@@ -29,6 +29,7 @@ pub struct UiPlugin {
 pub struct WindowsOpenState {
     edit_map: bool,
     build: bool,
+    message: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -57,6 +58,7 @@ impl Plugin for UiPlugin {
             .add_startup_system(setup)
             .insert_resource(WindowsOpenState {
                 edit_map: self.edit_map,
+                message: true,
                 ..default()
             })
             .init_resource::<UiConf>()
@@ -240,16 +242,20 @@ fn toolbar(
     textures: &EguiTextures,
     conf: &UiConf,
 ) {
-    if let Some((handle, size)) = textures.0.get(&UiTexture::IconBuild) {
-        if ui
-            .add(
-                egui::Button::image_and_text(handle.id(), conf.tex_size(*size), t!("build"))
-                    .small(),
-            )
-            .clicked()
-        {
-            wos.build = true;
-        };
+    let (handle, size) = textures.0.get(&UiTexture::IconBuild).unwrap();
+    if ui
+        .add(egui::Button::image_and_text(handle.id(), conf.tex_size(*size), t!("build")).small())
+        .clicked()
+    {
+        wos.build = !wos.build;
+    }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .clicked()
+    {
+        wos.message = !wos.message;
     }
 }
 
@@ -292,8 +298,13 @@ fn msg_window(
     mut egui_ctx: ResMut<EguiContext>,
     mut msgs: Local<VecDeque<(MsgKind, String)>>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut wos: ResMut<WindowsOpenState>,
     conf: Res<UiConf>,
 ) {
+    if !wos.message {
+        return;
+    }
+
     while let Some(msg) = crate::msg::pop_msg() {
         msgs.push_front(msg);
         if msgs.len() > conf.max_message {
@@ -302,6 +313,7 @@ fn msg_window(
     }
 
     let rect = egui::Window::new(t!("messages"))
+        .open(&mut wos.message)
         .vscroll(true)
         .show(egui_ctx.ctx_mut(), |ui| {
             egui::ScrollArea::vertical()

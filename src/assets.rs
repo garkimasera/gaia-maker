@@ -38,6 +38,7 @@ pub enum UiTexture {
     IconBranch,
     IconBuild,
     IconMaterial,
+    IconMessage,
     IconPower,
     TileColored,
     TileCursor,
