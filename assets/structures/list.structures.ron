@@ -1,0 +1,19 @@
+{
+    oxygen_generator: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 1,
+        cost: { material: 200 },
+        upkeeps: { energy: 10.0 },
+    ),
+    fertilization_plant: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 1,
+        cost: { material: 100 },
+        upkeeps: { energy: 2.0 },
+        //produces: {energy: 2.0, material: 0.1},
+    ),
+}

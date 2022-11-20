@@ -1,0 +1,18 @@
+{
+    // UI
+    "build": "Build",
+    "coordinates": "Coordinates",
+    "energy": "Energy",
+    "material": "Material",
+    "messages": "Messages",
+    "none": "None",
+    "selected-tool": "Selected tool",
+    "air-temprature": "Temprature",
+    
+    // Structures
+    "oxygen-generator": "oxygen generator",
+    "fertilization-plant": "fertilization plant",
+    
+    // Messages
+    "welcome_to": "Welcome to {$app_name} !",
+}

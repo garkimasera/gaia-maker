@@ -1,0 +1,18 @@
+{
+    // UI
+    "build": "建設",
+    "coordinates": "座標",
+    "energy": "エネルギー",
+    "material": "素材",
+    "messages": "メッセージ",
+    "none": "なし",
+    "selected-tool": "選択中のツール",
+    "air-temprature": "気温",
+
+    // Structures
+    "oxygen-generator": "酸素発生機",
+    "fertilization-plant": "肥沃化工場",
+    
+    // Messages
+    "welcome_to": "{$app_name} へようこそ",
+}
