@@ -1,0 +1,6 @@
+(
+    start: (
+        energy: 10000.0,
+        material: 1000.0,
+    ),
+)

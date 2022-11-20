@@ -122,8 +122,17 @@ impl Structure {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
+    pub start: StartParams,
+    #[serde(skip)]
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
+    #[serde(skip)]
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct StartParams {
+    pub energy: f32,
+    pub material: f32,
 }

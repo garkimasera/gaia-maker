@@ -14,7 +14,8 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(RonAssetPlugin::<BiomeAssetList>::new(&["biomes.ron"]))
+        app.add_plugin(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
+            .add_plugin(RonAssetPlugin::<BiomeAssetList>::new(&["biomes.ron"]))
             .add_plugin(RonAssetPlugin::<StructureAssetList>::new(&[
                 "structures.ron",
             ]))
@@ -54,6 +55,11 @@ define_asset_list_from_enum! {
 
 #[derive(Clone, Debug, Deserialize, TypeUuid)]
 #[serde(transparent)]
+#[uuid = "b0aaec37-3e9e-42d0-9370-aaacbe550799"]
+pub struct ParamsAsset(Params);
+
+#[derive(Clone, Debug, Deserialize, TypeUuid)]
+#[serde(transparent)]
 #[uuid = "99d5021f-98fb-4873-b16a-bd9619b8b074"]
 pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
 
@@ -69,6 +75,8 @@ pub struct TextureAtlasMaps {
 
 #[derive(Debug, AssetCollection)]
 pub struct ParamsAssetCollection {
+    #[asset(path = "planet.params.ron")]
+    params: Handle<ParamsAsset>,
     #[asset(path = "biomes/list.biomes.ron")]
     biomes: Handle<BiomeAssetList>,
     #[asset(path = "structures/list.structures.ron")]
@@ -96,7 +104,8 @@ fn create_assets_list(
     params_asset_collection: Res<ParamsAssetCollection>,
     biome_textures: Res<BiomeTextures>,
     structure_textures: Res<StructureTextures>,
-    (biome_asset_list, structure_asset_list): (
+    (params_asset, biome_asset_list, structure_asset_list): (
+        Res<Assets<ParamsAsset>>,
         Res<Assets<BiomeAssetList>>,
         Res<Assets<StructureAssetList>>,
     ),
@@ -133,9 +142,14 @@ fn create_assets_list(
         })
         .collect();
 
-    command.insert_resource(Params {
-        biomes: biome_asset_list.0.clone(),
-        structures: structure_asset_list.0.clone(),
-    });
+    let mut params = params_asset
+        .get(&params_asset_collection.params)
+        .unwrap()
+        .clone()
+        .0;
+    params.biomes = biome_asset_list.0.clone();
+    params.structures = structure_asset_list.0.clone();
+
+    command.insert_resource(params);
     command.insert_resource(TextureAtlasMaps { biomes, structures });
 }
