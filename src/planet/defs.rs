@@ -122,7 +122,7 @@ impl Structure {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, bevy::prelude::Resource)]
 pub struct Params {
     pub start: StartParams,
     #[serde(skip)]

@@ -44,7 +44,7 @@ impl Plugin for TextPlugin {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 struct TextLoading(Vec<HandleUntyped>);
 
 fn load_text(asset_server: Res<AssetServer>, mut text_loading: ResMut<TextLoading>) {

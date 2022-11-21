@@ -6,6 +6,7 @@ macro_rules! define_asset_list_from_enum {
             $field_vis:vis $field:ident: HashMap<$enum_name:ident, Handle<$asset_type:ty>>,
         }
     ) => {
+        #[derive(bevy::prelude::Resource)]
         $struct_vis struct $struct_name {
             $field_vis $field: HashMap<$enum_name, Handle<$asset_type>>,
         }

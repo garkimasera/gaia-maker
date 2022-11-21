@@ -39,7 +39,7 @@ impl Default for Tile {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, bevy::prelude::Resource)]
 pub struct Planet {
     pub tick: u64,
     pub player: Player,

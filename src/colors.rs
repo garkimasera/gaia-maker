@@ -9,6 +9,7 @@ impl Plugin for ColorsPlugin {
     }
 }
 
+#[derive(Resource)]
 pub struct ColorMaterials {
     pub green: Handle<ColorMaterial>,
 }

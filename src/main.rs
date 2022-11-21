@@ -38,14 +38,15 @@ fn main() {
     let args = Args::parse();
 
     App::new()
-        .insert_resource(DefaultTaskPoolOptions::with_num_threads(2))
-        .insert_resource(WindowDescriptor {
-            title: APP_NAME.into(),
-            present_mode: PresentMode::Fifo,
-            ..Default::default()
-        })
         .add_state(GameState::AssetLoading)
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: APP_NAME.into(),
+                present_mode: PresentMode::Fifo,
+                ..default()
+            },
+            ..default()
+        }))
         .add_plugin(text::TextPlugin)
         .add_plugin(assets::AssetsPlugin)
         .add_plugin(colors::ColorsPlugin)

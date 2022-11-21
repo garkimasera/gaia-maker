@@ -9,7 +9,7 @@ use geom::{Array2d, Coords, Direction, RectIter};
 #[derive(Clone, Copy, Debug)]
 pub struct DrawPlugin;
 
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Default, Debug, Resource)]
 pub struct UpdateMap {
     need_update: bool,
 }
@@ -31,7 +31,7 @@ impl Plugin for DrawPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .label("draw")
-                    .with_system(update_layered_tex_map.chain(spawn_map_textures))
+                    .with_system(update_layered_tex_map.pipe(spawn_map_textures))
                     .with_system(spawn_structure_textures)
                     .with_system(spawn_overlay_meshes),
             )
@@ -39,6 +39,7 @@ impl Plugin for DrawPlugin {
     }
 }
 
+#[derive(Resource)]
 pub struct LayeredTexMap {
     biome: Array2d<ArrayVec<Biome, 9>>,
 }
@@ -135,7 +136,7 @@ fn spawn_map_textures(
 
                 let tile_asset = &params.biomes[tile_idx];
                 let id = commands
-                    .spawn_bundle(SpriteSheetBundle {
+                    .spawn(SpriteSheetBundle {
                         texture_atlas: texture_atlas_maps.biomes[tile_idx].clone(),
                         sprite,
                         transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
@@ -180,7 +181,7 @@ fn spawn_structure_textures(
             let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
             let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
             let id = commands
-                .spawn_bundle(SpriteSheetBundle {
+                .spawn(SpriteSheetBundle {
                     texture_atlas: texture_atlas_maps.structures[&kind].clone(),
                     sprite,
                     transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
@@ -221,7 +222,7 @@ fn spawn_overlay_meshes(
 
     mesh_entities.clear();
     let id = commands
-        .spawn_bundle(MaterialMesh2dBundle {
+        .spawn(MaterialMesh2dBundle {
             mesh: tile_mesh.into(),
             transform: Transform::from_xyz(0.0, 0.0, 800.0),
             material: color_materials.green.clone(),

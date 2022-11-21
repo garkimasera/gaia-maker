@@ -4,7 +4,10 @@ use crate::draw::UpdateMap;
 use crate::planet::*;
 use crate::GameState;
 use bevy::window::WindowResized;
-use bevy::{math::Vec3Swizzles, prelude::*, sprite::Rect};
+use bevy::{
+    math::{Rect, Vec3Swizzles},
+    prelude::*,
+};
 use geom::Coords;
 
 #[derive(Clone, Copy, Debug)]
@@ -13,7 +16,7 @@ pub struct ScreenPlugin;
 #[derive(Clone, Copy, Debug)]
 pub struct Centering(pub Vec2);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Resource)]
 pub enum CursorMode {
     Normal,
     EditBiome(Biome),
@@ -30,15 +33,12 @@ impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Centering>()
             .add_startup_system(setup)
-            .add_startup_system(setup_cursor)
-            // .add_system_set(
-            //     SystemSet::on_enter(GameState::Running).with_system(setup_cursor)
-            // )
+            .add_system_set(SystemSet::on_enter(GameState::Running).with_system(setup_cursor))
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
             .add_system_set(
-                SystemSet::on_enter(GameState::Running)
+                SystemSet::on_update(GameState::Running)
                     .with_system(on_enter_running)
                     .after("start_sim"),
             )
@@ -52,7 +52,7 @@ impl Plugin for ScreenPlugin {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Resource)]
 pub struct InScreenTileRange {
     pub from: Coords,
     pub to: Coords,
@@ -72,12 +72,12 @@ impl Default for InScreenTileRange {
 
 pub fn setup(mut commands: Commands) {
     let camera = Camera2dBundle::default();
-    commands.spawn_bundle(camera);
+    commands.spawn(camera);
 }
 
 pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             texture: asset_server.get_handle("ui/tile-cursor.png"),
             visibility: Visibility { is_visible: false },
             ..default()
@@ -291,7 +291,7 @@ fn update_hover_tile(
         transform.translation.z = 920.0;
 
         let id = commands
-            .spawn_bundle(SpriteBundle {
+            .spawn(SpriteBundle {
                 texture: ui_textures.get(UiTexture::TileColored),
                 visibility: Visibility { is_visible: true },
                 transform,
@@ -302,7 +302,7 @@ fn update_hover_tile(
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Resource)]
 pub struct OccupiedScreenSpace {
     pub occupied_top: f32,
     pub occupied_buttom: f32,

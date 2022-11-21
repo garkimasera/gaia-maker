@@ -1,8 +1,8 @@
 use bevy::{
     app::AppExit,
     input::{keyboard::KeyboardInput, ButtonState},
+    math::Rect,
     prelude::*,
-    sprite::Rect,
 };
 use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily},
@@ -25,14 +25,14 @@ pub struct UiPlugin {
     pub edit_map: bool,
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
     edit_map: bool,
     build: bool,
     message: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Resource)]
 pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,
@@ -49,7 +49,7 @@ impl Default for UiConf {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Resource)]
 pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
 
 impl Plugin for UiPlugin {

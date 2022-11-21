@@ -68,12 +68,13 @@ pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
 #[uuid = "801a2daa-956d-469a-8e83-3610fbca21fd"]
 pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);
 
+#[derive(Resource)]
 pub struct TextureAtlasMaps {
     pub biomes: FnvHashMap<Biome, Handle<TextureAtlas>>,
     pub structures: FnvHashMap<StructureKind, Handle<TextureAtlas>>,
 }
 
-#[derive(Debug, AssetCollection)]
+#[derive(Debug, Resource, AssetCollection)]
 pub struct ParamsAssetCollection {
     #[asset(path = "planet.params.ron")]
     params: Handle<ParamsAsset>,
@@ -118,7 +119,7 @@ fn create_assets_list(
         .map(|biome| {
             let image = biome_textures.get(biome);
             let texture_atlas =
-                TextureAtlas::from_grid(image, Vec2::new(PIECE_SIZE, PIECE_SIZE), 6, 4);
+                TextureAtlas::from_grid(image, Vec2::new(PIECE_SIZE, PIECE_SIZE), 6, 4, None, None);
             (biome, texture_atlas_assets.add(texture_atlas))
         })
         .collect();
@@ -136,6 +137,8 @@ fn create_assets_list(
                 Vec2::new(attrs.width as _, attrs.height as _),
                 attrs.columns,
                 attrs.rows,
+                None,
+                None,
             );
 
             (structure, texture_atlas_assets.add(texture_atlas))
