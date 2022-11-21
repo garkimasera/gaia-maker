@@ -37,7 +37,11 @@ impl Plugin for ScreenPlugin {
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
-            .add_system_set(SystemSet::on_enter(GameState::Running).with_system(on_enter_running))
+            .add_system_set(
+                SystemSet::on_enter(GameState::Running)
+                    .with_system(on_enter_running)
+                    .after("start_sim"),
+            )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .with_system(centering.before("draw"))
@@ -82,9 +86,9 @@ pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn on_enter_running(planet: Res<Planet>, mut ew_centering: EventWriter<Centering>) {
-    let (w, h) = planet.map.size();
+    let h = planet.map.size().1;
     ew_centering.send(Centering(Vec2 {
-        x: w as f32 * TILE_SIZE / 2.0,
+        x: 0.0,
         y: h as f32 * TILE_SIZE / 2.0,
     }));
 }

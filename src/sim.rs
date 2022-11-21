@@ -19,7 +19,11 @@ pub enum ManagePlanet {
 impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
-            .add_system_set(SystemSet::on_enter(GameState::Running).with_system(start_sim))
+            .add_system_set(
+                SystemSet::on_enter(GameState::Running)
+                    .with_system(start_sim)
+                    .label("start_sim"),
+            )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .with_run_criteria(FixedTimestep::step(2.0))
@@ -33,7 +37,13 @@ impl Plugin for SimPlugin {
     }
 }
 
-fn start_sim(mut update_map: ResMut<UpdateMap>) {
+fn start_sim(mut commands: Commands, mut update_map: ResMut<UpdateMap>, params: Res<Params>) {
+    let planet = Planet::new(
+        params.start.default_size.0,
+        params.start.default_size.1,
+        &params,
+    );
+    commands.insert_resource(planet);
     update_map.update();
 }
 
@@ -46,11 +56,12 @@ fn manage_planet(
     mut er_manage_planet: EventReader<ManagePlanet>,
     mut planet: ResMut<Planet>,
     mut ew_centering: EventWriter<Centering>,
+    params: Res<Params>,
 ) {
     for e in er_manage_planet.iter() {
         match e {
             ManagePlanet::New(w, h) => {
-                *planet = Planet::new(*w, *h);
+                *planet = Planet::new(*w, *h, &params);
                 ew_centering.send(Centering(Vec2::new(
                     *w as f32 * TILE_SIZE / 2.0,
                     *h as f32 * TILE_SIZE / 2.0,

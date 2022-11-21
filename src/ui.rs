@@ -183,12 +183,8 @@ fn panels(
 }
 
 fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_tile: &HoverTile) {
-    ui.label(&format!("{}: {:.0}", t!("energy"), planet.player.energy));
-    ui.label(&format!(
-        "{}: {:.0}",
-        t!("material"),
-        planet.player.material
-    ));
+    ui.label(&format!("{}: {:.0}", t!("energy"), planet.res.energy));
+    ui.label(&format!("{}: {:.0}", t!("material"), planet.res.material));
 
     ui.separator();
 

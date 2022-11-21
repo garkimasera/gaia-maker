@@ -1,4 +1,5 @@
 #![warn(rust_2018_compatibility, future_incompatible, nonstandard_style)]
+#![allow(clippy::type_complexity)]
 
 extern crate tile_geom as geom;
 

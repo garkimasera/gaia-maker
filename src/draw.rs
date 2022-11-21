@@ -28,7 +28,6 @@ impl Plugin for DrawPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<UpdateMap>()
             .init_resource::<UpdateMap>()
-            .add_startup_system(initial_tile_world)
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .label("draw")
@@ -42,12 +41,6 @@ impl Plugin for DrawPlugin {
 
 pub struct LayeredTexMap {
     biome: Array2d<ArrayVec<Biome, 9>>,
-}
-
-fn initial_tile_world(mut commands: Commands) {
-    let planet = Planet::new(128, 64);
-
-    commands.insert_resource(planet);
 }
 
 fn update_layered_tex_map(

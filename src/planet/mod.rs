@@ -17,9 +17,13 @@ pub struct Tile {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct Player {
+pub struct Resources {
     pub energy: f32,
     pub material: f32,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct Player {
     pub buildable_structures: FnvHashSet<StructureKind>,
 }
 
@@ -39,16 +43,21 @@ impl Default for Tile {
 pub struct Planet {
     pub tick: u64,
     pub player: Player,
+    pub res: Resources,
     pub map: Array2d<Tile>,
 }
 
 impl Planet {
-    pub fn new(w: u32, h: u32) -> Planet {
+    pub fn new(w: u32, h: u32, params: &Params) -> Planet {
         let map = Array2d::new(w, h, Tile::default());
 
         let mut planet = Planet {
             tick: 0,
             player: Player::default(),
+            res: Resources {
+                energy: params.start.energy,
+                material: params.start.material,
+            },
             map,
         };
 

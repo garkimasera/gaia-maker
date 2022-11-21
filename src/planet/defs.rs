@@ -133,6 +133,7 @@ pub struct Params {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartParams {
+    pub default_size: (u32, u32),
     pub energy: f32,
     pub material: f32,
 }

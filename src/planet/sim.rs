@@ -18,7 +18,7 @@ impl Planet {
             }
         }
 
-        self.player.energy += (energy_product - energy_upkeep) * SPEED;
-        self.player.material += (material_product - material_upkeep) * SPEED;
+        self.res.energy += (energy_product - energy_upkeep) * SPEED;
+        self.res.material += (material_product - material_upkeep) * SPEED;
     }
 }
