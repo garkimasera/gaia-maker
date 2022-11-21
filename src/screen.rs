@@ -39,8 +39,7 @@ impl Plugin for ScreenPlugin {
             .init_resource::<CursorMode>()
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
-                    .with_system(on_enter_running)
-                    .after("start_sim"),
+                    .with_system(on_enter_running.after("start_sim")),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
@@ -85,7 +84,18 @@ pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(HoverTile(None));
 }
 
-fn on_enter_running(planet: Res<Planet>, mut ew_centering: EventWriter<Centering>) {
+fn on_enter_running(
+    planet: Option<Res<Planet>>,
+    mut ew_centering: EventWriter<Centering>,
+    mut done: Local<bool>,
+) {
+    let Some(planet) = planet else {
+        return;
+    };
+    if *done {
+        return;
+    }
+    *done = true;
     let h = planet.map.size().1;
     ew_centering.send(Centering(Vec2 {
         x: 0.0,
