@@ -14,6 +14,7 @@ mod msg;
 
 mod action;
 mod assets;
+mod audio;
 mod colors;
 mod draw;
 mod info;
@@ -54,6 +55,7 @@ fn main() {
         .add_plugin(ui::UiPlugin {
             edit_map: args.edit_map,
         })
+        .add_plugin(audio::GameAudioPlugin)
         .add_plugin(InspectorPlugin)
         .add_plugin(draw::DrawPlugin)
         .add_plugin(action::ActionPlugin)

@@ -10,11 +10,12 @@ inspector = ["bevy-inspector-egui"]
 [dependencies]
 anyhow = "1"
 arrayvec = "0.7"
-bevy = "0.9"
+bevy = { version = "0.9", default-features = false, features = ["bevy_asset", "bevy_winit", "render", "png", "x11"] }
 bevy_asset_loader = "0.14"
 bevy_common_assets = { version = "0.4", features = ["ron"] }
 bevy_egui = "0.17"
 bevy-inspector-egui = { version = "0.14", optional = true }
+bevy_kira_audio = "0.13"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
 fnv = "1"

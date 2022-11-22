@@ -1,9 +1,11 @@
+use crate::audio::SoundEffect;
 use crate::planet::*;
 use crate::GameState;
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy_asset_loader::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
+use bevy_kira_audio::AudioSource;
 use fnv::FnvHashMap;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -25,7 +27,8 @@ impl Plugin for AssetsPlugin {
                     .with_collection::<UiTextures>()
                     .with_collection::<ParamsAssetCollection>()
                     .with_collection::<BiomeTextures>()
-                    .with_collection::<StructureTextures>(),
+                    .with_collection::<StructureTextures>()
+                    .with_collection::<SoundEffects>(),
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::AssetLoading).with_system(create_assets_list),
@@ -97,6 +100,14 @@ define_asset_list_from_enum! {
     #[asset(extension = "png")]
     pub struct StructureTextures {
         pub textures: HashMap<StructureKind, Handle<Image>>,
+    }
+}
+
+define_asset_list_from_enum! {
+    #[asset(dir_path = "se")]
+    #[asset(extension = "ogg")]
+    pub struct SoundEffects {
+        pub sound_effects: HashMap<SoundEffect, Handle<AudioSource>>,
     }
 }
 
