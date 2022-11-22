@@ -1,13 +1,15 @@
 {
     // UI
+    "air-temprature": "Temprature",
     "build": "Build",
     "coordinates": "Coordinates",
     "energy": "Energy",
     "material": "Material",
     "messages": "Messages",
     "none": "None",
+    "orbit": "Orbit",
+    "star-system": "Star system",
     "selected-tool": "Selected tool",
-    "air-temprature": "Temprature",
     
     // Structures
     "oxygen-generator": "oxygen generator",

@@ -1,13 +1,15 @@
 {
     // UI
+    "air-temprature": "気温",
     "build": "建設",
     "coordinates": "座標",
     "energy": "エネルギー",
     "material": "素材",
     "messages": "メッセージ",
     "none": "なし",
+    "orbit": "軌道",
+    "star-system": "星系",
     "selected-tool": "選択中のツール",
-    "air-temprature": "気温",
 
     // Structures
     "oxygen-generator": "酸素発生機",

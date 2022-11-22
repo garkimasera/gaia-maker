@@ -1,3 +1,6 @@
+mod orbit;
+mod star_system;
+
 use bevy::{
     app::AppExit,
     input::{keyboard::KeyboardInput, ButtonState},
@@ -27,9 +30,11 @@ pub struct UiPlugin {
 
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
-    edit_map: bool,
     build: bool,
+    orbit: bool,
+    star_system: bool,
     message: bool,
+    edit_map: bool,
 }
 
 #[derive(Clone, Debug, Resource)]
@@ -68,6 +73,8 @@ impl Plugin for UiPlugin {
                     .with_system(panels.label("ui_panels").before("ui_windows"))
                     .with_system(msg_window.label("ui_windows"))
                     .with_system(build_window.label("ui_windows"))
+                    .with_system(orbit::orbit_window.label("ui_windows"))
+                    .with_system(star_system::star_system_window.label("ui_windows"))
                     .with_system(edit_map_window.label("ui_windows")),
             )
             .add_system(exit_on_esc_system);
@@ -82,7 +89,7 @@ fn setup(
     egui_settings.scale_factor = conf.scale_factor.into();
 
     let mut fonts = FontDefinitions::default();
-    let mut font_data = FontData::from_static(include_bytes!("../fonts/Mplus2-SemiBold.otf"));
+    let mut font_data = FontData::from_static(include_bytes!("../../fonts/Mplus2-SemiBold.otf"));
     font_data.tweak.scale = conf.font_scale;
     fonts.font_data.insert("m+_font".to_owned(), font_data);
     fonts
@@ -244,6 +251,22 @@ fn toolbar(
         .clicked()
     {
         wos.build = !wos.build;
+    }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconOrbit).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .clicked()
+    {
+        wos.orbit = !wos.orbit;
+    }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconStarSystem).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .clicked()
+    {
+        wos.star_system = !wos.star_system;
     }
 
     let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
