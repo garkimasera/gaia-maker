@@ -1,4 +1,4 @@
-use crate::overlay::ColorMaterials;
+use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::InScreenTileRange;
 use crate::{assets::*, GameState};
@@ -199,16 +199,25 @@ fn spawn_overlay_meshes(
     update_map: Res<UpdateMap>,
     mut meshes: ResMut<Assets<Mesh>>,
     color_materials: Res<ColorMaterials>,
-    _in_screen_tile_range: ResMut<InScreenTileRange>,
-    _planet: Res<Planet>,
+    in_screen_tile_range: Res<InScreenTileRange>,
+    planet: Res<Planet>,
+    current_layer: Res<OverlayLayerKind>,
+    mut prev_layer: Local<OverlayLayerKind>,
     mut tile_mesh: Local<Option<Handle<Mesh>>>,
     mut mesh_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_map.need_update && *current_layer == *prev_layer {
         return;
     }
+
     for entity in mesh_entities.iter() {
         commands.entity(*entity).despawn();
+    }
+    mesh_entities.clear();
+
+    *prev_layer = *current_layer;
+    if *current_layer == OverlayLayerKind::None {
+        return;
     }
 
     let tile_mesh = if let Some(tile_mesh) = tile_mesh.clone() {
@@ -220,16 +229,22 @@ fn spawn_overlay_meshes(
         tile_mesh.clone().unwrap()
     };
 
-    mesh_entities.clear();
-    let id = commands
-        .spawn(MaterialMesh2dBundle {
-            mesh: tile_mesh.into(),
-            transform: Transform::from_xyz(0.0, 0.0, 800.0),
-            material: color_materials.green.clone(),
-            ..default()
-        })
-        .id();
-    mesh_entities.push(id);
+    for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
+        let p = coord_rotation_x(planet.map.size(), p_screen);
+
+        let x = p_screen.0 as f32 * TILE_SIZE + TILE_SIZE as f32 / 2.0;
+        let y = p_screen.1 as f32 * TILE_SIZE + TILE_SIZE as f32 / 2.0;
+
+        let id = commands
+            .spawn(MaterialMesh2dBundle {
+                mesh: tile_mesh.clone().into(),
+                transform: Transform::from_xyz(x, y, 800.0),
+                material: color_materials.get(&planet, p, *current_layer),
+                ..default()
+            })
+            .id();
+        mesh_entities.push(id);
+    }
 }
 
 fn corner_idx<F: Fn(Coords) -> bool>(f: F, pos: Coords, corner: Coords) -> usize {
