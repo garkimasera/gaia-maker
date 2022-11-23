@@ -15,9 +15,9 @@ mod msg;
 mod action;
 mod assets;
 mod audio;
-mod colors;
 mod draw;
 mod info;
+mod overlay;
 mod planet;
 mod screen;
 mod sim;
@@ -50,7 +50,7 @@ fn main() {
         }))
         .add_plugin(text::TextPlugin)
         .add_plugin(assets::AssetsPlugin)
-        .add_plugin(colors::ColorsPlugin)
+        .add_plugin(overlay::OverlayPlugin)
         .add_plugin(screen::ScreenPlugin)
         .add_plugin(ui::UiPlugin {
             edit_map: args.edit_map,

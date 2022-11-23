@@ -1,12 +1,21 @@
 use bevy::prelude::*;
+use strum::{AsRefStr, EnumIter};
 
 #[derive(Clone, Copy, Debug)]
-pub struct ColorsPlugin;
+pub struct OverlayPlugin;
 
-impl Plugin for ColorsPlugin {
+impl Plugin for OverlayPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(prepare_color_materials);
     }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, AsRefStr, EnumIter, Resource)]
+#[strum(serialize_all = "kebab-case")]
+pub enum OverlayLayerKind {
+    #[default]
+    None,
+    AirTemprature,
 }
 
 #[derive(Resource)]

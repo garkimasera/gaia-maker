@@ -4,6 +4,7 @@
     "build": "Build",
     "coordinates": "Coordinates",
     "energy": "Energy",
+    "layers": "Layers",
     "material": "Material",
     "messages": "Messages",
     "none": "None",

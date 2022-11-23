@@ -40,6 +40,7 @@ impl Plugin for AssetsPlugin {
 #[strum(serialize_all = "kebab-case")]
 pub enum UiTexture {
     IconBuild,
+    IconLayers,
     IconMaterial,
     IconMessage,
     IconOrbit,

@@ -11,12 +11,14 @@ use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily},
     EguiContext, EguiPlugin, EguiSettings,
 };
+use strum::IntoEnumIterator;
 
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
     assets::{UiTexture, UiTextures},
     msg::MsgKind,
+    overlay::OverlayLayerKind,
     planet::*,
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
@@ -33,6 +35,7 @@ pub struct WindowsOpenState {
     build: bool,
     orbit: bool,
     star_system: bool,
+    layers: bool,
     message: bool,
     edit_map: bool,
 }
@@ -67,6 +70,7 @@ impl Plugin for UiPlugin {
                 ..default()
             })
             .init_resource::<UiConf>()
+            .init_resource::<OverlayLayerKind>()
             .add_system_set(SystemSet::on_exit(GameState::AssetLoading).with_system(load_textures))
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
@@ -75,6 +79,7 @@ impl Plugin for UiPlugin {
                     .with_system(build_window.label("ui_windows"))
                     .with_system(orbit::orbit_window.label("ui_windows"))
                     .with_system(star_system::star_system_window.label("ui_windows"))
+                    .with_system(layers_window.label("ui_windows"))
                     .with_system(edit_map_window.label("ui_windows")),
             )
             .add_system(exit_on_esc_system);
@@ -269,6 +274,14 @@ fn toolbar(
         wos.star_system = !wos.star_system;
     }
 
+    let (handle, size) = textures.0.get(&UiTexture::IconLayers).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .clicked()
+    {
+        wos.layers = !wos.layers;
+    }
+
     let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
@@ -304,6 +317,34 @@ fn build_window(
                         }
                     }
                 });
+        })
+        .unwrap()
+        .response
+        .rect;
+    occupied_screen_space
+        .window_rects
+        .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn layers_window(
+    mut egui_ctx: ResMut<EguiContext>,
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut wos: ResMut<WindowsOpenState>,
+    mut current_layer: ResMut<OverlayLayerKind>,
+    conf: Res<UiConf>,
+    _planet: Res<Planet>,
+) {
+    if !wos.layers {
+        return;
+    }
+
+    let rect = egui::Window::new(t!("layers"))
+        .open(&mut wos.layers)
+        .vscroll(true)
+        .show(egui_ctx.ctx_mut(), |ui| {
+            for kind in OverlayLayerKind::iter() {
+                ui.radio_value(&mut *current_layer, kind, t!(kind.as_ref()));
+            }
         })
         .unwrap()
         .response
@@ -382,7 +423,6 @@ fn edit_map_window(
                 egui::ComboBox::from_id_source(Biome::Ocean)
                     .selected_text(AsRef::<str>::as_ref(&*biome))
                     .show_ui(ui, |ui| {
-                        use strum::IntoEnumIterator;
                         for b in Biome::iter() {
                             ui.selectable_value(&mut *biome, b, AsRef::<str>::as_ref(&b));
                         }
