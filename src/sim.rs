@@ -16,6 +16,9 @@ pub enum ManagePlanet {
     Load(String),
 }
 
+impl Resource for Planet {}
+impl Resource for Params {}
+
 impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
