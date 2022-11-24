@@ -23,7 +23,7 @@ pub const SPEED: f32 = 1.0 / 10.0;
     EnumString,
     AsRefStr,
 )]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum ResourceKind {
     Energy,
@@ -45,7 +45,7 @@ pub enum ResourceKind {
     EnumIter,
     AsRefStr,
 )]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Biome {
     Rock,
@@ -122,6 +122,30 @@ impl Structure {
     }
 }
 
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    EnumString,
+    EnumIter,
+    AsRefStr,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum GasKind {
+    Oxygen,
+    Nitrogen,
+    CarbonDioxide,
+    Helium,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub start: StartParams,
@@ -136,4 +160,5 @@ pub struct StartParams {
     pub default_size: (u32, u32),
     pub energy: f32,
     pub material: f32,
+    pub atmo_mass: FnvHashMap<GasKind, f32>,
 }

@@ -39,6 +39,7 @@ impl Plugin for AssetsPlugin {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum UiTexture {
+    IconAtmosphere,
     IconBuild,
     IconLayers,
     IconMaterial,

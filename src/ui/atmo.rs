@@ -1,0 +1,32 @@
+use bevy::prelude::*;
+use bevy_egui::{egui, EguiContext};
+
+use super::{convert_rect, OccupiedScreenSpace, UiConf, WindowsOpenState};
+use crate::planet::Planet;
+
+pub fn atmo_window(
+    mut egui_ctx: ResMut<EguiContext>,
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut wos: ResMut<WindowsOpenState>,
+    conf: Res<UiConf>,
+    _planet: Res<Planet>,
+) {
+    if !wos.atmosphere {
+        return;
+    }
+
+    let rect = egui::Window::new(t!("atmosphere"))
+        .open(&mut wos.atmosphere)
+        .vscroll(true)
+        .show(egui_ctx.ctx_mut(), |ui| {
+            egui::ScrollArea::vertical()
+                .always_show_scroll(true)
+                .show(ui, |ui| ui.label("atmosphere"));
+        })
+        .unwrap()
+        .response
+        .rect;
+    occupied_screen_space
+        .window_rects
+        .push(convert_rect(rect, conf.scale_factor));
+}

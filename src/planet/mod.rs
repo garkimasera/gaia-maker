@@ -1,4 +1,5 @@
 mod action;
+mod atm;
 mod defs;
 mod sim;
 
@@ -6,6 +7,8 @@ pub use crate::planet::defs::*;
 use fnv::FnvHashSet;
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
+
+use self::atm::Atmosphere;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tile {
@@ -45,6 +48,7 @@ pub struct Planet {
     pub player: Player,
     pub res: Resources,
     pub map: Array2d<Tile>,
+    pub atmo: Atmosphere,
 }
 
 impl Planet {
@@ -59,6 +63,7 @@ impl Planet {
                 material: params.start.material,
             },
             map,
+            atmo: Atmosphere::from_params(&params.start),
         };
 
         planet

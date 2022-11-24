@@ -1,3 +1,4 @@
+mod atmo;
 mod orbit;
 mod star_system;
 
@@ -36,6 +37,7 @@ pub struct WindowsOpenState {
     orbit: bool,
     star_system: bool,
     layers: bool,
+    atmosphere: bool,
     message: bool,
     edit_map: bool,
 }
@@ -75,11 +77,12 @@ impl Plugin for UiPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .with_system(panels.label("ui_panels").before("ui_windows"))
-                    .with_system(msg_window.label("ui_windows"))
                     .with_system(build_window.label("ui_windows"))
                     .with_system(orbit::orbit_window.label("ui_windows"))
                     .with_system(star_system::star_system_window.label("ui_windows"))
                     .with_system(layers_window.label("ui_windows"))
+                    .with_system(atmo::atmo_window.label("ui_windows"))
+                    .with_system(msg_window.label("ui_windows"))
                     .with_system(edit_map_window.label("ui_windows")),
             )
             .add_system(exit_on_esc_system);
@@ -280,6 +283,14 @@ fn toolbar(
         .clicked()
     {
         wos.layers = !wos.layers;
+    }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconAtmosphere).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .clicked()
+    {
+        wos.atmosphere = !wos.atmosphere;
     }
 
     let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
