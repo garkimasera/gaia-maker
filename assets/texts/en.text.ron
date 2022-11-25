@@ -1,5 +1,6 @@
 {
     // UI
+    "atmosphere": "Atmosphere",
     "air-temprature": "Temprature",
     "build": "Build",
     "coordinates": "Coordinates",

@@ -255,7 +255,8 @@ fn toolbar(
 ) {
     let (handle, size) = textures.0.get(&UiTexture::IconBuild).unwrap();
     if ui
-        .add(egui::Button::image_and_text(handle.id(), conf.tex_size(*size), t!("build")).small())
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("build"))
         .clicked()
     {
         wos.build = !wos.build;
@@ -264,6 +265,7 @@ fn toolbar(
     let (handle, size) = textures.0.get(&UiTexture::IconOrbit).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("orbit"))
         .clicked()
     {
         wos.orbit = !wos.orbit;
@@ -272,6 +274,7 @@ fn toolbar(
     let (handle, size) = textures.0.get(&UiTexture::IconStarSystem).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("star-system"))
         .clicked()
     {
         wos.star_system = !wos.star_system;
@@ -280,6 +283,7 @@ fn toolbar(
     let (handle, size) = textures.0.get(&UiTexture::IconLayers).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("layers"))
         .clicked()
     {
         wos.layers = !wos.layers;
@@ -288,6 +292,7 @@ fn toolbar(
     let (handle, size) = textures.0.get(&UiTexture::IconAtmosphere).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("atmosphere"))
         .clicked()
     {
         wos.atmosphere = !wos.atmosphere;
@@ -296,6 +301,7 @@ fn toolbar(
     let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("messages"))
         .clicked()
     {
         wos.message = !wos.message;
