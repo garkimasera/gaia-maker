@@ -4,14 +4,17 @@
     "air-temprature": "気温",
     "build": "建設",
     "coordinates": "座標",
+    "cost": "コスト",
     "energy": "エネルギー",
     "layers": "レイヤー",
     "material": "素材",
     "messages": "メッセージ",
     "none": "なし",
     "orbit": "軌道",
+    "produces": "産出",
     "star-system": "星系",
     "selected-tool": "選択中のツール",
+    "upkeep": "維持",
 
     // Structures
     "oxygen-generator": "酸素発生機",

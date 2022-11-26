@@ -4,15 +4,18 @@
     "air-temprature": "Temprature",
     "build": "Build",
     "coordinates": "Coordinates",
+    "cost": "Cost",
     "energy": "Energy",
     "layers": "Layers",
     "material": "Material",
     "messages": "Messages",
     "none": "None",
     "orbit": "Orbit",
+    "produces": "Produces",
     "star-system": "Star system",
     "selected-tool": "Selected tool",
-    
+    "upkeep": "Upkeep",
+
     // Structures
     "oxygen-generator": "oxygen generator",
     "fertilization-plant": "fertilization plant",

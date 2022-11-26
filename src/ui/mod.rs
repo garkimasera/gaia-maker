@@ -9,12 +9,12 @@ use bevy::{
     prelude::*,
 };
 use bevy_egui::{
-    egui::{self, FontData, FontDefinitions, FontFamily},
+    egui::{self, FontData, FontDefinitions, FontFamily, RichText, Ui},
     EguiContext, EguiPlugin, EguiSettings,
 };
-use strum::IntoEnumIterator;
-
+use fnv::FnvHashMap;
 use std::collections::{HashMap, VecDeque};
+use strum::IntoEnumIterator;
 
 use crate::{
     assets::{UiFonts, UiTexture, UiTextures},
@@ -322,6 +322,7 @@ fn build_window(
     mut cursor_mode: ResMut<CursorMode>,
     conf: Res<UiConf>,
     planet: Res<Planet>,
+    params: Res<Params>,
 ) {
     if !wos.build {
         return;
@@ -336,7 +337,11 @@ fn build_window(
                 .show(ui, |ui| {
                     for kind in &planet.player.buildable_structures {
                         let s: &str = kind.as_ref();
-                        if ui.button(t!(s)).clicked() {
+                        if ui
+                            .button(t!(s))
+                            .on_hover_ui(build_button_tooltip(*kind, &params))
+                            .clicked()
+                        {
                             *cursor_mode = CursorMode::Build(*kind);
                         }
                     }
@@ -348,6 +353,68 @@ fn build_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn build_button_tooltip(kind: StructureKind, params: &Params) -> impl FnOnce(&mut Ui) + '_ {
+    let attr = &params.structures[&kind];
+    building_desc_tooltip(&attr.cost, &attr.upkeep, &attr.produces)
+}
+
+fn building_desc_tooltip<'a>(
+    cost: &'a FnvHashMap<ResourceKind, f32>,
+    upkeep: &'a FnvHashMap<ResourceKind, f32>,
+    produces: &'a FnvHashMap<ResourceKind, f32>,
+) -> impl FnOnce(&mut Ui) + 'a {
+    move |ui| {
+        if !cost.is_empty() {
+            ui.label(RichText::new(t!("cost")).strong());
+            let mut resources = cost.iter().collect::<Vec<_>>();
+            resources.sort_by_key(|(resource, _)| *resource);
+            let s = resources
+                .into_iter()
+                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .fold(String::new(), |mut s0, s1| {
+                    if !s0.is_empty() {
+                        s0.push_str(", ");
+                    }
+                    s0.push_str(&s1);
+                    s0
+                });
+            ui.label(s);
+        }
+        if !upkeep.is_empty() {
+            ui.label(RichText::new(t!("upkeep")).strong());
+            let mut resources = upkeep.iter().collect::<Vec<_>>();
+            resources.sort_by_key(|(resource, _)| *resource);
+            let s = resources
+                .iter()
+                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .fold(String::new(), |mut s0, s1| {
+                    if !s0.is_empty() {
+                        s0.push_str(", ");
+                    }
+                    s0.push_str(&s1);
+                    s0
+                });
+            ui.label(s);
+        }
+        if !produces.is_empty() {
+            ui.label(RichText::new(t!("produces")).strong());
+            let mut resources = produces.iter().collect::<Vec<_>>();
+            resources.sort_by_key(|(resource, _)| *resource);
+            let s = resources
+                .iter()
+                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .fold(String::new(), |mut s0, s1| {
+                    if !s0.is_empty() {
+                        s0.push_str(", ");
+                    }
+                    s0.push_str(&s1);
+                    s0
+                });
+            ui.label(s);
+        }
+    }
 }
 
 fn layers_window(

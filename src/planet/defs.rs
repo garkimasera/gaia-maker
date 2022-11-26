@@ -76,9 +76,9 @@ pub struct StructureAttrs {
     #[serde(default)]
     pub cost: FnvHashMap<ResourceKind, f32>,
     #[serde(default)]
-    pub produces: FnvHashMap<ResourceKind, f32>,
+    pub upkeep: FnvHashMap<ResourceKind, f32>,
     #[serde(default)]
-    pub upkeeps: FnvHashMap<ResourceKind, f32>,
+    pub produces: FnvHashMap<ResourceKind, f32>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
