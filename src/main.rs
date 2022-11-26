@@ -16,6 +16,7 @@ mod action;
 mod assets;
 mod audio;
 mod draw;
+mod gz;
 mod info;
 mod overlay;
 mod planet;
@@ -48,6 +49,7 @@ fn main() {
             },
             ..default()
         }))
+        .add_plugin(gz::GzPlugin)
         .add_plugin(text::TextPlugin)
         .add_plugin(assets::AssetsPlugin)
         .add_plugin(overlay::OverlayPlugin)

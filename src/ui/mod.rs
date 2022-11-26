@@ -17,7 +17,8 @@ use strum::IntoEnumIterator;
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
-    assets::{UiTexture, UiTextures},
+    assets::{UiFonts, UiTexture, UiTextures},
+    gz::GunzipBin,
     msg::MsgKind,
     overlay::OverlayLayerKind,
     planet::*,
@@ -65,7 +66,6 @@ pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(EguiPlugin)
-            .add_startup_system(setup)
             .insert_resource(WindowsOpenState {
                 edit_map: self.edit_map,
                 message: true,
@@ -73,7 +73,11 @@ impl Plugin for UiPlugin {
             })
             .init_resource::<UiConf>()
             .init_resource::<OverlayLayerKind>()
-            .add_system_set(SystemSet::on_exit(GameState::AssetLoading).with_system(load_textures))
+            .add_system_set(
+                SystemSet::on_exit(GameState::AssetLoading)
+                    .with_system(setup_fonts)
+                    .with_system(load_textures),
+            )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
                     .with_system(panels.label("ui_panels").before("ui_windows"))
@@ -89,15 +93,18 @@ impl Plugin for UiPlugin {
     }
 }
 
-fn setup(
+fn setup_fonts(
     mut egui_ctx: ResMut<EguiContext>,
     mut egui_settings: ResMut<EguiSettings>,
     conf: Res<UiConf>,
+    fonts: Res<UiFonts>,
+    gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
     egui_settings.scale_factor = conf.scale_factor.into();
 
+    let font_data = gunzip_bin.get(&fonts.font).unwrap().clone();
     let mut fonts = FontDefinitions::default();
-    let mut font_data = FontData::from_static(include_bytes!("../../fonts/Mplus2-SemiBold.otf"));
+    let mut font_data = FontData::from_owned(font_data.0);
     font_data.tweak.scale = conf.font_scale;
     fonts.font_data.insert("m+_font".to_owned(), font_data);
     fonts

@@ -1,4 +1,5 @@
 use crate::audio::SoundEffect;
+use crate::gz::GunzipBin;
 use crate::planet::*;
 use crate::GameState;
 use bevy::prelude::*;
@@ -25,6 +26,7 @@ impl Plugin for AssetsPlugin {
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::Running)
                     .with_collection::<UiTextures>()
+                    .with_collection::<UiFonts>()
                     .with_collection::<ParamsAssetCollection>()
                     .with_collection::<BiomeTextures>()
                     .with_collection::<StructureTextures>()
@@ -57,6 +59,12 @@ define_asset_list_from_enum! {
     pub struct UiTextures {
         pub textures: HashMap<UiTexture, Handle<Image>>,
     }
+}
+
+#[derive(Debug, Resource, AssetCollection)]
+pub struct UiFonts {
+    #[asset(path = "fonts/Mplus2-SemiBold.otf.gz")]
+    pub font: Handle<GunzipBin>,
 }
 
 #[derive(Clone, Debug, Deserialize, TypeUuid)]

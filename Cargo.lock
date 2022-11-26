@@ -2563,6 +2563,7 @@ dependencies = [
  "bevy_kira_audio",
  "bincode",
  "clap",
+ "flate2",
  "fnv",
  "log",
  "once_cell",
