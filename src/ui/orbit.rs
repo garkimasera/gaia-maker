@@ -30,17 +30,20 @@ pub fn orbit_window(
                     ui.label("");
                     ui.end_row();
                     for kind in OrbitalBuildingKind::iter() {
+                        let buildable = planet.buildable(&params.orbital_buildings[&kind]);
                         let building = planet.orbit.get_mut(&kind).unwrap();
                         ui.label(t!(kind.as_ref()));
                         ui.label(format!("{}", building.n));
                         ui.add(egui::Slider::new(&mut building.enabled, 0..=building.n));
                         if ui
-                            .button(t!("add"))
+                            .add_enabled(buildable, egui::Button::new(t!("add")))
                             .on_hover_ui(building_desc_tooltip(&params.orbital_buildings[&kind]))
+                            .on_disabled_hover_ui(building_desc_tooltip(
+                                &params.orbital_buildings[&kind],
+                            ))
                             .clicked()
                         {
-                            building.n += 1;
-                            building.enabled += 1;
+                            planet.build_orbital_building(kind, &params);
                         }
                         ui.end_row();
                     }

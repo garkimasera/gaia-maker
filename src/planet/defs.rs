@@ -6,9 +6,6 @@ use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
-/// Speed of simulation
-pub const SPEED: f32 = 1.0 / 10.0;
-
 #[derive(
     Clone,
     Copy,
@@ -21,6 +18,7 @@ pub const SPEED: f32 = 1.0 / 10.0;
     Serialize,
     Deserialize,
     EnumString,
+    EnumIter,
     AsRefStr,
 )]
 #[serde(rename_all = "snake_case")]
@@ -31,6 +29,8 @@ pub enum ResourceKind {
     Nitrogen,
     Helium,
 }
+
+pub type ResourceMap = fnv::FnvHashMap<ResourceKind, f32>;
 
 #[derive(
     Clone,
@@ -78,6 +78,12 @@ pub struct StructureAttrs {
     pub building: BuildingAttrs,
 }
 
+impl AsRef<BuildingAttrs> for StructureAttrs {
+    fn as_ref(&self) -> &BuildingAttrs {
+        &self.building
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum StructureSize {
@@ -103,7 +109,16 @@ impl Default for StructureSize {
 
 #[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(StructureKind))]
-#[strum_discriminants(derive(Hash, Serialize, Deserialize, EnumIter, AsRefStr, Display))]
+#[strum_discriminants(derive(
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    EnumIter,
+    AsRefStr,
+    Display
+))]
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum Structure {
@@ -146,11 +161,11 @@ pub enum GasKind {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BuildingAttrs {
     #[serde(default)]
-    pub cost: FnvHashMap<ResourceKind, f32>,
+    pub cost: ResourceMap,
     #[serde(default)]
-    pub upkeep: FnvHashMap<ResourceKind, f32>,
+    pub upkeep: ResourceMap,
     #[serde(default)]
-    pub produces: FnvHashMap<ResourceKind, f32>,
+    pub produces: ResourceMap,
 }
 
 #[derive(
@@ -210,7 +225,6 @@ pub struct Params {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartParams {
     pub default_size: (u32, u32),
-    pub energy: f32,
-    pub material: f32,
+    pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
 }

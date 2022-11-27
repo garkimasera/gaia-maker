@@ -1,9 +1,11 @@
 mod action;
 mod atm;
 mod defs;
+mod resources;
 mod sim;
 
-pub use crate::planet::defs::*;
+pub use self::defs::*;
+pub use self::resources::*;
 use fnv::{FnvHashMap, FnvHashSet};
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
@@ -18,12 +20,6 @@ pub struct Tile {
     pub height: f32,
     pub biomass: f32,
     pub temp: f32,
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct Resources {
-    pub energy: f32,
-    pub material: f32,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -67,10 +63,7 @@ impl Planet {
         let mut planet = Planet {
             tick: 0,
             player: Player::default(),
-            res: Resources {
-                energy: params.start.energy,
-                material: params.start.material,
-            },
+            res: Resources::new(&params.start),
             map,
             atmo: Atmosphere::from_params(&params.start),
             orbit: OrbitalBuildingKind::iter()

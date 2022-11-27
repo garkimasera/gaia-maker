@@ -1,8 +1,11 @@
 (
     start: (
         default_size: (128, 64),
-        energy: 10000.0,
-        material: 1000.0,
+        resources: {
+            energy: 10000.0,
+            material: 1000.0,
+            helium: 1000.0,
+        },
         atmo_mass: {
             nitrogen: 10,
             carbon_dioxide: 100,

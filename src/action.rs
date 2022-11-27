@@ -46,11 +46,13 @@ fn cursor_action(
             CursorMode::Build(kind) => match kind {
                 StructureKind::None => (),
                 _ => {
-                    update_map.update();
-                    let size = params.structures[&kind].size;
-                    if planet.placeable(coords, size) {
-                        planet.place(coords, size, new_structure(kind));
-                        audio_se.play(sound_effects.get(SoundEffect::Build));
+                    if planet.buildable(params.structures[&kind].as_ref()) {
+                        update_map.update();
+                        let size = params.structures[&kind].size;
+                        if planet.placeable(coords, size) {
+                            planet.place(coords, size, new_structure(kind));
+                            audio_se.play(sound_effects.get(SoundEffect::Build));
+                        }
                     }
                 }
             },
