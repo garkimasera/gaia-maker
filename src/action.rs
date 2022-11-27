@@ -50,7 +50,7 @@ fn cursor_action(
                         update_map.update();
                         let size = params.structures[&kind].size;
                         if planet.placeable(coords, size) {
-                            planet.place(coords, size, new_structure(kind));
+                            planet.place(coords, size, new_structure(kind), &params);
                             audio_se.play(sound_effects.get(SoundEffect::Build));
                         }
                     }

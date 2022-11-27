@@ -103,13 +103,17 @@ impl Planet {
         true
     }
 
-    pub fn place(&mut self, p: Coords, size: StructureSize, structure: Structure) {
+    pub fn place(&mut self, p: Coords, size: StructureSize, structure: Structure, params: &Params) {
         assert!(self.placeable(p, size));
 
+        let kind = structure.kind();
         self.map[p].structure = structure;
 
         for p_rel in size.occupied_tiles().into_iter() {
             self.map[p + p_rel].structure = Structure::Occupied { by: p };
         }
+
+        self.res
+            .remove_by_map(&params.structures[&kind].building.cost);
     }
 }
