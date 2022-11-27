@@ -1,13 +1,13 @@
 {
     // UI
+    "add": "Add",
     "atmosphere": "Atmosphere",
     "air-temprature": "Temprature",
     "build": "Build",
     "coordinates": "Coordinates",
     "cost": "Cost",
-    "energy": "Energy",
+    "enabled": "Enabled",
     "layers": "Layers",
-    "material": "Material",
     "messages": "Messages",
     "none": "None",
     "orbit": "Orbit",
@@ -15,10 +15,23 @@
     "star-system": "Star system",
     "selected-tool": "Selected tool",
     "upkeep": "Upkeep",
+    
+    // Resources
+    "energy": "Energy",
+    "material": "Material",
+    "nitrogen": "Nitrogen",
+    "helium": "Helium",
 
     // Structures
-    "oxygen-generator": "oxygen generator",
-    "fertilization-plant": "fertilization plant",
+    "oxygen-generator": "Oxygen Generator",
+    "fertilization-plant": "Fertilization Plant",
+    
+    // Orbital Buildings
+    "fusion-reactor": "Fusion Reactor",
+    "nitrogen-sprayer": "Nitrogen Sprayer",
+    
+    // Star System Buildings
+    "dyson-swarm-module": "Dyson Swarm Module",
     
     // Messages
     "welcome_to": "Welcome to {$app_name} !",

@@ -11,10 +11,22 @@ impl Planet {
 
         for tile in self.map.iter() {
             if let Some(a) = params.structures.get(&StructureKind::from(&tile.structure)) {
-                energy_upkeep += *a.upkeep.get(&ResourceKind::Energy).unwrap_or(&0.0);
-                material_upkeep += *a.upkeep.get(&ResourceKind::Material).unwrap_or(&0.0);
-                energy_product += *a.produces.get(&ResourceKind::Energy).unwrap_or(&0.0);
-                material_product += *a.produces.get(&ResourceKind::Material).unwrap_or(&0.0);
+                energy_upkeep += *a.building.upkeep.get(&ResourceKind::Energy).unwrap_or(&0.0);
+                material_upkeep += *a
+                    .building
+                    .upkeep
+                    .get(&ResourceKind::Material)
+                    .unwrap_or(&0.0);
+                energy_product += *a
+                    .building
+                    .produces
+                    .get(&ResourceKind::Energy)
+                    .unwrap_or(&0.0);
+                material_product += *a
+                    .building
+                    .produces
+                    .get(&ResourceKind::Material)
+                    .unwrap_or(&0.0);
             }
         }
 

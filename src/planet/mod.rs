@@ -4,9 +4,10 @@ mod defs;
 mod sim;
 
 pub use crate::planet::defs::*;
-use fnv::FnvHashSet;
+use fnv::{FnvHashMap, FnvHashSet};
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
+use strum::IntoEnumIterator;
 
 use self::atm::Atmosphere;
 
@@ -42,6 +43,12 @@ impl Default for Tile {
     }
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct Building {
+    pub n: u32,
+    pub enabled: u32,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
     pub tick: u64,
@@ -49,6 +56,8 @@ pub struct Planet {
     pub res: Resources,
     pub map: Array2d<Tile>,
     pub atmo: Atmosphere,
+    pub orbit: FnvHashMap<OrbitalBuildingKind, Building>,
+    pub star_system: FnvHashMap<StarSystemBuildingKind, Building>,
 }
 
 impl Planet {
@@ -64,6 +73,12 @@ impl Planet {
             },
             map,
             atmo: Atmosphere::from_params(&params.start),
+            orbit: OrbitalBuildingKind::iter()
+                .map(|kind| (kind, Building::default()))
+                .collect(),
+            star_system: StarSystemBuildingKind::iter()
+                .map(|kind| (kind, Building::default()))
+                .collect(),
         };
 
         planet

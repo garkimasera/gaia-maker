@@ -1,13 +1,13 @@
 {
     // UI
+    "add": "追加",
     "atmosphere": "大気",
     "air-temprature": "気温",
     "build": "建設",
     "coordinates": "座標",
     "cost": "コスト",
-    "energy": "エネルギー",
+    "enabled": "有効",
     "layers": "レイヤー",
-    "material": "素材",
     "messages": "メッセージ",
     "none": "なし",
     "orbit": "軌道",
@@ -15,10 +15,23 @@
     "star-system": "星系",
     "selected-tool": "選択中のツール",
     "upkeep": "維持",
+    
+    // Resources
+    "energy": "エネルギー",
+    "material": "素材",
+    "nitrogen": "窒素",
+    "helium": "ヘリウム",
 
     // Structures
     "oxygen-generator": "酸素発生機",
     "fertilization-plant": "肥沃化工場",
+    
+    // Orbital Buildings
+    "fusion-reactor": "核融合炉",
+    "nitrogen-sprayer": "窒素散布器",
+    
+    // Star System Buildings
+    "dyson-swarm-module": "ダイソンスウォームモジュール",
     
     // Messages
     "welcome_to": "{$app_name} へようこそ",

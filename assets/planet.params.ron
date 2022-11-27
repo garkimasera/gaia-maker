@@ -9,4 +9,22 @@
             helium: 0.1,
         },
     ),
+    orbital_buildings: {
+        fusion_reactor: (
+            cost: { material: 500 },
+            upkeep: { helium: 0.1 },
+            produces: { energy: 1000 },
+        ),
+        nitrogen_sprayer: (
+            cost: { material: 40 },
+            upkeep: { nitrogen: 100 },
+        ),
+    },
+    star_system_buildings: {
+        dyson_swarm_module: (
+            cost: { material: 20000 },
+            upkeep: { material: 10 },
+            produces: { energy: 50000 },
+        ),
+    },
 )

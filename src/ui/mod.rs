@@ -12,7 +12,6 @@ use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily, RichText, Ui},
     EguiContext, EguiPlugin, EguiSettings,
 };
-use fnv::FnvHashMap;
 use std::collections::{HashMap, VecDeque};
 use strum::IntoEnumIterator;
 
@@ -356,19 +355,14 @@ fn build_window(
 }
 
 fn build_button_tooltip(kind: StructureKind, params: &Params) -> impl FnOnce(&mut Ui) + '_ {
-    let attr = &params.structures[&kind];
-    building_desc_tooltip(&attr.cost, &attr.upkeep, &attr.produces)
+    building_desc_tooltip(&params.structures[&kind].building)
 }
 
-fn building_desc_tooltip<'a>(
-    cost: &'a FnvHashMap<ResourceKind, f32>,
-    upkeep: &'a FnvHashMap<ResourceKind, f32>,
-    produces: &'a FnvHashMap<ResourceKind, f32>,
-) -> impl FnOnce(&mut Ui) + 'a {
+fn building_desc_tooltip(attrs: &BuildingAttrs) -> impl FnOnce(&mut Ui) + '_ {
     move |ui| {
-        if !cost.is_empty() {
+        if !attrs.cost.is_empty() {
             ui.label(RichText::new(t!("cost")).strong());
-            let mut resources = cost.iter().collect::<Vec<_>>();
+            let mut resources = attrs.cost.iter().collect::<Vec<_>>();
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .into_iter()
@@ -382,9 +376,9 @@ fn building_desc_tooltip<'a>(
                 });
             ui.label(s);
         }
-        if !upkeep.is_empty() {
+        if !attrs.upkeep.is_empty() {
             ui.label(RichText::new(t!("upkeep")).strong());
-            let mut resources = upkeep.iter().collect::<Vec<_>>();
+            let mut resources = attrs.upkeep.iter().collect::<Vec<_>>();
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .iter()
@@ -398,9 +392,9 @@ fn building_desc_tooltip<'a>(
                 });
             ui.label(s);
         }
-        if !produces.is_empty() {
+        if !attrs.produces.is_empty() {
             ui.label(RichText::new(t!("produces")).strong());
-            let mut resources = produces.iter().collect::<Vec<_>>();
+            let mut resources = attrs.produces.iter().collect::<Vec<_>>();
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .iter()

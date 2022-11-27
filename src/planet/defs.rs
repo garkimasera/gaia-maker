@@ -28,6 +28,8 @@ pub const SPEED: f32 = 1.0 / 10.0;
 pub enum ResourceKind {
     Energy,
     Material,
+    Nitrogen,
+    Helium,
 }
 
 #[derive(
@@ -73,12 +75,7 @@ pub struct StructureAttrs {
     pub height: u32,
     pub columns: usize,
     pub rows: usize,
-    #[serde(default)]
-    pub cost: FnvHashMap<ResourceKind, f32>,
-    #[serde(default)]
-    pub upkeep: FnvHashMap<ResourceKind, f32>,
-    #[serde(default)]
-    pub produces: FnvHashMap<ResourceKind, f32>,
+    pub building: BuildingAttrs,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
@@ -147,12 +144,67 @@ pub enum GasKind {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct BuildingAttrs {
+    #[serde(default)]
+    pub cost: FnvHashMap<ResourceKind, f32>,
+    #[serde(default)]
+    pub upkeep: FnvHashMap<ResourceKind, f32>,
+    #[serde(default)]
+    pub produces: FnvHashMap<ResourceKind, f32>,
+}
+
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    EnumString,
+    EnumIter,
+    AsRefStr,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum OrbitalBuildingKind {
+    FusionReactor,
+    NitrogenSprayer,
+}
+
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    EnumString,
+    EnumIter,
+    AsRefStr,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum StarSystemBuildingKind {
+    DysonSwarmModule,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub start: StartParams,
     #[serde(skip)]
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
     #[serde(skip)]
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
+    pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, BuildingAttrs>,
+    pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, BuildingAttrs>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
