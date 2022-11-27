@@ -11,6 +11,12 @@
             carbon_dioxide: 100,
             helium: 0.1,
         },
+        orbital_buildings: {
+            fusion_reactor: 3,
+        },
+        star_system_buildings: {
+            asteroid_mining_station: 2,
+        },
     ),
     orbital_buildings: {
         fusion_reactor: (
@@ -24,6 +30,11 @@
         ),
     },
     star_system_buildings: {
+        asteroid_mining_station: (
+            cost: { material: 200 },
+            upkeep: { energy: 10 },
+            produces: { material: 100 },
+        ),
         dyson_swarm_module: (
             cost: { material: 20000 },
             upkeep: { material: 10 },

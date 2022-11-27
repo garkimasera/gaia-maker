@@ -74,6 +74,17 @@ impl Planet {
                 .collect(),
         };
 
+        for (kind, &n) in &params.start.orbital_buildings {
+            let building = planet.orbit.get_mut(kind).unwrap();
+            building.n = n;
+            building.enabled = n;
+        }
+        for (kind, &n) in &params.start.star_system_buildings {
+            let building = planet.star_system.get_mut(kind).unwrap();
+            building.n = n;
+            building.enabled = n;
+        }
+
         planet
             .player
             .buildable_structures

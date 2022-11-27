@@ -208,6 +208,7 @@ pub enum OrbitalBuildingKind {
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum StarSystemBuildingKind {
+    AsteroidMiningStation,
     DysonSwarmModule,
 }
 
@@ -227,4 +228,6 @@ pub struct StartParams {
     pub default_size: (u32, u32),
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
+    pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
+    pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
 }
