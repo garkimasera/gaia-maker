@@ -20,6 +20,7 @@ mod gz;
 mod info;
 mod overlay;
 mod planet;
+mod saveload;
 mod screen;
 mod sim;
 mod ui;

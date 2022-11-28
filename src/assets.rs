@@ -43,6 +43,7 @@ impl Plugin for AssetsPlugin {
 pub enum UiTexture {
     IconAtmosphere,
     IconBuild,
+    IconGameMenu,
     IconLayers,
     IconMaterial,
     IconMessage,

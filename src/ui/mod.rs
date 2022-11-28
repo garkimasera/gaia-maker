@@ -39,6 +39,7 @@ pub struct WindowsOpenState {
     layers: bool,
     atmosphere: bool,
     message: bool,
+    game_menu: bool,
     edit_map: bool,
 }
 
@@ -86,6 +87,7 @@ impl Plugin for UiPlugin {
                     .with_system(layers_window.label("ui_windows"))
                     .with_system(atmo::atmo_window.label("ui_windows"))
                     .with_system(msg_window.label("ui_windows"))
+                    .with_system(game_menu_window.label("ui_windows"))
                     .with_system(edit_map_window.label("ui_windows")),
             )
             .add_system(exit_on_esc_system);
@@ -320,6 +322,15 @@ fn toolbar(
     {
         wos.message = !wos.message;
     }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconGameMenu).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("menu"))
+        .clicked()
+    {
+        wos.game_menu = !wos.game_menu;
+    }
 }
 
 fn build_window(
@@ -477,6 +488,51 @@ fn msg_window(
                         ui.separator();
                     }
                 });
+        })
+        .unwrap()
+        .response
+        .rect;
+    occupied_screen_space
+        .window_rects
+        .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn game_menu_window(
+    mut egui_ctx: ResMut<EguiContext>,
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut app_exit_events: EventWriter<AppExit>,
+    mut wos: ResMut<WindowsOpenState>,
+    mut planet: ResMut<Planet>,
+    conf: Res<UiConf>,
+) {
+    if !wos.game_menu {
+        return;
+    }
+
+    let rect = egui::Window::new(t!("menu"))
+        .open(&mut wos.game_menu)
+        .show(egui_ctx.ctx_mut(), |ui| {
+            if ui.button(t!("save")).clicked() {
+                if let Err(e) = crate::saveload::save_to("test.planet", &planet) {
+                    log::error!("{}", e);
+                }
+            }
+
+            if ui.button(t!("load")).clicked() {
+                match crate::saveload::load_from("test.planet") {
+                    Ok(new_planet) => {
+                        *planet = new_planet;
+                    }
+                    Err(e) => {
+                        log::error!("{}", e);
+                    }
+                }
+            }
+
+            ui.separator();
+            if ui.button(t!("exit")).clicked() {
+                app_exit_events.send(bevy::app::AppExit);
+            }
         })
         .unwrap()
         .response

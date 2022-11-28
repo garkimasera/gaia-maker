@@ -10,6 +10,7 @@ inspector = ["bevy-inspector-egui"]
 [dependencies]
 anyhow = "1"
 arrayvec = "0.7"
+base64 = "0.13"
 bevy = { version = "0.9", default-features = false, features = ["bevy_asset", "bevy_winit", "render", "png", "x11"] }
 bevy_asset_loader = "0.14"
 bevy_common_assets = { version = "0.4", features = ["ron"] }
@@ -18,6 +19,7 @@ bevy-inspector-egui = { version = "0.14", optional = true }
 bevy_kira_audio = "0.13"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
+dirs = "4"
 flate2 = "1"
 fnv = "1"
 log = "0.4"
@@ -27,6 +29,9 @@ serde = { version = "1", features = ["derive"] }
 strum = { version = "0.24", features = ["derive"] }
 
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Window", "Storage"] }
 
 [profile.dev]
 opt-level = 1
