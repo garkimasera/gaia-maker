@@ -1,4 +1,3 @@
-use anyhow::Result;
 use bevy::prelude::*;
 use bevy::time::FixedTimestep;
 
@@ -71,11 +70,11 @@ fn manage_planet(
                 )));
             }
             ManagePlanet::Save(path) => {
-                if let Err(e) = save(&planet, path) {
+                if let Err(e) = crate::saveload::save_to(path, &planet) {
                     log::warn!("cannot save: {:?}", e);
                 }
             }
-            ManagePlanet::Load(path) => match load(path) {
+            ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
                 Ok(new_planet) => {
                     *planet = new_planet;
                     ew_centering.send(Centering(Vec2::new(
@@ -89,15 +88,4 @@ fn manage_planet(
             },
         }
     }
-}
-
-fn save(planet: &Planet, path: &str) -> Result<()> {
-    let w = std::fs::File::create(path)?;
-    bincode::serialize_into(w, planet)?;
-    Ok(())
-}
-
-fn load(path: &str) -> Result<Planet> {
-    let r = std::fs::File::open(path)?;
-    Ok(bincode::deserialize_from(r)?)
 }

@@ -209,7 +209,7 @@ pub enum OrbitalBuildingKind {
 #[strum(serialize_all = "kebab-case")]
 pub enum StarSystemBuildingKind {
     AsteroidMiningStation,
-    DysonSwarmModule,
+    DysonSwarmUnit,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

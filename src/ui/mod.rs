@@ -502,33 +502,29 @@ fn game_menu_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut app_exit_events: EventWriter<AppExit>,
     mut wos: ResMut<WindowsOpenState>,
-    mut planet: ResMut<Planet>,
+    mut ew_manage_planet: EventWriter<ManagePlanet>,
     conf: Res<UiConf>,
 ) {
     if !wos.game_menu {
         return;
     }
 
+    let mut close = false;
+
     let rect = egui::Window::new(t!("menu"))
+        .title_bar(false)
+        .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
         .open(&mut wos.game_menu)
         .show(egui_ctx.ctx_mut(), |ui| {
             if ui.button(t!("save")).clicked() {
-                if let Err(e) = crate::saveload::save_to("test.planet", &planet) {
-                    log::error!("{}", e);
-                }
+                ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
+                close = true;
             }
 
             if ui.button(t!("load")).clicked() {
-                match crate::saveload::load_from("test.planet") {
-                    Ok(new_planet) => {
-                        *planet = new_planet;
-                    }
-                    Err(e) => {
-                        log::error!("{}", e);
-                    }
-                }
+                ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+                close = true;
             }
-
             ui.separator();
             if ui.button(t!("exit")).clicked() {
                 app_exit_events.send(bevy::app::AppExit);
@@ -540,6 +536,10 @@ fn game_menu_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+
+    if close {
+        wos.game_menu = false;
+    }
 }
 
 fn edit_map_window(
@@ -551,7 +551,6 @@ fn edit_map_window(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     (mut new_w, mut new_h): (Local<u32>, Local<u32>),
     mut biome: Local<Biome>,
-    mut save_file_path: Local<String>,
 ) {
     if !wos.edit_map {
         return;
@@ -580,17 +579,6 @@ fn edit_map_window(
                     || matches!(*cursor_mode, CursorMode::EditBiome(_))
                 {
                     *cursor_mode = CursorMode::EditBiome(*biome);
-                }
-            });
-
-            ui.separator();
-            ui.horizontal(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut *save_file_path));
-                if ui.button("Save").clicked() {
-                    ew_manage_planet.send(ManagePlanet::Save(save_file_path.clone()));
-                }
-                if ui.button("Load").clicked() {
-                    ew_manage_planet.send(ManagePlanet::Load(save_file_path.clone()));
                 }
             });
         })

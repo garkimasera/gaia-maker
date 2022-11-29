@@ -36,7 +36,7 @@
     
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
-    "dyson-swarm-module": "Dyson Swarm Module",
+    "dyson-swarm-unit": "Dyson Swarm Unit",
     
     // Messages
     "welcome_to": "Welcome to {$app_name} !",
