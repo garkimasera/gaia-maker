@@ -64,7 +64,7 @@ impl CheckUpkeepProduces {
             .min_by(|a, b| a.total_cmp(b));
 
         let available_by_produce = building
-            .upkeep
+            .produces
             .iter()
             .map(|(resource_kind, v)| {
                 (planet.res.cap[resource_kind] - self.stock[resource_kind]) / v

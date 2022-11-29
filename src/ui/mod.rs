@@ -514,21 +514,24 @@ fn game_menu_window(
     let rect = egui::Window::new(t!("menu"))
         .title_bar(false)
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
+        .resizable(false)
         .open(&mut wos.game_menu)
         .show(egui_ctx.ctx_mut(), |ui| {
-            if ui.button(t!("save")).clicked() {
-                ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
-                close = true;
-            }
+            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                if ui.button(t!("save")).clicked() {
+                    ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
+                    close = true;
+                }
 
-            if ui.button(t!("load")).clicked() {
-                ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
-                close = true;
-            }
-            ui.separator();
-            if ui.button(t!("exit")).clicked() {
-                app_exit_events.send(bevy::app::AppExit);
-            }
+                if ui.button(t!("load")).clicked() {
+                    ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+                    close = true;
+                }
+                ui.separator();
+                if ui.button(t!("exit")).clicked() {
+                    app_exit_events.send(bevy::app::AppExit);
+                }
+            });
         })
         .unwrap()
         .response
