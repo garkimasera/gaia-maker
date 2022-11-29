@@ -6,6 +6,7 @@ impl Planet {
 
         let c = CheckUpkeepProduces::new(self, params);
         self.res.stock = c.stock;
+        self.res.diff = c.diff;
     }
 }
 

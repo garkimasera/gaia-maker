@@ -206,16 +206,12 @@ fn panels(
 }
 
 fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_tile: &HoverTile) {
-    ui.label(&format!(
-        "{}: {:.0}",
-        t!("energy"),
-        planet.res.stock[&ResourceKind::Energy]
-    ));
-    ui.label(&format!(
-        "{}: {:.0}",
-        t!("material"),
-        planet.res.stock[&ResourceKind::Material]
-    ));
+    for (kind, v) in &planet.res.stock {
+        ui.horizontal(|ui| {
+            ui.label(&format!("{}: {:.1}", t!(kind.as_ref()), v,));
+            ui.label(egui::RichText::new(&format!("({:+.1})", planet.res.diff[kind],)).small());
+        });
+    }
 
     ui.separator();
 

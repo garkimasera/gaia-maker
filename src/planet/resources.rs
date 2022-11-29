@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct Resources {
     pub stock: ResourceMap,
     pub cap: ResourceMap,
+    pub diff: ResourceMap,
 }
 
 impl Default for Resources {
@@ -12,6 +13,7 @@ impl Default for Resources {
         Resources {
             stock: ResourceKind::iter().map(|kind| (kind, 0.0)).collect(),
             cap: ResourceKind::iter().map(|kind| (kind, 1.0E+06)).collect(),
+            diff: ResourceKind::iter().map(|kind| (kind, 0.0)).collect(),
         }
     }
 }
