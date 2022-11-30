@@ -166,6 +166,8 @@ pub struct BuildingAttrs {
     pub upkeep: ResourceMap,
     #[serde(default)]
     pub produces: ResourceMap,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub effect: Option<BuildingEffect>,
 }
 
 #[derive(
@@ -212,6 +214,12 @@ pub enum StarSystemBuildingKind {
     DysonSwarmUnit,
     HeliumCollector,
     AmmoniaExtractor,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
+#[strum(serialize_all = "kebab-case")]
+pub enum BuildingEffect {
+    SprayToAtmo { kind: GasKind, mass: f32 },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

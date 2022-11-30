@@ -28,6 +28,7 @@
         nitrogen_sprayer: (
             cost: { material: 40 },
             upkeep: { nitrogen: 100 },
+            effect: SprayToAtmo( kind: nitrogen, mass: 100 ),
         ),
     },
     star_system_buildings: {

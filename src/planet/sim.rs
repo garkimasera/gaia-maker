@@ -7,6 +7,8 @@ impl Planet {
         let c = CheckUpkeepProduces::new(self, params);
         self.res.stock = c.stock;
         self.res.diff = c.diff;
+
+        apply_building_effect(self, &c.stopped_buildings, params);
     }
 }
 
@@ -92,6 +94,28 @@ impl CheckUpkeepProduces {
         for (resource_kind, v) in &building.produces {
             *self.diff.entry(*resource_kind).or_default() += *v * a;
             *self.stock.get_mut(resource_kind).unwrap() += *v * a;
+        }
+    }
+}
+
+fn apply_building_effect(
+    planet: &mut Planet,
+    stopped_buildings: &FnvHashMap<BuildingKind, u32>,
+    params: &Params,
+) {
+    for (&orbital_building_kind, Building { enabled, .. }) in &planet.orbit {
+        if let Some(effect) = &params.orbital_buildings[&orbital_building_kind].effect {
+            let n = enabled
+                - stopped_buildings
+                    .get(&BuildingKind::Orbital(orbital_building_kind))
+                    .copied()
+                    .unwrap_or(0);
+
+            match effect {
+                BuildingEffect::SprayToAtmo { kind, mass } => {
+                    *planet.atmo.mass.get_mut(kind).unwrap() += mass * n as f32;
+                }
+            }
         }
     }
 }
