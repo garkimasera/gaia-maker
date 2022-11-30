@@ -37,6 +37,8 @@
     // Star System Buildings
     "asteroid-mining-station": "小惑星採掘ステーション",
     "dyson-swarm-unit": "ダイソンスウォームユニット",
+    "helium-collector": "ヘリウム収集装置",
+    "ammonia-extractor": "アンモニア抽出ステーション",
     
     // Messages
     "welcome_to": "{$app_name} へようこそ",

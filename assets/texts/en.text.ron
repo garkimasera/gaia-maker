@@ -37,6 +37,8 @@
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
     "dyson-swarm-unit": "Dyson Swarm Unit",
+    "helium-collector": "Helium Collector",
+    "ammonia-extractor": "Ammonia Extractor",
     
     // Messages
     "welcome_to": "Welcome to {$app_name} !",

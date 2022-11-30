@@ -210,6 +210,8 @@ pub enum OrbitalBuildingKind {
 pub enum StarSystemBuildingKind {
     AsteroidMiningStation,
     DysonSwarmUnit,
+    HeliumCollector,
+    AmmoniaExtractor,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

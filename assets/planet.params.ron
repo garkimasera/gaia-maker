@@ -16,6 +16,7 @@
         },
         star_system_buildings: {
             asteroid_mining_station: 2,
+            helium_collector: 1,
         },
     ),
     orbital_buildings: {
@@ -39,6 +40,16 @@
             cost: { material: 20000 },
             upkeep: { material: 10 },
             produces: { energy: 50000 },
+        ),
+        helium_collector: (
+            cost: { material: 10 },
+            upkeep: { energy: 0.1 },
+            produces: { helium: 100 },
+        ),
+        ammonia_extractor: (
+            cost: { material: 30 },
+            upkeep: { energy: 1000 },
+            produces: { nitrogen: 4 },
         ),
     },
 )

@@ -310,6 +310,8 @@ fn toolbar(
         wos.atmosphere = !wos.atmosphere;
     }
 
+    ui.add(egui::Separator::default().spacing(2.0).vertical());
+
     let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
