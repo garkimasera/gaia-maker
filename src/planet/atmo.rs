@@ -13,4 +13,8 @@ impl Atmosphere {
             mass: start_params.atmo_mass.clone(),
         }
     }
+
+    pub fn total_mass(&self) -> f32 {
+        self.mass.values().sum()
+    }
 }

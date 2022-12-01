@@ -6,6 +6,11 @@ use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct PlanetBasics {
+    pub solar_constant: f32,
+}
+
 #[derive(
     Clone,
     Copy,
@@ -155,7 +160,6 @@ pub enum GasKind {
     Oxygen,
     Nitrogen,
     CarbonDioxide,
-    Helium,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -235,6 +239,7 @@ pub struct Params {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartParams {
+    pub basics: PlanetBasics,
     pub default_size: (u32, u32),
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,

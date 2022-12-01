@@ -1,5 +1,8 @@
 (
     start: (
+        basics: (
+            solar_constant: 1000,
+        ),
         default_size: (128, 64),
         resources: {
             energy: 10000.0,
@@ -7,9 +10,9 @@
             helium: 1000.0,
         },
         atmo_mass: {
+            oxygen: 1,
             nitrogen: 10,
             carbon_dioxide: 100,
-            helium: 0.1,
         },
         orbital_buildings: {
             fusion_reactor: 3,

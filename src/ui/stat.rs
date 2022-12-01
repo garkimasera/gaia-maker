@@ -1,0 +1,74 @@
+use bevy::prelude::*;
+use bevy_egui::{egui, EguiContext};
+use strum::{AsRefStr, EnumIter, IntoEnumIterator};
+
+use super::{convert_rect, OccupiedScreenSpace, UiConf, WindowsOpenState};
+use crate::planet::*;
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Panel {
+    #[default]
+    Planet,
+    Atmosphere,
+}
+
+pub fn stat_window(
+    mut egui_ctx: ResMut<EguiContext>,
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut wos: ResMut<WindowsOpenState>,
+    conf: Res<UiConf>,
+    planet: Res<Planet>,
+    mut current_panel: Local<Panel>,
+) {
+    if !wos.stat {
+        return;
+    }
+
+    let rect = egui::Window::new(t!("statistics"))
+        .open(&mut wos.stat)
+        .vscroll(true)
+        .show(egui_ctx.ctx_mut(), |ui| {
+            ui.horizontal(|ui| {
+                for panel in Panel::iter() {
+                    ui.selectable_value(&mut *current_panel, panel, t!(panel.as_ref()));
+                }
+            });
+            ui.separator();
+
+            match *current_panel {
+                Panel::Planet => planet_stat(ui, &planet),
+                Panel::Atmosphere => atmo_stat(ui, &planet),
+            }
+        })
+        .unwrap()
+        .response
+        .rect;
+    occupied_screen_space
+        .window_rects
+        .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
+    egui::Grid::new("table_planet")
+        .striped(true)
+        .show(ui, |ui| {
+            ui.label(t!("solar-constant"));
+            ui.label(format!("{:.0} W/m2", planet.basics.solar_constant));
+        });
+}
+
+fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
+    let total_mass = planet.atmo.total_mass();
+
+    egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
+        for gas_kind in GasKind::iter() {
+            ui.label(t!(gas_kind.as_ref()));
+            ui.label(&format!(
+                "{:.1}%",
+                planet.atmo.mass[&gas_kind] / total_mass * 100.0
+            ));
+            ui.end_row();
+        }
+    });
+}

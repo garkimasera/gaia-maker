@@ -2,7 +2,7 @@ use super::*;
 
 impl Planet {
     pub fn advance(&mut self, params: &Params) {
-        self.tick += 1;
+        self.days += 1;
 
         let c = CheckUpkeepProduces::new(self, params);
         self.res.stock = c.stock;

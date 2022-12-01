@@ -1,17 +1,16 @@
 mod action;
-mod atm;
+mod atmo;
 mod defs;
 mod resources;
 mod sim;
 
+pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
 use fnv::{FnvHashMap, FnvHashSet};
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
-
-use self::atm::Atmosphere;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tile {
@@ -47,7 +46,8 @@ pub struct Building {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
-    pub tick: u64,
+    pub days: u64,
+    pub basics: PlanetBasics,
     pub player: Player,
     pub res: Resources,
     pub map: Array2d<Tile>,
@@ -57,15 +57,16 @@ pub struct Planet {
 }
 
 impl Planet {
-    pub fn new(w: u32, h: u32, params: &Params) -> Planet {
+    pub fn new(w: u32, h: u32, start_params: &StartParams) -> Planet {
         let map = Array2d::new(w, h, Tile::default());
 
         let mut planet = Planet {
-            tick: 0,
+            days: 0,
+            basics: start_params.basics.clone(),
             player: Player::default(),
-            res: Resources::new(&params.start),
+            res: Resources::new(start_params),
             map,
-            atmo: Atmosphere::from_params(&params.start),
+            atmo: Atmosphere::from_params(start_params),
             orbit: OrbitalBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
@@ -74,12 +75,12 @@ impl Planet {
                 .collect(),
         };
 
-        for (kind, &n) in &params.start.orbital_buildings {
+        for (kind, &n) in &start_params.orbital_buildings {
             let building = planet.orbit.get_mut(kind).unwrap();
             building.n = n;
             building.enabled = n;
         }
-        for (kind, &n) in &params.start.star_system_buildings {
+        for (kind, &n) in &start_params.star_system_buildings {
             let building = planet.star_system.get_mut(kind).unwrap();
             building.n = n;
             building.enabled = n;

@@ -43,7 +43,7 @@ fn start_sim(mut commands: Commands, mut update_map: ResMut<UpdateMap>, params: 
     let planet = Planet::new(
         params.start.default_size.0,
         params.start.default_size.1,
-        &params,
+        &params.start,
     );
     commands.insert_resource(planet);
     update_map.update();
@@ -63,7 +63,7 @@ fn manage_planet(
     for e in er_manage_planet.iter() {
         match e {
             ManagePlanet::New(w, h) => {
-                *planet = Planet::new(*w, *h, &params);
+                *planet = Planet::new(*w, *h, &params.start);
                 ew_centering.send(Centering(Vec2::new(
                     *w as f32 * TILE_SIZE / 2.0,
                     *h as f32 * TILE_SIZE / 2.0,

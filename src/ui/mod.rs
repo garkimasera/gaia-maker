@@ -1,6 +1,6 @@
-mod atmo;
 mod orbit;
 mod star_system;
+mod stat;
 
 use bevy::{
     app::AppExit,
@@ -37,7 +37,7 @@ pub struct WindowsOpenState {
     orbit: bool,
     star_system: bool,
     layers: bool,
-    atmosphere: bool,
+    stat: bool,
     message: bool,
     game_menu: bool,
     edit_map: bool,
@@ -85,7 +85,7 @@ impl Plugin for UiPlugin {
                     .with_system(orbit::orbit_window.label("ui_windows"))
                     .with_system(star_system::star_system_window.label("ui_windows"))
                     .with_system(layers_window.label("ui_windows"))
-                    .with_system(atmo::atmo_window.label("ui_windows"))
+                    .with_system(stat::stat_window.label("ui_windows"))
                     .with_system(msg_window.label("ui_windows"))
                     .with_system(game_menu_window.label("ui_windows"))
                     .with_system(edit_map_window.label("ui_windows")),
@@ -123,13 +123,12 @@ fn setup_fonts(
 
 fn exit_on_esc_system(
     mut keyboard_input_events: EventReader<KeyboardInput>,
-    mut _app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: EventWriter<AppExit>,
 ) {
     for event in keyboard_input_events.iter() {
         if let Some(key_code) = event.key_code {
             if event.state == ButtonState::Pressed && key_code == KeyCode::Escape {
-                std::process::exit(0);
-                // app_exit_events.send(bevy::app::AppExit);
+                app_exit_events.send(bevy::app::AppExit);
             }
         }
     }
@@ -301,13 +300,13 @@ fn toolbar(
         wos.layers = !wos.layers;
     }
 
-    let (handle, size) = textures.0.get(&UiTexture::IconAtmosphere).unwrap();
+    let (handle, size) = textures.0.get(&UiTexture::IconStat).unwrap();
     if ui
         .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("atmosphere"))
+        .on_hover_text(t!("statistics"))
         .clicked()
     {
-        wos.atmosphere = !wos.atmosphere;
+        wos.stat = !wos.stat;
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
