@@ -511,6 +511,7 @@ fn game_menu_window(
     let rect = egui::Window::new(t!("menu"))
         .title_bar(false)
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
+        .default_width(0.0)
         .resizable(false)
         .open(&mut wos.game_menu)
         .show(egui_ctx.ctx_mut(), |ui| {
