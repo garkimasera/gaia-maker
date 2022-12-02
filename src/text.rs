@@ -8,6 +8,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::RwLock;
 
+use crate::planet::ResourceKind;
+
 macro_rules! t {
     ($s:expr) => {
         $crate::text::get_text($s, std::collections::HashMap::default())
@@ -134,4 +136,37 @@ pub fn replace(s: &str, map: HashMap<String, String>) -> String {
         map[name].to_string()
     })
     .into_owned()
+}
+
+pub struct WithUnitDisplay {
+    kind: ResourceKind,
+    value: f32,
+}
+
+pub trait Unit {
+    fn display_with_value(&self, value: f32) -> WithUnitDisplay;
+}
+
+impl Unit for ResourceKind {
+    fn display_with_value(&self, value: f32) -> WithUnitDisplay {
+        WithUnitDisplay { kind: *self, value }
+    }
+}
+
+impl std::fmt::Display for WithUnitDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        let (unit0, unit1) = match self.kind {
+            ResourceKind::Energy => ("PJ", "EJ"),
+            ResourceKind::Helium => ("kg", "t"),
+            _ => ("Mt", "Gt"),
+        };
+
+        if self.value < 1.0 {
+            write!(f, "{}{}", self.value, unit0)
+        } else if self.value < 100000.0 {
+            write!(f, "{:.0}{}", self.value, unit0)
+        } else {
+            write!(f, "{:.0}{}", self.value / 1000.0, unit1)
+        }
+    }
 }

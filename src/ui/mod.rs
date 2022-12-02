@@ -23,6 +23,7 @@ use crate::{
     planet::*,
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
+    text::Unit,
     GameState,
 };
 
@@ -205,10 +206,21 @@ fn panels(
 }
 
 fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_tile: &HoverTile) {
-    for (kind, v) in &planet.res.stock {
+    let mut stock: Vec<_> = planet.res.stock.iter().collect();
+    stock.sort_by_key(|&(res, _)| res);
+    for (kind, v) in stock.into_iter() {
         ui.horizontal(|ui| {
-            ui.label(&format!("{}: {:.1}", t!(kind.as_ref()), v,));
-            ui.label(egui::RichText::new(&format!("({:+.1})", planet.res.diff[kind],)).small());
+            ui.label(&format!(
+                "{}: {}",
+                t!(kind.as_ref()),
+                kind.display_with_value(*v)
+            ));
+            let diff = planet.res.diff[kind];
+            let sign = if diff > 0.0 { '+' } else { '-' };
+            ui.label(
+                egui::RichText::new(&format!("({}{})", sign, kind.display_with_value(diff)))
+                    .small(),
+            );
         });
     }
 
@@ -382,7 +394,13 @@ fn building_desc_tooltip(attrs: &BuildingAttrs) -> impl FnOnce(&mut Ui) + '_ {
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .into_iter()
-                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .map(|(resource, value)| {
+                    format!(
+                        "{}: {}",
+                        t!(resource.as_ref()),
+                        resource.display_with_value(*value)
+                    )
+                })
                 .fold(String::new(), |mut s0, s1| {
                     if !s0.is_empty() {
                         s0.push_str(", ");
@@ -398,7 +416,13 @@ fn building_desc_tooltip(attrs: &BuildingAttrs) -> impl FnOnce(&mut Ui) + '_ {
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .iter()
-                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .map(|(resource, value)| {
+                    format!(
+                        "{}: {}",
+                        t!(resource.as_ref()),
+                        resource.display_with_value(**value)
+                    )
+                })
                 .fold(String::new(), |mut s0, s1| {
                     if !s0.is_empty() {
                         s0.push_str(", ");
@@ -414,7 +438,13 @@ fn building_desc_tooltip(attrs: &BuildingAttrs) -> impl FnOnce(&mut Ui) + '_ {
             resources.sort_by_key(|(resource, _)| *resource);
             let s = resources
                 .iter()
-                .map(|(resource, value)| format!("{}: {}", t!(resource.as_ref()), value))
+                .map(|(resource, value)| {
+                    format!(
+                        "{}: {}",
+                        t!(resource.as_ref()),
+                        resource.display_with_value(**value)
+                    )
+                })
                 .fold(String::new(), |mut s0, s1| {
                     if !s0.is_empty() {
                         s0.push_str(", ");
