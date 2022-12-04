@@ -1,6 +1,8 @@
 (
     start: (
         basics: (
+            radius: 6300000,
+            density: 5500,
             solar_constant: 1000,
         ),
         default_size: (128, 64),

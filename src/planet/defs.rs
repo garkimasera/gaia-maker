@@ -8,6 +8,11 @@ pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct PlanetBasics {
+    /// Planet density [kg/m^3]
+    pub density: f32,
+    /// Planet radius [m]
+    pub radius: f32,
+    /// Solar constant at the planet [W/m^2]
     pub solar_constant: f32,
 }
 
