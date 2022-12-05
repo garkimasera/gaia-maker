@@ -218,8 +218,12 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
             let diff = planet.res.diff[kind];
             let sign = if diff > 0.0 { '+' } else { '-' };
             ui.label(
-                egui::RichText::new(&format!("({}{})", sign, kind.display_with_value(diff)))
-                    .small(),
+                egui::RichText::new(&format!(
+                    "({}{})",
+                    sign,
+                    kind.display_with_value(diff.abs())
+                ))
+                .small(),
             );
         });
     }
