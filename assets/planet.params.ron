@@ -12,9 +12,9 @@
             helium: 1000.0,
         },
         atmo_mass: {
-            oxygen: 1,
-            nitrogen: 10,
-            carbon_dioxide: 100,
+            oxygen: 0,
+            nitrogen: 1.0e+7,
+            carbon_dioxide: 2.0e+8,
         },
         orbital_buildings: {
             fusion_reactor: 3,
@@ -23,6 +23,9 @@
             asteroid_mining_station: 2,
             helium_collector: 1,
         },
+    ),
+    sim: (
+        total_mass_per_atm: 5.0e+9,
     ),
     orbital_buildings: {
         fusion_reactor: (

@@ -9,6 +9,8 @@ impl Planet {
         self.res.diff = c.diff;
 
         apply_building_effect(self, &c.stopped_buildings, params);
+
+        atmo::sim_atmosphere(self, params);
     }
 }
 

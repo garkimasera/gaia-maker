@@ -2,6 +2,7 @@
     // UI
     "add": "追加",
     "atmosphere": "大気",
+    "atmosphere-pressure": "気圧",
     "air-temprature": "気温",
     "build": "建設",
     "carbon-dioxide": "二酸化炭素",

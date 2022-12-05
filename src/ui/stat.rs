@@ -65,6 +65,13 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
 }
 
 fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
+    ui.label(format!(
+        "{}: {:.2} atm",
+        t!("atmosphere-pressure"),
+        planet.atmo.atm
+    ));
+    ui.separator();
+
     let total_mass = planet.atmo.total_mass();
 
     egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {

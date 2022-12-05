@@ -234,6 +234,7 @@ pub enum BuildingEffect {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub start: StartParams,
+    pub sim: SimParams,
     #[serde(skip)]
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
     #[serde(skip)]
@@ -250,4 +251,9 @@ pub struct StartParams {
     pub atmo_mass: FnvHashMap<GasKind, f32>,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SimParams {
+    pub total_mass_per_atm: f32,
 }
