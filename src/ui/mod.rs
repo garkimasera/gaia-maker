@@ -239,6 +239,9 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
         CursorMode::Build(kind) => {
             ui.label(t!(kind.as_ref()));
         }
+        CursorMode::Demolition => {
+            ui.label(t!("demolition"));
+        }
         CursorMode::EditBiome(biome) => {
             ui.label(format!("biome editing: {}", biome.as_ref()));
         }
@@ -363,20 +366,20 @@ fn build_window(
         .open(&mut wos.build)
         .vscroll(true)
         .show(egui_ctx.ctx_mut(), |ui| {
-            egui::ScrollArea::vertical()
-                .always_show_scroll(true)
-                .show(ui, |ui| {
-                    for kind in &planet.player.buildable_structures {
-                        let s: &str = kind.as_ref();
-                        if ui
-                            .button(t!(s))
-                            .on_hover_ui(build_button_tooltip(*kind, &params))
-                            .clicked()
-                        {
-                            *cursor_mode = CursorMode::Build(*kind);
-                        }
-                    }
-                });
+            if ui.button(t!("demolition")).clicked() {
+                *cursor_mode = CursorMode::Demolition;
+            }
+            ui.separator();
+            for kind in &planet.player.buildable_structures {
+                let s: &str = kind.as_ref();
+                if ui
+                    .button(t!(s))
+                    .on_hover_ui(build_button_tooltip(*kind, &params))
+                    .clicked()
+                {
+                    *cursor_mode = CursorMode::Build(*kind);
+                }
+            }
         })
         .unwrap()
         .response

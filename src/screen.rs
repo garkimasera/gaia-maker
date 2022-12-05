@@ -19,8 +19,9 @@ pub struct Centering(pub Vec2);
 #[derive(Clone, Debug, Resource)]
 pub enum CursorMode {
     Normal,
-    EditBiome(Biome),
+    Demolition,
     Build(StructureKind),
+    EditBiome(Biome),
 }
 
 impl Default for CursorMode {

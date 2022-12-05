@@ -39,6 +39,10 @@ fn cursor_action(
 
         match *cursor_mode {
             CursorMode::Normal => (),
+            CursorMode::Demolition => {
+                update_map.update();
+                planet.demolition(coords);
+            }
             CursorMode::EditBiome(biome) => {
                 update_map.update();
                 planet.edit_biome(coords, biome);
