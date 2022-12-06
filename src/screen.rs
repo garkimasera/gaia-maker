@@ -2,6 +2,7 @@ use crate::action::CursorAction;
 use crate::assets::{UiTexture, UiTextures};
 use crate::draw::UpdateMap;
 use crate::planet::*;
+use crate::ui::UiConf;
 use crate::GameState;
 use bevy::window::WindowResized;
 use bevy::{
@@ -47,7 +48,8 @@ impl Plugin for ScreenPlugin {
                     .with_system(centering.before("draw"))
                     .with_system(on_resize.before("draw"))
                     .with_system(update_hover_tile.label("update_hover_tile"))
-                    .with_system(mouse_event.after("update_hover_tile")),
+                    .with_system(mouse_event.after("update_hover_tile"))
+                    .with_system(keyboard_input),
             );
     }
 }
@@ -362,5 +364,42 @@ fn on_resize(
         ) / 2.0;
         translation += d;
         ew_centering.send(Centering(translation));
+    }
+}
+
+fn keyboard_input(
+    keys: Res<Input<KeyCode>>,
+    mut ew_centering: EventWriter<Centering>,
+    camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+    screen: Res<OccupiedScreenSpace>,
+    egui_settings: ResMut<bevy_egui::EguiSettings>,
+    conf: Res<UiConf>,
+) {
+    let direction = match (
+        keys.pressed(KeyCode::W),
+        keys.pressed(KeyCode::A),
+        keys.pressed(KeyCode::S),
+        keys.pressed(KeyCode::D),
+    ) {
+        (true, false, false, false) => Some((0.0, 1.0)),
+        (true, true, false, false) => Some((-1.0, 1.0)),
+        (false, true, false, false) => Some((-1.0, 0.0)),
+        (false, true, true, false) => Some((-1.0, -1.0)),
+        (false, false, true, false) => Some((0.0, -1.0)),
+        (false, false, true, true) => Some((1.0, -1.0)),
+        (false, false, false, true) => Some((1.0, 0.0)),
+        (true, false, false, true) => Some((1.0, 1.0)),
+        _ => None,
+    };
+
+    if let Some((dx, dy)) = direction {
+        let camera_pos = camera_query.get_single().unwrap().1.translation.xy();
+
+        let space_adjust = Vec2::new(
+            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor as f32,
+            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor as f32,
+        ) / 2.0;
+        let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
+        ew_centering.send(Centering(new_center));
     }
 }

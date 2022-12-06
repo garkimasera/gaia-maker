@@ -49,6 +49,7 @@ pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,
     pub max_message: usize,
+    pub camera_move_speed: f32,
 }
 
 impl Default for UiConf {
@@ -57,6 +58,7 @@ impl Default for UiConf {
             scale_factor: 1.0,
             font_scale: 1.4,
             max_message: 20,
+            camera_move_speed: 48.0,
         }
     }
 }
