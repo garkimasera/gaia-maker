@@ -78,7 +78,7 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
         for gas_kind in GasKind::iter() {
             ui.label(t!(gas_kind.as_ref()));
             ui.label(&format!(
-                "{:.1}%",
+                "{:.2}%",
                 planet.atmo.mass[&gas_kind] / total_mass * 100.0
             ));
             ui.end_row();

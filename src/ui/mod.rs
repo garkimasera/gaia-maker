@@ -256,6 +256,15 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
         ui.label(format!("{}: [{}, {}]", t!("coordinates"), p.0, p.1));
         let tile = &planet.map[p];
 
+        let (longitude, latitude) = planet.calc_longitude_latitude(p);
+        ui.label(format!(
+            "{}: {:.0}°, {}: {:.0}°",
+            t!("longitude"),
+            longitude * 180.0 * std::f32::consts::FRAC_1_PI,
+            t!("latitude"),
+            latitude * 180.0 * std::f32::consts::FRAC_1_PI,
+        ));
+
         ui.label(format!(
             "{}: {:.1} °C",
             t!("air-temprature"),

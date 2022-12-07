@@ -10,6 +10,7 @@ pub use self::resources::*;
 use fnv::{FnvHashMap, FnvHashSet};
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
+use std::f32::consts::PI;
 use strum::IntoEnumIterator;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -96,5 +97,17 @@ impl Planet {
             .insert(StructureKind::FertilizationPlant);
 
         planet
+    }
+
+    pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {
+        let coords = coords.into();
+        let (nx, ny) = self.map.size();
+
+        let x = (2.0 * coords.0 as f32 + 1.0) / (2.0 * nx as f32); // 0.0 ~ 1.0
+        let y = ((2.0 * coords.1 as f32 + 1.0) / (2.0 * ny as f32)) * 2.0 - 1.0; // -1.0 ~ 1.0
+
+        let longtitude = x * 2.0 * PI; // 0.0 ~ 2pi
+        let latitude = y.asin(); // -pi/2 ~ pi/2
+        (longtitude, latitude)
     }
 }
