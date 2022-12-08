@@ -16,7 +16,7 @@ use std::collections::{HashMap, VecDeque};
 use strum::IntoEnumIterator;
 
 use crate::{
-    assets::{UiFonts, UiTexture, UiTextures},
+    assets::{UiAssets, UiConf, UiTexture, UiTextures},
     gz::GunzipBin,
     msg::MsgKind,
     overlay::OverlayLayerKind,
@@ -44,14 +44,6 @@ pub struct WindowsOpenState {
     edit_map: bool,
 }
 
-#[derive(Clone, Debug, Resource)]
-pub struct UiConf {
-    pub scale_factor: f32,
-    pub font_scale: f32,
-    pub max_message: usize,
-    pub camera_move_speed: f32,
-}
-
 impl Default for UiConf {
     fn default() -> Self {
         Self {
@@ -74,7 +66,6 @@ impl Plugin for UiPlugin {
                 message: true,
                 ..default()
             })
-            .init_resource::<UiConf>()
             .init_resource::<OverlayLayerKind>()
             .add_system_set(
                 SystemSet::on_exit(GameState::AssetLoading)
@@ -100,13 +91,14 @@ impl Plugin for UiPlugin {
 fn setup_fonts(
     mut egui_ctx: ResMut<EguiContext>,
     mut egui_settings: ResMut<EguiSettings>,
-    conf: Res<UiConf>,
-    fonts: Res<UiFonts>,
+    conf: Res<Assets<UiConf>>,
+    ui_assets: Res<UiAssets>,
     gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
+    let conf = conf.get(&ui_assets.default_conf).unwrap().clone();
     egui_settings.scale_factor = conf.scale_factor.into();
 
-    let font_data = gunzip_bin.get(&fonts.font).unwrap().clone();
+    let font_data = gunzip_bin.get(&ui_assets.font).unwrap().clone();
     let mut fonts = FontDefinitions::default();
     let mut font_data = FontData::from_owned(font_data.0);
     font_data.tweak.scale = conf.font_scale;

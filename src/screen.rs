@@ -1,8 +1,7 @@
 use crate::action::CursorAction;
-use crate::assets::{UiTexture, UiTextures};
+use crate::assets::{UiConf, UiTexture, UiTextures};
 use crate::draw::UpdateMap;
 use crate::planet::*;
-use crate::ui::UiConf;
 use crate::GameState;
 use bevy::window::WindowResized;
 use bevy::{
