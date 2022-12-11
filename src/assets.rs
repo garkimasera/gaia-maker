@@ -25,7 +25,7 @@ impl Plugin for AssetsPlugin {
             ]))
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
-                    .continue_to_state(GameState::Running)
+                    .continue_to_state(GameState::MainMenu)
                     .with_collection::<UiTextures>()
                     .with_collection::<UiAssets>()
                     .with_collection::<ParamsAssetCollection>()

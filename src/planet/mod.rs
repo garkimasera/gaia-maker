@@ -7,6 +7,7 @@ mod sim;
 pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
+pub use self::sim::Sim;
 use fnv::{FnvHashMap, FnvHashSet};
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};

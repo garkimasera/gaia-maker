@@ -70,6 +70,7 @@ fn main() {
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
     AssetLoading,
+    MainMenu,
     Running,
 }
 

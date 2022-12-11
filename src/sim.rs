@@ -17,6 +17,7 @@ pub enum ManagePlanet {
 
 impl Resource for Planet {}
 impl Resource for Params {}
+impl Resource for Sim {}
 
 impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
@@ -31,11 +32,7 @@ impl Plugin for SimPlugin {
                     .with_run_criteria(FixedTimestep::step(2.0))
                     .with_system(update),
             )
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .with_system(manage_planet)
-                    .before("draw"),
-            );
+            .add_system(manage_planet.before("draw"));
     }
 }
 
@@ -49,43 +46,68 @@ fn start_sim(mut commands: Commands, mut update_map: ResMut<UpdateMap>, params: 
     update_map.update();
 }
 
-fn update(mut planet: ResMut<Planet>, params: Res<Params>, mut update_map: ResMut<UpdateMap>) {
+fn update(
+    planet: Option<ResMut<Planet>>,
+    update_map: Option<ResMut<UpdateMap>>,
+    sim: Option<ResMut<Sim>>,
+    params: Res<Params>,
+) {
+    // Workaround for state and with_run_criteria not working
+    let (Some(mut planet), Some(mut update_map), Some(mut sim)) = (planet, update_map, sim) else {
+        return;
+    };
     update_map.update();
-    planet.advance(&params);
+    planet.advance(&mut sim, &params);
 }
 
 fn manage_planet(
+    mut command: Commands,
     mut er_manage_planet: EventReader<ManagePlanet>,
-    mut planet: ResMut<Planet>,
+    mut game_state: ResMut<State<GameState>>,
     mut ew_centering: EventWriter<Centering>,
-    params: Res<Params>,
+    mut planet: Option<ResMut<Planet>>,
+    params: Option<Res<Params>>,
 ) {
+    let Some(params) = params else {
+        return;
+    };
+
     for e in er_manage_planet.iter() {
-        match e {
+        let new_planet = match e {
             ManagePlanet::New(w, h) => {
-                *planet = Planet::new(*w, *h, &params.start);
-                ew_centering.send(Centering(Vec2::new(
-                    *w as f32 * TILE_SIZE / 2.0,
-                    *h as f32 * TILE_SIZE / 2.0,
-                )));
+                let planet = Planet::new(*w, *h, &params.start);
+                Some(planet)
             }
             ManagePlanet::Save(path) => {
-                if let Err(e) = crate::saveload::save_to(path, &planet) {
+                if let Err(e) = crate::saveload::save_to(path, planet.as_ref().unwrap()) {
                     log::warn!("cannot save: {:?}", e);
                 }
+                None
             }
             ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
-                Ok(new_planet) => {
-                    *planet = new_planet;
-                    ew_centering.send(Centering(Vec2::new(
-                        planet.map.size().0 as f32 * TILE_SIZE / 2.0,
-                        planet.map.size().1 as f32 * TILE_SIZE / 2.0,
-                    )));
-                }
+                Ok(planet) => Some(planet),
                 Err(e) => {
                     log::warn!("cannot load: {:?}", e);
+                    None
                 }
             },
+        };
+
+        if let Some(new_planet) = new_planet {
+            ew_centering.send(Centering(Vec2::new(
+                new_planet.map.size().0 as f32 * TILE_SIZE / 2.0,
+                new_planet.map.size().1 as f32 * TILE_SIZE / 2.0,
+            )));
+
+            let sim = Sim::new(&new_planet);
+            command.insert_resource(sim);
+            if let Some(planet) = &mut planet {
+                **planet = new_planet;
+            } else {
+                command.insert_resource(new_planet);
+            }
+
+            let _ = game_state.set(GameState::Running);
         }
     }
 }

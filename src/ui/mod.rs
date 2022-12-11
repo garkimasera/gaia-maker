@@ -1,3 +1,4 @@
+mod main_menu;
 mod orbit;
 mod star_system;
 mod stat;
@@ -44,17 +45,6 @@ pub struct WindowsOpenState {
     edit_map: bool,
 }
 
-impl Default for UiConf {
-    fn default() -> Self {
-        Self {
-            scale_factor: 1.0,
-            font_scale: 1.4,
-            max_message: 20,
-            camera_move_speed: 48.0,
-        }
-    }
-}
-
 #[derive(Clone, Default, Resource)]
 pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
 
@@ -71,6 +61,9 @@ impl Plugin for UiPlugin {
                 SystemSet::on_exit(GameState::AssetLoading)
                     .with_system(setup_fonts)
                     .with_system(load_textures),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::MainMenu).with_system(main_menu::main_menu),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)

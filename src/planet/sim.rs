@@ -1,8 +1,10 @@
 use super::*;
+use std::f32::consts::PI;
 
 impl Planet {
-    pub fn advance(&mut self, params: &Params) {
+    pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
         self.days += 1;
+        sim.update(self);
 
         let c = CheckUpkeepProduces::new(self, params);
         self.res.stock = c.stock;
@@ -12,6 +14,32 @@ impl Planet {
 
         atmo::sim_atmosphere(self, params);
     }
+}
+
+/// Holds data for simulation
+pub struct Sim {
+    /// The number of tiles
+    pub n_tile: u32,
+    /// Tile area [m^2]
+    pub tile_area: f32,
+    /// Atmosphere temprature
+    pub atemp: Array2d<f32>,
+}
+
+impl Sim {
+    pub fn new(planet: &Planet) -> Self {
+        let size = planet.map.size();
+        let tile_area = 4.0 * PI * planet.basics.radius * planet.basics.radius;
+
+        Sim {
+            n_tile: size.0 * size.1,
+            tile_area,
+            atemp: Array2d::new(size.0, size.1, 0.0),
+        }
+    }
+
+    /// Update values before advance simulation
+    pub fn update(&mut self, _planet: &Planet) {}
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
