@@ -1,0 +1,57 @@
+name: Pages
+
+on:
+  push:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: wasm-bindgen-cli
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target wasm32-unknown-unknown
+      - run: |
+          wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/pixel-gaia.wasm
+          mv index.html ./out/
+          mv assets ./out/
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./out
+
+  deploy:
+    name: Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
