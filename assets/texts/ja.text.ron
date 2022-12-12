@@ -36,7 +36,6 @@
     "energy": "エネルギー",
     "material": "素材",
     "nitrogen": "窒素",
-    "helium": "ヘリウム",
 
     // Structures
     "oxygen-generator": "酸素発生機",
@@ -49,7 +48,6 @@
     // Star System Buildings
     "asteroid-mining-station": "小惑星採掘ステーション",
     "dyson-swarm-unit": "ダイソンスウォームユニット",
-    "helium-collector": "ヘリウム収集装置",
     "ammonia-extractor": "アンモニア抽出ステーション",
     
     // Messages

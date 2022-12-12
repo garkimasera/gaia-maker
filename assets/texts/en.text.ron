@@ -36,7 +36,6 @@
     "energy": "Energy",
     "material": "Material",
     "nitrogen": "Nitrogen",
-    "helium": "Helium",
 
     // Structures
     "oxygen-generator": "Oxygen Generator",
@@ -49,7 +48,6 @@
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
     "dyson-swarm-unit": "Dyson Swarm Unit",
-    "helium-collector": "Helium Collector",
     "ammonia-extractor": "Ammonia Extractor",
     
     // Messages

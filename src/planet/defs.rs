@@ -37,7 +37,6 @@ pub enum ResourceKind {
     Energy,
     Material,
     Nitrogen,
-    Helium,
 }
 
 pub type ResourceMap = fnv::FnvHashMap<ResourceKind, f32>;
@@ -221,7 +220,6 @@ pub enum OrbitalBuildingKind {
 pub enum StarSystemBuildingKind {
     AsteroidMiningStation,
     DysonSwarmUnit,
-    HeliumCollector,
     AmmoniaExtractor,
 }
 
