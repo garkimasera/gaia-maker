@@ -1,6 +1,8 @@
 mod action;
 mod atmo;
+mod buildings;
 mod defs;
+mod heat_transfer;
 mod resources;
 mod sim;
 
@@ -98,6 +100,16 @@ impl Planet {
             .insert(StructureKind::FertilizationPlant);
 
         planet
+    }
+
+    pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
+        self.days += 1;
+        sim.update(self);
+
+        self::buildings::advance(self, params);
+        self::heat_transfer::advance(self, sim, params);
+
+        atmo::sim_atmosphere(self, params);
     }
 
     pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {
