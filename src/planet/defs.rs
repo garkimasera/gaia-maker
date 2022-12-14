@@ -254,4 +254,9 @@ pub struct StartParams {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SimParams {
     pub total_mass_per_atm: f32,
+    pub secs_per_day: f32,
+    /// Heat capacity of air [J/(kg*K)]
+    pub air_heat_cap: f32,
+    /// The number of loop of atmosphere heat transfer calculation
+    pub n_loop_atmo_heat_calc: usize,
 }

@@ -3,7 +3,7 @@
         basics: (
             radius: 6300000,
             density: 5500,
-            solar_constant: 1000,
+            solar_constant: 2000,
         ),
         default_size: (128, 64),
         resources: {
@@ -24,6 +24,9 @@
     ),
     sim: (
         total_mass_per_atm: 5.0e+9,
+        secs_per_day: 86400,
+        air_heat_cap: 1000.0,
+        n_loop_atmo_heat_calc: 15,
     ),
     orbital_buildings: {
         fusion_reactor: (

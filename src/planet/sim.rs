@@ -9,6 +9,10 @@ pub struct Sim {
     pub tile_area: f32,
     /// Atmosphere temprature
     pub atemp: Array2d<f32>,
+    /// Atmosphere temprature (used for calculation)
+    pub atemp_new: Array2d<f32>,
+    /// Atmosphere heat capacity [J/K]
+    pub atmo_heat_cap: Array2d<f32>,
 }
 
 impl Sim {
@@ -21,6 +25,8 @@ impl Sim {
             n_tile: size.0 * size.1,
             tile_area,
             atemp: Array2d::new(size.0, size.1, 0.0),
+            atemp_new: Array2d::new(size.0, size.1, 0.0),
+            atmo_heat_cap: Array2d::new(size.0, size.1, 0.0),
         }
     }
 
