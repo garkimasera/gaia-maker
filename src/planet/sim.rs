@@ -13,6 +13,8 @@ pub struct Sim {
     pub atemp_new: Array2d<f32>,
     /// Atmosphere heat capacity [J/K]
     pub atmo_heat_cap: Array2d<f32>,
+    /// Tile albedo
+    pub albedo: Array2d<f32>,
 }
 
 impl Sim {
@@ -27,9 +29,7 @@ impl Sim {
             atemp: Array2d::new(size.0, size.1, 0.0),
             atemp_new: Array2d::new(size.0, size.1, 0.0),
             atmo_heat_cap: Array2d::new(size.0, size.1, 0.0),
+            albedo: Array2d::new(size.0, size.1, 0.0),
         }
     }
-
-    /// Update values before advance simulation
-    pub fn update(&mut self, _planet: &Planet) {}
 }

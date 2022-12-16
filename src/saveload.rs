@@ -30,7 +30,7 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
         .ok_or_else(|| anyhow!("cannot get data directory"))?;
     let save_dir_path = data_dir.join("save");
     std::fs::create_dir_all(&save_dir_path)?;
-    std::fs::write(&save_dir_path.join(file_name), data)?;
+    std::fs::write(save_dir_path.join(file_name), data)?;
     Ok(())
 }
 
@@ -40,7 +40,7 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
         .as_ref()
         .ok_or_else(|| anyhow!("cannot get data directory"))?;
     let save_dir_path = data_dir.join("save");
-    Ok(std::fs::read(&save_dir_path.join(file_name))?)
+    Ok(std::fs::read(save_dir_path.join(file_name))?)
 }
 
 #[cfg(target_arch = "wasm32")]

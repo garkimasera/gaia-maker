@@ -232,8 +232,8 @@ fn spawn_overlay_meshes(
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
-        let x = p_screen.0 as f32 * TILE_SIZE + TILE_SIZE as f32 / 2.0;
-        let y = p_screen.1 as f32 * TILE_SIZE + TILE_SIZE as f32 / 2.0;
+        let x = p_screen.0 as f32 * TILE_SIZE + TILE_SIZE / 2.0;
+        let y = p_screen.1 as f32 * TILE_SIZE + TILE_SIZE / 2.0;
 
         let id = commands
             .spawn(MaterialMesh2dBundle {

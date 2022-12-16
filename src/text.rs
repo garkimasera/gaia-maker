@@ -52,7 +52,7 @@ struct TextLoading(Vec<HandleUntyped>);
 fn load_text(asset_server: Res<AssetServer>, mut text_loading: ResMut<TextLoading>) {
     text_loading
         .0
-        .push(asset_server.load_untyped(&format!("texts/{}.text.ron", lang_code())));
+        .push(asset_server.load_untyped(format!("texts/{}.text.ron", lang_code())));
 }
 
 fn update_text(
