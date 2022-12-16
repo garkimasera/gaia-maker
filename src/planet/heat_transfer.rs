@@ -10,7 +10,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Calculate heat capacity of tiles
     for p in map_iter_idx {
-        sim.atmo_heat_cap[p] = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9;
+        sim.atmo_heat_cap[p] = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9
+            + params.sim.surface_heat_cap * sim.tile_area;
     }
 
     // Set temprature for simulation
@@ -24,7 +25,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let old_heat_amount = sim.atmo_heat_cap[p] * sim.atemp[p];
 
             let solar_power =
-                planet.basics.solar_constant * planet.calc_longitude_latitude(p).1.cos();
+                planet.basics.solar_constant * planet.calc_longitude_latitude(p).1.cos() * 0.5;
             let inflow = solar_power * sim.tile_area;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT * sim.atemp[p].powi(4) * sim.tile_area;

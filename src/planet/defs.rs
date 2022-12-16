@@ -257,6 +257,8 @@ pub struct SimParams {
     pub secs_per_day: f32,
     /// Heat capacity of air [J/(kg*K)]
     pub air_heat_cap: f32,
+    /// Heat capacity of planet surface [J/(kg*m^3)]
+    pub surface_heat_cap: f32,
     /// The number of loop of atmosphere heat transfer calculation
     pub n_loop_atmo_heat_calc: usize,
 }
