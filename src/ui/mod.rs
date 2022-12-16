@@ -147,7 +147,7 @@ fn load_textures(
                 .collect(),
         };
         let texture_handle =
-            ctx.load_texture(k.as_ref(), color_image, egui::TextureFilter::Nearest);
+            ctx.load_texture(k.as_ref(), color_image, egui::TextureOptions::NEAREST);
 
         egui_textures.insert(*k, (texture_handle, size));
     }

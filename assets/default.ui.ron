@@ -1,6 +1,6 @@
 (
     scale_factor: 1.0,
-    font_scale: 1.4,
+    font_scale: 1.2,
     max_message: 20,
     camera_move_speed: 48.0,
 )

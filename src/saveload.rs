@@ -55,7 +55,10 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 
     let mut s = String::new();
     {
-        let base64_encoder = base64::write::EncoderStringWriter::from(&mut s, base64::STANDARD);
+        let base64_encoder = base64::write::EncoderStringWriter::from_consumer(
+            &mut s,
+            &base64::engine::DEFAULT_ENGINE,
+        );
         let mut encoder =
             flate2::write::GzEncoder::new(base64_encoder, flate2::Compression::best());
         encoder.write_all(data)?;
@@ -83,7 +86,7 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;
     let mut s = Cursor::new(s);
-    let base64_decoder = base64::read::DecoderReader::new(&mut s, base64::STANDARD);
+    let base64_decoder = base64::read::DecoderReader::from(&mut s, &base64::engine::DEFAULT_ENGINE);
     let mut decoder = flate2::read::GzDecoder::new(base64_decoder);
 
     let mut data = Vec::new();
