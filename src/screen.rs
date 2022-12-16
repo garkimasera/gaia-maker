@@ -375,10 +375,10 @@ fn keyboard_input(
     conf: Res<UiConf>,
 ) {
     let direction = match (
-        keys.pressed(KeyCode::W),
-        keys.pressed(KeyCode::A),
-        keys.pressed(KeyCode::S),
-        keys.pressed(KeyCode::D),
+        keys.pressed(KeyCode::Up) || keys.pressed(KeyCode::W),
+        keys.pressed(KeyCode::Left) || keys.pressed(KeyCode::A),
+        keys.pressed(KeyCode::Down) || keys.pressed(KeyCode::S),
+        keys.pressed(KeyCode::Right) || keys.pressed(KeyCode::D),
     ) {
         (true, false, false, false) => Some((0.0, 1.0)),
         (true, true, false, false) => Some((-1.0, 1.0)),
