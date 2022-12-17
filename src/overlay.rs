@@ -55,14 +55,14 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                     red: 1.0,
                     green: 1.0,
                     blue: 1.0 - (i as f32 / (N_POINTS / 2) as f32),
-                    alpha: 0.3,
+                    alpha: 0.4,
                 }
             } else {
                 Color::Rgba {
                     red: 1.0,
                     green: 1.0 - ((i - N_POINTS / 2) as f32 / (N_POINTS / 2) as f32),
                     blue: 0.0,
-                    alpha: 0.3,
+                    alpha: 0.4,
                 }
             };
 

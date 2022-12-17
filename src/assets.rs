@@ -161,7 +161,7 @@ fn create_assets_list(
         .map(|biome| {
             let image = biome_textures.get(biome);
             let texture_atlas =
-                TextureAtlas::from_grid(image, Vec2::new(PIECE_SIZE, PIECE_SIZE), 6, 4, None, None);
+                TextureAtlas::from_grid(image, Vec2::new(PIECE_SIZE, PIECE_SIZE), 6, 8, None, None);
             (biome, texture_atlas_assets.add(texture_atlas))
         })
         .collect();

@@ -18,6 +18,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     assets::{UiAssets, UiConf, UiTexture, UiTextures},
+    draw::UpdateMap,
     gz::GunzipBin,
     msg::MsgKind,
     overlay::OverlayLayerKind,
@@ -461,19 +462,20 @@ fn layers_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
+    mut update_map: ResMut<UpdateMap>,
     conf: Res<UiConf>,
-    _planet: Res<Planet>,
 ) {
     if !wos.layers {
         return;
     }
+    let mut new_layer = *current_layer;
 
     let rect = egui::Window::new(t!("layers"))
         .open(&mut wos.layers)
         .vscroll(true)
         .show(egui_ctx.ctx_mut(), |ui| {
             for kind in OverlayLayerKind::iter() {
-                ui.radio_value(&mut *current_layer, kind, t!(kind.as_ref()));
+                ui.radio_value(&mut new_layer, kind, t!(kind.as_ref()));
             }
         })
         .unwrap()
@@ -482,6 +484,11 @@ fn layers_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+
+    if new_layer != *current_layer {
+        *current_layer = new_layer;
+        update_map.update();
+    }
 }
 
 fn msg_window(

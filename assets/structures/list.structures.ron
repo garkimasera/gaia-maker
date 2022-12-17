@@ -3,7 +3,7 @@
         width: 48,
         height: 48,
         columns: 1,
-        rows: 1,
+        rows: 2,
         building: (
             cost: { material: 200 },
             upkeep: { energy: 10.0 },
@@ -13,7 +13,7 @@
         width: 48,
         height: 48,
         columns: 1,
-        rows: 1,
+        rows: 2,
         building: (
             cost: { material: 100 },
             upkeep: { energy: 2.0 },

@@ -91,6 +91,7 @@ fn spawn_map_textures(
     params: Res<Params>,
     texture_atlas_maps: Res<TextureAtlasMaps>,
     in_screen_tile_range: Res<InScreenTileRange>,
+    current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
     if !update_map.need_update {
@@ -102,6 +103,8 @@ fn spawn_map_textures(
         commands.entity(*entity).despawn();
     }
     tex_entities.clear();
+
+    let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
     // Spawn biome textures
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
@@ -121,7 +124,8 @@ fn spawn_map_textures(
                 );
 
                 let grid_x = (corner_index % 3) * 2 + corner_piece_grid.0;
-                let grid_y = (corner_index / 3) * 2 + corner_piece_grid.1;
+                let grid_y =
+                    (corner_index / 3) * 2 + corner_piece_grid.1 + if monochrome { 4 } else { 0 };
 
                 let index = grid_x + grid_y * 6;
 
@@ -157,6 +161,7 @@ fn spawn_structure_textures(
     texture_atlas_maps: Res<TextureAtlasMaps>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
+    current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
     if !update_map.need_update {
@@ -167,6 +172,8 @@ fn spawn_structure_textures(
     }
     tex_entities.clear();
 
+    let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
+
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
         let structure = &planet.map[p].structure;
@@ -174,10 +181,8 @@ fn spawn_structure_textures(
         if !matches!(structure, Structure::None | Structure::Occupied { .. }) {
             let kind: StructureKind = structure.into();
             let attrs = &params.structures[&kind];
-            let sprite = TextureAtlasSprite {
-                index: 0,
-                ..default()
-            };
+            let index = if monochrome { attrs.columns } else { 0 };
+            let sprite = TextureAtlasSprite { index, ..default() };
             let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
             let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
             let id = commands
