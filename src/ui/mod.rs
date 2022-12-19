@@ -1,3 +1,4 @@
+mod edit_planet;
 mod main_menu;
 mod orbit;
 mod star_system;
@@ -31,19 +32,19 @@ use crate::{
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin {
-    pub edit_map: bool,
+    pub edit_planet: bool,
 }
 
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
-    build: bool,
-    orbit: bool,
-    star_system: bool,
-    layers: bool,
-    stat: bool,
-    message: bool,
-    game_menu: bool,
-    edit_map: bool,
+    pub build: bool,
+    pub orbit: bool,
+    pub star_system: bool,
+    pub layers: bool,
+    pub stat: bool,
+    pub message: bool,
+    pub game_menu: bool,
+    pub edit_planet: bool,
 }
 
 #[derive(Clone, Default, Resource)]
@@ -53,7 +54,7 @@ impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(EguiPlugin)
             .insert_resource(WindowsOpenState {
-                edit_map: self.edit_map,
+                edit_planet: self.edit_planet,
                 message: true,
                 ..default()
             })
@@ -76,7 +77,7 @@ impl Plugin for UiPlugin {
                     .with_system(stat::stat_window.label("ui_windows"))
                     .with_system(msg_window.label("ui_windows"))
                     .with_system(game_menu_window.label("ui_windows"))
-                    .with_system(edit_map_window.label("ui_windows")),
+                    .with_system(edit_planet::edit_planet_window.label("ui_windows")),
             )
             .add_system(exit_on_esc_system);
     }
@@ -577,54 +578,6 @@ fn game_menu_window(
     if close {
         wos.game_menu = false;
     }
-}
-
-fn edit_map_window(
-    mut egui_ctx: ResMut<EguiContext>,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut cursor_mode: ResMut<CursorMode>,
-    wos: Res<WindowsOpenState>,
-    conf: Res<UiConf>,
-    mut ew_manage_planet: EventWriter<ManagePlanet>,
-    (mut new_w, mut new_h): (Local<u32>, Local<u32>),
-    mut biome: Local<Biome>,
-) {
-    if !wos.edit_map {
-        return;
-    }
-
-    let rect = egui::Window::new("Map editing tools")
-        .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
-            ui.add(egui::Slider::new(&mut *new_w, 2..=100).text("width"));
-            ui.horizontal(|ui| {
-                ui.add(egui::Slider::new(&mut *new_h, 2..=100).text("height"));
-                if ui.button("New").clicked() {
-                    ew_manage_planet.send(ManagePlanet::New(*new_w, *new_h));
-                }
-            });
-
-            ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source(Biome::Ocean)
-                    .selected_text(AsRef::<str>::as_ref(&*biome))
-                    .show_ui(ui, |ui| {
-                        for b in Biome::iter() {
-                            ui.selectable_value(&mut *biome, b, AsRef::<str>::as_ref(&b));
-                        }
-                    });
-                if ui.button("Edit biome").clicked()
-                    || matches!(*cursor_mode, CursorMode::EditBiome(_))
-                {
-                    *cursor_mode = CursorMode::EditBiome(*biome);
-                }
-            });
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
 }
 
 fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {

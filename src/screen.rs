@@ -2,6 +2,7 @@ use crate::action::CursorAction;
 use crate::assets::{UiConf, UiTexture, UiTextures};
 use crate::draw::UpdateMap;
 use crate::planet::*;
+use crate::ui::WindowsOpenState;
 use crate::GameState;
 use bevy::window::WindowResized;
 use bevy::{
@@ -369,11 +370,19 @@ fn on_resize(
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
     mut ew_centering: EventWriter<Centering>,
+    mut wos: ResMut<WindowsOpenState>,
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     screen: Res<OccupiedScreenSpace>,
     egui_settings: ResMut<bevy_egui::EguiSettings>,
     conf: Res<UiConf>,
 ) {
+    // Shortcut keys
+    if keys.just_pressed(KeyCode::E) && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
+    {
+        wos.edit_planet = true;
+    }
+
+    // Keys for moving camera
     let direction = match (
         keys.pressed(KeyCode::Up) || keys.pressed(KeyCode::W),
         keys.pressed(KeyCode::Left) || keys.pressed(KeyCode::A),

@@ -32,9 +32,9 @@ const APP_NAME: &str = concat!("Pixel Gaia v", env!("CARGO_PKG_VERSION"));
 #[derive(Clone, Parser, Debug)]
 #[clap(author, version)]
 struct Args {
-    /// Open map editing tools
+    /// Open planet editing tools
     #[clap(long)]
-    edit_map: bool,
+    edit_planet: bool,
 }
 
 fn main() {
@@ -56,7 +56,7 @@ fn main() {
         .add_plugin(overlay::OverlayPlugin)
         .add_plugin(screen::ScreenPlugin)
         .add_plugin(ui::UiPlugin {
-            edit_map: args.edit_map,
+            edit_planet: args.edit_planet,
         })
         .add_plugin(audio::GameAudioPlugin)
         .add_plugin(draw::DrawPlugin)
