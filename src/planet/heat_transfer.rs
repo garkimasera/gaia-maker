@@ -16,7 +16,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Calculate albedo of tiles
     for p in map_iter_idx {
-        sim.albedo[p] = 0.5;
+        sim.albedo[p] = 0.3;
     }
 
     // Set temprature for simulation
@@ -31,7 +31,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             let solar_power = planet.basics.solar_constant
                 * planet.calc_longitude_latitude(p).1.cos()
-                * (1.0 - sim.albedo[p]);
+                * (1.0 - sim.albedo[p])
+                * params.sim.sunlight_day_averaging_factor;
             let inflow = solar_power * sim.tile_area;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT * sim.atemp[p].powi(4) * sim.tile_area;
