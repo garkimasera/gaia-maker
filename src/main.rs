@@ -59,7 +59,6 @@ fn main() {
             edit_map: args.edit_map,
         })
         .add_plugin(audio::GameAudioPlugin)
-        .add_plugin(InspectorPlugin)
         .add_plugin(draw::DrawPlugin)
         .add_plugin(action::ActionPlugin)
         .add_plugin(sim::SimPlugin)
@@ -72,19 +71,4 @@ enum GameState {
     AssetLoading,
     MainMenu,
     Running,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct InspectorPlugin;
-
-#[cfg(feature = "inspector")]
-impl Plugin for InspectorPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
-    }
-}
-
-#[cfg(not(feature = "inspector"))]
-impl Plugin for InspectorPlugin {
-    fn build(&self, _app: &mut App) {}
 }

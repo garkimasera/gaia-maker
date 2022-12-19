@@ -4,9 +4,6 @@ version = "0.1.0"
 edition = "2021"
 authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
 
-[features]
-inspector = ["bevy-inspector-egui"]
-
 [dependencies]
 anyhow = "1"
 arrayvec = "0.7"
@@ -15,7 +12,6 @@ bevy = { version = "0.9", default-features = false, features = ["bevy_asset", "b
 bevy_asset_loader = "0.14"
 bevy_common_assets = { version = "0.4", features = ["ron"] }
 bevy_egui = "0.18"
-bevy-inspector-egui = { version = "0.14", optional = true }
 bevy_kira_audio = "0.13"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
