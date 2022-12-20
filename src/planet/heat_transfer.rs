@@ -7,11 +7,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let size = planet.map.size();
     let map_iter_idx = planet.map.iter_idx();
     let atmo_mass_per_tile = planet.atmo.total_mass() / (size.0 as f32 * size.1 as f32);
+    let air_heat_cap_per_tile = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9;
 
     // Calculate heat capacity of tiles
     for p in map_iter_idx {
-        sim.atmo_heat_cap[p] = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9
-            + params.sim.surface_heat_cap * sim.tile_area;
+        sim.atmo_heat_cap[p] = air_heat_cap_per_tile + params.sim.surface_heat_cap * sim.tile_area;
     }
 
     // Calculate albedo of tiles
@@ -23,6 +23,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in map_iter_idx {
         sim.atemp[p] = planet.map[p].temp;
     }
+
+    let secs_per_loop = params.sim.secs_per_day / params.sim.n_loop_atmo_heat_calc as f32;
 
     // Calculate new atmosphere temprature of tiles
     for _ in 0..params.sim.n_loop_atmo_heat_calc {
@@ -37,7 +39,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT * sim.atemp[p].powi(4) * sim.tile_area;
 
-            let heat_amount = old_heat_amount + (inflow - outflow) * params.sim.secs_per_day;
+            let heat_amount = old_heat_amount + (inflow - outflow) * secs_per_loop;
             sim.atemp_new[p] = heat_amount / sim.atmo_heat_cap[p];
         }
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);
