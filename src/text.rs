@@ -1,14 +1,32 @@
-use bevy::asset::LoadState;
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy_common_assets::ron::RonAssetPlugin;
+use crossbeam::atomic::AtomicCell;
 use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::RwLock;
+use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 
-use crate::planet::ResourceKind;
+use crate::{assets::TranslationTexts, planet::ResourceKind, GameState};
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
+pub enum Lang {
+    #[strum(serialize = "en")]
+    English,
+    #[strum(serialize = "ja")]
+    Japanese,
+}
+
+impl Lang {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Lang::English => "English",
+            Lang::Japanese => "日本語",
+        }
+    }
+}
 
 macro_rules! t {
     ($s:expr) => {
@@ -25,9 +43,17 @@ macro_rules! t {
     }};
 }
 
-static TRANSLATION_TEXTS: Lazy<RwLock<HashMap<String, TranslationText>>> =
+static LANG: AtomicCell<Lang> = AtomicCell::new(Lang::English);
+static TRANSLATION_TEXTS: Lazy<RwLock<HashMap<Lang, TranslationText>>> =
     Lazy::new(|| RwLock::new(HashMap::default()));
-static LANG_CODE: Lazy<String> = Lazy::new(lang_code);
+
+pub fn set_lang(lang: Lang) {
+    LANG.store(lang);
+}
+
+pub fn get_lang() -> Lang {
+    LANG.load()
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct TextPlugin;
@@ -40,83 +66,29 @@ pub struct TranslationText(HashMap<String, String>);
 impl Plugin for TextPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(RonAssetPlugin::<TranslationText>::new(&["text.ron"]))
-            .init_resource::<TextLoading>()
-            .add_startup_system(load_text)
-            .add_system(update_text);
+            .add_system_set(SystemSet::on_exit(GameState::AssetLoading).with_system(set_text));
     }
 }
 
-#[derive(Default, Resource)]
-struct TextLoading(Vec<HandleUntyped>);
-
-fn load_text(asset_server: Res<AssetServer>, mut text_loading: ResMut<TextLoading>) {
-    text_loading
-        .0
-        .push(asset_server.load_untyped(format!("texts/{}.text.ron", lang_code())));
-}
-
-fn update_text(
-    mut command: Commands,
-    asset_server: Res<AssetServer>,
-    loading: Option<Res<TextLoading>>,
-    texts: Res<Assets<TranslationText>>,
-) {
-    let loading = if let Some(loading) = loading {
-        loading
-    } else {
-        return;
-    };
-    match asset_server.get_group_load_state(loading.0.iter().map(|h| h.id)) {
-        LoadState::Failed => {
-            panic!();
-        }
-        LoadState::Loaded => (),
-        _ => {
-            return;
+fn set_text(translation_texts: Res<TranslationTexts>, texts: Res<Assets<TranslationText>>) {
+    {
+        let t = &mut TRANSLATION_TEXTS.write().unwrap();
+        for lang in Lang::iter() {
+            let Some(translation_text) = texts.get(&translation_texts.get(lang)) else {
+            continue;
+        };
+            t.insert(lang, translation_text.clone());
         }
     }
-
-    let texts = texts
-        .iter()
-        .map(|(id, text)| {
-            (
-                asset_server
-                    .get_handle_path(id)
-                    .unwrap()
-                    .path()
-                    .display()
-                    .to_string()
-                    .strip_prefix("texts/")
-                    .unwrap()
-                    .strip_suffix(".text.ron")
-                    .unwrap()
-                    .to_string(),
-                text.clone(),
-            )
-        })
-        .collect::<HashMap<String, TranslationText>>();
-
-    *TRANSLATION_TEXTS.write().unwrap() = texts;
 
     crate::msg::push_msg(
         crate::msg::MsgKind::Notice,
         t!("welcome_to"; app_name=crate::APP_NAME),
     );
-
-    command.remove_resource::<TextLoading>();
-}
-
-fn lang_code() -> String {
-    if let Ok(lang) = std::env::var("LANG") {
-        if let Some(lang) = lang.split('_').next() {
-            return lang.into();
-        }
-    }
-    "en".into()
 }
 
 pub fn get_text(s: &str, map: HashMap<String, String>) -> String {
-    if let Some(translation_text) = TRANSLATION_TEXTS.read().unwrap().get(&*LANG_CODE) {
+    if let Some(translation_text) = TRANSLATION_TEXTS.read().unwrap().get(&LANG.load()) {
         if let Some(text) = translation_text.0.get(s) {
             if map.is_empty() {
                 return text.into();

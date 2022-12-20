@@ -3,6 +3,8 @@ use bevy_egui::{egui, EguiContext};
 
 use crate::planet::Params;
 use crate::sim::ManagePlanet;
+use crate::text::Lang;
+use strum::IntoEnumIterator;
 
 pub fn main_menu(
     mut egui_ctx: ResMut<EguiContext>,
@@ -23,7 +25,30 @@ pub fn main_menu(
                 if ui.button(t!("load")).clicked() {
                     ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
                 }
+
+                ui.separator();
+
+                if let Some(lang) = language_selector(ui, crate::text::get_lang()) {
+                    crate::text::set_lang(lang);
+                }
             });
         })
         .unwrap();
+}
+
+fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
+    let mut selected = before;
+    egui::ComboBox::from_label("")
+        .selected_text(selected.name())
+        .show_ui(ui, |ui| {
+            for lang in Lang::iter() {
+                ui.selectable_value(&mut selected, lang, lang.name());
+            }
+        });
+
+    if selected != before {
+        Some(selected)
+    } else {
+        None
+    }
 }

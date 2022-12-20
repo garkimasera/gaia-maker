@@ -15,6 +15,7 @@ bevy_egui = "0.18"
 bevy_kira_audio = "0.13"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
+crossbeam = "0.8"
 dirs = "4"
 flate2 = "1"
 fnv = "1"

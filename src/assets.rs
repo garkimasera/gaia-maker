@@ -1,6 +1,7 @@
 use crate::audio::SoundEffect;
 use crate::gz::GunzipBin;
 use crate::planet::*;
+use crate::text::{Lang, TranslationText};
 use crate::GameState;
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
@@ -26,6 +27,7 @@ impl Plugin for AssetsPlugin {
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
+                    .with_collection::<TranslationTexts>()
                     .with_collection::<UiTextures>()
                     .with_collection::<UiAssets>()
                     .with_collection::<ParamsAssetCollection>()
@@ -38,6 +40,14 @@ impl Plugin for AssetsPlugin {
                     .with_system(set_resources)
                     .with_system(create_assets_list),
             );
+    }
+}
+
+define_asset_list_from_enum! {
+    #[asset(dir_path = "texts")]
+    #[asset(extension = "text.ron")]
+    pub struct TranslationTexts {
+        pub texts: HashMap<Lang, Handle<TranslationText>>,
     }
 }
 
