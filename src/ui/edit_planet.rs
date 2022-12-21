@@ -11,6 +11,7 @@ pub enum Panel {
     #[default]
     Map,
     Planet,
+    Atmosphere,
 }
 
 pub fn edit_planet_window(
@@ -23,7 +24,6 @@ pub fn edit_planet_window(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,
-    mut planet_panel: Local<PlanetPanel>,
 ) {
     if !wos.edit_planet {
         return;
@@ -42,7 +42,8 @@ pub fn edit_planet_window(
 
             match *current_panel {
                 Panel::Map => map_panel.ui(ui, &mut ew_manage_planet, &mut cursor_mode),
-                Panel::Planet => planet_panel.ui(ui, &mut planet),
+                Panel::Planet => planet_ui(ui, &mut planet),
+                Panel::Atmosphere => atmo_ui(ui, &mut planet),
             }
         })
         .unwrap()
@@ -91,14 +92,18 @@ impl MapPanel {
     }
 }
 
-#[derive(Default, Debug)]
-pub struct PlanetPanel;
+fn planet_ui(ui: &mut egui::Ui, planet: &mut Planet) {
+    ui.add(
+        egui::Slider::new(&mut planet.basics.solar_constant, 0.0..=3000.0)
+            .text(t!("solar-constant")),
+    );
+}
 
-impl PlanetPanel {
-    fn ui(&mut self, ui: &mut egui::Ui, planet: &mut Planet) {
+fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
+    for gas_kind in GasKind::iter() {
         ui.add(
-            egui::Slider::new(&mut planet.basics.solar_constant, 0.0..=3000.0)
-                .text(t!("solar-constant")),
+            egui::Slider::new(planet.atmo.mass.get_mut(&gas_kind).unwrap(), 0.0..=1.0e+11)
+                .text(t!(gas_kind.as_ref())),
         );
     }
 }
