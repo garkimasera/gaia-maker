@@ -23,6 +23,8 @@
         },
     ),
     sim: (
+        sim_normal_loop_duration_ms: 1000,
+        sim_fast_loop_duration_ms: 250,
         total_mass_per_atm: 5.0e+9,
         secs_per_day: 86400,
         air_heat_cap: 1000.0,

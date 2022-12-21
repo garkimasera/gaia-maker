@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use bevy::time::FixedTimestep;
 
 use crate::draw::UpdateMap;
 use crate::screen::Centering;
-use crate::{planet::*, GameState};
+use crate::{planet::*, GameSpeed, GameState};
 
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
@@ -27,11 +26,7 @@ impl Plugin for SimPlugin {
                     .with_system(start_sim)
                     .label("start_sim"),
             )
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .with_run_criteria(FixedTimestep::step(2.0))
-                    .with_system(update),
-            )
+            .add_system_set(SystemSet::on_update(GameState::Running).with_system(update))
             .add_system(manage_planet.before("draw"));
     }
 }
@@ -47,15 +42,38 @@ fn start_sim(mut commands: Commands, mut update_map: ResMut<UpdateMap>, params: 
 }
 
 fn update(
-    planet: Option<ResMut<Planet>>,
-    update_map: Option<ResMut<UpdateMap>>,
-    sim: Option<ResMut<Sim>>,
+    mut planet: ResMut<Planet>,
+    mut update_map: ResMut<UpdateMap>,
+    mut sim: ResMut<Sim>,
     params: Res<Params>,
+    speed: Res<GameSpeed>,
+    mut count_frame: Local<u64>,
+    mut last_update: Local<Option<u64>>,
 ) {
-    // Workaround for state and with_run_criteria not working
-    let (Some(mut planet), Some(mut update_map), Some(mut sim)) = (planet, update_map, sim) else {
-        return;
-    };
+    *count_frame += 1;
+
+    match *speed {
+        GameSpeed::Paused => {
+            return;
+        }
+        GameSpeed::Normal => {
+            if last_update.is_some()
+                && *count_frame - last_update.unwrap()
+                    < 60 * params.sim.sim_normal_loop_duration_ms / 1000
+            {
+                return;
+            }
+        }
+        GameSpeed::Fast => {
+            if last_update.is_some()
+                && *count_frame - last_update.unwrap()
+                    < 60 * params.sim.sim_fast_loop_duration_ms / 1000
+            {
+                return;
+            }
+        }
+    }
+    *last_update = Some(*count_frame);
     update_map.update();
     planet.advance(&mut sim, &params);
 }

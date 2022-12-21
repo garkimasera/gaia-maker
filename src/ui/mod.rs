@@ -27,7 +27,7 @@ use crate::{
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
     text::Unit,
-    GameState,
+    GameSpeed, GameState,
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -163,6 +163,7 @@ fn panels(
     hover_tile: Query<&HoverTile>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
+    mut speed: ResMut<GameSpeed>,
     planet: Res<Planet>,
     textures: Res<EguiTextures>,
     conf: Res<UiConf>,
@@ -184,7 +185,7 @@ fn panels(
         .resizable(false)
         .show(egui_ctx.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
-                toolbar(ui, &mut cursor_mode, &mut wos, &textures, &conf);
+                toolbar(ui, &mut cursor_mode, &mut wos, &mut speed, &textures, &conf);
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -274,6 +275,7 @@ fn toolbar(
     ui: &mut egui::Ui,
     _cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
+    speed: &mut GameSpeed,
     textures: &EguiTextures,
     conf: &UiConf,
 ) {
@@ -320,6 +322,48 @@ fn toolbar(
         .clicked()
     {
         wos.stat = !wos.stat;
+    }
+
+    ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+    let texture = if *speed == GameSpeed::Paused {
+        UiTexture::IconSpeedPausedSelected
+    } else {
+        UiTexture::IconSpeedPaused
+    };
+    let (handle, size) = textures.0.get(&texture).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("speed-paused"))
+        .clicked()
+    {
+        *speed = GameSpeed::Paused;
+    }
+    let texture = if *speed == GameSpeed::Normal {
+        UiTexture::IconSpeedNormalSelected
+    } else {
+        UiTexture::IconSpeedNormal
+    };
+    let (handle, size) = textures.0.get(&texture).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("speed-normal"))
+        .clicked()
+    {
+        *speed = GameSpeed::Normal;
+    }
+    let texture = if *speed == GameSpeed::Fast {
+        UiTexture::IconSpeedFastSelected
+    } else {
+        UiTexture::IconSpeedFast
+    };
+    let (handle, size) = textures.0.get(&texture).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("speed-fast"))
+        .clicked()
+    {
+        *speed = GameSpeed::Fast;
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());

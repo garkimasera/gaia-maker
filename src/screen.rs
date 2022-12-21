@@ -377,9 +377,12 @@ fn keyboard_input(
     conf: Res<UiConf>,
 ) {
     // Shortcut keys
+    if keys.just_pressed(KeyCode::B) {
+        wos.build = !wos.build;
+    }
     if keys.just_pressed(KeyCode::E) && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
     {
-        wos.edit_planet = true;
+        wos.edit_planet = !wos.edit_planet;
     }
 
     // Keys for moving camera

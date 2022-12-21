@@ -63,12 +63,21 @@ fn main() {
         .add_plugin(action::ActionPlugin)
         .add_plugin(sim::SimPlugin)
         .insert_resource(WinitSettings::game())
+        .init_resource::<GameSpeed>()
         .run();
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 enum GameState {
     AssetLoading,
     MainMenu,
     Running,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Resource)]
+enum GameSpeed {
+    #[default]
+    Paused,
+    Normal,
+    Fast,
 }
