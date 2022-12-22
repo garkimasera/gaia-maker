@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 use strum::IntoEnumIterator;
 
-use super::{building_desc_tooltip, convert_rect, OccupiedScreenSpace, UiConf, WindowsOpenState};
+use super::{building_desc_tooltip, convert_rect, OccupiedScreenSpace, WindowsOpenState};
+use crate::conf::Conf;
 use crate::planet::*;
 
 pub fn star_system_window(
@@ -10,7 +11,7 @@ pub fn star_system_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
     params: Res<Params>,
 ) {
     if !wos.star_system {

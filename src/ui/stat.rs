@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
-use super::{convert_rect, OccupiedScreenSpace, UiConf, WindowsOpenState};
+use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
+use crate::conf::Conf;
 use crate::planet::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
@@ -17,7 +18,7 @@ pub fn stat_window(
     mut egui_ctx: ResMut<EguiContext>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
     planet: Res<Planet>,
     mut current_panel: Local<Panel>,
 ) {

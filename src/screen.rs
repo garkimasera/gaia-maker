@@ -1,5 +1,6 @@
 use crate::action::CursorAction;
-use crate::assets::{UiConf, UiTexture, UiTextures};
+use crate::assets::{UiTexture, UiTextures};
+use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::planet::*;
 use crate::ui::WindowsOpenState;
@@ -374,7 +375,7 @@ fn keyboard_input(
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     screen: Res<OccupiedScreenSpace>,
     egui_settings: ResMut<bevy_egui::EguiSettings>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
 ) {
     // Shortcut keys
     if keys.just_pressed(KeyCode::B) {

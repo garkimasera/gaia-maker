@@ -1,4 +1,5 @@
 use crate::audio::SoundEffect;
+use crate::conf::Conf;
 use crate::gz::GunzipBin;
 use crate::planet::*;
 use crate::text::{Lang, TranslationText};
@@ -18,8 +19,7 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(RonAssetPlugin::<UiConf>::new(&["ui.ron"]))
-            .add_plugin(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
+        app.add_plugin(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
             .add_plugin(RonAssetPlugin::<BiomeAssetList>::new(&["biomes.ron"]))
             .add_plugin(RonAssetPlugin::<StructureAssetList>::new(&[
                 "structures.ron",
@@ -36,9 +36,7 @@ impl Plugin for AssetsPlugin {
                     .with_collection::<SoundEffects>(),
             )
             .add_system_set(
-                SystemSet::on_exit(GameState::AssetLoading)
-                    .with_system(set_resources)
-                    .with_system(create_assets_list),
+                SystemSet::on_exit(GameState::AssetLoading).with_system(create_assets_list),
             );
     }
 }
@@ -49,15 +47,6 @@ define_asset_list_from_enum! {
     pub struct TranslationTexts {
         pub texts: HashMap<Lang, Handle<TranslationText>>,
     }
-}
-
-#[derive(Clone, Debug, Deserialize, Resource, TypeUuid)]
-#[uuid = "92795344-1b26-49fb-b352-e989043777c7"]
-pub struct UiConf {
-    pub scale_factor: f32,
-    pub font_scale: f32,
-    pub max_message: usize,
-    pub camera_move_speed: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
@@ -92,8 +81,8 @@ define_asset_list_from_enum! {
 
 #[derive(Debug, Resource, AssetCollection)]
 pub struct UiAssets {
-    #[asset(path = "default.ui.ron")]
-    pub default_conf: Handle<UiConf>,
+    #[asset(path = "default.conf.ron")]
+    pub default_conf: Handle<Conf>,
     #[asset(path = "fonts/Mplus2-SemiBold.otf.gz")]
     pub font: Handle<GunzipBin>,
 }
@@ -151,11 +140,6 @@ define_asset_list_from_enum! {
     pub struct SoundEffects {
         pub sound_effects: HashMap<SoundEffect, Handle<AudioSource>>,
     }
-}
-
-fn set_resources(mut command: Commands, ui_assets: Res<UiAssets>, ui_conf: Res<Assets<UiConf>>) {
-    let ui_conf = ui_conf.get(&ui_assets.default_conf).unwrap().clone();
-    command.insert_resource(ui_conf);
 }
 
 fn create_assets_list(

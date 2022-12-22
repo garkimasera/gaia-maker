@@ -1,12 +1,7 @@
+use crate::conf::data_dir;
 use anyhow::{anyhow, Result};
-#[cfg(not(target_arch = "wasm32"))]
-use once_cell::sync::Lazy;
 
 use crate::planet::Planet;
-
-#[cfg(not(target_arch = "wasm32"))]
-static DATA_DIR: Lazy<Option<std::path::PathBuf>> =
-    Lazy::new(|| dirs::data_dir().map(|path| path.join(env!("CARGO_PKG_NAME"))));
 
 pub fn save_to(file_name: &str, planet: &Planet) -> Result<()> {
     let planet_data = bincode::serialize(planet)?;
@@ -25,9 +20,7 @@ pub fn load_from(file_name: &str) -> Result<Planet> {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn write(file_name: &str, data: &[u8]) -> Result<()> {
-    let data_dir = DATA_DIR
-        .as_ref()
-        .ok_or_else(|| anyhow!("cannot get data directory"))?;
+    let data_dir = data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     std::fs::create_dir_all(&save_dir_path)?;
     std::fs::write(save_dir_path.join(file_name), data)?;
@@ -36,9 +29,7 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn read(file_name: &str) -> Result<Vec<u8>> {
-    let data_dir = DATA_DIR
-        .as_ref()
-        .ok_or_else(|| anyhow!("cannot get data directory"))?;
+    let data_dir = data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     Ok(std::fs::read(save_dir_path.join(file_name))?)
 }

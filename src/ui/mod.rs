@@ -18,7 +18,8 @@ use std::collections::{HashMap, VecDeque};
 use strum::IntoEnumIterator;
 
 use crate::{
-    assets::{UiAssets, UiConf, UiTexture, UiTextures},
+    assets::{UiAssets, UiTexture, UiTextures},
+    conf::Conf,
     draw::UpdateMap,
     gz::GunzipBin,
     msg::MsgKind,
@@ -79,14 +80,14 @@ impl Plugin for UiPlugin {
                     .with_system(game_menu_window.label("ui_windows"))
                     .with_system(edit_planet::edit_planet_window.label("ui_windows")),
             )
-            .add_system(exit_on_esc_system);
+            .add_system(exit_on_esc);
     }
 }
 
 fn setup_fonts(
     mut egui_ctx: ResMut<EguiContext>,
     mut egui_settings: ResMut<EguiSettings>,
-    conf: Res<Assets<UiConf>>,
+    conf: Res<Assets<Conf>>,
     ui_assets: Res<UiAssets>,
     gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
@@ -111,7 +112,7 @@ fn setup_fonts(
     egui_ctx.ctx_mut().set_fonts(fonts);
 }
 
-fn exit_on_esc_system(
+fn exit_on_esc(
     mut keyboard_input_events: EventReader<KeyboardInput>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
@@ -166,7 +167,7 @@ fn panels(
     mut speed: ResMut<GameSpeed>,
     planet: Res<Planet>,
     textures: Res<EguiTextures>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
 ) {
     occupied_screen_space.window_rects.clear();
 
@@ -277,7 +278,7 @@ fn toolbar(
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
     textures: &EguiTextures,
-    conf: &UiConf,
+    conf: &Conf,
 ) {
     let (handle, size) = textures.0.get(&UiTexture::IconBuild).unwrap();
     if ui
@@ -392,7 +393,7 @@ fn build_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut cursor_mode: ResMut<CursorMode>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
     planet: Res<Planet>,
     params: Res<Params>,
 ) {
@@ -508,7 +509,7 @@ fn layers_window(
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
     mut update_map: ResMut<UpdateMap>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
 ) {
     if !wos.layers {
         return;
@@ -541,7 +542,7 @@ fn msg_window(
     mut msgs: Local<VecDeque<(MsgKind, String)>>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
 ) {
     if !wos.message {
         return;
@@ -581,7 +582,7 @@ fn game_menu_window(
     mut app_exit_events: EventWriter<AppExit>,
     mut wos: ResMut<WindowsOpenState>,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
 ) {
     if !wos.game_menu {
         return;
@@ -631,7 +632,7 @@ fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {
     }
 }
 
-impl UiConf {
+impl Conf {
     fn tex_size(&self, size: egui::Vec2) -> egui::Vec2 {
         let factor = 1.0;
         egui::Vec2::new(size.x * factor, size.y * factor)

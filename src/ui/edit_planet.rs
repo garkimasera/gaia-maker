@@ -1,4 +1,5 @@
-use super::{convert_rect, CursorMode, OccupiedScreenSpace, UiConf, WindowsOpenState};
+use super::{convert_rect, CursorMode, OccupiedScreenSpace, WindowsOpenState};
+use crate::conf::Conf;
 use crate::planet::*;
 use crate::sim::ManagePlanet;
 use bevy::prelude::*;
@@ -20,7 +21,7 @@ pub fn edit_planet_window(
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
-    conf: Res<UiConf>,
+    conf: Res<Conf>,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,

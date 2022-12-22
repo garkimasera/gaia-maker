@@ -1,4 +1,5 @@
 (
+    lang: English,
     scale_factor: 1.0,
     font_scale: 1.2,
     max_message: 20,

@@ -15,6 +15,7 @@ mod msg;
 mod action;
 mod assets;
 mod audio;
+mod conf;
 mod draw;
 mod gz;
 mod info;
@@ -52,6 +53,7 @@ fn main() {
         }))
         .add_plugin(gz::GzPlugin)
         .add_plugin(text::TextPlugin)
+        .add_plugin(conf::ConfPlugin)
         .add_plugin(assets::AssetsPlugin)
         .add_plugin(overlay::OverlayPlugin)
         .add_plugin(screen::ScreenPlugin)

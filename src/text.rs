@@ -4,14 +4,16 @@ use bevy_common_assets::ron::RonAssetPlugin;
 use crossbeam::atomic::AtomicCell;
 use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::RwLock;
 use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 
 use crate::{assets::TranslationTexts, planet::ResourceKind, GameState};
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
+#[derive(
+    Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, EnumIter, EnumString, AsRefStr,
+)]
 pub enum Lang {
     #[strum(serialize = "en")]
     English,
