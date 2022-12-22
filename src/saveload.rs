@@ -1,4 +1,3 @@
-use crate::conf::data_dir;
 use anyhow::{anyhow, Result};
 
 use crate::planet::Planet;
@@ -20,7 +19,8 @@ pub fn load_from(file_name: &str) -> Result<Planet> {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn write(file_name: &str, data: &[u8]) -> Result<()> {
-    let data_dir = data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    let data_dir =
+        crate::conf::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     std::fs::create_dir_all(&save_dir_path)?;
     std::fs::write(save_dir_path.join(file_name), data)?;
@@ -29,7 +29,8 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn read(file_name: &str) -> Result<Vec<u8>> {
-    let data_dir = data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    let data_dir =
+        crate::conf::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     Ok(std::fs::read(save_dir_path.join(file_name))?)
 }
@@ -37,12 +38,6 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
 #[cfg(target_arch = "wasm32")]
 fn write(file_name: &str, data: &[u8]) -> Result<()> {
     use std::io::Write;
-
-    let window = web_sys::window().ok_or_else(|| anyhow!("cannot get Window"))?;
-    let storage = window
-        .local_storage()
-        .map_err(|e| anyhow!("cannot get local_storage {:?}", e))?
-        .ok_or_else(|| anyhow!("cannot get local_storage"))?;
 
     let mut s = String::new();
     {
@@ -55,7 +50,7 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
         encoder.write_all(data)?;
     }
 
-    storage
+    crate::conf::get_storage()?
         .set_item(&format!("save/{}", file_name), &s)
         .map_err(|e| anyhow!("setItem failed: {:?}", e))?;
 
@@ -66,13 +61,7 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 fn read(file_name: &str) -> Result<Vec<u8>> {
     use std::io::{Cursor, Read};
 
-    let window = web_sys::window().ok_or_else(|| anyhow!("cannot get Window"))?;
-    let storage = window
-        .local_storage()
-        .map_err(|e| anyhow!("cannot get local_storage {:?}", e))?
-        .ok_or_else(|| anyhow!("cannot get local_storage"))?;
-
-    let s = storage
+    let s = crate::conf::get_storage()?
         .get_item(&format!("save/{}", file_name))
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;

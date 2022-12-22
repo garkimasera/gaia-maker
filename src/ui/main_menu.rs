@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
+use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
 use crate::sim::ManagePlanet;
 use crate::text::Lang;
@@ -10,6 +11,8 @@ pub fn main_menu(
     mut egui_ctx: ResMut<EguiContext>,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
+    mut conf: ResMut<Conf>,
+    mut ew_conf_change: EventWriter<ConfChange>,
 ) {
     egui::Window::new(t!("menu"))
         .title_bar(false)
@@ -29,7 +32,9 @@ pub fn main_menu(
                 ui.separator();
 
                 if let Some(lang) = language_selector(ui, crate::text::get_lang()) {
+                    conf.lang = lang;
                     crate::text::set_lang(lang);
+                    ew_conf_change.send_default();
                 }
             });
         })
