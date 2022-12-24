@@ -30,6 +30,7 @@
         air_heat_cap: 1000.0,
         surface_heat_cap: 5.0e+6,
         sunlight_day_averaging_factor: 0.25,
+        air_diffusion_factor: 0.01,
         n_loop_atmo_heat_calc: 10,
     ),
     orbital_buildings: {

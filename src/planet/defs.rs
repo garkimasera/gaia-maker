@@ -263,6 +263,8 @@ pub struct SimParams {
     pub surface_heat_cap: f32,
     /// Factor to average sunlight power per day
     pub sunlight_day_averaging_factor: f32,
+    /// The ratio of tile air diffusion
+    pub air_diffusion_factor: f32,
     /// The number of loop of atmosphere heat transfer calculation
     pub n_loop_atmo_heat_calc: usize,
 }

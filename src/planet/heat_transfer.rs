@@ -1,4 +1,5 @@
 use super::*;
+use geom::Direction;
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
 pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.67E-8;
@@ -35,11 +36,25 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 * planet.calc_longitude_latitude(p).1.cos()
                 * (1.0 - sim.albedo[p])
                 * params.sim.sunlight_day_averaging_factor;
+
             let inflow = solar_power * sim.tile_area;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT * sim.atemp[p].powi(4) * sim.tile_area;
 
-            let heat_amount = old_heat_amount + (inflow - outflow) * secs_per_loop;
+            let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
+                .into_iter()
+                .map(|dir| {
+                    if let Some(adjacent_tile) = planet.cyclic_tile_coords(p + dir.as_coords()) {
+                        let delta_temp = sim.atemp[adjacent_tile] - sim.atemp[p];
+                        0.5 * params.sim.air_diffusion_factor * air_heat_cap_per_tile * delta_temp
+                    } else {
+                        0.0
+                    }
+                })
+                .sum();
+
+            let heat_amount =
+                old_heat_amount + (inflow - outflow) * secs_per_loop + adjacent_tile_flow;
             sim.atemp_new[p] = heat_amount / sim.atmo_heat_cap[p];
         }
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);
