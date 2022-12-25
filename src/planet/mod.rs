@@ -111,25 +111,6 @@ impl Planet {
         atmo::sim_atmosphere(self, params);
     }
 
-    pub fn cyclic_tile_coords<T: Into<Coords>>(&self, coords: T) -> Option<Coords> {
-        let coords = coords.into();
-        let (nx, ny) = self.map.size();
-        let (nx, ny) = (nx as i32, ny as i32);
-
-        if coords.1 < 0 || coords.1 >= ny {
-            None
-        } else {
-            let i = if coords.0 < 0 {
-                (coords.0 + nx) % nx
-            } else if coords.0 >= nx {
-                coords.0 % nx
-            } else {
-                coords.0
-            };
-            Some(Coords(i, coords.1))
-        }
-    }
-
     pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {
         let coords = coords.into();
         let (nx, ny) = self.map.size();

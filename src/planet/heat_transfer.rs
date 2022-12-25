@@ -1,5 +1,5 @@
 use super::*;
-use geom::Direction;
+use geom::{CyclicMode, Direction};
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
 pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.67E-8;
@@ -44,7 +44,9 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                 .into_iter()
                 .map(|dir| {
-                    if let Some(adjacent_tile) = planet.cyclic_tile_coords(p + dir.as_coords()) {
+                    if let Some(adjacent_tile) =
+                        CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
+                    {
                         let delta_temp = sim.atemp[adjacent_tile] - sim.atemp[p];
                         0.5 * params.sim.air_diffusion_factor * air_heat_cap_per_tile * delta_temp
                     } else {
