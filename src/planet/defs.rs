@@ -135,6 +135,7 @@ pub enum Structure {
     Occupied { by: Coords },
     OxygenGenerator,
     FertilizationPlant,
+    Heater,
 }
 
 impl Structure {
@@ -227,6 +228,7 @@ pub enum StarSystemBuildingKind {
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
     SprayToAtmo { kind: GasKind, mass: f32 },
+    Heater { heat: f32 },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

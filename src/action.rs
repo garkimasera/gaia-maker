@@ -68,6 +68,7 @@ fn new_structure(kind: StructureKind) -> Structure {
     match kind {
         StructureKind::OxygenGenerator => Structure::OxygenGenerator,
         StructureKind::FertilizationPlant => Structure::FertilizationPlant,
+        StructureKind::Heater => Structure::Heater,
         _ => unreachable!(),
     }
 }

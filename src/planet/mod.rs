@@ -10,9 +10,10 @@ pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 use std::f32::consts::PI;
 use strum::IntoEnumIterator;
 
@@ -27,7 +28,7 @@ pub struct Tile {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Player {
-    pub buildable_structures: FnvHashSet<StructureKind>,
+    pub buildable_structures: BTreeSet<StructureKind>,
 }
 
 impl Default for Tile {
@@ -98,6 +99,10 @@ impl Planet {
             .player
             .buildable_structures
             .insert(StructureKind::FertilizationPlant);
+        planet
+            .player
+            .buildable_structures
+            .insert(StructureKind::Heater);
 
         planet
     }

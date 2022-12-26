@@ -2,7 +2,7 @@ use super::*;
 use geom::{CyclicMode, Direction};
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
-pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.67E-8;
+pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.670E-8;
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let size = planet.map.size();
@@ -55,8 +55,22 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 })
                 .sum();
 
-            let heat_amount =
-                old_heat_amount + (inflow - outflow) * secs_per_loop + adjacent_tile_flow;
+            let structure_heat = if let Some(structure_param) =
+                params.structures.get(&planet.map[p].structure.kind())
+            {
+                if let Some(BuildingEffect::Heater { heat }) = structure_param.building.effect {
+                    heat
+                } else {
+                    0.0
+                }
+            } else {
+                0.0
+            };
+
+            let heat_amount = old_heat_amount
+                + (inflow - outflow) * secs_per_loop
+                + adjacent_tile_flow
+                + structure_heat;
             sim.atemp_new[p] = heat_amount / sim.atmo_heat_cap[p];
         }
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);

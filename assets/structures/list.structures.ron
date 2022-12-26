@@ -19,4 +19,15 @@
             upkeep: { energy: 2.0 },
         ),
     ),
+    heater: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 2,
+        building: (
+            cost: { material: 100 },
+            upkeep: { energy: 1000 },
+            effect: Heater ( heat: 1.0e+18 ),
+        ),
+    ),
 }

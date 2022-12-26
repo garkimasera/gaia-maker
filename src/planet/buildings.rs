@@ -111,6 +111,7 @@ fn apply_building_effect(
                 BuildingEffect::SprayToAtmo { kind, mass } => {
                     *planet.atmo.mass.get_mut(kind).unwrap() += mass * n as f32;
                 }
+                BuildingEffect::Heater { .. } => (),
             }
         }
     }

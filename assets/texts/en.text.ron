@@ -43,6 +43,7 @@
     // Structures
     "oxygen-generator": "Oxygen Generator",
     "fertilization-plant": "Fertilization Plant",
+    "heater": "Heater",
     
     // Orbital Buildings
     "fusion-reactor": "Fusion Reactor",

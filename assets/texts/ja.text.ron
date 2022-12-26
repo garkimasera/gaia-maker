@@ -43,6 +43,7 @@
     // Structures
     "oxygen-generator": "酸素発生機",
     "fertilization-plant": "肥沃化工場",
+    "heater": "ヒーター",
     
     // Orbital Buildings
     "fusion-reactor": "核融合炉",
