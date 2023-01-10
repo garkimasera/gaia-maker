@@ -51,7 +51,8 @@ impl Plugin for ScreenPlugin {
                     .with_system(update_hover_tile.label("update_hover_tile"))
                     .with_system(mouse_event.after("update_hover_tile"))
                     .with_system(keyboard_input),
-            );
+            )
+            .add_system(window_resize);
     }
 }
 
@@ -413,5 +414,38 @@ fn keyboard_input(
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn window_resize() {}
+
+#[cfg(target_arch = "wasm32")]
+fn window_resize(mut windows: ResMut<Windows>) {
+    let Some(window) = windows.get_primary_mut() else {
+        return;
+    };
+
+    let Some(w) = web_sys::window() else {
+        return;
+    };
+
+    let Some(width) = w
+        .inner_width()
+        .ok()
+        .and_then(|width| width.as_f64())
+        .map(|width| width as f32) else {
+            return;
+        };
+    let Some(height) = w
+        .inner_height()
+        .ok()
+        .and_then(|height| height.as_f64())
+        .map(|height| height as f32) else {
+            return;
+        };
+
+    if window.width() != width as f32 || window.height() != height as f32 {
+        window.set_resolution(width, height);
     }
 }

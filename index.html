@@ -1,9 +1,20 @@
 <html>
   <head>
     <meta charset="utf-8"/>
+    <title>Pixel Gaia</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+        }
+    </style>
   </head>
-  <script type="module">
-    import init from './pixel-gaia.js'
-    init()
-  </script>
+  <body>
+    <script type="module">
+      import init from './pixel-gaia.js'
+      document.body.oncontextmenu = function () {return false;}
+      init()
+    </script>
+  </body>
 </html>
