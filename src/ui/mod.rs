@@ -4,12 +4,7 @@ mod orbit;
 mod star_system;
 mod stat;
 
-use bevy::{
-    app::AppExit,
-    input::{keyboard::KeyboardInput, ButtonState},
-    math::Rect,
-    prelude::*,
-};
+use bevy::{app::AppExit, math::Rect, prelude::*};
 use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily, RichText, Ui},
     EguiContext, EguiPlugin, EguiSettings,
@@ -79,8 +74,7 @@ impl Plugin for UiPlugin {
                     .with_system(msg_window.label("ui_windows"))
                     .with_system(game_menu_window.label("ui_windows"))
                     .with_system(edit_planet::edit_planet_window.label("ui_windows")),
-            )
-            .add_system(exit_on_esc);
+            );
     }
 }
 
@@ -110,19 +104,6 @@ fn setup_fonts(
         .unwrap()
         .push("m+_font".to_owned());
     egui_ctx.ctx_mut().set_fonts(fonts);
-}
-
-fn exit_on_esc(
-    mut keyboard_input_events: EventReader<KeyboardInput>,
-    mut app_exit_events: EventWriter<AppExit>,
-) {
-    for event in keyboard_input_events.iter() {
-        if let Some(key_code) = event.key_code {
-            if event.state == ButtonState::Pressed && key_code == KeyCode::Escape {
-                app_exit_events.send(bevy::app::AppExit);
-            }
-        }
-    }
 }
 
 fn load_textures(
