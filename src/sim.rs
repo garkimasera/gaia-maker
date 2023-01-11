@@ -31,13 +31,7 @@ impl Plugin for SimPlugin {
     }
 }
 
-fn start_sim(mut commands: Commands, mut update_map: ResMut<UpdateMap>, params: Res<Params>) {
-    let planet = Planet::new(
-        params.start.default_size.0,
-        params.start.default_size.1,
-        &params.start,
-    );
-    commands.insert_resource(planet);
+fn start_sim(mut update_map: ResMut<UpdateMap>) {
     update_map.update();
 }
 
