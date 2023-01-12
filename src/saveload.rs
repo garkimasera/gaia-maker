@@ -39,16 +39,12 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
 fn write(file_name: &str, data: &[u8]) -> Result<()> {
     use std::io::Write;
 
-    let mut s = String::new();
-    {
-        let base64_encoder = base64::write::EncoderStringWriter::from_consumer(
-            &mut s,
-            &base64::engine::DEFAULT_ENGINE,
-        );
-        let mut encoder =
-            flate2::write::GzEncoder::new(base64_encoder, flate2::Compression::best());
-        encoder.write_all(data)?;
-    }
+    let base64_encoder =
+        base64::write::EncoderStringWriter::new(&base64::engine::general_purpose::STANDARD);
+    let mut encoder = flate2::write::GzEncoder::new(base64_encoder, flate2::Compression::best());
+    encoder.write_all(data)?;
+
+    let s = encoder.finish()?.into_inner();
 
     crate::conf::get_storage()?
         .set_item(&format!("save/{}", file_name), &s)
@@ -66,7 +62,8 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;
     let mut s = Cursor::new(s);
-    let base64_decoder = base64::read::DecoderReader::from(&mut s, &base64::engine::DEFAULT_ENGINE);
+    let base64_decoder =
+        base64::read::DecoderReader::new(&mut s, &base64::engine::general_purpose::STANDARD);
     let mut decoder = flate2::read::GzDecoder::new(base64_decoder);
 
     let mut data = Vec::new();
