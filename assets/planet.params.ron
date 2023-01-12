@@ -6,6 +6,7 @@
             solar_constant: 1400,
         ),
         default_size: (128, 64),
+        max_height: 5000.0,
         resources: {
             energy: 10000.0,
             material: 1000.0,

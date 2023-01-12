@@ -230,6 +230,7 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
             t!("latitude"),
             latitude * 180.0 * std::f32::consts::FRAC_1_PI,
         ));
+        ui.label(format!("{:.0} m", tile.height));
 
         ui.label(format!(
             "{}: {:.1} °C",

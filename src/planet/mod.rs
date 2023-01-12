@@ -3,6 +3,7 @@ mod atmo;
 mod buildings;
 mod defs;
 mod heat_transfer;
+mod map_generator;
 mod resources;
 mod sim;
 
@@ -63,7 +64,17 @@ pub struct Planet {
 
 impl Planet {
     pub fn new(w: u32, h: u32, start_params: &StartParams) -> Planet {
-        let map = Array2d::new(w, h, Tile::default());
+        let mut map = Array2d::new(w, h, Tile::default());
+
+        let gen_conf = map_generator::GenConf {
+            w: start_params.default_size.0,
+            h: start_params.default_size.1,
+            max_height: start_params.max_height,
+        };
+        let height_map = map_generator::generate(gen_conf);
+        for (p, height) in height_map.iter_with_idx() {
+            map[p].height = *height;
+        }
 
         let mut planet = Planet {
             days: 0,

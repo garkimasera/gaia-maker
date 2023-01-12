@@ -247,6 +247,7 @@ pub struct Params {
 pub struct StartParams {
     pub basics: PlanetBasics,
     pub default_size: (u32, u32),
+    pub max_height: f32,
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
