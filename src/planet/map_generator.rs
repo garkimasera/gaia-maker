@@ -1,5 +1,8 @@
 use geom::Array2d;
-use noise::{NoiseFn, Perlin, ScalePoint};
+use noise::{
+    utils::{NoiseMapBuilder, SphereMapBuilder},
+    Perlin, ScalePoint,
+};
 
 #[derive(Clone, Debug)]
 pub struct GenConf {
@@ -9,10 +12,13 @@ pub struct GenConf {
 }
 
 pub fn generate(conf: GenConf) -> Array2d<f32> {
-    let noise_fn = ScalePoint::new(Perlin::new(rand::random()))
-        .set_x_scale(0.1)
-        .set_y_scale(0.1);
+    let noise_fn = ScalePoint::new(Perlin::new(rand::random())).set_scale(2.0);
+    let map_builder = SphereMapBuilder::new(noise_fn)
+        .set_size(conf.w as _, conf.h as _)
+        .set_bounds(-90.0, 90.0, -180.0, 180.0)
+        .build();
+
     Array2d::from_fn(conf.w, conf.h, |(x, y)| {
-        (noise_fn.get([x as f64, y as f64]) as f32 + 1.0) * conf.max_height * 0.5
+        (map_builder.get_value(x as _, y as _) as f32 + 1.0) * conf.max_height * 0.5
     })
 }
