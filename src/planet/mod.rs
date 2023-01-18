@@ -6,11 +6,13 @@ mod heat_transfer;
 mod map_generator;
 mod resources;
 mod sim;
+mod water;
 
 pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
+pub use self::water::*;
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
@@ -58,6 +60,7 @@ pub struct Planet {
     pub res: Resources,
     pub map: Array2d<Tile>,
     pub atmo: Atmosphere,
+    pub water: Water,
     pub orbit: FnvHashMap<OrbitalBuildingKind, Building>,
     pub star_system: FnvHashMap<StarSystemBuildingKind, Building>,
 }
@@ -82,7 +85,8 @@ impl Planet {
             player: Player::default(),
             res: Resources::new(start_params),
             map,
-            atmo: Atmosphere::from_params(start_params),
+            atmo: Atmosphere::new(start_params),
+            water: Water::new(start_params),
             orbit: OrbitalBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
@@ -125,6 +129,7 @@ impl Planet {
         self::heat_transfer::advance(self, sim, params);
 
         atmo::sim_atmosphere(self, params);
+        water::sim_water(self, sim, params);
     }
 
     pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {

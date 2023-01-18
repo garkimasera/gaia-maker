@@ -10,7 +10,7 @@ pub struct Atmosphere {
 }
 
 impl Atmosphere {
-    pub fn from_params(start_params: &StartParams) -> Self {
+    pub fn new(start_params: &StartParams) -> Self {
         Atmosphere {
             atm: 0.0,
             mass: start_params.atmo_mass.clone(),

@@ -250,6 +250,7 @@ pub struct StartParams {
     pub max_height: f32,
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
+    pub water_volume: f32,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
 }

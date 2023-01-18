@@ -6,7 +6,7 @@
             solar_constant: 1400,
         ),
         default_size: (128, 64),
-        max_height: 5000.0,
+        max_height: 10000.0,
         resources: {
             energy: 10000.0,
             material: 1000.0,
@@ -16,6 +16,7 @@
             nitrogen: 1.0e+7,
             carbon_dioxide: 2.0e+8,
         },
+        water_volume: 5.0e+17,
         orbital_buildings: {
             fusion_reactor: 3,
         },
