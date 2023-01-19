@@ -68,7 +68,7 @@ fn update_layered_tex_map(
             let tile_z = params.biomes[&biome_i].z;
             tiles[pos].push(i);
             for d in Direction::EIGHT_DIRS {
-                let p = pos + d.as_coords();
+                let p = coord_rotation_x(planet.map.size(), pos + d.as_coords());
                 if tiles.in_range(p) {
                     let surround_tile_i = planet.map[p].biome;
                     let z = params.biomes[&surround_tile_i].z;
@@ -113,6 +113,7 @@ fn spawn_map_textures(
             for (corner, corner_piece_grid) in CORNERS.into_iter().zip(CORNER_PIECE_GRID) {
                 let corner_index = corner_idx(
                     |pos| {
+                        let pos = coord_rotation_x(ltm.biome.size(), pos);
                         if ltm.biome.in_range(pos) {
                             ltm.biome[pos].contains(tile_idx)
                         } else {
