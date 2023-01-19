@@ -13,6 +13,7 @@ pub enum Panel {
     Map,
     Planet,
     Atmosphere,
+    Water,
 }
 
 pub fn edit_planet_window(
@@ -45,6 +46,7 @@ pub fn edit_planet_window(
                 Panel::Map => map_panel.ui(ui, &mut ew_manage_planet, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmosphere => atmo_ui(ui, &mut planet),
+                Panel::Water => water_ui(ui, &mut planet),
             }
         })
         .unwrap()
@@ -111,4 +113,8 @@ fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
             .logarithmic(true),
         );
     }
+}
+
+fn water_ui(ui: &mut egui::Ui, planet: &mut Planet) {
+    ui.add(egui::Slider::new(&mut planet.water.water_volume, 0.0..=1.0e+18).text("water volume"));
 }
