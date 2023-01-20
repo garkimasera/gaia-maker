@@ -25,6 +25,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         sim.atemp[p] = planet.map[p].temp;
     }
 
+    let greenhouse_effect = greenhouse_effect(planet, params);
+
     let secs_per_loop = params.sim.secs_per_day / params.sim.n_loop_atmo_heat_calc as f32;
 
     // Calculate new atmosphere temprature of tiles
@@ -39,7 +41,10 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             let inflow = solar_power * sim.tile_area;
 
-            let outflow = STEFAN_BOLTZMANN_CONSTANT * sim.atemp[p].powi(4) * sim.tile_area;
+            let outflow = STEFAN_BOLTZMANN_CONSTANT
+                * sim.atemp[p].powi(4)
+                * sim.tile_area
+                * (1.0 - greenhouse_effect);
 
             let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                 .into_iter()
@@ -80,4 +85,36 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in map_iter_idx {
         planet.map[p].temp = sim.atemp[p];
     }
+}
+
+fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {
+    interpolation(
+        &params.sim.co2_green_house_effect_table,
+        planet.atmo.partial_pressure(GasKind::CarbonDioxide),
+    )
+}
+
+fn interpolation(table: &[(f32, f32)], x: f32) -> f32 {
+    assert!(table.len() > 2);
+    let first = table.first().unwrap();
+    let last = table.last().unwrap();
+    if first.0 >= x {
+        return first.1;
+    } else if last.0 <= x {
+        return last.1;
+    }
+
+    for i in 0..(table.len() - 1) {
+        let x0 = table[i].0;
+        let x1 = table[i + 1].0;
+        if x0 < x && x <= x1 {
+            let y0 = table[i].1;
+            let y1 = table[i + 1].1;
+            let a = (y1 - y0) / (x1 - x0);
+            let b = (x1 * y0 + x0 * y1) / (x1 - x0);
+            return a * x + b;
+        }
+    }
+
+    panic!("invalid input for interpolation")
 }

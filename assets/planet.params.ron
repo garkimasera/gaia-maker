@@ -34,6 +34,13 @@
         sunlight_day_averaging_factor: 0.25,
         air_diffusion_factor: 0.01,
         n_loop_atmo_heat_calc: 10,
+        co2_green_house_effect_table: [
+            (0.0, 0.0),
+            (0.0003, 0.55),
+            (0.005, 0.58),
+            (0.01, 0.63),
+            (80, 0.96),
+        ],
     ),
     orbital_buildings: {
         fusion_reactor: (

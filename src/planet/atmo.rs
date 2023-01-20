@@ -20,6 +20,10 @@ impl Atmosphere {
     pub fn total_mass(&self) -> f32 {
         self.mass.values().sum()
     }
+
+    pub fn partial_pressure(&self, kind: GasKind) -> f32 {
+        self.atm * self.mass[&kind] / self.total_mass()
+    }
 }
 
 pub fn sim_atmosphere(planet: &mut Planet, params: &Params) {
