@@ -19,6 +19,7 @@ pub enum OverlayLayerKind {
     #[default]
     None,
     AirTemprature,
+    Rainfall,
     Height,
 }
 
@@ -41,6 +42,17 @@ impl ColorMaterials {
                     0
                 } else {
                     (((temp - 263.15) / (50.0 / N_POINTS as f32)) as usize).clamp(0, N_POINTS - 1)
+                };
+
+                self.white_yellow_red[i].clone()
+            }
+            OverlayLayerKind::Rainfall => {
+                let rainfall = planet.map[p].rainfall;
+
+                let i = if rainfall < 0.0 {
+                    0
+                } else {
+                    ((rainfall / 40.0) as usize).clamp(0, N_POINTS - 1)
                 };
 
                 self.white_yellow_red[i].clone()

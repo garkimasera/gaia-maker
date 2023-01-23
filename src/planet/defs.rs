@@ -74,6 +74,7 @@ impl Default for Biome {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BiomeAttrs {
     pub z: f32,
+    pub revaporization_ratio: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

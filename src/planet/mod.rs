@@ -27,6 +27,7 @@ pub struct Tile {
     pub height: f32,
     pub biomass: f32,
     pub temp: f32,
+    pub rainfall: f32,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -42,6 +43,7 @@ impl Default for Tile {
             height: 0.0,
             biomass: 0.0,
             temp: 300.0,
+            rainfall: 0.0,
         }
     }
 }
