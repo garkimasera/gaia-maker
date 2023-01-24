@@ -6,6 +6,8 @@ use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
+pub const RAINFALL_DURATION: f32 = 360.0;
+
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct PlanetBasics {
     /// Planet density [kg/m^3]
@@ -274,4 +276,10 @@ pub struct SimParams {
     pub n_loop_atmo_heat_calc: usize,
     /// Greeh house effect table of CO2
     pub co2_green_house_effect_table: Vec<(f32, f32)>,
+    /// The number of loop of vapor transfer calculation
+    pub n_loop_vapor_calc: usize,
+    /// The ratio of tile vapor diffusion
+    pub vapor_diffusion_factor: f32,
+    /// The ratio of vapor loss
+    pub vapor_loss_ratio: f32,
 }

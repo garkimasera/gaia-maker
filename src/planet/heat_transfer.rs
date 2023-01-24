@@ -20,11 +20,6 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         sim.albedo[p] = 0.3;
     }
 
-    // Set temprature for simulation
-    for p in map_iter_idx {
-        sim.atemp[p] = planet.map[p].temp;
-    }
-
     let greenhouse_effect = greenhouse_effect(planet, params);
 
     let secs_per_loop = params.sim.secs_per_day / params.sim.n_loop_atmo_heat_calc as f32;

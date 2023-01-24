@@ -237,7 +237,7 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
             t!("air-temprature"),
             tile.temp - 273.15
         ));
-        ui.label(format!("{}: {:.1} mm", t!("rainfall"), tile.rainfall));
+        ui.label(format!("{}: {:.0} mm", t!("rainfall"), tile.rainfall));
 
         let s = match &tile.structure {
             Structure::None => None,

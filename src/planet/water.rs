@@ -1,4 +1,5 @@
 use super::*;
+use geom::{CyclicMode, Direction};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -18,7 +19,7 @@ impl Water {
     }
 }
 
-pub fn sim_water(planet: &mut Planet, sim: &mut Sim, _params: &Params) {
+pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     planet.water.sea_level = bisection(|x| target_function(planet, sim, x), 0.0, 10000.0, 10, 10.0);
 
     for p in planet.map.iter_idx() {
@@ -30,6 +31,8 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, _params: &Params) {
             tile.biome = Biome::Rock;
         }
     }
+
+    advance_rainfall_calc(planet, sim, params);
 }
 
 fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
@@ -67,4 +70,43 @@ fn bisection<F: Fn(f32) -> f32>(
         }
     }
     c
+}
+
+pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let map_iter_idx = planet.map.iter_idx();
+
+    // Calculate new vapor amount of tiles
+    for _ in 0..params.sim.n_loop_vapor_calc {
+        for p in map_iter_idx {
+            let biome = planet.map[p].biome;
+
+            if biome == Biome::Ocean {
+                sim.vapor_new[p] = 10.0;
+            } else {
+                let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
+                    .into_iter()
+                    .map(|dir| {
+                        if let Some(adjacent_tile) =
+                            CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
+                        {
+                            let delta_vapor = sim.vapor[adjacent_tile] - sim.vapor[p];
+                            0.5 * params.sim.vapor_diffusion_factor * delta_vapor
+                        } else {
+                            0.0
+                        }
+                    })
+                    .sum();
+                let loss = sim.vapor[p]
+                    * params.sim.vapor_loss_ratio
+                    * (1.0 - params.biomes[&biome].revaporization_ratio);
+                sim.vapor_new[p] = sim.vapor[p] + adjacent_tile_flow - loss;
+            }
+        }
+        std::mem::swap(&mut sim.vapor, &mut sim.vapor_new);
+    }
+
+    // Set calculated new rainfall
+    for p in map_iter_idx {
+        planet.map[p].rainfall = sim.vapor[p] * RAINFALL_DURATION;
+    }
 }
