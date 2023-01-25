@@ -179,6 +179,8 @@ pub struct BuildingAttrs {
     #[serde(default)]
     pub produces: ResourceMap,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub build_max: Option<u32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub effect: Option<BuildingEffect>,
 }
 

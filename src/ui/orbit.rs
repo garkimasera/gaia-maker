@@ -31,7 +31,11 @@ pub fn orbit_window(
                     ui.label("");
                     ui.end_row();
                     for kind in OrbitalBuildingKind::iter() {
-                        let buildable = planet.buildable(&params.orbital_buildings[&kind]);
+                        let buildable = planet.buildable(&params.orbital_buildings[&kind])
+                            && params.orbital_buildings[&kind]
+                                .build_max
+                                .map(|build_max| build_max > planet.orbit[&kind].n)
+                                .unwrap_or(true);
                         let building = planet.orbit.get_mut(&kind).unwrap();
                         ui.label(t!(kind.as_ref()));
                         ui.label(format!("{}", building.n));
