@@ -145,4 +145,8 @@ impl Planet {
         let latitude = y.asin(); // -pi/2 ~ pi/2
         (longtitude, latitude)
     }
+
+    pub fn height_above_sea_level(&self, p: Coords) -> f32 {
+        self.map[p].height - self.water.sea_level
+    }
 }

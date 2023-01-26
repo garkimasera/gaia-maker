@@ -29,6 +29,7 @@ pub const N_POINTS: usize = 64;
 pub struct ColorMaterials {
     pub white_yellow_red: Vec<Handle<ColorMaterial>>,
     pub brown_white: Vec<Handle<ColorMaterial>>,
+    pub blue_dark_blue: Vec<Handle<ColorMaterial>>,
 }
 
 impl ColorMaterials {
@@ -58,11 +59,15 @@ impl ColorMaterials {
                 self.white_yellow_red[i].clone()
             }
             OverlayLayerKind::Height => {
-                let h = planet.map[p].height;
+                let h = planet.height_above_sea_level(p);
 
-                let i = (h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
-
-                self.brown_white[i].clone()
+                if h > 0.0 {
+                    let i = (h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
+                    self.brown_white[i].clone()
+                } else {
+                    let i = (-h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
+                    self.blue_dark_blue[i].clone()
+                }
             }
         }
     }
@@ -110,9 +115,26 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
         })
         .collect::<Vec<_>>();
 
+    let blue_dark_blue = BLUE_DARK_BLUE
+        .into_iter()
+        .map(|[r, g, b]| {
+            let color = Color::Rgba {
+                red: r as f32 / 256.0,
+                green: g as f32 / 256.0,
+                blue: b as f32 / 256.0,
+                alpha: 0.4,
+            };
+            materials.add(ColorMaterial {
+                color,
+                texture: None,
+            })
+        })
+        .collect::<Vec<_>>();
+
     let color_materials = ColorMaterials {
         white_yellow_red,
         brown_white,
+        blue_dark_blue,
     };
     commands.insert_resource(color_materials);
 }
@@ -182,4 +204,71 @@ const GRAD_BROWN_WIHTE: [[u8; 3]; N_POINTS] = [
     [214, 210, 210],
     [215, 211, 211],
     [217, 212, 213],
+];
+
+const BLUE_DARK_BLUE: [[u8; 3]; N_POINTS] = [
+    [72, 138, 206],
+    [72, 136, 205],
+    [71, 135, 202],
+    [70, 134, 201],
+    [70, 133, 199],
+    [69, 131, 197],
+    [69, 130, 196],
+    [68, 129, 194],
+    [67, 128, 192],
+    [66, 127, 190],
+    [66, 126, 188],
+    [66, 125, 187],
+    [65, 123, 185],
+    [64, 122, 183],
+    [64, 121, 182],
+    [63, 119, 180],
+    [62, 118, 178],
+    [62, 117, 176],
+    [61, 116, 174],
+    [61, 115, 173],
+    [60, 114, 171],
+    [59, 112, 169],
+    [58, 111, 167],
+    [58, 110, 165],
+    [57, 109, 164],
+    [57, 108, 161],
+    [56, 106, 160],
+    [55, 105, 158],
+    [55, 104, 156],
+    [55, 103, 154],
+    [54, 102, 153],
+    [53, 100, 151],
+    [52, 99, 149],
+    [52, 98, 147],
+    [51, 96, 145],
+    [50, 95, 143],
+    [50, 94, 142],
+    [49, 93, 140],
+    [48, 92, 138],
+    [47, 91, 136],
+    [48, 90, 134],
+    [47, 88, 132],
+    [46, 87, 131],
+    [45, 86, 129],
+    [45, 85, 127],
+    [44, 84, 126],
+    [43, 82, 124],
+    [43, 81, 122],
+    [42, 80, 120],
+    [41, 79, 118],
+    [41, 78, 116],
+    [40, 76, 115],
+    [40, 75, 112],
+    [39, 74, 112],
+    [39, 73, 109],
+    [38, 72, 107],
+    [38, 70, 105],
+    [36, 69, 104],
+    [36, 68, 102],
+    [35, 67, 100],
+    [35, 65, 99],
+    [34, 64, 96],
+    [33, 63, 95],
+    [33, 63, 94],
 ];
