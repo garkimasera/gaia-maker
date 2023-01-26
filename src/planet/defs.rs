@@ -232,8 +232,18 @@ pub enum StarSystemBuildingKind {
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
-    SprayToAtmo { kind: GasKind, mass: f32 },
-    Heater { heat: f32 },
+    SprayToAtmo {
+        kind: GasKind,
+        mass: f32,
+    },
+    Heater {
+        heat: f32,
+    },
+    Fertilize {
+        increment: f32,
+        max: f32,
+        range: u32,
+    },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

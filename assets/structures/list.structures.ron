@@ -17,6 +17,7 @@
         building: (
             cost: { material: 100 },
             upkeep: { energy: 2.0 },
+            effect: Fertilize ( increment: 0.1, max: 40.0, range: 1 ),
         ),
     ),
     heater: (

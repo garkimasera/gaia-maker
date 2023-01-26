@@ -107,11 +107,12 @@ fn apply_building_effect(
                     .copied()
                     .unwrap_or(0);
 
+            #[allow(clippy::single_match)]
             match effect {
                 BuildingEffect::SprayToAtmo { kind, mass } => {
                     *planet.atmo.mass.get_mut(kind).unwrap() += mass * n as f32;
                 }
-                BuildingEffect::Heater { .. } => (),
+                _ => (),
             }
         }
     }

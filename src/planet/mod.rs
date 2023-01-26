@@ -1,5 +1,6 @@
 mod action;
 mod atmo;
+mod biome;
 mod buildings;
 mod defs;
 mod heat_transfer;
@@ -26,6 +27,7 @@ pub struct Tile {
     pub structure: Structure,
     pub height: f32,
     pub biomass: f32,
+    pub fertility: f32,
     pub temp: f32,
     pub rainfall: f32,
 }
@@ -42,6 +44,7 @@ impl Default for Tile {
             structure: Structure::None,
             height: 0.0,
             biomass: 0.0,
+            fertility: 0.0,
             temp: 300.0,
             rainfall: 0.0,
         }
@@ -129,9 +132,9 @@ impl Planet {
 
         self::buildings::advance(self, params);
         self::heat_transfer::advance(self, sim, params);
-
-        atmo::sim_atmosphere(self, params);
-        water::sim_water(self, sim, params);
+        self::atmo::sim_atmosphere(self, params);
+        self::water::sim_water(self, sim, params);
+        self::biome::sim_biome(self, sim, params);
     }
 
     pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {

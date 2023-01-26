@@ -238,6 +238,7 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
             tile.temp - 273.15
         ));
         ui.label(format!("{}: {:.0} mm", t!("rainfall"), tile.rainfall));
+        ui.label(format!("{}: {:.0} %", t!("fertility"), tile.fertility));
 
         let s = match &tile.structure {
             Structure::None => None,
