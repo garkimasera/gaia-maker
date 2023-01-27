@@ -21,6 +21,7 @@ pub enum OverlayLayerKind {
     AirTemprature,
     Rainfall,
     Height,
+    Fertility,
 }
 
 pub const N_POINTS: usize = 64;
@@ -68,6 +69,11 @@ impl ColorMaterials {
                     let i = (-h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
                     self.blue_dark_blue[i].clone()
                 }
+            }
+            OverlayLayerKind::Fertility => {
+                let i = (planet.map[p].fertility / 100.0 * N_POINTS as f32)
+                    .clamp(0.0, N_POINTS as f32 - 1.0) as usize;
+                self.white_yellow_red[i].clone()
             }
         }
     }
