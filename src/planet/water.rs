@@ -1,3 +1,4 @@
+use super::misc::linear_interpolation;
 use super::*;
 use geom::{CyclicMode, Direction};
 use serde::{Deserialize, Serialize};
@@ -81,7 +82,10 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
             let biome = planet.map[p].biome;
 
             if biome == Biome::Ocean {
-                sim.vapor_new[p] = 10.0;
+                sim.vapor_new[p] = linear_interpolation(
+                    &params.sim.ocean_vaporization_table,
+                    planet.map[p].temp - KELVIN_CELSIUS,
+                ) / RAINFALL_DURATION;
             } else {
                 let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                     .into_iter()

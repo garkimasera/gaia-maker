@@ -235,7 +235,7 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
         ui.label(format!(
             "{}: {:.1} °C",
             t!("air-temprature"),
-            tile.temp - 273.15
+            tile.temp - KELVIN_CELSIUS
         ));
         ui.label(format!("{}: {:.0} mm", t!("rainfall"), tile.rainfall));
         ui.label(format!("{}: {:.0} %", t!("fertility"), tile.fertility));

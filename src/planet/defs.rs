@@ -6,6 +6,7 @@ use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
+pub const KELVIN_CELSIUS: f32 = 273.15;
 pub const RAINFALL_DURATION: f32 = 360.0;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -294,4 +295,6 @@ pub struct SimParams {
     pub vapor_diffusion_factor: f32,
     /// The ratio of vapor loss
     pub vapor_loss_ratio: f32,
+    /// Vaporizaion from ocean tile - °C table
+    pub ocean_vaporization_table: Vec<(f32, f32)>,
 }

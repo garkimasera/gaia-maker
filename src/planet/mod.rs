@@ -5,6 +5,7 @@ mod buildings;
 mod defs;
 mod heat_transfer;
 mod map_generator;
+mod misc;
 mod resources;
 mod sim;
 mod water;
