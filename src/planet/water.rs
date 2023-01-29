@@ -29,6 +29,7 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if tile.height < planet.water.sea_level {
             tile.biome = Biome::Ocean;
         } else if tile.biome == Biome::Ocean {
+            tile.fertility *= params.sim.change_from_ocean_fertility_factor;
             tile.biome = Biome::Rock;
         }
     }

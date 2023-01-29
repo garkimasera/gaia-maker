@@ -23,6 +23,7 @@
         star_system_buildings: {
             asteroid_mining_station: 2,
         },
+        days_before_start: 100,
     ),
     sim: (
         sim_normal_loop_duration_ms: 1000,
@@ -50,6 +51,7 @@
             (20.0, 1000.0),
             (40.0, 3000.0),
         ],
+        change_from_ocean_fertility_factor: 0.2,
     ),
     orbital_buildings: {
         fusion_reactor: (

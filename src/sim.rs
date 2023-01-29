@@ -87,7 +87,7 @@ fn manage_planet(
     for e in er_manage_planet.iter() {
         let new_planet = match e {
             ManagePlanet::New(w, h) => {
-                let planet = Planet::new(*w, *h, &params.start);
+                let planet = Planet::new(*w, *h, &params.start, &params);
                 Some(planet)
             }
             ManagePlanet::Save(path) => {

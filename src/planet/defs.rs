@@ -270,6 +270,7 @@ pub struct StartParams {
     pub water_volume: f32,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
+    pub days_before_start: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -298,4 +299,6 @@ pub struct SimParams {
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
     pub ocean_vaporization_table: Vec<(f32, f32)>,
+    /// Fertility factor when changed from ocean
+    pub change_from_ocean_fertility_factor: f32,
 }

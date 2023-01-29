@@ -72,7 +72,7 @@ pub struct Planet {
 }
 
 impl Planet {
-    pub fn new(w: u32, h: u32, start_params: &StartParams) -> Planet {
+    pub fn new(w: u32, h: u32, start_params: &StartParams, params: &Params) -> Planet {
         let mut map = Array2d::new(w, h, Tile::default());
 
         let gen_conf = map_generator::GenConf {
@@ -124,6 +124,11 @@ impl Planet {
             .player
             .buildable_structures
             .insert(StructureKind::Heater);
+
+        let mut sim = Sim::new(&planet);
+        for _ in 0..start_params.days_before_start {
+            planet.advance(&mut sim, params);
+        }
 
         planet
     }
