@@ -8,7 +8,7 @@ https://garkimasera.github.io/pixel-gaia/
 
 ## Concept
 
-* Focus on terraforming and plant engineering
+* Focus on terraforming and planet engineering
 * Simple simulation for temprature, rainfall, and biomes 
 
 ## License

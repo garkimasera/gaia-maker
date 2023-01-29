@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use geom::Coords;
 use strum::{AsRefStr, EnumIter};
 
-use crate::planet::Planet;
+use crate::planet::{Biome, Planet};
 
 #[derive(Clone, Copy, Debug)]
 pub struct OverlayPlugin;
@@ -49,15 +49,18 @@ impl ColorMaterials {
                 self.white_yellow_red[i].clone()
             }
             OverlayLayerKind::Rainfall => {
-                let rainfall = planet.map[p].rainfall;
-
-                let i = if rainfall < 0.0 {
-                    0
+                if planet.map[p].biome == Biome::Ocean {
+                    self.blue_dark_blue[32].clone()
                 } else {
-                    ((rainfall / 40.0) as usize).clamp(0, N_POINTS - 1)
-                };
+                    let rainfall = planet.map[p].rainfall;
 
-                self.white_yellow_red[i].clone()
+                    let i = if rainfall < 0.0 {
+                        0
+                    } else {
+                        ((rainfall / 40.0) as usize).clamp(0, N_POINTS - 1)
+                    };
+                    self.white_yellow_red[i].clone()
+                }
             }
             OverlayLayerKind::Height => {
                 let h = planet.height_above_sea_level(p);

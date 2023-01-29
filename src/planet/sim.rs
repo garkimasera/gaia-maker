@@ -33,7 +33,7 @@ impl Sim {
 
         for p in map_iter_idx {
             atemp[p] = planet.map[p].temp;
-            vapor[p] = planet.map[p].rainfall;
+            vapor[p] = planet.map[p].vapor;
         }
 
         Sim {

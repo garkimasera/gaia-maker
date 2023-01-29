@@ -112,6 +112,7 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
 
     // Set calculated new rainfall
     for p in map_iter_idx {
+        planet.map[p].vapor = sim.vapor[p];
         planet.map[p].rainfall = sim.vapor[p] * RAINFALL_DURATION;
     }
 }
