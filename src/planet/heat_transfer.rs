@@ -18,7 +18,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Calculate albedo of tiles
     for p in map_iter_idx {
-        sim.albedo[p] = 0.3;
+        sim.albedo[p] = params.biomes[&planet.map[p].biome].albedo;
     }
 
     let greenhouse_effect = greenhouse_effect(planet, params);

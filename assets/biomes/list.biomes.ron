@@ -1,18 +1,22 @@
 {
     rock: (
         z: 80.0,
+        albedo: 0.3,
         revaporization_ratio: 0.1,
     ),
     ocean: (
         z: 90.0,
+        albedo: 0.2,
         revaporization_ratio: 0.0,
     ),
     desert: (
         z: 50.0,
+        albedo: 0.35,
         revaporization_ratio: 0.1,
     ),
     grassland: (
         z: 40.0,
+        albedo: 0.2,
         revaporization_ratio: 0.3,
     ),
 }
