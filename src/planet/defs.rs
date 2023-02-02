@@ -79,6 +79,16 @@ pub struct BiomeAttrs {
     pub z: f32,
     pub albedo: f32,
     pub revaporization_ratio: f32,
+    pub priority: u32,
+    pub mean_transition_time: f32,
+    pub requirements: BiomeRequirements,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct BiomeRequirements {
+    temprature: (f32, f32),
+    rainfall: (f32, f32),
+    fertility: (f32, f32),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
