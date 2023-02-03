@@ -28,7 +28,7 @@
         albedo: 0.35,
         revaporization_ratio: 0.1,
         priority: 1,
-        mean_transition_time: 200,
+        mean_transition_time: 80,
         requirements: (
             temprature: (-50.0, 100.0),
             rainfall: (0.0, 1000.0),
@@ -40,7 +40,7 @@
         albedo: 0.2,
         revaporization_ratio: 0.3,
         priority: 10,
-        mean_transition_time: 100,
+        mean_transition_time: 120,
         requirements: (
             temprature: (0.0, 42.0),
             rainfall: (300.0, 4000.0),
