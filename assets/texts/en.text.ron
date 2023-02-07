@@ -40,11 +40,13 @@
     
     // Resources
     "energy": "Energy",
+    "ice": "Ice",
     "material": "Material",
     "nitrogen": "Nitrogen",
 
     // Structures
     "oxygen-generator": "Oxygen Generator",
+    "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
     
@@ -54,6 +56,7 @@
     
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
+    "ice-mining-station": "Ice Mining Station",
     "dyson-swarm-unit": "Dyson Swarm Unit",
     "ammonia-extractor": "Ammonia Extractor",
     

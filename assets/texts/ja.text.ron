@@ -40,11 +40,13 @@
     
     // Resources
     "energy": "エネルギー",
+    "ice": "氷",
     "material": "素材",
     "nitrogen": "窒素",
 
     // Structures
     "oxygen-generator": "酸素発生機",
+    "rainmaker": "降雨装置",
     "fertilization-plant": "肥沃化工場",
     "heater": "ヒーター",
     
@@ -54,6 +56,7 @@
     
     // Star System Buildings
     "asteroid-mining-station": "小惑星採掘ステーション",
+    "ice-mining-station": "氷採掘ステーション",
     "dyson-swarm-unit": "ダイソンスウォームユニット",
     "ammonia-extractor": "アンモニア抽出ステーション",
     

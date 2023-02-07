@@ -39,6 +39,7 @@ pub struct PlanetBasics {
 pub enum ResourceKind {
     Energy,
     Material,
+    Ice,
     Nitrogen,
 }
 
@@ -149,6 +150,7 @@ pub enum Structure {
     None,
     Occupied { by: Coords },
     OxygenGenerator,
+    Rainmaker,
     FertilizationPlant,
     Heater,
 }
@@ -237,6 +239,7 @@ pub enum OrbitalBuildingKind {
 #[strum(serialize_all = "kebab-case")]
 pub enum StarSystemBuildingKind {
     AsteroidMiningStation,
+    IceMiningStation,
     DysonSwarmUnit,
     AmmoniaExtractor,
 }
@@ -247,6 +250,10 @@ pub enum BuildingEffect {
     SprayToAtmo {
         kind: GasKind,
         mass: f32,
+    },
+    Vapor {
+        value: f32,
+        additional_water: f32,
     },
     Heater {
         heat: f32,

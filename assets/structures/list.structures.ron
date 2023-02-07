@@ -9,6 +9,17 @@
             upkeep: { energy: 10.0 },
         ),
     ),
+    rainmaker: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 2,
+        building: (
+            cost: { material: 100 },
+            upkeep: { energy: 1000, ice: 1 },
+            effect: Vapor ( value: 5000, additional_water: 1e+9 ),
+        ),
+    ),
     fertilization_plant: (
         width: 48,
         height: 48,

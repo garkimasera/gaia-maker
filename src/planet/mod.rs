@@ -121,6 +121,10 @@ impl Planet {
         planet
             .player
             .buildable_structures
+            .insert(StructureKind::Rainmaker);
+        planet
+            .player
+            .buildable_structures
             .insert(StructureKind::FertilizationPlant);
         planet
             .player

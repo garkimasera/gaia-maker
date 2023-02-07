@@ -75,6 +75,12 @@
             produces: { material: 100 },
             build_max: 100,
         ),
+        ice_mining_station: (
+            cost: { material: 200 },
+            upkeep: { energy: 80 },
+            produces: { ice: 1000 },
+            build_max: 100,
+        ),
         dyson_swarm_unit: (
             cost: { material: 20000 },
             upkeep: { material: 10 },
