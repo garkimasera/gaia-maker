@@ -66,10 +66,18 @@ fn cursor_action(
 
 fn new_structure(kind: StructureKind) -> Structure {
     match kind {
-        StructureKind::OxygenGenerator => Structure::OxygenGenerator,
-        StructureKind::Rainmaker => Structure::Rainmaker,
-        StructureKind::FertilizationPlant => Structure::FertilizationPlant,
-        StructureKind::Heater => Structure::Heater,
+        StructureKind::OxygenGenerator => Structure::OxygenGenerator {
+            state: StructureState::Working,
+        },
+        StructureKind::Rainmaker => Structure::Rainmaker {
+            state: StructureState::Working,
+        },
+        StructureKind::FertilizationPlant => Structure::FertilizationPlant {
+            state: StructureState::Working,
+        },
+        StructureKind::Heater => Structure::Heater {
+            state: StructureState::Working,
+        },
         _ => unreachable!(),
     }
 }

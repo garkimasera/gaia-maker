@@ -149,16 +149,43 @@ impl Default for StructureSize {
 pub enum Structure {
     None,
     Occupied { by: Coords },
-    OxygenGenerator,
-    Rainmaker,
-    FertilizationPlant,
-    Heater,
+    OxygenGenerator { state: StructureState },
+    Rainmaker { state: StructureState },
+    FertilizationPlant { state: StructureState },
+    Heater { state: StructureState },
 }
 
 impl Structure {
     pub fn kind(&self) -> StructureKind {
         self.into()
     }
+
+    pub fn state(&mut self) -> Option<StructureState> {
+        match self {
+            Self::OxygenGenerator { state } => Some(*state),
+            Self::Rainmaker { state } => Some(*state),
+            Self::FertilizationPlant { state } => Some(*state),
+            Self::Heater { state } => Some(*state),
+            _ => None,
+        }
+    }
+
+    pub fn state_mut(&mut self) -> Option<&mut StructureState> {
+        match self {
+            Self::OxygenGenerator { state } => Some(state),
+            Self::Rainmaker { state } => Some(state),
+            Self::FertilizationPlant { state } => Some(state),
+            Self::Heater { state } => Some(state),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub enum StructureState {
+    Working,
+    Stopped,
+    Disabled,
 }
 
 #[derive(
