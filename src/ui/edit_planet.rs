@@ -1,7 +1,6 @@
 use super::{convert_rect, CursorMode, OccupiedScreenSpace, WindowsOpenState};
 use crate::conf::Conf;
 use crate::planet::*;
-use crate::sim::ManagePlanet;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
@@ -23,7 +22,6 @@ pub fn edit_planet_window(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     conf: Res<Conf>,
-    mut ew_manage_planet: EventWriter<ManagePlanet>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,
 ) {
@@ -43,7 +41,7 @@ pub fn edit_planet_window(
             ui.separator();
 
             match *current_panel {
-                Panel::Map => map_panel.ui(ui, &mut ew_manage_planet, &mut cursor_mode),
+                Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmosphere => atmo_ui(ui, &mut planet),
                 Panel::Water => water_ui(ui, &mut planet),
@@ -59,26 +57,11 @@ pub fn edit_planet_window(
 
 #[derive(Default, Debug)]
 pub struct MapPanel {
-    new_w: u32,
-    new_h: u32,
     biome: Biome,
 }
 
 impl MapPanel {
-    fn ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        ew_manage_planet: &mut EventWriter<ManagePlanet>,
-        cursor_mode: &mut CursorMode,
-    ) {
-        ui.add(egui::Slider::new(&mut self.new_w, 2..=100).text("width"));
-        ui.horizontal(|ui| {
-            ui.add(egui::Slider::new(&mut self.new_h, 2..=100).text("height"));
-            if ui.button("New").clicked() {
-                ew_manage_planet.send(ManagePlanet::New(self.new_w, self.new_h));
-            }
-        });
-
+    fn ui(&mut self, ui: &mut egui::Ui, cursor_mode: &mut CursorMode) {
         ui.horizontal(|ui| {
             egui::ComboBox::from_id_source(Biome::Ocean)
                 .selected_text(AsRef::<str>::as_ref(&self.biome))

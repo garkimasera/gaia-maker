@@ -74,12 +74,12 @@ pub struct Planet {
 }
 
 impl Planet {
-    pub fn new(w: u32, h: u32, start_params: &StartParams, params: &Params) -> Planet {
-        let mut map = Array2d::new(w, h, Tile::default());
+    pub fn new(start_params: &StartParams, params: &Params) -> Planet {
+        let mut map = Array2d::new(start_params.size.0, start_params.size.1, Tile::default());
 
         let gen_conf = map_generator::GenConf {
-            w: start_params.default_size.0,
-            h: start_params.default_size.1,
+            w: start_params.size.0,
+            h: start_params.size.1,
             max_height: start_params.max_height,
         };
         let height_map = map_generator::generate(gen_conf);

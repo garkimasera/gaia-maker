@@ -9,7 +9,7 @@ pub struct SimPlugin;
 
 #[derive(Clone, Debug)]
 pub enum ManagePlanet {
-    New(u32, u32),
+    New(StartParams),
     Save(String),
     Load(String),
 }
@@ -86,8 +86,8 @@ fn manage_planet(
 
     for e in er_manage_planet.iter() {
         let new_planet = match e {
-            ManagePlanet::New(w, h) => {
-                let planet = Planet::new(*w, *h, &params.start, &params);
+            ManagePlanet::New(start_params) => {
+                let planet = Planet::new(start_params, &params);
                 Some(planet)
             }
             ManagePlanet::Save(path) => {

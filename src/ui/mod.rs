@@ -1,5 +1,6 @@
 mod edit_planet;
 mod main_menu;
+mod new_planet;
 mod orbit;
 mod star_system;
 mod stat;
@@ -59,6 +60,10 @@ impl Plugin for UiPlugin {
                 SystemSet::on_exit(GameState::AssetLoading)
                     .with_system(setup_fonts)
                     .with_system(load_textures),
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::MainMenu)
+                    .with_system(main_menu::set_main_menu_state),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::MainMenu).with_system(main_menu::main_menu),

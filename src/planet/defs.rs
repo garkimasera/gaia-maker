@@ -160,7 +160,7 @@ impl Structure {
         self.into()
     }
 
-    pub fn state(&mut self) -> Option<StructureState> {
+    pub fn _state(&mut self) -> Option<StructureState> {
         match self {
             Self::OxygenGenerator { state } => Some(*state),
             Self::Rainmaker { state } => Some(*state),
@@ -170,7 +170,7 @@ impl Structure {
         }
     }
 
-    pub fn state_mut(&mut self) -> Option<&mut StructureState> {
+    pub fn _state_mut(&mut self) -> Option<&mut StructureState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
@@ -294,8 +294,9 @@ pub enum BuildingEffect {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
-    pub start: StartParams,
     pub sim: SimParams,
+    pub new_planet: NewPlanetParams,
+    pub default_start_params: StartParams,
     #[serde(skip)]
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
     #[serde(skip)]
@@ -307,7 +308,7 @@ pub struct Params {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartParams {
     pub basics: PlanetBasics,
-    pub default_size: (u32, u32),
+    pub size: (u32, u32),
     pub max_height: f32,
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
@@ -345,4 +346,16 @@ pub struct SimParams {
     pub ocean_vaporization_table: Vec<(f32, f32)>,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NewPlanetRangedParam {
+    pub min: f32,
+    pub max: f32,
+    pub default: f32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NewPlanetParams {
+    pub solar_constant: NewPlanetRangedParam,
 }
