@@ -358,4 +358,7 @@ pub struct NewPlanetRangedParam {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NewPlanetParams {
     pub solar_constant: NewPlanetRangedParam,
+    pub water_volume_max: f32,
+    pub nitrogen_max: f32,
+    pub carbon_dioxide_max: f32,
 }

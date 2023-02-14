@@ -30,6 +30,9 @@
     ),
     new_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
+        water_volume_max: 1.0e+18,
+        nitrogen_max: 1.0e+10,
+        carbon_dioxide_max: 2.0e+8,
     ),
     default_start_params: (
         basics: (
