@@ -52,7 +52,6 @@ impl Plugin for UiPlugin {
         app.add_plugin(EguiPlugin)
             .insert_resource(WindowsOpenState {
                 edit_planet: self.edit_planet,
-                message: true,
                 ..default()
             })
             .init_resource::<OverlayLayerKind>()
@@ -244,6 +243,8 @@ fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_t
         ));
         ui.label(format!("{}: {:.0} mm", t!("rainfall"), tile.rainfall));
         ui.label(format!("{}: {:.0} %", t!("fertility"), tile.fertility));
+
+        ui.label(t!(tile.biome.as_ref()));
 
         let s = match &tile.structure {
             Structure::None => None,

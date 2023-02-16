@@ -47,6 +47,12 @@
     "material": "素材",
     "nitrogen": "窒素",
 
+    // Biomes
+    "rock": "岩石",
+    "ocean": "海",
+    "desert": "砂漠",
+    "grassland": "草原",
+
     // Structures
     "oxygen-generator": "酸素発生機",
     "rainmaker": "降雨装置",

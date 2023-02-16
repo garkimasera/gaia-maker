@@ -47,6 +47,12 @@
     "material": "Material",
     "nitrogen": "Nitrogen",
 
+    // Biomes
+    "rock": "Rock",
+    "ocean": "Ocean",
+    "desert": "Desert",
+    "grassland": "Grassland",
+
     // Structures
     "oxygen-generator": "Oxygen Generator",
     "rainmaker": "Rainmaker",
