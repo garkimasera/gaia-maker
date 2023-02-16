@@ -19,6 +19,8 @@ pub struct Sim {
     pub vapor: Array2d<f32>,
     /// Vapor in air (used for calculation)
     pub vapor_new: Array2d<f32>,
+    /// Fertility effect to tile from structures or other factors
+    pub fertility_effect: Array2d<f32>,
 }
 
 impl Sim {
@@ -45,6 +47,7 @@ impl Sim {
             albedo: Array2d::new(size.0, size.1, 0.0),
             vapor,
             vapor_new: Array2d::new(size.0, size.1, 0.0),
+            fertility_effect: Array2d::new(size.0, size.1, 0.0),
         }
     }
 }

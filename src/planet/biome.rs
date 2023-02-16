@@ -1,12 +1,15 @@
-use super::*;
-use geom::CDistRangeIter;
+use super::{misc::linear_interpolation, *};
+use geom::{CDistRangeIter, Direction};
 use rand::{thread_rng, Rng};
 
 const FERTILITY_MAX: f32 = 100.0;
 const FERTILITY_MIN: f32 = 0.0;
 
-pub fn sim_biome(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
+pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let map_iter_idx = planet.map.iter_idx();
+
+    // Fertility
+    sim.fertility_effect.fill(0.0);
 
     for p in map_iter_idx {
         if let Some(structure_param) = params.structures.get(&planet.map[p].structure.kind()) {
@@ -17,12 +20,45 @@ pub fn sim_biome(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
             }) = structure_param.building.effect
             {
                 for (_, p) in CDistRangeIter::new(p, range as _) {
-                    let fertility = &mut planet.map[p].fertility;
-                    *fertility =
-                        (*fertility + increment).clamp(FERTILITY_MIN, max.min(FERTILITY_MAX));
+                    if planet.map.in_range(p) {
+                        if planet.map[p].fertility < max {
+                            sim.fertility_effect[p] += increment;
+                        }
+                    }
                 }
             }
         }
+    }
+
+    for p in map_iter_idx {
+        let temp_factor = linear_interpolation(
+            &params.sim.temprature_fertility_table,
+            planet.map[p].temp - KELVIN_CELSIUS,
+        );
+        let rainfall_factor =
+            linear_interpolation(&params.sim.rainfall_fertility_table, planet.map[p].rainfall);
+
+        let fertility = planet.map[p].fertility;
+
+        let diff = if temp_factor >= 0.0 && rainfall_factor >= 0.0 {
+            let fertility_from_adjacent_tiles = Direction::FOUR_DIRS
+                .iter()
+                .filter_map(|direction| {
+                    let p_adj = p + direction.as_coords();
+                    if planet.map.in_range(p_adj) {
+                        Some((planet.map[p_adj].fertility - fertility).max(0.0))
+                    } else {
+                        None
+                    }
+                })
+                .sum::<f32>()
+                * params.sim.fertility_adjacent_factor;
+            (sim.fertility_effect[p] + fertility_from_adjacent_tiles) * temp_factor
+        } else {
+            params.sim.fertility_base_decrement * temp_factor.min(rainfall_factor)
+        };
+
+        planet.map[p].fertility = (fertility + diff).clamp(FERTILITY_MIN, FERTILITY_MAX);
     }
 
     process_biome_transition(planet, params);

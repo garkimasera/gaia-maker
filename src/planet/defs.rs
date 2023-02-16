@@ -344,6 +344,14 @@ pub struct SimParams {
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
     pub ocean_vaporization_table: Vec<(f32, f32)>,
+    /// Temprature effect to fertility table
+    pub temprature_fertility_table: Vec<(f32, f32)>,
+    /// Rainfall effect to fertility table
+    pub rainfall_fertility_table: Vec<(f32, f32)>,
+    /// Base decrement value of fertility
+    pub fertility_base_decrement: f32,
+    /// Factor of fertility from adjacent tiles
+    pub fertility_adjacent_factor: f32,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
 }
