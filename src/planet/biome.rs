@@ -20,10 +20,8 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             }) = structure_param.building.effect
             {
                 for (_, p) in CDistRangeIter::new(p, range as _) {
-                    if planet.map.in_range(p) {
-                        if planet.map[p].fertility < max {
-                            sim.fertility_effect[p] += increment;
-                        }
+                    if planet.map.in_range(p) && planet.map[p].fertility < max {
+                        sim.fertility_effect[p] += increment;
                     }
                 }
             }

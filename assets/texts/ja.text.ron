@@ -14,6 +14,7 @@
     "exit": "終了",
     "fertility": "肥沃度",
     "height": "高さ",
+    "help": "ヘルプ",
     "latitude": "緯度",
     "layers": "レイヤー",
     "load": "ロード",
@@ -37,6 +38,7 @@
     "star-system": "星系",
     "start": "開始",
     "statistics": "統計",
+    "structures": "構造物",
     "selected-tool": "選択中のツール",
     "upkeep": "維持",
     "water": "水",
@@ -59,17 +61,20 @@
     "rainmaker": "降雨装置",
     "fertilization-plant": "肥沃化工場",
     "heater": "ヒーター",
-    
+
     // Orbital Buildings
     "fusion-reactor": "核融合炉",
     "nitrogen-sprayer": "窒素散布器",
-    
+
     // Star System Buildings
     "asteroid-mining-station": "小惑星採掘ステーション",
     "ice-mining-station": "氷採掘ステーション",
     "dyson-swarm-unit": "ダイソンスウォームユニット",
     "ammonia-extractor": "アンモニア抽出ステーション",
-    
+
     // Messages
     "welcome_to": "{$app_name} へようこそ",
+
+    // Help
+    "basics": "基本",
 }

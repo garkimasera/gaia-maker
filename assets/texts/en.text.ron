@@ -14,6 +14,7 @@
     "exit": "Exit",
     "fertility": "Fertility",
     "height": "Height",
+    "help": "Help",
     "latitude": "Latitude",
     "layers": "Layers",
     "load": "Load",
@@ -37,6 +38,7 @@
     "star-system": "Star system",
     "start": "Start",
     "statistics": "Statistics",
+    "structures": "Structures",
     "selected-tool": "Selected tool",
     "upkeep": "Upkeep",
     "water": "Water",
@@ -59,17 +61,20 @@
     "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
-    
+
     // Orbital Buildings
     "fusion-reactor": "Fusion Reactor",
     "nitrogen-sprayer": "Nitrogen Sprayer",
-    
+
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
     "ice-mining-station": "Ice Mining Station",
     "dyson-swarm-unit": "Dyson Swarm Unit",
     "ammonia-extractor": "Ammonia Extractor",
-    
+
     // Messages
     "welcome_to": "Welcome to {$app_name} !",
+
+    // Help
+    "basics": "Basics",
 }

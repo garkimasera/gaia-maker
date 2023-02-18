@@ -1,4 +1,5 @@
 mod edit_planet;
+mod help;
 mod main_menu;
 mod new_planet;
 mod orbit;
@@ -41,6 +42,7 @@ pub struct WindowsOpenState {
     pub stat: bool,
     pub message: bool,
     pub game_menu: bool,
+    pub help: bool,
     pub edit_planet: bool,
 }
 
@@ -77,6 +79,7 @@ impl Plugin for UiPlugin {
                     .with_system(stat::stat_window.label("ui_windows"))
                     .with_system(msg_window.label("ui_windows"))
                     .with_system(game_menu_window.label("ui_windows"))
+                    .with_system(help::help_window.label("ui_windows"))
                     .with_system(edit_planet::edit_planet_window.label("ui_windows")),
             );
     }
@@ -375,6 +378,15 @@ fn toolbar(
         .clicked()
     {
         wos.game_menu = !wos.game_menu;
+    }
+
+    let (handle, size) = textures.0.get(&UiTexture::IconHelp).unwrap();
+    if ui
+        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        .on_hover_text(t!("help"))
+        .clicked()
+    {
+        wos.help = !wos.help;
     }
 }
 
