@@ -6,7 +6,7 @@
         priority: 0,
         mean_transition_time: 200,
         requirements: (
-            temprature: (-275.15, 10000.0),
+            temprature: (-273.15, 10000.0),
             rainfall: (0.0, 100000.0),
             fertility: (0.0, 100.0),
         ),
@@ -32,6 +32,18 @@
         requirements: (
             temprature: (-50.0, 100.0),
             rainfall: (0.0, 1000.0),
+            fertility: (0.0, 100.0),
+        ),
+    ),
+    ice_field: (
+        z: 70.0,
+        albedo: 0.9,
+        revaporization_ratio: 0.1,
+        priority: 1,
+        mean_transition_time: 80,
+        requirements: (
+            temprature: (-273.15, -15.0),
+            rainfall: (50.0, 100000.0),
             fertility: (0.0, 100.0),
         ),
     ),

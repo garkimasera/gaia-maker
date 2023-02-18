@@ -53,6 +53,7 @@ pub type ResourceMap = fnv::FnvHashMap<ResourceKind, f32>;
     PartialOrd,
     Ord,
     Hash,
+    Default,
     Debug,
     Serialize,
     Deserialize,
@@ -63,16 +64,12 @@ pub type ResourceMap = fnv::FnvHashMap<ResourceKind, f32>;
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Biome {
+    #[default]
     Rock,
     Ocean,
     Desert,
+    IceField,
     Grassland,
-}
-
-impl Default for Biome {
-    fn default() -> Self {
-        Self::Rock
-    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
