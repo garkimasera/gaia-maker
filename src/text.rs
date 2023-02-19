@@ -89,7 +89,8 @@ fn set_text(translation_texts: Res<TranslationTexts>, texts: Res<Assets<Translat
     );
 }
 
-pub fn get_text(s: &str, map: HashMap<String, String>) -> String {
+pub fn get_text<S: AsRef<str>>(s: S, map: HashMap<String, String>) -> String {
+    let s = s.as_ref();
     if let Some(translation_text) = TRANSLATION_TEXTS.read().unwrap().get(&LANG.load()) {
         if let Some(text) = translation_text.0.get(s) {
             if map.is_empty() {

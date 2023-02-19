@@ -4,26 +4,31 @@ use once_cell::sync::Lazy;
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, WindowsOpenState};
-use crate::planet::StructureKind;
+use crate::planet::{OrbitalBuildingKind, StarSystemBuildingKind, StructureKind};
 use crate::{conf::Conf, screen::OccupiedScreenSpace};
 
 use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumDiscriminants)]
-#[strum(serialize_all = "kebab-case")]
 #[strum_discriminants(name(ItemGroup))]
-#[strum_discriminants(derive(PartialOrd, Ord, Hash, EnumIter, AsRefStr,))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, EnumIter, AsRefStr))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum Item {
     Basics(BasicsItem),
-    Structure(StructureKind),
+    Structures(StructureKind),
+    OrbitalBuildings(OrbitalBuildingKind),
+    StarSystemBuildings(StarSystemBuildingKind),
 }
 
 impl AsRef<str> for Item {
     fn as_ref(&self) -> &str {
         match self {
             Item::Basics(basic_items) => basic_items.as_ref(),
-            Item::Structure(structure_kind) => structure_kind.as_ref(),
+            Item::Structures(structure_kind) => structure_kind.as_ref(),
+            Item::OrbitalBuildings(orbital_building_kind) => orbital_building_kind.as_ref(),
+            Item::StarSystemBuildings(star_system_building_kind) => {
+                star_system_building_kind.as_ref()
+            }
         }
     }
 }
@@ -58,12 +63,10 @@ static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<Item>>> = Lazy::new(|| {
 
     map.insert(
         ItemGroup::Basics,
-        BasicsItem::iter()
-            .map(|basics_item| Item::Basics(basics_item))
-            .collect(),
+        BasicsItem::iter().map(Item::Basics).collect(),
     );
     map.insert(
-        ItemGroup::Structure,
+        ItemGroup::Structures,
         StructureKind::iter()
             .filter_map(|structure_kind| {
                 if matches!(
@@ -72,9 +75,21 @@ static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<Item>>> = Lazy::new(|| {
                 ) {
                     None
                 } else {
-                    Some(Item::Structure(structure_kind))
+                    Some(Item::Structures(structure_kind))
                 }
             })
+            .collect(),
+    );
+    map.insert(
+        ItemGroup::OrbitalBuildings,
+        OrbitalBuildingKind::iter()
+            .map(Item::OrbitalBuildings)
+            .collect(),
+    );
+    map.insert(
+        ItemGroup::StarSystemBuildings,
+        StarSystemBuildingKind::iter()
+            .map(Item::StarSystemBuildings)
             .collect(),
     );
 
@@ -93,13 +108,14 @@ pub fn help_window(
     }
     let rect = egui::Window::new(t!("help"))
         .open(&mut wos.help)
-        .vscroll(true)
-        .default_size([400.0, 400.0])
+        .vscroll(false)
         .show(egui_ctx.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 egui::ScrollArea::vertical()
                     .min_scrolled_height(300.0)
                     .show(ui, |ui| {
+                        ui.set_min_width(150.0);
+                        ui.set_min_height(300.0);
                         ui.vertical(|ui| {
                             for item_group in ItemGroup::iter() {
                                 ui.collapsing(t!(item_group.as_ref()), |ui| {
@@ -116,8 +132,10 @@ pub fn help_window(
                     });
                 ui.separator();
                 ui.vertical(|ui| {
+                    ui.set_min_width(300.0);
+                    ui.set_min_height(300.0);
                     ui.heading(t!(current_item.as_ref()));
-                    ui.label("TEXT");
+                    ui.label(t!(format!("help/{}", current_item.as_ref())));
                 });
             });
         })
