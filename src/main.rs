@@ -32,14 +32,10 @@ const APP_NAME: &str = concat!("Pixel Gaia v", env!("CARGO_PKG_VERSION"));
 
 #[derive(Clone, Parser, Debug)]
 #[clap(author, version)]
-struct Args {
-    /// Open planet editing tools
-    #[clap(long)]
-    edit_planet: bool,
-}
+struct Args {}
 
 fn main() {
-    let args = Args::parse();
+    let _args = Args::parse();
 
     App::new()
         .add_state(GameState::AssetLoading)
@@ -57,9 +53,7 @@ fn main() {
         .add_plugin(assets::AssetsPlugin)
         .add_plugin(overlay::OverlayPlugin)
         .add_plugin(screen::ScreenPlugin)
-        .add_plugin(ui::UiPlugin {
-            edit_planet: args.edit_planet,
-        })
+        .add_plugin(ui::UiPlugin)
         .add_plugin(audio::GameAudioPlugin)
         .add_plugin(draw::DrawPlugin)
         .add_plugin(action::ActionPlugin)

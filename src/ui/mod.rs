@@ -29,9 +29,7 @@ use crate::{
 };
 
 #[derive(Clone, Copy, Debug)]
-pub struct UiPlugin {
-    pub edit_planet: bool,
-}
+pub struct UiPlugin;
 
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
@@ -53,7 +51,7 @@ impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(EguiPlugin)
             .insert_resource(WindowsOpenState {
-                edit_planet: self.edit_planet,
+                help: true,
                 ..default()
             })
             .init_resource::<OverlayLayerKind>()
