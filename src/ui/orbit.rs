@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 use strum::IntoEnumIterator;
 
-use super::{building_desc_tooltip, convert_rect, OccupiedScreenSpace, WindowsOpenState};
+use super::{convert_rect, help::HelpItem, OccupiedScreenSpace, WindowsOpenState};
 use crate::conf::Conf;
 use crate::planet::*;
 
@@ -42,10 +42,10 @@ pub fn orbit_window(
                         ui.add(egui::Slider::new(&mut building.enabled, 0..=building.n));
                         if ui
                             .add_enabled(buildable, egui::Button::new(t!("add")))
-                            .on_hover_ui(building_desc_tooltip(&params.orbital_buildings[&kind]))
-                            .on_disabled_hover_ui(building_desc_tooltip(
-                                &params.orbital_buildings[&kind],
-                            ))
+                            .on_hover_ui(|ui| HelpItem::OrbitalBuildings(kind).ui(ui, &params))
+                            .on_disabled_hover_ui(|ui| {
+                                HelpItem::OrbitalBuildings(kind).ui(ui, &params)
+                            })
                             .clicked()
                         {
                             planet.build_orbital_building(kind, &params);

@@ -8,7 +8,7 @@ mod stat;
 
 use bevy::{app::AppExit, math::Rect, prelude::*};
 use bevy_egui::{
-    egui::{self, FontData, FontDefinitions, FontFamily, RichText, Ui},
+    egui::{self, FontData, FontDefinitions, FontFamily},
     EguiContext, EguiPlugin, EguiSettings,
 };
 use std::collections::{HashMap, VecDeque};
@@ -27,6 +27,8 @@ use crate::{
     text::Unit,
     GameSpeed, GameState,
 };
+
+use self::help::HelpItem;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
@@ -413,7 +415,7 @@ fn build_window(
                 let s: &str = kind.as_ref();
                 if ui
                     .button(t!(s))
-                    .on_hover_ui(build_button_tooltip(*kind, &params))
+                    .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, &params))
                     .clicked()
                 {
                     *cursor_mode = CursorMode::Build(*kind);
@@ -426,81 +428,6 @@ fn build_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
-}
-
-fn build_button_tooltip(kind: StructureKind, params: &Params) -> impl FnOnce(&mut Ui) + '_ {
-    building_desc_tooltip(&params.structures[&kind].building)
-}
-
-fn building_desc_tooltip(attrs: &BuildingAttrs) -> impl FnOnce(&mut Ui) + '_ {
-    move |ui| {
-        if !attrs.cost.is_empty() {
-            ui.label(RichText::new(t!("cost")).strong());
-            let mut resources = attrs.cost.iter().collect::<Vec<_>>();
-            resources.sort_by_key(|(resource, _)| *resource);
-            let s = resources
-                .into_iter()
-                .map(|(resource, value)| {
-                    format!(
-                        "{}: {}",
-                        t!(resource.as_ref()),
-                        resource.display_with_value(*value)
-                    )
-                })
-                .fold(String::new(), |mut s0, s1| {
-                    if !s0.is_empty() {
-                        s0.push_str(", ");
-                    }
-                    s0.push_str(&s1);
-                    s0
-                });
-            ui.label(s);
-        }
-        if !attrs.upkeep.is_empty() {
-            ui.label(RichText::new(t!("upkeep")).strong());
-            let mut resources = attrs.upkeep.iter().collect::<Vec<_>>();
-            resources.sort_by_key(|(resource, _)| *resource);
-            let s = resources
-                .iter()
-                .map(|(resource, value)| {
-                    format!(
-                        "{}: {}",
-                        t!(resource.as_ref()),
-                        resource.display_with_value(**value)
-                    )
-                })
-                .fold(String::new(), |mut s0, s1| {
-                    if !s0.is_empty() {
-                        s0.push_str(", ");
-                    }
-                    s0.push_str(&s1);
-                    s0
-                });
-            ui.label(s);
-        }
-        if !attrs.produces.is_empty() {
-            ui.label(RichText::new(t!("produces")).strong());
-            let mut resources = attrs.produces.iter().collect::<Vec<_>>();
-            resources.sort_by_key(|(resource, _)| *resource);
-            let s = resources
-                .iter()
-                .map(|(resource, value)| {
-                    format!(
-                        "{}: {}",
-                        t!(resource.as_ref()),
-                        resource.display_with_value(**value)
-                    )
-                })
-                .fold(String::new(), |mut s0, s1| {
-                    if !s0.is_empty() {
-                        s0.push_str(", ");
-                    }
-                    s0.push_str(&s1);
-                    s0
-                });
-            ui.label(s);
-        }
-    }
 }
 
 fn layers_window(

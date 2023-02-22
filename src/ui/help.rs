@@ -4,8 +4,12 @@ use once_cell::sync::Lazy;
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, WindowsOpenState};
-use crate::planet::{OrbitalBuildingKind, StarSystemBuildingKind, StructureKind};
-use crate::{conf::Conf, screen::OccupiedScreenSpace};
+use crate::conf::Conf;
+use crate::planet::{
+    BuildingAttrs, OrbitalBuildingKind, Params, StarSystemBuildingKind, StructureKind,
+};
+use crate::screen::OccupiedScreenSpace;
+use crate::text::Unit;
 
 use std::collections::BTreeMap;
 
@@ -13,20 +17,20 @@ use std::collections::BTreeMap;
 #[strum_discriminants(name(ItemGroup))]
 #[strum_discriminants(derive(PartialOrd, Ord, Hash, EnumIter, AsRefStr))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
-pub enum Item {
+pub enum HelpItem {
     Basics(BasicsItem),
     Structures(StructureKind),
     OrbitalBuildings(OrbitalBuildingKind),
     StarSystemBuildings(StarSystemBuildingKind),
 }
 
-impl AsRef<str> for Item {
+impl AsRef<str> for HelpItem {
     fn as_ref(&self) -> &str {
         match self {
-            Item::Basics(basic_items) => basic_items.as_ref(),
-            Item::Structures(structure_kind) => structure_kind.as_ref(),
-            Item::OrbitalBuildings(orbital_building_kind) => orbital_building_kind.as_ref(),
-            Item::StarSystemBuildings(star_system_building_kind) => {
+            HelpItem::Basics(basic_items) => basic_items.as_ref(),
+            HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
+            HelpItem::OrbitalBuildings(orbital_building_kind) => orbital_building_kind.as_ref(),
+            HelpItem::StarSystemBuildings(star_system_building_kind) => {
                 star_system_building_kind.as_ref()
             }
         }
@@ -46,24 +50,24 @@ impl Default for ItemGroup {
     }
 }
 
-impl Default for Item {
+impl Default for HelpItem {
     fn default() -> Self {
-        Item::Basics(BasicsItem::Concept)
+        HelpItem::Basics(BasicsItem::Concept)
     }
 }
 
-impl From<ItemGroup> for Item {
-    fn from(group: ItemGroup) -> Item {
+impl From<ItemGroup> for HelpItem {
+    fn from(group: ItemGroup) -> HelpItem {
         ITEM_LIST[&group][0]
     }
 }
 
-static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<Item>>> = Lazy::new(|| {
+static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<HelpItem>>> = Lazy::new(|| {
     let mut map = BTreeMap::new();
 
     map.insert(
         ItemGroup::Basics,
-        BasicsItem::iter().map(Item::Basics).collect(),
+        BasicsItem::iter().map(HelpItem::Basics).collect(),
     );
     map.insert(
         ItemGroup::Structures,
@@ -75,7 +79,7 @@ static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<Item>>> = Lazy::new(|| {
                 ) {
                     None
                 } else {
-                    Some(Item::Structures(structure_kind))
+                    Some(HelpItem::Structures(structure_kind))
                 }
             })
             .collect(),
@@ -83,13 +87,13 @@ static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<Item>>> = Lazy::new(|| {
     map.insert(
         ItemGroup::OrbitalBuildings,
         OrbitalBuildingKind::iter()
-            .map(Item::OrbitalBuildings)
+            .map(HelpItem::OrbitalBuildings)
             .collect(),
     );
     map.insert(
         ItemGroup::StarSystemBuildings,
         StarSystemBuildingKind::iter()
-            .map(Item::StarSystemBuildings)
+            .map(HelpItem::StarSystemBuildings)
             .collect(),
     );
 
@@ -101,7 +105,8 @@ pub fn help_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     conf: Res<Conf>,
-    mut current_item: Local<Item>,
+    params: Res<Params>,
+    mut current_item: Local<HelpItem>,
 ) {
     if !wos.help {
         return;
@@ -135,7 +140,8 @@ pub fn help_window(
                     ui.set_min_width(300.0);
                     ui.set_min_height(300.0);
                     ui.heading(t!(current_item.as_ref()));
-                    ui.label(t!(format!("help/{}", current_item.as_ref())));
+                    ui.separator();
+                    current_item.ui(ui, &params);
                 });
             });
         })
@@ -145,4 +151,88 @@ pub fn help_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+}
+
+impl HelpItem {
+    pub fn ui(&self, ui: &mut egui::Ui, params: &Params) {
+        if let Some(building_attrs) = match self {
+            HelpItem::Structures(kind) => Some(&params.structures[kind].building),
+            HelpItem::OrbitalBuildings(kind) => Some(&params.orbital_buildings[kind]),
+            HelpItem::StarSystemBuildings(kind) => Some(&params.star_system_buildings[kind]),
+            _ => None,
+        } {
+            ui_building_attr(ui, building_attrs);
+            ui.separator();
+        }
+        ui.label(t!(format!("help/{}", self.as_ref())));
+    }
+}
+
+fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
+    if !attrs.cost.is_empty() {
+        ui.label(egui::RichText::new(t!("cost")).strong());
+        let mut resources = attrs.cost.iter().collect::<Vec<_>>();
+        resources.sort_by_key(|(resource, _)| *resource);
+        let s = resources
+            .into_iter()
+            .map(|(resource, value)| {
+                format!(
+                    "{}: {}",
+                    t!(resource.as_ref()),
+                    resource.display_with_value(*value)
+                )
+            })
+            .fold(String::new(), |mut s0, s1| {
+                if !s0.is_empty() {
+                    s0.push_str(", ");
+                }
+                s0.push_str(&s1);
+                s0
+            });
+        ui.label(s);
+    }
+    if !attrs.upkeep.is_empty() {
+        ui.label(egui::RichText::new(t!("upkeep")).strong());
+        let mut resources = attrs.upkeep.iter().collect::<Vec<_>>();
+        resources.sort_by_key(|(resource, _)| *resource);
+        let s = resources
+            .iter()
+            .map(|(resource, value)| {
+                format!(
+                    "{}: {}",
+                    t!(resource.as_ref()),
+                    resource.display_with_value(**value)
+                )
+            })
+            .fold(String::new(), |mut s0, s1| {
+                if !s0.is_empty() {
+                    s0.push_str(", ");
+                }
+                s0.push_str(&s1);
+                s0
+            });
+        ui.label(s);
+    }
+    if !attrs.produces.is_empty() {
+        ui.label(egui::RichText::new(t!("produces")).strong());
+        let mut resources = attrs.produces.iter().collect::<Vec<_>>();
+        resources.sort_by_key(|(resource, _)| *resource);
+        let s = resources
+            .iter()
+            .map(|(resource, value)| {
+                format!(
+                    "{}: {}",
+                    t!(resource.as_ref()),
+                    resource.display_with_value(**value)
+                )
+            })
+            .fold(String::new(), |mut s0, s1| {
+                if !s0.is_empty() {
+                    s0.push_str(", ");
+                }
+                s0.push_str(&s1);
+                s0
+            });
+        ui.label(s);
+    }
 }
