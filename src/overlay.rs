@@ -18,9 +18,9 @@ impl Plugin for OverlayPlugin {
 pub enum OverlayLayerKind {
     #[default]
     None,
+    Height,
     AirTemprature,
     Rainfall,
-    Height,
     Fertility,
 }
 

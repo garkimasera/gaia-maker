@@ -71,7 +71,7 @@ enum GameState {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Resource)]
-enum GameSpeed {
+pub enum GameSpeed {
     #[default]
     Paused,
     Normal,

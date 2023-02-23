@@ -52,14 +52,19 @@ define_asset_list_from_enum! {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum UiTexture {
+    IconAirTemprature,
     IconBuild,
+    IconCoordinates,
+    IconFertility,
     IconGameMenu,
+    IconHeight,
     IconHelp,
     IconLayers,
     IconMaterial,
     IconMessage,
     IconOrbit,
     IconPower,
+    IconRainfall,
     IconSpeedFast,
     IconSpeedFastSelected,
     IconSpeedNormal,

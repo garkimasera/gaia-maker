@@ -3,6 +3,7 @@ mod help;
 mod main_menu;
 mod new_planet;
 mod orbit;
+mod panels;
 mod star_system;
 mod stat;
 
@@ -22,10 +23,9 @@ use crate::{
     msg::MsgKind,
     overlay::OverlayLayerKind,
     planet::*,
-    screen::{CursorMode, HoverTile, OccupiedScreenSpace},
+    screen::{CursorMode, OccupiedScreenSpace},
     sim::ManagePlanet,
-    text::Unit,
-    GameSpeed, GameState,
+    GameState,
 };
 
 use self::help::HelpItem;
@@ -71,7 +71,7 @@ impl Plugin for UiPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
-                    .with_system(panels.label("ui_panels").before("ui_windows"))
+                    .with_system(panels::panels.label("ui_panels").before("ui_windows"))
                     .with_system(build_window.label("ui_windows"))
                     .with_system(orbit::orbit_window.label("ui_windows"))
                     .with_system(star_system::star_system_window.label("ui_windows"))
@@ -144,250 +144,6 @@ fn load_textures(
     }
 
     commands.insert_resource(EguiTextures(egui_textures));
-}
-
-fn panels(
-    mut egui_ctx: ResMut<EguiContext>,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    hover_tile: Query<&HoverTile>,
-    mut cursor_mode: ResMut<CursorMode>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut speed: ResMut<GameSpeed>,
-    planet: Res<Planet>,
-    textures: Res<EguiTextures>,
-    conf: Res<Conf>,
-) {
-    occupied_screen_space.window_rects.clear();
-
-    occupied_screen_space.occupied_left = egui::SidePanel::left("left_panel")
-        .resizable(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
-            sidebar(ui, &cursor_mode, &planet, hover_tile.get_single().unwrap());
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .width()
-        * conf.scale_factor;
-
-    occupied_screen_space.occupied_top = egui::TopBottomPanel::top("top_panel")
-        .resizable(false)
-        .show(egui_ctx.ctx_mut(), |ui| {
-            ui.horizontal(|ui| {
-                toolbar(ui, &mut cursor_mode, &mut wos, &mut speed, &textures, &conf);
-            });
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .height()
-        * conf.scale_factor;
-}
-
-fn sidebar(ui: &mut egui::Ui, cursor_mode: &CursorMode, planet: &Planet, hover_tile: &HoverTile) {
-    let mut stock: Vec<_> = planet.res.stock.iter().collect();
-    stock.sort_by_key(|&(res, _)| res);
-    for (kind, v) in stock.into_iter() {
-        ui.horizontal(|ui| {
-            ui.label(&format!(
-                "{}: {}",
-                t!(kind.as_ref()),
-                kind.display_with_value(*v)
-            ));
-            let diff = planet.res.diff[kind];
-            let sign = if diff > 0.0 { '+' } else { '-' };
-            ui.label(
-                egui::RichText::new(format!("({}{})", sign, kind.display_with_value(diff.abs())))
-                    .small(),
-            );
-        });
-    }
-
-    ui.separator();
-
-    // Information about selected tool
-    ui.label(t!("selected-tool"));
-    match cursor_mode {
-        CursorMode::Normal => {
-            ui.label(t!("none"));
-        }
-        CursorMode::Build(kind) => {
-            ui.label(t!(kind.as_ref()));
-        }
-        CursorMode::Demolition => {
-            ui.label(t!("demolition"));
-        }
-        CursorMode::EditBiome(biome) => {
-            ui.label(format!("biome editing: {}", biome.as_ref()));
-        }
-    }
-
-    ui.separator();
-
-    // Information about the hovered tile
-    if let Some(p) = hover_tile.0 {
-        ui.label(format!("{}: [{}, {}]", t!("coordinates"), p.0, p.1));
-        let tile = &planet.map[p];
-
-        let (longitude, latitude) = planet.calc_longitude_latitude(p);
-        ui.label(format!(
-            "{}: {:.0}°, {}: {:.0}°",
-            t!("longitude"),
-            longitude * 180.0 * std::f32::consts::FRAC_1_PI,
-            t!("latitude"),
-            latitude * 180.0 * std::f32::consts::FRAC_1_PI,
-        ));
-        ui.label(format!("{:.0} m", planet.height_above_sea_level(p)));
-
-        ui.label(format!(
-            "{}: {:.1} °C",
-            t!("air-temprature"),
-            tile.temp - KELVIN_CELSIUS
-        ));
-        ui.label(format!("{}: {:.0} mm", t!("rainfall"), tile.rainfall));
-        ui.label(format!("{}: {:.0} %", t!("fertility"), tile.fertility));
-
-        ui.label(t!(tile.biome.as_ref()));
-
-        let s = match &tile.structure {
-            Structure::None => None,
-            Structure::Occupied { by } => {
-                Some(crate::info::structure_info(&planet.map[*by].structure))
-            }
-            other => Some(crate::info::structure_info(other)),
-        };
-
-        if let Some(s) = s {
-            ui.label(s);
-        }
-    } else {
-        ui.label(format!("{}: -", t!("coordinates")));
-    };
-}
-
-fn toolbar(
-    ui: &mut egui::Ui,
-    _cursor_mode: &mut CursorMode,
-    wos: &mut WindowsOpenState,
-    speed: &mut GameSpeed,
-    textures: &EguiTextures,
-    conf: &Conf,
-) {
-    let (handle, size) = textures.0.get(&UiTexture::IconBuild).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("build"))
-        .clicked()
-    {
-        wos.build = !wos.build;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconOrbit).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("orbit"))
-        .clicked()
-    {
-        wos.orbit = !wos.orbit;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconStarSystem).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("star-system"))
-        .clicked()
-    {
-        wos.star_system = !wos.star_system;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconLayers).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("layers"))
-        .clicked()
-    {
-        wos.layers = !wos.layers;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconStat).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("statistics"))
-        .clicked()
-    {
-        wos.stat = !wos.stat;
-    }
-
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    let texture = if *speed == GameSpeed::Paused {
-        UiTexture::IconSpeedPausedSelected
-    } else {
-        UiTexture::IconSpeedPaused
-    };
-    let (handle, size) = textures.0.get(&texture).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("speed-paused"))
-        .clicked()
-    {
-        *speed = GameSpeed::Paused;
-    }
-    let texture = if *speed == GameSpeed::Normal {
-        UiTexture::IconSpeedNormalSelected
-    } else {
-        UiTexture::IconSpeedNormal
-    };
-    let (handle, size) = textures.0.get(&texture).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("speed-normal"))
-        .clicked()
-    {
-        *speed = GameSpeed::Normal;
-    }
-    let texture = if *speed == GameSpeed::Fast {
-        UiTexture::IconSpeedFastSelected
-    } else {
-        UiTexture::IconSpeedFast
-    };
-    let (handle, size) = textures.0.get(&texture).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("speed-fast"))
-        .clicked()
-    {
-        *speed = GameSpeed::Fast;
-    }
-
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    let (handle, size) = textures.0.get(&UiTexture::IconMessage).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("messages"))
-        .clicked()
-    {
-        wos.message = !wos.message;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconGameMenu).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("menu"))
-        .clicked()
-    {
-        wos.game_menu = !wos.game_menu;
-    }
-
-    let (handle, size) = textures.0.get(&UiTexture::IconHelp).unwrap();
-    if ui
-        .add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
-        .on_hover_text(t!("help"))
-        .clicked()
-    {
-        wos.help = !wos.help;
-    }
 }
 
 fn build_window(
