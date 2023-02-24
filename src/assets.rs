@@ -53,6 +53,7 @@ define_asset_list_from_enum! {
 #[strum(serialize_all = "kebab-case")]
 pub enum UiTexture {
     IconAirTemprature,
+    IconBiomass,
     IconBuild,
     IconCoordinates,
     IconFertility,

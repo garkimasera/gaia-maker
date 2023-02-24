@@ -223,6 +223,11 @@ fn sidebar(
                 format!("{:.0} %", tile.fertility),
                 "fertility",
             ),
+            (
+                UiTexture::IconBiomass,
+                format!("{:.1} Mt", tile.biomass),
+                "biomass",
+            ),
         ];
 
         for (icon, label, s) in items {
