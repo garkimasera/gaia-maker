@@ -75,7 +75,8 @@
     "ammonia-extractor": "アンモニア抽出ステーション",
 
     // Messages
-    "welcome_to": "{$app_name} へようこそ",
+    "msg/welcome": "{$app_name} へようこそ",
+    "msg/loading-failed": "ロード失敗",
 
     // Help
     "basics": "基本",

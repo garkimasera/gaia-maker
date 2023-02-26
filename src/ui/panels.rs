@@ -231,7 +231,7 @@ fn sidebar(
         ];
 
         for (icon, label, s) in items {
-            let (texture, size) = &textures.0[&icon];
+            let (texture, size) = &textures.0[icon];
             let s = t!(s);
             ui.horizontal(|ui| {
                 ui.image(texture, *size).on_hover_text(&s);

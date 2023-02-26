@@ -30,7 +30,7 @@ impl MsgHolder {
         if let Some((msg_kind, s)) = self.msgs.front() {
             (*msg_kind, s.clone())
         } else {
-            (MsgKind::Notice, t!("welcome_to"; app_name=crate::APP_NAME))
+            (MsgKind::Notice, t!("msg/welcome"; app_name=crate::APP_NAME))
         }
     }
 }

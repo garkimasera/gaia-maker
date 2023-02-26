@@ -75,7 +75,8 @@
     "ammonia-extractor": "Ammonia Extractor",
 
     // Messages
-    "welcome_to": "Welcome to {$app_name} !",
+    "msg/welcome": "Welcome to {$app_name} !",
+    "msg/loading-failed": "Loading failed",
 
     // Help
     "basics": "Basics",

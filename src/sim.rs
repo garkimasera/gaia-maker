@@ -21,6 +21,7 @@ impl Resource for Sim {}
 impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
+            .add_event::<ManagePlanetError>()
             .add_system_set(
                 SystemSet::on_enter(GameState::Running)
                     .with_system(start_sim)
@@ -72,9 +73,13 @@ fn update(
     planet.advance(&mut sim, &params);
 }
 
+#[derive(Debug)]
+pub struct ManagePlanetError(pub String);
+
 fn manage_planet(
     mut command: Commands,
     mut er_manage_planet: EventReader<ManagePlanet>,
+    mut ew_manage_planet_eror: EventWriter<ManagePlanetError>,
     mut game_state: ResMut<State<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
@@ -84,42 +89,42 @@ fn manage_planet(
         return;
     };
 
-    for e in er_manage_planet.iter() {
-        let new_planet = match e {
-            ManagePlanet::New(start_params) => {
-                let planet = Planet::new(start_params, &params);
-                Some(planet)
+    let Some(e) = er_manage_planet.iter().next() else { return; };
+    let new_planet = match e {
+        ManagePlanet::New(start_params) => {
+            let planet = Planet::new(start_params, &params);
+            Some(planet)
+        }
+        ManagePlanet::Save(path) => {
+            if let Err(e) = crate::saveload::save_to(path, planet.as_ref().unwrap()) {
+                log::warn!("cannot save: {:?}", e);
             }
-            ManagePlanet::Save(path) => {
-                if let Err(e) = crate::saveload::save_to(path, planet.as_ref().unwrap()) {
-                    log::warn!("cannot save: {:?}", e);
-                }
+            None
+        }
+        ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
+            Ok(planet) => Some(planet),
+            Err(e) => {
+                ew_manage_planet_eror.send(ManagePlanetError(e.to_string()));
+                log::warn!("cannot load: {:?}", e);
                 None
             }
-            ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
-                Ok(planet) => Some(planet),
-                Err(e) => {
-                    log::warn!("cannot load: {:?}", e);
-                    None
-                }
-            },
-        };
+        },
+    };
 
-        if let Some(new_planet) = new_planet {
-            ew_centering.send(Centering(Vec2::new(
-                new_planet.map.size().0 as f32 * TILE_SIZE / 2.0,
-                new_planet.map.size().1 as f32 * TILE_SIZE / 2.0,
-            )));
+    if let Some(new_planet) = new_planet {
+        ew_centering.send(Centering(Vec2::new(
+            new_planet.map.size().0 as f32 * TILE_SIZE / 2.0,
+            new_planet.map.size().1 as f32 * TILE_SIZE / 2.0,
+        )));
 
-            let sim = Sim::new(&new_planet);
-            command.insert_resource(sim);
-            if let Some(planet) = &mut planet {
-                **planet = new_planet;
-            } else {
-                command.insert_resource(new_planet);
-            }
-
-            let _ = game_state.set(GameState::Running);
+        let sim = Sim::new(&new_planet);
+        command.insert_resource(sim);
+        if let Some(planet) = &mut planet {
+            **planet = new_planet;
+        } else {
+            command.insert_resource(new_planet);
         }
+
+        let _ = game_state.set(GameState::Running);
     }
 }

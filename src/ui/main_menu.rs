@@ -3,30 +3,33 @@ use bevy_egui::{egui, EguiContext};
 
 use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
-use crate::sim::ManagePlanet;
+use crate::sim::{ManagePlanet, ManagePlanetError};
 use crate::text::Lang;
 use strum::IntoEnumIterator;
 
 use super::new_planet::NewPlanetState;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum MainMenuWindow {
+pub enum MainMenuMode {
     #[default]
     Menu,
     NewPlanet,
+    Error,
 }
 
 #[derive(Clone, Debug, Resource)]
 pub struct MainMenuState {
-    pub current: MainMenuWindow,
+    pub mode: MainMenuMode,
     pub new_planet: NewPlanetState,
+    pub error: String,
 }
 
 impl MainMenuState {
     fn new(params: &Params) -> Self {
         MainMenuState {
-            current: MainMenuWindow::Menu,
+            mode: MainMenuMode::Menu,
             new_planet: NewPlanetState::new(params),
+            error: "".into(),
         }
     }
 }
@@ -41,10 +44,16 @@ pub fn main_menu(
     params: Res<Params>,
     mut conf: ResMut<Conf>,
     mut ew_conf_change: EventWriter<ConfChange>,
+    mut ew_manage_planet_eror: EventReader<ManagePlanetError>,
     mut state: ResMut<MainMenuState>,
 ) {
-    match state.current {
-        MainMenuWindow::Menu => {
+    if let Some(e) = ew_manage_planet_eror.iter().next() {
+        state.mode = MainMenuMode::Error;
+        state.error = e.0.clone();
+    }
+
+    match state.mode {
+        MainMenuMode::Menu => {
             egui::Window::new(t!("menu"))
                 .title_bar(false)
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
@@ -53,7 +62,7 @@ pub fn main_menu(
                 .show(egui_ctx.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                         if ui.button(t!("new")).clicked() {
-                            state.current = MainMenuWindow::NewPlanet;
+                            state.mode = MainMenuMode::NewPlanet;
                         }
                         if ui.button(t!("load")).clicked() {
                             ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
@@ -70,8 +79,23 @@ pub fn main_menu(
                 })
                 .unwrap();
         }
-        MainMenuWindow::NewPlanet => {
+        MainMenuMode::NewPlanet => {
             super::new_planet::new_planet(&mut egui_ctx, ew_manage_planet, &params, &mut state);
+        }
+        MainMenuMode::Error => {
+            egui::Window::new(t!("msg/loading-failed"))
+                .collapsible(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(egui_ctx.ctx_mut(), |ui| {
+                    ui.label(&state.error);
+                    ui.separator();
+                    ui.vertical_centered(|ui| {
+                        if ui.button(t!("close")).clicked() {
+                            state.mode = MainMenuMode::Menu;
+                        }
+                    });
+                })
+                .unwrap();
         }
     }
 }
