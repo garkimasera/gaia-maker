@@ -7,6 +7,7 @@
     "biomass": "Biomass",
     "build": "Build",
     "carbon-dioxide": "Carbon Dioxide",
+    "close": "Close",
     "coordinates": "Coordinates",
     "cost": "Cost",
     "demolition": "Demolition",
@@ -96,4 +97,9 @@
     "help/ice-mining-station": "Ice mining stations mine ice from ice-rich celestial bodies.",
     "help/dyson-swarm-unit": "The Dyson Swarm is a megastructure designed to harness all the energy emitted by a star. Each unit is merely a giant mirror that reflects light and delivers it to the demand location, but in sufficient numbers, they provide enough energy for terraforming.",
     "help/ammonia-extractor": "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in air or solid form.",
+
+    // Events
+    "event/start": "    You have arrived on a barren, undeveloped planet. Depending on the conditions of the planet, you can build various facilities to transform it into an environment suitable for life.
+    You need Energy to maintain the facilities and Material to build them. Energy can be produced by building fusion reactors in orbit and Material can be produced by building asteroid mining stations in the star system.
+    Please refer to the help for further information as needed.",
 }

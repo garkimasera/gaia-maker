@@ -73,20 +73,13 @@ impl Plugin for TextPlugin {
 }
 
 fn set_text(translation_texts: Res<TranslationTexts>, texts: Res<Assets<TranslationText>>) {
-    {
-        let t = &mut TRANSLATION_TEXTS.write().unwrap();
-        for lang in Lang::iter() {
-            let Some(translation_text) = texts.get(&translation_texts.get(lang)) else {
+    let t = &mut TRANSLATION_TEXTS.write().unwrap();
+    for lang in Lang::iter() {
+        let Some(translation_text) = texts.get(&translation_texts.get(lang)) else {
             continue;
         };
-            t.insert(lang, translation_text.clone());
-        }
+        t.insert(lang, translation_text.clone());
     }
-
-    crate::msg::push_msg(
-        crate::msg::MsgKind::Notice,
-        t!("welcome_to"; app_name=crate::APP_NAME),
-    );
 }
 
 pub fn get_text<S: AsRef<str>>(s: S, map: HashMap<String, String>) -> String {

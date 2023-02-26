@@ -1,5 +1,7 @@
 use super::*;
+use std::collections::VecDeque;
 use std::f32::consts::PI;
+use strum::AsRefStr;
 
 /// Holds data for simulation
 pub struct Sim {
@@ -21,6 +23,8 @@ pub struct Sim {
     pub vapor_new: Array2d<f32>,
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,
+    /// Events occured in simulation
+    pub events: VecDeque<Event>,
 }
 
 impl Sim {
@@ -38,6 +42,11 @@ impl Sim {
             vapor[p] = planet.map[p].vapor;
         }
 
+        let mut events = VecDeque::new();
+        if planet.days == 0 {
+            events.push_back(Event::Start);
+        }
+
         Sim {
             n_tile: size.0 * size.1,
             tile_area,
@@ -48,6 +57,13 @@ impl Sim {
             vapor,
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
+            events,
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, AsRefStr)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Event {
+    Start,
 }

@@ -12,7 +12,7 @@ use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily},
     EguiContext, EguiPlugin, EguiSettings,
 };
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -20,7 +20,7 @@ use crate::{
     conf::Conf,
     draw::UpdateMap,
     gz::GunzipBin,
-    msg::MsgKind,
+    msg::MsgHolder,
     overlay::OverlayLayerKind,
     planet::*,
     screen::{CursorMode, OccupiedScreenSpace},
@@ -52,10 +52,7 @@ pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(EguiPlugin)
-            .insert_resource(WindowsOpenState {
-                help: true,
-                ..default()
-            })
+            .init_resource::<WindowsOpenState>()
             .init_resource::<OverlayLayerKind>()
             .add_system_set(
                 SystemSet::on_exit(GameState::AssetLoading)
@@ -222,38 +219,34 @@ fn layers_window(
 
 fn msg_window(
     mut egui_ctx: ResMut<EguiContext>,
-    mut msgs: Local<VecDeque<(MsgKind, String)>>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
+    msg_holder: Res<MsgHolder>,
     conf: Res<Conf>,
 ) {
     if !wos.message {
         return;
     }
 
-    while let Some(msg) = crate::msg::pop_msg() {
-        msgs.push_front(msg);
-        if msgs.len() > conf.max_message {
-            msgs.pop_back();
-        }
-    }
+    let (_msg_kind, s) = msg_holder.latest();
 
+    let mut open = true;
     let rect = egui::Window::new(t!("messages"))
         .open(&mut wos.message)
         .vscroll(true)
         .show(egui_ctx.ctx_mut(), |ui| {
-            egui::ScrollArea::vertical()
-                .always_show_scroll(true)
-                .show(ui, |ui| {
-                    for (_kind, msg) in msgs.iter() {
-                        ui.label(msg);
-                        ui.separator();
-                    }
-                });
+            ui.label(s);
+            ui.separator();
+            ui.vertical_centered(|ui| {
+                if ui.button(t!("close")).clicked() {
+                    open = false;
+                }
+            });
         })
         .unwrap()
         .response
         .rect;
+    wos.message = open && wos.message;
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));

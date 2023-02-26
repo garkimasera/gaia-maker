@@ -135,6 +135,7 @@ impl Planet {
         for _ in 0..start_params.days_before_start {
             planet.advance(&mut sim, params);
         }
+        planet.days = 0;
 
         planet
     }
