@@ -84,9 +84,14 @@ pub struct BiomeAttrs {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BiomeRequirements {
+    /// Required temprature [°C]
     pub temprature: (f32, f32),
+    /// Required rainfall [mm/year]
     pub rainfall: (f32, f32),
-    pub fertility: (f32, f32),
+    /// Required fertility [%]
+    pub fertility: f32,
+    /// Required carbon biomass [kg/m2]
+    pub biomass: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

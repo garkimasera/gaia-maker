@@ -8,7 +8,8 @@
         requirements: (
             temprature: (-273.15, 10000.0),
             rainfall: (0.0, 100000.0),
-            fertility: (0.0, 100.0),
+            fertility: 0.0,
+            biomass: 0.0,
         ),
     ),
     ocean: (
@@ -20,7 +21,8 @@
         requirements: (
             temprature: (-10.0, 100.0),
             rainfall: (0.0, 100000.0),
-            fertility: (0.0, 100.0),
+            fertility: 0.0,
+            biomass: 0.0,
         ),
     ),
     desert: (
@@ -32,7 +34,8 @@
         requirements: (
             temprature: (-50.0, 100.0),
             rainfall: (0.0, 1000.0),
-            fertility: (0.0, 100.0),
+            fertility: 0.0,
+            biomass: 0.0,
         ),
     ),
     ice_field: (
@@ -44,7 +47,8 @@
         requirements: (
             temprature: (-273.15, -15.0),
             rainfall: (50.0, 100000.0),
-            fertility: (0.0, 100.0),
+            fertility: 0.0,
+            biomass: 0.0,
         ),
     ),
     grassland: (
@@ -56,7 +60,8 @@
         requirements: (
             temprature: (0.0, 42.0),
             rainfall: (300.0, 4000.0),
-            fertility: (15.0, 100.0),
+            fertility: 20.0,
+            biomass: 1.0,
         ),
     ),
 }

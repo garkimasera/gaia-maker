@@ -50,7 +50,7 @@ pub fn new_planet(
                         &mut state.new_planet.solar_constant,
                         npp.solar_constant.min..=npp.solar_constant.max,
                     )
-                    .text(format!("{} [W/m2]", t!("solar-constant"))),
+                    .text(format!("{} [W/m²]", t!("solar-constant"))),
                 );
 
                 ui.add(

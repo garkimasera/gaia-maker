@@ -225,7 +225,7 @@ fn sidebar(
             ),
             (
                 UiTexture::IconBiomass,
-                format!("{:.1} Mt", tile.biomass),
+                format!("{:.1} kg/m²", tile.biomass),
                 "biomass",
             ),
         ];

@@ -106,6 +106,6 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
         && temp <= req.temprature.1
         && req.rainfall.0 <= tile.rainfall
         && tile.rainfall <= req.rainfall.1
-        && req.fertility.0 <= tile.fertility
-        && tile.fertility <= req.fertility.1
+        && req.fertility <= tile.fertility
+        && req.biomass <= tile.biomass
 }
