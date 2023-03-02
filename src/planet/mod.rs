@@ -114,28 +114,25 @@ impl Planet {
             building.enabled = n;
         }
 
-        planet
-            .player
-            .buildable_structures
-            .insert(StructureKind::OxygenGenerator);
-        planet
-            .player
-            .buildable_structures
-            .insert(StructureKind::Rainmaker);
-        planet
-            .player
-            .buildable_structures
-            .insert(StructureKind::FertilizationPlant);
-        planet
-            .player
-            .buildable_structures
-            .insert(StructureKind::Heater);
+        let buildable_structures = &[
+            StructureKind::OxygenGenerator,
+            StructureKind::Rainmaker,
+            StructureKind::FertilizationPlant,
+            StructureKind::Heater,
+        ];
+        for structure_kind in buildable_structures {
+            planet.player.buildable_structures.insert(*structure_kind);
+        }
 
+        // Simulate before start
         let mut sim = Sim::new(&planet);
         for _ in 0..start_params.days_before_start {
             planet.advance(&mut sim, params);
         }
+
+        // Reset
         planet.days = 0;
+        planet.res = Resources::new(start_params);
 
         planet
     }
