@@ -56,7 +56,11 @@
     "ocean": "海",
     "desert": "砂漠",
     "ice-field": "氷原",
+    "tundra": "ツンドラ",
     "grassland": "草原",
+    "boreal-forest": "針葉樹林",
+    "temperate-forest": "温帯樹林",
+    "tropical-rainforest": "熱帯雨林",
 
     // Structures
     "oxygen-generator": "酸素発生機",

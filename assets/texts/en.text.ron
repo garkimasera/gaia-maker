@@ -56,7 +56,11 @@
     "ocean": "Ocean",
     "desert": "Desert",
     "ice-field": "Ice Field",
+    "tundra": "Tundra",
     "grassland": "Grassland",
+    "boreal-forest": "Boreal Forest",
+    "temperate-forest": "Temperate Forest",
+    "tropical-rainforest": "Tropical Rainforest",
 
     // Structures
     "oxygen-generator": "Oxygen Generator",

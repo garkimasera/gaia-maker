@@ -69,7 +69,11 @@ pub enum Biome {
     Ocean,
     Desert,
     IceField,
+    Tundra,
     Grassland,
+    BorealForest,
+    TemperateForest,
+    TropicalRainforest,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
