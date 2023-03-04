@@ -1,5 +1,5 @@
 use super::{misc::linear_interpolation, *};
-use geom::{CDistRangeIter, Direction};
+use geom::{CDistRangeIter, CyclicMode, Direction};
 use rand::{thread_rng, Rng};
 
 const FERTILITY_MAX: f32 = 100.0;
@@ -43,10 +43,15 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let diff = if diff > 0.0 {
             let fertility_from_adjacent_tiles = Direction::FOUR_DIRS
                 .iter()
-                .filter_map(|direction| {
-                    let p_adj = p + direction.as_coords();
-                    if planet.map.in_range(p_adj) {
-                        Some((planet.map[p_adj].fertility - fertility).max(0.0))
+                .filter_map(|dir| {
+                    let p_adj =
+                        CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords());
+                    if let Some(p_adj) = p_adj {
+                        if planet.map.in_range(p_adj) {
+                            Some((planet.map[p_adj].fertility - fertility).max(0.0))
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
