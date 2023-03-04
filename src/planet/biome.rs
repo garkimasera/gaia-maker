@@ -35,10 +35,12 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         );
         let rainfall_factor =
             linear_interpolation(&params.sim.rainfall_fertility_table, planet.map[p].rainfall);
+        let max_fertility = (temp_factor + rainfall_factor) / 2.0;
 
         let fertility = planet.map[p].fertility;
+        let diff = max_fertility - fertility;
 
-        let diff = if temp_factor >= 0.0 && rainfall_factor >= 0.0 {
+        let diff = if diff > 0.0 {
             let fertility_from_adjacent_tiles = Direction::FOUR_DIRS
                 .iter()
                 .filter_map(|direction| {
@@ -51,14 +53,36 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 })
                 .sum::<f32>()
                 * params.sim.fertility_adjacent_factor;
-            (sim.fertility_effect[p] + fertility_from_adjacent_tiles) * temp_factor
+            let fertility_growth_from_biomass = linear_interpolation(
+                &params.sim.fertility_growth_from_biomass_table,
+                planet.map[p].biomass,
+            );
+
+            fertility_from_adjacent_tiles + fertility_growth_from_biomass
         } else {
-            params.sim.fertility_base_decrement * temp_factor.min(rainfall_factor)
+            diff * params.sim.fertility_base_decrement
         };
 
         planet.map[p].fertility = (fertility + diff).clamp(FERTILITY_MIN, FERTILITY_MAX);
+
+        if planet.map[p].fertility < max_fertility {
+            planet.map[p].fertility =
+                (planet.map[p].fertility + sim.fertility_effect[p]).min(max_fertility);
+        }
     }
 
+    // Biomass
+    for p in map_iter_idx {
+        let max = calc_max_biomass(planet, params, p);
+        let diff = max - planet.map[p].biomass;
+        if diff > 0.0 {
+            planet.map[p].biomass += diff * params.sim.base_biomass_increase_speed;
+        } else {
+            planet.map[p].biomass += diff * params.sim.base_biomass_decrease_speed;
+        }
+    }
+
+    // Biome transistion
     process_biome_transition(planet, params);
 }
 
@@ -108,4 +132,11 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
         && tile.rainfall <= req.rainfall.1
         && req.fertility <= tile.fertility
         && req.biomass <= tile.biomass
+}
+
+fn calc_max_biomass(planet: &Planet, params: &Params, p: Coords) -> f32 {
+    linear_interpolation(
+        &params.sim.max_biomass_fertility_table,
+        planet.map[p].fertility,
+    )
 }

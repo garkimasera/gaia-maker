@@ -346,16 +346,24 @@ pub struct SimParams {
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
     pub ocean_vaporization_table: Vec<(f32, f32)>,
-    /// Temprature effect to fertility table
+    /// Max fertility table by temprature
     pub temprature_fertility_table: Vec<(f32, f32)>,
-    /// Rainfall effect to fertility table
+    /// Max fertility table by rainfall
     pub rainfall_fertility_table: Vec<(f32, f32)>,
+    /// Fertility growth from biomass
+    pub fertility_growth_from_biomass_table: Vec<(f32, f32)>,
     /// Base decrement value of fertility
     pub fertility_base_decrement: f32,
     /// Factor of fertility from adjacent tiles
     pub fertility_adjacent_factor: f32,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
+    /// Max biomass by fertility
+    pub max_biomass_fertility_table: Vec<(f32, f32)>,
+    /// Base biomass increase speed
+    pub base_biomass_increase_speed: f32,
+    /// Base biomass decrease speed
+    pub base_biomass_decrease_speed: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
