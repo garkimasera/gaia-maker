@@ -23,7 +23,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     let greenhouse_effect = greenhouse_effect(planet, params);
 
-    let secs_per_loop = params.sim.secs_per_day / params.sim.n_loop_atmo_heat_calc as f32;
+    let secs_per_loop = params.sim.secs_per_cycle / params.sim.n_loop_atmo_heat_calc as f32;
 
     // Calculate new atmosphere temprature of tiles
     for _ in 0..params.sim.n_loop_atmo_heat_calc {

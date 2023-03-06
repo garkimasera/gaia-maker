@@ -62,7 +62,7 @@ pub struct Building {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
-    pub days: u64,
+    pub cycles: u64,
     pub basics: PlanetBasics,
     pub player: Player,
     pub res: Resources,
@@ -88,7 +88,7 @@ impl Planet {
         }
 
         let mut planet = Planet {
-            days: 0,
+            cycles: 0,
             basics: start_params.basics.clone(),
             player: Player::default(),
             res: Resources::new(start_params),
@@ -126,19 +126,19 @@ impl Planet {
 
         // Simulate before start
         let mut sim = Sim::new(&planet);
-        for _ in 0..start_params.days_before_start {
+        for _ in 0..start_params.cycles_before_start {
             planet.advance(&mut sim, params);
         }
 
         // Reset
-        planet.days = 0;
+        planet.cycles = 0;
         planet.res = Resources::new(start_params);
 
         planet
     }
 
     pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
-        self.days += 1;
+        self.cycles += 1;
 
         self::buildings::advance(self, params);
         self::heat_transfer::advance(self, sim, params);

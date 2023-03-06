@@ -321,7 +321,7 @@ pub struct StartParams {
     pub water_volume: f32,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
-    pub days_before_start: u32,
+    pub cycles_before_start: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -329,7 +329,7 @@ pub struct SimParams {
     pub sim_normal_loop_duration_ms: u64,
     pub sim_fast_loop_duration_ms: u64,
     pub total_mass_per_atm: f32,
-    pub secs_per_day: f32,
+    pub secs_per_cycle: f32,
     /// Heat capacity of air [J/(kg*K)]
     pub air_heat_cap: f32,
     /// Heat capacity of planet surface [J/(kg*m^3)]

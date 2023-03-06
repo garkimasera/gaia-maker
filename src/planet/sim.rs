@@ -43,7 +43,7 @@ impl Sim {
         }
 
         let mut events = VecDeque::new();
-        if planet.days == 0 {
+        if planet.cycles == 0 {
             events.push_back(Event::Start);
         }
 

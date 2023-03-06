@@ -3,7 +3,7 @@
         sim_normal_loop_duration_ms: 1000,
         sim_fast_loop_duration_ms: 250,
         total_mass_per_atm: 5.0e+9,
-        secs_per_day: 86400,
+        secs_per_cycle: 86400,
         air_heat_cap: 1000.0,
         surface_heat_cap: 5.0e+6,
         sunlight_day_averaging_factor: 0.25,
@@ -103,7 +103,7 @@
         star_system_buildings: {
             asteroid_mining_station: 2,
         },
-        days_before_start: 100,
+        cycles_before_start: 100,
     ),
     orbital_buildings: {
         fusion_reactor: (
