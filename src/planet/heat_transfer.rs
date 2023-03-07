@@ -35,6 +35,13 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 * (1.0 - sim.albedo[p])
                 * params.sim.sunlight_day_averaging_factor;
 
+            let greenhouse_effect = greenhouse_effect
+                * (1.0
+                    - params.sim.green_house_effect_height_decrease
+                        * planet.height_above_sea_level(p).max(0.0)
+                        * planet.atmo.atm)
+                    .max(0.0);
+
             let inflow = solar_power * sim.tile_area;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT

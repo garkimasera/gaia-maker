@@ -16,6 +16,7 @@
             (0.01, 0.63),
             (80, 0.96),
         ],
+        green_house_effect_height_decrease: 4.0e-5,
         n_loop_vapor_calc: 4,
         vapor_diffusion_factor: 0.1,
         vapor_loss_ratio: 0.005,
