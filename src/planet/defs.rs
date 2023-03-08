@@ -77,6 +77,16 @@ pub enum Biome {
     TropicalRainforest,
 }
 
+impl Biome {
+    pub fn is_land(&self) -> bool {
+        !self.is_sea()
+    }
+
+    pub fn is_sea(&self) -> bool {
+        matches!(*self, Biome::Ocean | Biome::SeaIce)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BiomeAttrs {
     pub z: f32,
@@ -363,6 +373,8 @@ pub struct SimParams {
     pub fertility_base_decrement: f32,
     /// Factor of fertility from adjacent tiles
     pub fertility_adjacent_factor: f32,
+    /// Fertility attenuation factor in sea
+    pub sea_fertility_attenuation_factor: f32,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
     /// Max biomass by fertility
@@ -371,6 +383,8 @@ pub struct SimParams {
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed
     pub base_biomass_decrease_speed: f32,
+    /// Sea biomass factor compared to land
+    pub sea_biomass_factor: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

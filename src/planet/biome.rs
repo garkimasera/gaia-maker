@@ -68,7 +68,14 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             diff * params.sim.fertility_base_decrement
         };
 
-        planet.map[p].fertility = (fertility + diff).clamp(FERTILITY_MIN, FERTILITY_MAX);
+        let sea_effect = if planet.map[p].biome.is_sea() {
+            -params.sim.sea_fertility_attenuation_factor * fertility
+        } else {
+            0.0
+        };
+
+        planet.map[p].fertility =
+            (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
 
         if planet.map[p].fertility < max_fertility {
             planet.map[p].fertility =
@@ -101,7 +108,7 @@ fn process_biome_transition(planet: &mut Planet, params: &Params) {
             0
         };
 
-        if matches!(current_biome, Biome::Ocean | Biome::SeaIce) {
+        if current_biome.is_sea() {
             let sea_ice_temp = params.biomes[&Biome::SeaIce].requirements.temprature.1;
             let next_biome = if tile.temp - KELVIN_CELSIUS < sea_ice_temp {
                 Biome::SeaIce
@@ -156,5 +163,9 @@ fn calc_max_biomass(planet: &Planet, params: &Params, p: Coords) -> f32 {
     linear_interpolation(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,
-    )
+    ) * if planet.map[p].biome.is_land() {
+        1.0
+    } else {
+        params.sim.sea_biomass_factor
+    }
 }

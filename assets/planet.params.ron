@@ -60,6 +60,7 @@
         ],
         fertility_base_decrement: 0.02,
         fertility_adjacent_factor: 0.01,
+        sea_fertility_attenuation_factor: 0.01,
         change_from_ocean_fertility_factor: 0.2,
         max_biomass_fertility_table: [
             (0, 0.0),
@@ -73,6 +74,7 @@
         ],
         base_biomass_increase_speed: 0.05,
         base_biomass_decrease_speed: 0.1,
+        sea_biomass_factor: 0.05,
     ),
     new_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
