@@ -54,6 +54,7 @@
     // Biomes
     "rock": "岩石",
     "ocean": "海",
+    "sea-ice": "海氷",
     "desert": "砂漠",
     "ice-field": "氷原",
     "tundra": "ツンドラ",

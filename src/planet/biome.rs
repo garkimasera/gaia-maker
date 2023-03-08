@@ -101,7 +101,20 @@ fn process_biome_transition(planet: &mut Planet, params: &Params) {
             0
         };
 
-        if current_biome == Biome::Ocean {
+        if matches!(current_biome, Biome::Ocean | Biome::SeaIce) {
+            let sea_ice_temp = params.biomes[&Biome::SeaIce].requirements.temprature.1;
+            let next_biome = if tile.temp - KELVIN_CELSIUS < sea_ice_temp {
+                Biome::SeaIce
+            } else {
+                Biome::Ocean
+            };
+            if current_biome != next_biome {
+                let transition_probability =
+                    1.0 / params.biomes[&next_biome].mean_transition_time as f64;
+                if thread_rng().gen_bool(transition_probability) {
+                    planet.map[p].biome = next_biome;
+                }
+            }
             continue;
         }
 

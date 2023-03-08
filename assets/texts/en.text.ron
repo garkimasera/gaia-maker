@@ -54,6 +54,7 @@
     // Biomes
     "rock": "Rock",
     "ocean": "Ocean",
+    "sea-ice": "Sea Ice",
     "desert": "Desert",
     "ice-field": "Ice Field",
     "tundra": "Tundra",

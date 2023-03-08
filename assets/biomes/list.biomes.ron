@@ -3,7 +3,7 @@
         z: 80.0,
         albedo: 0.3,
         revaporization_ratio: 0.1,
-        priority: 0,
+        priority: 1,
         mean_transition_time: 200,
         requirements: (
             temprature: (-273.15, 10000.0),
@@ -17,9 +17,22 @@
         albedo: 0.2,
         revaporization_ratio: 0.0,
         priority: 0,
-        mean_transition_time: 1,
+        mean_transition_time: 100,
         requirements: (
             temprature: (-10.0, 100.0),
+            rainfall: (0.0, 100000.0),
+            fertility: 0.0,
+            biomass: 0.0,
+        ),
+    ),
+    sea_ice: (
+        z: 95.0,
+        albedo: 0.9,
+        revaporization_ratio: 0.0,
+        priority: 0,
+        mean_transition_time: 100,
+        requirements: (
+            temprature: (-273.15, -20.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -29,7 +42,7 @@
         z: 50.0,
         albedo: 0.35,
         revaporization_ratio: 0.1,
-        priority: 1,
+        priority: 2,
         mean_transition_time: 80,
         requirements: (
             temprature: (-50.0, 100.0),
@@ -42,7 +55,7 @@
         z: 70.0,
         albedo: 0.9,
         revaporization_ratio: 0.1,
-        priority: 1,
+        priority: 2,
         mean_transition_time: 80,
         requirements: (
             temprature: (-273.15, -15.0),
@@ -72,7 +85,7 @@
         mean_transition_time: 120,
         requirements: (
             temprature: (0.0, 42.0),
-            rainfall: (300.0, 4000.0),
+            rainfall: (50.0, 4000.0),
             fertility: 20.0,
             biomass: 1.0,
         ),
@@ -84,7 +97,7 @@
         priority: 15,
         mean_transition_time: 150,
         requirements: (
-            temprature: (5.0, 15.0),
+            temprature: (2.0, 15.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 8.0,
@@ -97,7 +110,7 @@
         priority: 20,
         mean_transition_time: 180,
         requirements: (
-            temprature: (15.0, 22.0),
+            temprature: (15.0, 25.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 9.0,
@@ -110,7 +123,7 @@
         priority: 25,
         mean_transition_time: 180,
         requirements: (
-            temprature: (22.0, 40.0),
+            temprature: (25.0, 40.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 9.0,

@@ -7,7 +7,7 @@
         air_heat_cap: 1000.0,
         surface_heat_cap: 5.0e+6,
         sunlight_day_averaging_factor: 0.25,
-        air_diffusion_factor: 0.01,
+        air_diffusion_factor: 0.1,
         n_loop_atmo_heat_calc: 10,
         co2_green_house_effect_table: [
             (0.0, 0.0),
@@ -29,9 +29,9 @@
         ],
         temprature_fertility_table: [
             (-20.0, 0),
-            (-10.0, 1),
-            (0.0, 4),
-            (10.0, 30),
+            (-15.0, 10),
+            (0.0, 20),
+            (10.0, 40),
             (15.0, 70),
             (20.0, 100),
             (25.0, 90),
@@ -41,7 +41,7 @@
         ],
         rainfall_fertility_table: [
             (0, 0),
-            (50, 5),
+            (50, 20),
             (200, 40),
             (1000, 80),
             (2000, 100),

@@ -67,6 +67,7 @@ pub enum Biome {
     #[default]
     Rock,
     Ocean,
+    SeaIce,
     Desert,
     IceField,
     Tundra,

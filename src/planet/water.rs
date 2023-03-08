@@ -26,9 +26,13 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
         let tile = &mut planet.map[p];
 
-        if tile.height < planet.water.sea_level {
+        if tile.height < planet.water.sea_level
+            && !matches!(tile.biome, Biome::Ocean | Biome::SeaIce)
+        {
             tile.biome = Biome::Ocean;
-        } else if tile.biome == Biome::Ocean {
+        } else if tile.height >= planet.water.sea_level
+            && matches!(tile.biome, Biome::Ocean | Biome::SeaIce)
+        {
             tile.fertility *= params.sim.change_from_ocean_fertility_factor;
             tile.biome = Biome::Rock;
         }
