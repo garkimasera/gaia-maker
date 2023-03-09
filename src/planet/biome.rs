@@ -95,11 +95,23 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in map_iter_idx {
         let max = calc_max_biomass(planet, params, p);
         let diff = max - planet.map[p].biomass;
-        if diff > 0.0 && speed_factor_by_atmo > 0.0 {
-            planet.map[p].biomass +=
-                diff * params.sim.base_biomass_increase_speed * speed_factor_by_atmo;
+        let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
+            params.sim.base_biomass_increase_speed * speed_factor_by_atmo
         } else {
-            planet.map[p].biomass += diff * params.sim.base_biomass_decrease_speed;
+            diff * params.sim.base_biomass_decrease_speed
+        };
+
+        let carbon_weight = sim.tile_area * v * 1.0e-9;
+        if v > 0.0 {
+            if planet.atmo.remove_carbon(carbon_weight) {
+                planet.map[p].biomass += v;
+            }
+        } else {
+            planet.atmo.release_carbon(
+                carbon_weight * (1.0 - params.sim.decreased_biomass_to_buried_carbon_ratio),
+            );
+            planet.map[p].buried_carbon +=
+                carbon_weight * params.sim.decreased_biomass_to_buried_carbon_ratio;
         }
     }
 

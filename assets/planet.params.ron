@@ -90,6 +90,7 @@
             (600e-6, 1.5),
             (1000e-6, 2.0),
         ],
+        decreased_biomass_to_buried_carbon_ratio: 0.5,
         sea_biomass_factor: 0.05,
     ),
     new_planet: (

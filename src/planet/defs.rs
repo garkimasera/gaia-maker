@@ -387,6 +387,8 @@ pub struct SimParams {
     pub biomass_growth_speed_atm_table: Vec<(f32, f32)>,
     /// Biomass growth speed factor by CO2
     pub biomass_growth_speed_co2_table: Vec<(f32, f32)>,
+    /// Ratio of biomass to buried carbon on decreasing
+    pub decreased_biomass_to_buried_carbon_ratio: f32,
     /// Sea biomass factor compared to land
     pub sea_biomass_factor: f32,
 }
