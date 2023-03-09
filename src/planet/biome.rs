@@ -84,11 +84,20 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Biomass
+    let speed_factor_by_atmo = 0.5
+        * linear_interpolation(&params.sim.biomass_growth_speed_atm_table, planet.atmo.atm)
+        + 0.5
+            * linear_interpolation(
+                &params.sim.biomass_growth_speed_co2_table,
+                planet.atmo.partial_pressure(GasKind::CarbonDioxide),
+            );
+
     for p in map_iter_idx {
         let max = calc_max_biomass(planet, params, p);
         let diff = max - planet.map[p].biomass;
-        if diff > 0.0 {
-            planet.map[p].biomass += diff * params.sim.base_biomass_increase_speed;
+        if diff > 0.0 && speed_factor_by_atmo > 0.0 {
+            planet.map[p].biomass +=
+                diff * params.sim.base_biomass_increase_speed * speed_factor_by_atmo;
         } else {
             planet.map[p].biomass += diff * params.sim.base_biomass_decrease_speed;
         }
