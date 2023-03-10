@@ -101,7 +101,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             diff * params.sim.base_biomass_decrease_speed
         };
 
-        let carbon_weight = sim.tile_area * v * 1.0e-9;
+        let carbon_weight = sim.tile_area * v.abs() * 1.0e-9;
         if v > 0.0 {
             if planet.atmo.remove_carbon(carbon_weight) {
                 planet.map[p].biomass += v;
