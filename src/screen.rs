@@ -393,12 +393,6 @@ fn keyboard_input(
     conf: Res<Conf>,
 ) {
     // Shortcut keys
-    if keys.just_pressed(KeyCode::Escape) {
-        wos.game_menu = !wos.game_menu;
-    }
-    if keys.just_pressed(KeyCode::B) {
-        wos.build = !wos.build;
-    }
     if keys.just_pressed(KeyCode::E) && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
     {
         wos.edit_planet = !wos.edit_planet;

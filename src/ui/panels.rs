@@ -1,16 +1,20 @@
-use bevy::prelude::*;
+use bevy::{app::AppExit, prelude::*};
 use bevy_egui::{egui, EguiContexts};
+use strum::IntoEnumIterator;
 
 use crate::{
     assets::UiTexture,
     conf::Conf,
-    planet::{Planet, Structure, KELVIN_CELSIUS},
+    draw::UpdateMap,
+    overlay::OverlayLayerKind,
+    planet::{Params, Planet, Structure, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
+    sim::ManagePlanet,
     text::Unit,
     GameSpeed,
 };
 
-use super::{EguiTextures, WindowsOpenState};
+use super::{help::HelpItem, EguiTextures, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -19,8 +23,11 @@ pub fn panels(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
+    (mut current_layer, mut update_map): (ResMut<OverlayLayerKind>, ResMut<UpdateMap>),
+    (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
     planet: Res<Planet>,
     textures: Res<EguiTextures>,
+    params: Res<Params>,
     conf: Res<Conf>,
 ) {
     occupied_screen_space.window_rects.clear();
@@ -47,7 +54,18 @@ pub fn panels(
         .resizable(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
-                toolbar(ui, &mut cursor_mode, &mut wos, &mut speed, &textures, &conf);
+                toolbar(
+                    ui,
+                    &mut cursor_mode,
+                    &mut wos,
+                    &mut speed,
+                    (&mut current_layer, &mut update_map),
+                    (&mut app_exit_events, &mut ew_manage_planet),
+                    &textures,
+                    &planet,
+                    &params,
+                    &conf,
+                );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -59,10 +77,17 @@ pub fn panels(
 
 fn toolbar(
     ui: &mut egui::Ui,
-    _cursor_mode: &mut CursorMode,
+    cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
+    (current_layer, update_map): (&mut OverlayLayerKind, &mut UpdateMap),
+    (app_exit_events, ew_manage_planet): (
+        &mut EventWriter<AppExit>,
+        &mut EventWriter<ManagePlanet>,
+    ),
     textures: &EguiTextures,
+    planet: &Planet,
+    params: &Params,
     conf: &Conf,
 ) {
     let button = |ui: &mut egui::Ui, icon: UiTexture, s: &str| {
@@ -72,9 +97,10 @@ fn toolbar(
             .clicked()
     };
 
-    if button(ui, UiTexture::IconBuild, "build") {
-        wos.build = !wos.build;
-    }
+    let (handle, size) = &textures.0[&UiTexture::IconBuild];
+    ui.menu_image_button(handle.id(), *size, |ui| {
+        build_menu(ui, cursor_mode, planet, params);
+    });
 
     if button(ui, UiTexture::IconOrbit, "orbit") {
         wos.orbit = !wos.orbit;
@@ -84,9 +110,10 @@ fn toolbar(
         wos.star_system = !wos.star_system;
     }
 
-    if button(ui, UiTexture::IconLayers, "layer") {
-        wos.layers = !wos.layers;
-    }
+    let (handle, size) = &textures.0[&UiTexture::IconLayers];
+    ui.menu_image_button(handle.id(), *size, |ui| {
+        layers_menu(ui, current_layer, update_map);
+    });
 
     if button(ui, UiTexture::IconStat, "statistics") {
         wos.stat = !wos.stat;
@@ -127,9 +154,10 @@ fn toolbar(
         wos.message = !wos.message;
     }
 
-    if button(ui, UiTexture::IconGameMenu, "menu") {
-        wos.game_menu = !wos.game_menu;
-    }
+    let (handle, size) = &textures.0[&UiTexture::IconGameMenu];
+    ui.menu_image_button(handle.id(), *size, |ui| {
+        game_menu(ui, app_exit_events, ew_manage_planet);
+    });
 
     if button(ui, UiTexture::IconHelp, "help") {
         wos.help = !wos.help;
@@ -254,5 +282,65 @@ fn sidebar(
         if let Some(s) = s {
             ui.label(s);
         }
+    }
+}
+
+fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, params: &Params) {
+    if ui.button(t!("demolition")).clicked() {
+        *cursor_mode = CursorMode::Demolition;
+        ui.close_menu();
+    }
+    ui.separator();
+    egui::Grid::new("build_menu").striped(true).show(ui, |ui| {
+        for kind in &planet.player.buildable_structures {
+            let s: &str = kind.as_ref();
+            if ui.button(t!(s)).clicked() {
+                *cursor_mode = CursorMode::Build(*kind);
+                ui.close_menu();
+            }
+            ui.label("?")
+                .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, params));
+            ui.end_row();
+        }
+    });
+}
+
+fn layers_menu(
+    ui: &mut egui::Ui,
+    current_layer: &mut OverlayLayerKind,
+    update_map: &mut UpdateMap,
+) {
+    let mut new_layer = *current_layer;
+    for kind in OverlayLayerKind::iter() {
+        if ui
+            .radio_value(&mut new_layer, kind, t!(kind.as_ref()))
+            .clicked()
+        {
+            ui.close_menu();
+        }
+    }
+    if new_layer != *current_layer {
+        *current_layer = new_layer;
+        update_map.update();
+    }
+}
+
+fn game_menu(
+    ui: &mut egui::Ui,
+    app_exit_events: &mut EventWriter<AppExit>,
+    ew_manage_planet: &mut EventWriter<ManagePlanet>,
+) {
+    if ui.button(t!("save")).clicked() {
+        ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
+        ui.close_menu();
+    }
+    if ui.button(t!("load")).clicked() {
+        ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+        ui.close_menu();
+    }
+    ui.separator();
+    if ui.button(t!("exit")).clicked() {
+        app_exit_events.send(bevy::app::AppExit);
+        ui.close_menu();
     }
 }

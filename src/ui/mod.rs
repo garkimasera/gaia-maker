@@ -7,41 +7,32 @@ mod panels;
 mod star_system;
 mod stat;
 
-use bevy::{app::AppExit, math::Rect, prelude::*};
+use bevy::{math::Rect, prelude::*};
 use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily},
     EguiContexts, EguiPlugin, EguiSettings,
 };
 use std::collections::HashMap;
-use strum::IntoEnumIterator;
 
 use crate::{
     assets::{UiAssets, UiTexture, UiTextures},
     conf::Conf,
-    draw::UpdateMap,
     gz::GunzipBin,
     msg::MsgHolder,
     overlay::OverlayLayerKind,
-    planet::*,
     screen::{CursorMode, OccupiedScreenSpace},
-    sim::ManagePlanet,
     GameState,
 };
-
-use self::help::HelpItem;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
 
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
-    pub build: bool,
     pub orbit: bool,
     pub star_system: bool,
-    pub layers: bool,
     pub stat: bool,
     pub message: bool,
-    pub game_menu: bool,
     pub help: bool,
     pub edit_planet: bool,
 }
@@ -67,13 +58,10 @@ impl Plugin for UiPlugin {
             )
             .add_systems(
                 (
-                    build_window,
                     orbit::orbit_window,
                     star_system::star_system_window,
-                    layers_window,
                     stat::stat_window,
                     msg_window,
-                    game_menu_window,
                     help::help_window,
                     edit_planet::edit_planet_window,
                 )
@@ -144,80 +132,6 @@ fn load_textures(
     commands.insert_resource(EguiTextures(egui_textures));
 }
 
-fn build_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut cursor_mode: ResMut<CursorMode>,
-    conf: Res<Conf>,
-    planet: Res<Planet>,
-    params: Res<Params>,
-) {
-    if !wos.build {
-        return;
-    }
-
-    let rect = egui::Window::new(t!("build"))
-        .open(&mut wos.build)
-        .vscroll(true)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            if ui.button(t!("demolition")).clicked() {
-                *cursor_mode = CursorMode::Demolition;
-            }
-            ui.separator();
-            for kind in &planet.player.buildable_structures {
-                let s: &str = kind.as_ref();
-                if ui
-                    .button(t!(s))
-                    .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, &params))
-                    .clicked()
-                {
-                    *cursor_mode = CursorMode::Build(*kind);
-                }
-            }
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
-}
-
-fn layers_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut current_layer: ResMut<OverlayLayerKind>,
-    mut update_map: ResMut<UpdateMap>,
-    conf: Res<Conf>,
-) {
-    if !wos.layers {
-        return;
-    }
-    let mut new_layer = *current_layer;
-
-    let rect = egui::Window::new(t!("layers"))
-        .open(&mut wos.layers)
-        .vscroll(true)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            for kind in OverlayLayerKind::iter() {
-                ui.radio_value(&mut new_layer, kind, t!(kind.as_ref()));
-            }
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
-
-    if new_layer != *current_layer {
-        *current_layer = new_layer;
-        update_map.update();
-    }
-}
-
 fn msg_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
@@ -251,55 +165,6 @@ fn msg_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
-}
-
-fn game_menu_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut app_exit_events: EventWriter<AppExit>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut ew_manage_planet: EventWriter<ManagePlanet>,
-    conf: Res<Conf>,
-) {
-    if !wos.game_menu {
-        return;
-    }
-
-    let mut close = false;
-
-    let rect = egui::Window::new(t!("menu"))
-        .title_bar(false)
-        .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
-        .default_width(0.0)
-        .resizable(false)
-        .open(&mut wos.game_menu)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                if ui.button(t!("save")).clicked() {
-                    ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
-                    close = true;
-                }
-
-                if ui.button(t!("load")).clicked() {
-                    ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
-                    close = true;
-                }
-                ui.separator();
-                if ui.button(t!("exit")).clicked() {
-                    app_exit_events.send(bevy::app::AppExit);
-                }
-            });
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
-
-    if close {
-        wos.game_menu = false;
-    }
 }
 
 fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {
