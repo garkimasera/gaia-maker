@@ -21,7 +21,7 @@ pub struct CursorAction {
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CursorAction>()
-            .add_system_set(SystemSet::on_update(GameState::Running).with_system(cursor_action));
+            .add_system(cursor_action.in_set(OnUpdate(GameState::Running)));
     }
 }
 

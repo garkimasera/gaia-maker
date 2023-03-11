@@ -2,7 +2,7 @@ use super::{convert_rect, CursorMode, OccupiedScreenSpace, WindowsOpenState};
 use crate::conf::Conf;
 use crate::planet::*;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
@@ -16,7 +16,7 @@ pub enum Panel {
 }
 
 pub fn edit_planet_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
@@ -32,7 +32,7 @@ pub fn edit_planet_window(
     let rect = egui::Window::new("Planet editing tools")
         .open(&mut wos.edit_planet)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
                     ui.selectable_value(&mut *current_panel, panel, panel.as_ref());

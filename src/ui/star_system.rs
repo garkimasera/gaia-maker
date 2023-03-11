@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
 use super::{convert_rect, help::HelpItem, OccupiedScreenSpace, WindowsOpenState};
@@ -7,7 +7,7 @@ use crate::conf::Conf;
 use crate::planet::*;
 
 pub fn star_system_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
@@ -21,7 +21,7 @@ pub fn star_system_window(
     let rect = egui::Window::new(t!("star-system"))
         .open(&mut wos.star_system)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             egui::Grid::new("star_system_buildings")
                 .striped(true)
                 .show(ui, |ui| {

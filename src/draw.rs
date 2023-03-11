@@ -1,7 +1,7 @@
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
-use crate::planet::*;
 use crate::screen::InScreenTileRange;
 use crate::{assets::*, GameState};
+use crate::{planet::*, GameSystemSet};
 use arrayvec::ArrayVec;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use geom::{Array2d, Coords, Direction, RectIter};
@@ -28,14 +28,17 @@ impl Plugin for DrawPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<UpdateMap>()
             .init_resource::<UpdateMap>()
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .label("draw")
-                    .with_system(update_layered_tex_map.pipe(spawn_map_textures))
-                    .with_system(spawn_structure_textures)
-                    .with_system(spawn_overlay_meshes),
+            .init_resource::<LayeredTexMap>()
+            .add_systems(
+                (
+                    update_layered_tex_map.pipe(spawn_map_textures),
+                    spawn_structure_textures,
+                    spawn_overlay_meshes,
+                )
+                    .in_set(GameSystemSet::Draw)
+                    .in_set(OnUpdate(GameState::Running)),
             )
-            .add_system(reset_update_map.after("draw"));
+            .add_system(reset_update_map.after(GameSystemSet::Draw));
     }
 }
 
@@ -44,19 +47,31 @@ pub struct LayeredTexMap {
     biome: Array2d<ArrayVec<Biome, 9>>,
 }
 
+impl Default for LayeredTexMap {
+    fn default() -> Self {
+        LayeredTexMap {
+            biome: Array2d::new(1, 1, ArrayVec::new()),
+        }
+    }
+}
+
 fn update_layered_tex_map(
-    mut commands: Commands,
     update_map: Res<UpdateMap>,
     params: Res<Params>,
     planet: Res<Planet>,
-    ltm: Option<ResMut<LayeredTexMap>>,
+    mut ltm: ResMut<LayeredTexMap>,
 ) {
-    if !update_map.need_update && !planet.is_changed() && ltm.is_some() {
+    if !update_map.need_update && !planet.is_changed() {
         return;
     }
 
     let (w, h) = planet.map.size();
-    let mut tiles = Array2d::new(w, h, ArrayVec::new());
+    if ltm.biome.size() != (w, h) {
+        ltm.biome = Array2d::new(w, h, ArrayVec::new());
+    } else {
+        ltm.biome.fill(ArrayVec::new())
+    }
+    let tiles = &mut ltm.biome;
 
     for &i in params.biomes.keys() {
         for pos in RectIter::new((0, 0), (w - 1, h - 1)) {
@@ -79,15 +94,12 @@ fn update_layered_tex_map(
             }
         }
     }
-
-    let ltm = LayeredTexMap { biome: tiles };
-    commands.insert_resource(ltm);
 }
 
 fn spawn_map_textures(
     mut commands: Commands,
     update_map: Res<UpdateMap>,
-    ltm: Option<Res<LayeredTexMap>>,
+    ltm: Res<LayeredTexMap>,
     params: Res<Params>,
     texture_atlas_maps: Res<TextureAtlasMaps>,
     in_screen_tile_range: Res<InScreenTileRange>,
@@ -97,7 +109,6 @@ fn spawn_map_textures(
     if !update_map.need_update {
         return;
     }
-    let ltm = unwrap_res!(ltm);
 
     for entity in tex_entities.iter() {
         commands.entity(*entity).despawn();
@@ -145,7 +156,7 @@ fn spawn_map_textures(
                         texture_atlas: texture_atlas_maps.biomes[tile_idx].clone(),
                         sprite,
                         transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
-                        visibility: Visibility { is_visible: true },
+                        visibility: Visibility::Visible,
                         ..default()
                     })
                     .id();
@@ -191,7 +202,7 @@ fn spawn_structure_textures(
                     texture_atlas: texture_atlas_maps.structures[&kind].clone(),
                     sprite,
                     transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
-                    visibility: Visibility { is_visible: true },
+                    visibility: Visibility::Inherited,
                     ..default()
                 })
                 .id();

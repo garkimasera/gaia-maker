@@ -38,13 +38,13 @@ fn main() {
     let _args = Args::parse();
 
     App::new()
-        .add_state(GameState::AssetLoading)
+        .add_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
+            primary_window: Some(Window {
                 title: APP_NAME.into(),
                 present_mode: PresentMode::Fifo,
                 ..default()
-            },
+            }),
             ..default()
         }))
         .add_plugin(gz::GzPlugin)
@@ -64,8 +64,9 @@ fn main() {
         .run();
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Hash, States)]
 enum GameState {
+    #[default]
     AssetLoading,
     MainMenu,
     Running,
@@ -77,4 +78,11 @@ pub enum GameSpeed {
     Paused,
     Normal,
     Fast,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub enum GameSystemSet {
+    Draw,
+    StartSim,
+    UpdateHoverTile,
 }

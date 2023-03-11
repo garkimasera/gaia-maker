@@ -55,13 +55,3 @@ macro_rules! define_asset_list_from_enum {
         }
     };
 }
-
-macro_rules! unwrap_res {
-    ($res:expr) => {
-        if let Some(res) = $res {
-            res
-        } else {
-            return;
-        }
-    };
-}

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 use once_cell::sync::Lazy;
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
@@ -101,7 +101,7 @@ static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<HelpItem>>> = Lazy::new(|| {
 });
 
 pub fn help_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     conf: Res<Conf>,
@@ -114,7 +114,7 @@ pub fn help_window(
     let rect = egui::Window::new(t!("help"))
         .open(&mut wos.help)
         .vscroll(false)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 egui::ScrollArea::vertical()
                     .min_scrolled_height(300.0)

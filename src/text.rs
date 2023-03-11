@@ -68,7 +68,7 @@ pub struct TranslationText(HashMap<String, String>);
 impl Plugin for TextPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(RonAssetPlugin::<TranslationText>::new(&["text.ron"]))
-            .add_system_set(SystemSet::on_exit(GameState::AssetLoading).with_system(set_text));
+            .add_system(set_text.in_schedule(OnExit(GameState::AssetLoading)));
     }
 }
 

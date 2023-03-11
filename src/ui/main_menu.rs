@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
@@ -39,7 +39,7 @@ pub fn set_main_menu_state(mut command: Commands, params: Res<Params>) {
 }
 
 pub fn main_menu(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
     mut conf: ResMut<Conf>,
@@ -59,7 +59,7 @@ pub fn main_menu(
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
                 .default_width(0.0)
                 .resizable(false)
-                .show(egui_ctx.ctx_mut(), |ui| {
+                .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
@@ -80,13 +80,13 @@ pub fn main_menu(
                 .unwrap();
         }
         MainMenuMode::NewPlanet => {
-            super::new_planet::new_planet(&mut egui_ctx, ew_manage_planet, &params, &mut state);
+            super::new_planet::new_planet(&mut egui_ctxs, ew_manage_planet, &params, &mut state);
         }
         MainMenuMode::Error => {
             egui::Window::new(t!("msg/loading-failed"))
                 .collapsible(false)
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
-                .show(egui_ctx.ctx_mut(), |ui| {
+                .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.label(&state.error);
                     ui.separator();
                     ui.vertical_centered(|ui| {

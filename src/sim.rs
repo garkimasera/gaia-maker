@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::draw::UpdateMap;
 use crate::screen::Centering;
-use crate::{planet::*, GameSpeed, GameState};
+use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
@@ -22,13 +22,13 @@ impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
-            .add_system_set(
-                SystemSet::on_enter(GameState::Running)
-                    .with_system(start_sim)
-                    .label("start_sim"),
+            .add_system(
+                start_sim
+                    .in_schedule(OnEnter(GameState::Running))
+                    .in_set(GameSystemSet::StartSim),
             )
-            .add_system_set(SystemSet::on_update(GameState::Running).with_system(update))
-            .add_system(manage_planet.before("draw"));
+            .add_system(update.in_set(OnUpdate(GameState::Running)))
+            .add_system(manage_planet.before(GameSystemSet::Draw));
     }
 }
 
@@ -80,7 +80,7 @@ fn manage_planet(
     mut command: Commands,
     mut er_manage_planet: EventReader<ManagePlanet>,
     mut ew_manage_planet_eror: EventWriter<ManagePlanetError>,
-    mut game_state: ResMut<State<GameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
     params: Option<Res<Params>>,
@@ -125,6 +125,6 @@ fn manage_planet(
             command.insert_resource(new_planet);
         }
 
-        let _ = game_state.set(GameState::Running);
+        next_game_state.set(GameState::Running);
     }
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
@@ -15,7 +15,7 @@ pub enum Panel {
 }
 
 pub fn stat_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     conf: Res<Conf>,
@@ -29,7 +29,7 @@ pub fn stat_window(
     let rect = egui::Window::new(t!("statistics"))
         .open(&mut wos.stat)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
                     ui.selectable_value(&mut *current_panel, panel, t!(panel.as_ref()));

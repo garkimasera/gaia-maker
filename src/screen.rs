@@ -2,10 +2,10 @@ use crate::action::CursorAction;
 use crate::assets::{UiTexture, UiTextures};
 use crate::conf::Conf;
 use crate::draw::UpdateMap;
-use crate::planet::*;
 use crate::ui::WindowsOpenState;
 use crate::GameState;
-use bevy::window::WindowResized;
+use crate::{planet::*, GameSystemSet};
+use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
     prelude::*,
@@ -36,22 +36,31 @@ impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Centering>()
             .add_startup_system(setup)
-            .add_system_set(SystemSet::on_enter(GameState::Running).with_system(setup_cursor))
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .with_system(on_enter_running.after("start_sim")),
+            .add_system(setup_cursor.in_schedule(OnEnter(GameState::Running)))
+            .add_system(
+                on_enter_running
+                    .in_set(OnUpdate(GameState::Running))
+                    .after(GameSystemSet::StartSim),
             )
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .with_system(centering.before("draw"))
-                    .with_system(on_resize.before("draw"))
-                    .with_system(update_hover_tile.label("update_hover_tile"))
-                    .with_system(mouse_event.after("update_hover_tile"))
-                    .with_system(keyboard_input),
+            .add_systems(
+                (centering, on_resize)
+                    .in_set(OnUpdate(GameState::Running))
+                    .before(GameSystemSet::Draw),
             )
+            .add_system(
+                update_hover_tile
+                    .in_set(OnUpdate(GameState::Running))
+                    .in_set(GameSystemSet::UpdateHoverTile),
+            )
+            .add_system(
+                mouse_event
+                    .in_set(OnUpdate(GameState::Running))
+                    .after(GameSystemSet::UpdateHoverTile),
+            )
+            .add_system(keyboard_input.in_set(OnUpdate(GameState::Running)))
             .add_system(window_resize);
     }
 }
@@ -83,7 +92,7 @@ pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(SpriteBundle {
             texture: asset_server.get_handle("ui/tile-cursor.png"),
-            visibility: Visibility { is_visible: false },
+            visibility: Visibility::Hidden,
             ..default()
         })
         .insert(HoverTile(None));
@@ -111,7 +120,7 @@ fn on_enter_running(
 fn mouse_event(
     mut ew_cursor_action: EventWriter<CursorAction>,
     mut ew_centering: EventWriter<Centering>,
-    windows: Res<Windows>,
+    window: Query<&Window, With<PrimaryWindow>>,
     mouse_button_input: Res<Input<MouseButton>>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     occupied_screen_space: Res<OccupiedScreenSpace>,
@@ -119,7 +128,9 @@ fn mouse_event(
     mut cursor_mode: ResMut<CursorMode>,
     mut prev_tile_coords: Local<Option<Coords>>,
 ) {
-    let window = windows.get_primary().unwrap();
+    let Ok(window) = window.get_single() else {
+        return;
+    };
     let pos = if let Some(pos) = window.cursor_position() {
         pos
     } else {
@@ -181,7 +192,7 @@ fn centering(
     mut er_centering: EventReader<Centering>,
     mut update_map: ResMut<UpdateMap>,
     screen: Res<OccupiedScreenSpace>,
-    windows: Res<Windows>,
+    window: Query<&Window, With<PrimaryWindow>>,
     egui_settings: ResMut<bevy_egui::EguiSettings>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
     planet: Res<Planet>,
@@ -190,7 +201,9 @@ fn centering(
     for e in er_centering.iter() {
         update_map.update();
         let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
-        let window = windows.get_primary().unwrap();
+        let Ok(window) = window.get_single() else {
+            return;
+        };
 
         let center = &e.0;
 
@@ -230,7 +243,7 @@ fn centering(
 
 fn update_hover_tile(
     mut commands: Commands,
-    windows: Res<Windows>,
+    window: Query<&Window, With<PrimaryWindow>>,
     planet: Res<Planet>,
     mut hover_tile: Query<
         (&mut HoverTile, &mut Transform, &mut Visibility),
@@ -243,7 +256,9 @@ fn update_hover_tile(
     mut color_entities: Local<Vec<Entity>>,
 ) {
     let mut hover_tile = hover_tile.get_single_mut().unwrap();
-    let window = windows.get_primary().unwrap();
+    let Ok(window) = window.get_single() else {
+            return;
+        };
     let cursor_pos = if let Some(pos) = window.cursor_position() {
         pos
     } else {
@@ -261,7 +276,7 @@ fn update_hover_tile(
     };
     let tile_j = (p.y / TILE_SIZE) as i32;
 
-    let is_visible = if tile_j >= 0 && tile_j < planet.map.size().1 as i32 && p.y >= 0.0 {
+    *hover_tile.2 = if tile_j >= 0 && tile_j < planet.map.size().1 as i32 && p.y >= 0.0 {
         let planet_w = planet.map.size().0 as i32;
         let tile_i_rotated = if tile_i < 0 {
             tile_i + (-tile_i / planet_w + 1) * planet_w
@@ -272,19 +287,18 @@ fn update_hover_tile(
         hover_tile.1.translation.x = tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.y = tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.z = 950.0;
-        true
+        Visibility::Inherited
     } else {
         hover_tile.0 .0 = None;
-        false
+        Visibility::Hidden
     };
-    *hover_tile.2 = Visibility { is_visible };
 
     for entity in color_entities.iter() {
         commands.entity(*entity).despawn();
     }
     color_entities.clear();
 
-    if !is_visible {
+    if *hover_tile.2 == Visibility::Inherited {
         return;
     }
 
@@ -308,7 +322,7 @@ fn update_hover_tile(
         let id = commands
             .spawn(SpriteBundle {
                 texture: ui_textures.get(UiTexture::TileColored),
-                visibility: Visibility { is_visible: true },
+                visibility: Visibility::Inherited,
                 transform,
                 ..default()
             })
@@ -424,10 +438,10 @@ fn keyboard_input(
 fn window_resize() {}
 
 #[cfg(target_arch = "wasm32")]
-fn window_resize(mut windows: ResMut<Windows>) {
-    let Some(window) = windows.get_primary_mut() else {
-        return;
-    };
+fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
+    let Ok(mut window) = window.get_single_mut() else {
+            return;
+        };
 
     let Some(w) = web_sys::window() else {
         return;
@@ -449,6 +463,6 @@ fn window_resize(mut windows: ResMut<Windows>) {
         };
 
     if window.width() != width as f32 || window.height() != height as f32 {
-        window.set_resolution(width, height);
+        window.resolution.set(width, height);
     }
 }

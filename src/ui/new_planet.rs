@@ -1,5 +1,5 @@
 use bevy::prelude::EventWriter;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 use crate::{
     planet::{GasKind, Params, PlanetBasics, StartParams},
@@ -28,7 +28,7 @@ impl NewPlanetState {
 }
 
 pub fn new_planet(
-    egui_ctx: &mut EguiContext,
+    egui_ctxs: &mut EguiContexts,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: &Params,
     state: &mut MainMenuState,
@@ -40,7 +40,7 @@ pub fn new_planet(
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
         .default_width(0.0)
         .resizable(false)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 ui.label(t!("search-new-planet"));
                 ui.separator();

@@ -25,19 +25,16 @@ impl Plugin for AssetsPlugin {
                 "structures.ron",
             ]))
             .add_loading_state(
-                LoadingState::new(GameState::AssetLoading)
-                    .continue_to_state(GameState::MainMenu)
-                    .with_collection::<TranslationTexts>()
-                    .with_collection::<UiTextures>()
-                    .with_collection::<UiAssets>()
-                    .with_collection::<ParamsAssetCollection>()
-                    .with_collection::<BiomeTextures>()
-                    .with_collection::<StructureTextures>()
-                    .with_collection::<SoundEffects>(),
+                LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::MainMenu),
             )
-            .add_system_set(
-                SystemSet::on_exit(GameState::AssetLoading).with_system(create_assets_list),
-            );
+            .add_collection_to_loading_state::<_, TranslationTexts>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, UiTextures>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, UiAssets>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, ParamsAssetCollection>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, BiomeTextures>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, StructureTextures>(GameState::AssetLoading)
+            .add_collection_to_loading_state::<_, SoundEffects>(GameState::AssetLoading)
+            .add_system(create_assets_list.in_schedule(OnExit(GameState::AssetLoading)));
     }
 }
 

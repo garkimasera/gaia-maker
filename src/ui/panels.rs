@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 use crate::{
     assets::UiTexture,
@@ -13,7 +13,7 @@ use crate::{
 use super::{EguiTextures, WindowsOpenState};
 
 pub fn panels(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     hover_tile: Query<&HoverTile>,
     mut cursor_mode: ResMut<CursorMode>,
@@ -27,7 +27,7 @@ pub fn panels(
 
     occupied_screen_space.occupied_left = egui::SidePanel::left("left_panel")
         .resizable(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             sidebar(
                 ui,
                 &cursor_mode,
@@ -45,7 +45,7 @@ pub fn panels(
 
     occupied_screen_space.occupied_top = egui::TopBottomPanel::top("top_panel")
         .resizable(false)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 toolbar(ui, &mut cursor_mode, &mut wos, &mut speed, &textures, &conf);
             });

@@ -10,7 +10,7 @@ mod stat;
 use bevy::{app::AppExit, math::Rect, prelude::*};
 use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily},
-    EguiContext, EguiPlugin, EguiSettings,
+    EguiContexts, EguiPlugin, EguiSettings,
 };
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
@@ -49,41 +49,42 @@ pub struct WindowsOpenState {
 #[derive(Clone, Default, Resource)]
 pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct UiWindowsSystemSet;
+
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(EguiPlugin)
             .init_resource::<WindowsOpenState>()
             .init_resource::<OverlayLayerKind>()
-            .add_system_set(
-                SystemSet::on_exit(GameState::AssetLoading)
-                    .with_system(setup_fonts)
-                    .with_system(load_textures),
+            .add_systems((setup_fonts, load_textures).in_schedule(OnExit(GameState::AssetLoading)))
+            .add_system(main_menu::set_main_menu_state.in_schedule(OnEnter(GameState::MainMenu)))
+            .add_system(main_menu::main_menu.in_set(OnUpdate(GameState::MainMenu)))
+            .add_system(
+                panels::panels
+                    .in_set(OnUpdate(GameState::Running))
+                    .before(UiWindowsSystemSet),
             )
-            .add_system_set(
-                SystemSet::on_enter(GameState::MainMenu)
-                    .with_system(main_menu::set_main_menu_state),
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::MainMenu).with_system(main_menu::main_menu),
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::Running)
-                    .with_system(panels::panels.label("ui_panels").before("ui_windows"))
-                    .with_system(build_window.label("ui_windows"))
-                    .with_system(orbit::orbit_window.label("ui_windows"))
-                    .with_system(star_system::star_system_window.label("ui_windows"))
-                    .with_system(layers_window.label("ui_windows"))
-                    .with_system(stat::stat_window.label("ui_windows"))
-                    .with_system(msg_window.label("ui_windows"))
-                    .with_system(game_menu_window.label("ui_windows"))
-                    .with_system(help::help_window.label("ui_windows"))
-                    .with_system(edit_planet::edit_planet_window.label("ui_windows")),
+            .add_systems(
+                (
+                    build_window,
+                    orbit::orbit_window,
+                    star_system::star_system_window,
+                    layers_window,
+                    stat::stat_window,
+                    msg_window,
+                    game_menu_window,
+                    help::help_window,
+                    edit_planet::edit_planet_window,
+                )
+                    .in_set(OnUpdate(GameState::Running))
+                    .in_set(UiWindowsSystemSet),
             );
     }
 }
 
 fn setup_fonts(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut egui_settings: ResMut<EguiSettings>,
     conf: Res<Assets<Conf>>,
     ui_assets: Res<UiAssets>,
@@ -107,16 +108,16 @@ fn setup_fonts(
         .get_mut(&FontFamily::Monospace)
         .unwrap()
         .push("m+_font".to_owned());
-    egui_ctx.ctx_mut().set_fonts(fonts);
+    egui_ctxs.ctx_mut().set_fonts(fonts);
 }
 
 fn load_textures(
     mut commands: Commands,
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     images: Res<Assets<Image>>,
     ui_textures: Res<UiTextures>,
 ) {
-    let ctx = egui_ctx.ctx_mut();
+    let ctx = egui_ctxs.ctx_mut();
 
     let mut egui_textures = HashMap::new();
 
@@ -144,7 +145,7 @@ fn load_textures(
 }
 
 fn build_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut cursor_mode: ResMut<CursorMode>,
@@ -159,7 +160,7 @@ fn build_window(
     let rect = egui::Window::new(t!("build"))
         .open(&mut wos.build)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             if ui.button(t!("demolition")).clicked() {
                 *cursor_mode = CursorMode::Demolition;
             }
@@ -184,7 +185,7 @@ fn build_window(
 }
 
 fn layers_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
@@ -199,7 +200,7 @@ fn layers_window(
     let rect = egui::Window::new(t!("layers"))
         .open(&mut wos.layers)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             for kind in OverlayLayerKind::iter() {
                 ui.radio_value(&mut new_layer, kind, t!(kind.as_ref()));
             }
@@ -218,7 +219,7 @@ fn layers_window(
 }
 
 fn msg_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     msg_holder: Res<MsgHolder>,
@@ -234,7 +235,7 @@ fn msg_window(
     let rect = egui::Window::new(t!("messages"))
         .open(&mut wos.message)
         .vscroll(true)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.label(s);
             ui.separator();
             ui.vertical_centered(|ui| {
@@ -253,7 +254,7 @@ fn msg_window(
 }
 
 fn game_menu_window(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut app_exit_events: EventWriter<AppExit>,
     mut wos: ResMut<WindowsOpenState>,
@@ -272,7 +273,7 @@ fn game_menu_window(
         .default_width(0.0)
         .resizable(false)
         .open(&mut wos.game_menu)
-        .show(egui_ctx.ctx_mut(), |ui| {
+        .show(egui_ctxs.ctx_mut(), |ui| {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 if ui.button(t!("save")).clicked() {
                     ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));

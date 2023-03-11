@@ -32,7 +32,7 @@ impl Plugin for ConfPlugin {
         app.add_event::<ConfChange>()
             .add_plugin(RonAssetPlugin::<Conf>::new(&["conf.ron"]))
             .add_system(on_change)
-            .add_system_set(SystemSet::on_exit(GameState::AssetLoading).with_system(set_conf));
+            .add_system(set_conf.in_schedule(OnExit(GameState::AssetLoading)));
     }
 }
 
