@@ -432,31 +432,63 @@ fn keyboard_input(
 fn window_resize() {}
 
 #[cfg(target_arch = "wasm32")]
-fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
-    let Ok(mut window) = window.get_single_mut() else {
-            return;
-        };
+fn window_resize(mut _window: Query<&mut Window, With<PrimaryWindow>>) {
+    // let Ok(mut window) = window.get_single_mut() else {
+    //         return;
+    //     };
 
+    // let Some(w) = web_sys::window() else {
+    //     return;
+    // };
+
+    // let Some(width) = w
+    //     .inner_width()
+    //     .ok()
+    //     .and_then(|width| width.as_f64())
+    //     .map(|width| width as f32) else {
+    //         return;
+    //     };
+    // let Some(height) = w
+    //     .inner_height()
+    //     .ok()
+    //     .and_then(|height| height.as_f64())
+    //     .map(|height| height as f32) else {
+    //         return;
+    //     };
+
+    // if window.width() != width as f32 || window.height() != height as f32 {
+    //     window.resolution.set(width, height);
+    // }
+}
+
+const DEFAULT_WINDOW_SIZE: (u32, u32) = (1280, 720);
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn preferred_window_size() -> (u32, u32) {
+    DEFAULT_WINDOW_SIZE
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn preferred_window_size() -> (u32, u32) {
     let Some(w) = web_sys::window() else {
-        return;
+        return DEFAULT_WINDOW_SIZE;
     };
 
     let Some(width) = w
         .inner_width()
         .ok()
-        .and_then(|width| width.as_f64())
-        .map(|width| width as f32) else {
-            return;
+        .and_then(|width| width.as_f64()) else {
+            return DEFAULT_WINDOW_SIZE;
         };
     let Some(height) = w
         .inner_height()
         .ok()
-        .and_then(|height| height.as_f64())
-        .map(|height| height as f32) else {
-            return;
+        .and_then(|height| height.as_f64()) else {
+            return DEFAULT_WINDOW_SIZE;
         };
+    let width = width as u32;
+    let height = height as u32;
 
-    if window.width() != width as f32 || window.height() != height as f32 {
-        window.resolution.set(width, height);
-    }
+    // Workaround for drawing in web
+    (width - width % 2, height - height % 2)
 }

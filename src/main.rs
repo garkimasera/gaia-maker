@@ -26,7 +26,11 @@ mod screen;
 mod sim;
 mod ui;
 
-use bevy::{prelude::*, window::PresentMode, winit::WinitSettings};
+use bevy::{
+    prelude::*,
+    window::{PresentMode, WindowResolution},
+    winit::WinitSettings,
+};
 
 const APP_NAME: &str = concat!("Pixel Gaia v", env!("CARGO_PKG_VERSION"));
 
@@ -37,12 +41,15 @@ struct Args {}
 fn main() {
     let _args = Args::parse();
 
+    let window_size = screen::preferred_window_size();
+
     App::new()
         .add_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: APP_NAME.into(),
                 present_mode: PresentMode::Fifo,
+                resolution: WindowResolution::new(window_size.0 as f32, window_size.1 as f32),
                 ..default()
             }),
             ..default()

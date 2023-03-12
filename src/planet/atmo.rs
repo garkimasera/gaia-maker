@@ -3,6 +3,7 @@ use fnv::FnvHashMap;
 use serde::{Deserialize, Serialize};
 
 const CO2_CARBON_WEIGHT_RATIO: f32 = 44.0 / 12.0;
+const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Atmosphere {
@@ -28,10 +29,11 @@ impl Atmosphere {
     }
 
     pub fn remove_carbon(&mut self, value: f32) -> bool {
-        let value = value * CO2_CARBON_WEIGHT_RATIO;
+        let carbon_weight = value * CO2_CARBON_WEIGHT_RATIO;
         let co2_mass = self.mass.get_mut(&GasKind::CarbonDioxide).unwrap();
-        if *co2_mass > value {
-            *co2_mass -= value;
+        if *co2_mass > carbon_weight {
+            *co2_mass -= carbon_weight;
+            *self.mass.get_mut(&GasKind::Oxygen).unwrap() += value * CO2_OXYGEN_WEIGHT_RATIO;
             true
         } else {
             false
