@@ -44,6 +44,7 @@ pub enum BasicsItem {
     Concept,
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for ItemGroup {
     fn default() -> Self {
         ItemGroup::Basics
