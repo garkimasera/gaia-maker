@@ -3,8 +3,7 @@ use crate::assets::{UiTexture, UiTextures};
 use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::ui::WindowsOpenState;
-use crate::GameState;
-use crate::{planet::*, GameSystemSet};
+use crate::{planet::*, GameState, GameSystemSet};
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
@@ -88,7 +87,14 @@ pub fn setup(mut commands: Commands) {
     commands.spawn(camera);
 }
 
-pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_cursor(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut setup: Local<bool>,
+) {
+    if *setup {
+        return;
+    }
     commands
         .spawn(SpriteBundle {
             texture: asset_server.get_handle("ui/tile-cursor.png"),
@@ -96,6 +102,7 @@ pub fn setup_cursor(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         })
         .insert(HoverTile(None));
+    *setup = true;
 }
 
 fn on_enter_running(
