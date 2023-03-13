@@ -1,6 +1,5 @@
 use bevy::{app::AppExit, prelude::*};
 use bevy_egui::{egui, EguiContexts};
-use strum::IntoEnumIterator;
 
 use crate::{
     assets::UiTexture,
@@ -80,7 +79,7 @@ fn toolbar(
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
-    (current_layer, update_map): (&mut OverlayLayerKind, &mut UpdateMap),
+    (_current_layer, _update_map): (&mut OverlayLayerKind, &mut UpdateMap),
     (app_exit_events, ew_manage_planet): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
@@ -110,10 +109,9 @@ fn toolbar(
         wos.star_system = !wos.star_system;
     }
 
-    let (handle, size) = &textures.0[&UiTexture::IconLayers];
-    ui.menu_image_button(handle.id(), *size, |ui| {
-        layers_menu(ui, current_layer, update_map);
-    });
+    if button(ui, UiTexture::IconLayers, "layers") {
+        wos.layers = !wos.layers;
+    }
 
     if button(ui, UiTexture::IconStat, "statistics") {
         wos.stat = !wos.stat;
@@ -303,26 +301,6 @@ fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, 
             ui.end_row();
         }
     });
-}
-
-fn layers_menu(
-    ui: &mut egui::Ui,
-    current_layer: &mut OverlayLayerKind,
-    update_map: &mut UpdateMap,
-) {
-    let mut new_layer = *current_layer;
-    for kind in OverlayLayerKind::iter() {
-        if ui
-            .radio_value(&mut new_layer, kind, t!(kind.as_ref()))
-            .clicked()
-        {
-            ui.close_menu();
-        }
-    }
-    if new_layer != *current_layer {
-        *current_layer = new_layer;
-        update_map.update();
-    }
 }
 
 fn game_menu(

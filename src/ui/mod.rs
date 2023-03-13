@@ -13,10 +13,12 @@ use bevy_egui::{
     EguiContexts, EguiPlugin, EguiSettings,
 };
 use std::collections::HashMap;
+use strum::IntoEnumIterator;
 
 use crate::{
     assets::{UiAssets, UiTexture, UiTextures},
     conf::Conf,
+    draw::UpdateMap,
     gz::GunzipBin,
     msg::MsgHolder,
     overlay::OverlayLayerKind,
@@ -31,6 +33,7 @@ pub struct UiPlugin;
 pub struct WindowsOpenState {
     pub orbit: bool,
     pub star_system: bool,
+    pub layers: bool,
     pub stat: bool,
     pub message: bool,
     pub help: bool,
@@ -61,6 +64,7 @@ impl Plugin for UiPlugin {
                     orbit::orbit_window,
                     star_system::star_system_window,
                     stat::stat_window,
+                    layers_window,
                     msg_window,
                     help::help_window,
                     edit_planet::edit_planet_window,
@@ -130,6 +134,52 @@ fn load_textures(
     }
 
     commands.insert_resource(EguiTextures(egui_textures));
+}
+
+fn layers_window(
+    mut egui_ctxs: EguiContexts,
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut wos: ResMut<WindowsOpenState>,
+    mut current_layer: ResMut<OverlayLayerKind>,
+    mut update_map: ResMut<UpdateMap>,
+    conf: Res<Conf>,
+) {
+    if !wos.layers {
+        return;
+    }
+
+    let rect = egui::Window::new(t!("layers"))
+        .open(&mut wos.layers)
+        .vscroll(true)
+        .show(egui_ctxs.ctx_mut(), |ui| {
+            layers_menu(ui, &mut current_layer, &mut update_map);
+        })
+        .unwrap()
+        .response
+        .rect;
+    occupied_screen_space
+        .window_rects
+        .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn layers_menu(
+    ui: &mut egui::Ui,
+    current_layer: &mut OverlayLayerKind,
+    update_map: &mut UpdateMap,
+) {
+    let mut new_layer = *current_layer;
+    for kind in OverlayLayerKind::iter() {
+        if ui
+            .radio_value(&mut new_layer, kind, t!(kind.as_ref()))
+            .clicked()
+        {
+            ui.close_menu();
+        }
+    }
+    if new_layer != *current_layer {
+        *current_layer = new_layer;
+        update_map.update();
+    }
 }
 
 fn msg_window(
