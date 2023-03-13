@@ -82,7 +82,7 @@ impl Planet {
         let gen_conf = map_generator::GenConf {
             w: start_params.size.0,
             h: start_params.size.1,
-            max_height: start_params.max_height,
+            max_height: start_params.difference_in_elevation,
         };
         let height_map = map_generator::generate(gen_conf);
         for (p, height) in height_map.iter_with_idx() {

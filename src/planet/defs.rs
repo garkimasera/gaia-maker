@@ -326,7 +326,7 @@ pub struct Params {
 pub struct StartParams {
     pub basics: PlanetBasics,
     pub size: (u32, u32),
-    pub max_height: f32,
+    pub difference_in_elevation: f32,
     pub resources: ResourceMap,
     pub atmo_mass: FnvHashMap<GasKind, f32>,
     pub water_volume: f32,
@@ -403,6 +403,7 @@ pub struct NewPlanetRangedParam {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NewPlanetParams {
     pub solar_constant: NewPlanetRangedParam,
+    pub difference_in_elevation: NewPlanetRangedParam,
     pub water_volume_max: f32,
     pub nitrogen_max: f32,
     pub carbon_dioxide_max: f32,

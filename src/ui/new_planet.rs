@@ -11,6 +11,7 @@ use super::main_menu::MainMenuState;
 #[derive(Clone, Debug)]
 pub struct NewPlanetState {
     solar_constant: f32,
+    difference_in_elevation: f32,
     water: f32,
     nitrogen: f32,
     carbon_dioxide: f32,
@@ -20,6 +21,7 @@ impl NewPlanetState {
     pub fn new(params: &Params) -> Self {
         NewPlanetState {
             solar_constant: params.new_planet.solar_constant.default,
+            difference_in_elevation: params.new_planet.difference_in_elevation.default,
             water: 0.0,
             nitrogen: 50.0,
             carbon_dioxide: 30.0,
@@ -54,6 +56,14 @@ pub fn new_planet(
                 );
 
                 ui.add(
+                    egui::Slider::new(
+                        &mut state.new_planet.difference_in_elevation,
+                        npp.difference_in_elevation.min..=npp.difference_in_elevation.max,
+                    )
+                    .text(format!("{} [m]", t!("difference-in-elevation"))),
+                );
+
+                ui.add(
                     egui::Slider::new(&mut state.new_planet.water, 0.0..=100.0)
                         .show_value(false)
                         .text(t!("water")),
@@ -85,6 +95,7 @@ pub fn new_planet(
                             solar_constant: state.new_planet.solar_constant,
                             ..params.default_start_params.clone().basics
                         },
+                        difference_in_elevation: state.new_planet.difference_in_elevation,
                         water_volume: params.new_planet.water_volume_max * state.new_planet.water
                             / 100.0,
                         atmo_mass,

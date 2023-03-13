@@ -95,6 +95,7 @@
     ),
     new_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
+        difference_in_elevation: (min: 1000, max: 15000, default: 7000),
         water_volume_max: 1.0e+18,
         nitrogen_max: 1.0e+10,
         carbon_dioxide_max: 2.0e+8,
@@ -106,7 +107,7 @@
             solar_constant: 1400,
         ),
         size: (128, 64),
-        max_height: 10000.0,
+        difference_in_elevation: 7000.0,
         resources: {
             energy: 10000.0,
             material: 1000.0,
