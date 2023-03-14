@@ -22,9 +22,9 @@ impl NewPlanetState {
         NewPlanetState {
             solar_constant: params.new_planet.solar_constant.default,
             difference_in_elevation: params.new_planet.difference_in_elevation.default,
-            water: 0.0,
-            nitrogen: 50.0,
-            carbon_dioxide: 30.0,
+            water: params.new_planet.water_volume.default_percentage,
+            nitrogen: params.new_planet.nitrogen.default_percentage,
+            carbon_dioxide: params.new_planet.carbon_dioxide.default_percentage,
         }
     }
 }
@@ -85,9 +85,9 @@ pub fn new_planet(
                 if ui.button(t!("start")).clicked() {
                     let mut atmo_mass = params.default_start_params.atmo_mass.clone();
                     *atmo_mass.get_mut(&GasKind::Nitrogen).unwrap() =
-                        params.new_planet.nitrogen_max * state.new_planet.nitrogen / 100.0;
+                        params.new_planet.nitrogen.max * state.new_planet.nitrogen / 100.0;
                     *atmo_mass.get_mut(&GasKind::CarbonDioxide).unwrap() =
-                        params.new_planet.carbon_dioxide_max * state.new_planet.carbon_dioxide
+                        params.new_planet.carbon_dioxide.max * state.new_planet.carbon_dioxide
                             / 100.0;
 
                     let start_params = StartParams {
@@ -96,7 +96,7 @@ pub fn new_planet(
                             ..params.default_start_params.clone().basics
                         },
                         difference_in_elevation: state.new_planet.difference_in_elevation,
-                        water_volume: params.new_planet.water_volume_max * state.new_planet.water
+                        water_volume: params.new_planet.water_volume.max * state.new_planet.water
                             / 100.0,
                         atmo_mass,
                         ..params.default_start_params.clone()

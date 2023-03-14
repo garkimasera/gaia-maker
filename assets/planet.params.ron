@@ -96,9 +96,9 @@
     new_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
         difference_in_elevation: (min: 1000, max: 15000, default: 7000),
-        water_volume_max: 1.0e+18,
-        nitrogen_max: 1.0e+10,
-        carbon_dioxide_max: 2.0e+8,
+        water_volume: (default_percentage: 20.0, max: 1.0e+18),
+        nitrogen: (default_percentage: 30.0, max: 1.0e+10),
+        carbon_dioxide: (default_percentage: 15.0, max: 2.0e+8),
     ),
     default_start_params: (
         basics: (
