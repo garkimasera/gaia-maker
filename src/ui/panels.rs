@@ -10,7 +10,7 @@ use crate::{
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
     text::Unit,
-    GameSpeed,
+    GameSpeed, GameState,
 };
 
 use super::{help::HelpItem, EguiTextures, WindowsOpenState};
@@ -23,7 +23,11 @@ pub fn panels(
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
     (mut current_layer, mut update_map): (ResMut<OverlayLayerKind>, ResMut<UpdateMap>),
-    (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
+    (mut app_exit_events, mut ew_manage_planet, mut next_game_state): (
+        EventWriter<AppExit>,
+        EventWriter<ManagePlanet>,
+        ResMut<NextState<GameState>>,
+    ),
     planet: Res<Planet>,
     textures: Res<EguiTextures>,
     params: Res<Params>,
@@ -59,7 +63,11 @@ pub fn panels(
                     &mut wos,
                     &mut speed,
                     (&mut current_layer, &mut update_map),
-                    (&mut app_exit_events, &mut ew_manage_planet),
+                    (
+                        &mut app_exit_events,
+                        &mut ew_manage_planet,
+                        &mut next_game_state,
+                    ),
                     &textures,
                     &planet,
                     &params,
@@ -80,9 +88,10 @@ fn toolbar(
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
     (_current_layer, _update_map): (&mut OverlayLayerKind, &mut UpdateMap),
-    (app_exit_events, ew_manage_planet): (
+    (app_exit_events, ew_manage_planet, next_game_state): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
+        &mut NextState<GameState>,
     ),
     textures: &EguiTextures,
     planet: &Planet,
@@ -154,7 +163,7 @@ fn toolbar(
 
     let (handle, size) = &textures.0[&UiTexture::IconGameMenu];
     ui.menu_image_button(handle.id(), *size, |ui| {
-        game_menu(ui, app_exit_events, ew_manage_planet);
+        game_menu(ui, app_exit_events, ew_manage_planet, next_game_state);
     });
 
     if button(ui, UiTexture::IconHelp, "help") {
@@ -307,6 +316,7 @@ fn game_menu(
     ui: &mut egui::Ui,
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
+    next_game_state: &mut NextState<GameState>,
 ) {
     if ui.button(t!("save")).clicked() {
         ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
@@ -314,6 +324,11 @@ fn game_menu(
     }
     if ui.button(t!("load")).clicked() {
         ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+        ui.close_menu();
+    }
+    ui.separator();
+    if ui.button(t!("main-menu")).clicked() {
+        next_game_state.set(GameState::MainMenu);
         ui.close_menu();
     }
     ui.separator();

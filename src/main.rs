@@ -72,7 +72,7 @@ fn main() {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Hash, States)]
-enum GameState {
+pub enum GameState {
     #[default]
     AssetLoading,
     MainMenu,

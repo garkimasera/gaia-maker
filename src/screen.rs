@@ -38,6 +38,7 @@ impl Plugin for ScreenPlugin {
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
+            .add_system(main_menu_background.in_schedule(OnEnter(GameState::MainMenu)))
             .add_system(setup_cursor.in_schedule(OnEnter(GameState::Running)))
             .add_system(
                 on_enter_running
@@ -433,6 +434,12 @@ fn keyboard_input(
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
     }
+}
+
+fn main_menu_background(mut camera_query: Query<(&OrthographicProjection, &mut Transform)>) {
+    let translation = &mut camera_query.get_single_mut().unwrap().1.translation;
+    translation.x = 0.0;
+    translation.y = 0.0;
 }
 
 #[cfg(not(target_arch = "wasm32"))]
