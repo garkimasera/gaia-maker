@@ -4,6 +4,7 @@ use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameState, GameSystemSet};
+use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
@@ -39,6 +40,7 @@ impl Plugin for ScreenPlugin {
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
             .add_system(main_menu_background.in_schedule(OnEnter(GameState::MainMenu)))
+            .add_system(main_menu_background_exit.in_schedule(OnExit(GameState::MainMenu)))
             .add_system(setup_cursor.in_schedule(OnEnter(GameState::Running)))
             .add_system(
                 on_enter_running
@@ -436,10 +438,55 @@ fn keyboard_input(
     }
 }
 
-fn main_menu_background(mut camera_query: Query<(&OrthographicProjection, &mut Transform)>) {
+#[derive(Component)]
+struct MainMenuBackground;
+
+fn main_menu_background(
+    mut commands: Commands,
+    mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+    mut initialized: Local<bool>,
+    mut bg_meshes: Query<&mut Visibility, With<MainMenuBackground>>,
+    (mut meshes, mut materials): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
+    (mut bg_mesh, mut bg_material): (
+        Local<Option<Handle<Mesh>>>,
+        Local<Option<Handle<ColorMaterial>>>,
+    ),
+) {
     let translation = &mut camera_query.get_single_mut().unwrap().1.translation;
     translation.x = 0.0;
     translation.y = 0.0;
+
+    let bg_material = bg_material.get_or_insert_with(|| {
+        materials.add(ColorMaterial {
+            color: Color::GRAY,
+            texture: None,
+        })
+    });
+    let bg_mesh = bg_mesh.get_or_insert_with(|| {
+        meshes.add(Mesh::from(shape::Quad::new(Vec2::new(100000.0, 100000.0))))
+    });
+
+    if !*initialized {
+        commands
+            .spawn(MaterialMesh2dBundle {
+                mesh: bg_mesh.clone().into(),
+                transform: Transform::from_xyz(0.0, 0.0, 998.0),
+                material: bg_material.clone(),
+                ..default()
+            })
+            .insert(MainMenuBackground);
+        *initialized = true;
+    } else {
+        for mut bg in bg_meshes.iter_mut() {
+            *bg = Visibility::Visible;
+        }
+    }
+}
+
+fn main_menu_background_exit(mut bg_meshes: Query<&mut Visibility, With<MainMenuBackground>>) {
+    for mut bg in bg_meshes.iter_mut() {
+        *bg = Visibility::Hidden;
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
