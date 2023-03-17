@@ -50,6 +50,7 @@ fn main() {
                 title: APP_NAME.into(),
                 present_mode: PresentMode::Fifo,
                 resolution: WindowResolution::new(window_size.0 as f32, window_size.1 as f32),
+                canvas: Some("#pixel-gaia-screen".into()),
                 ..default()
             }),
             ..default()

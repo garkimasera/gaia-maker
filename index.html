@@ -7,14 +7,34 @@
             margin: 0;
             padding: 0;
             background-color: black;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #pixel-gaia-screen {
+            width: 0px;
+            height: 0px;
         }
     </style>
   </head>
   <body>
     <script type="module">
       import init from './pixel-gaia.js'
+      
       document.body.oncontextmenu = function () { return false; }
-      init()
+
+      function start() {
+        let start_screen = document.getElementById('start-screen');
+        start_screen.remove();
+        init();
+      }
+      let start_button = document.getElementById('start-button');
+      start_button.addEventListener('click', start);
     </script>
+    <div id="start-screen">
+      <input type="button" value="start" id="start-button">
+    </div>
+    <canvas id="pixel-gaia-screen"></canvas>
   </body>
 </html>

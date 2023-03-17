@@ -154,7 +154,6 @@
         ),
         dyson_swarm_unit: (
             cost: { material: 20000 },
-            upkeep: { material: 10 },
             produces: { energy: 50000 },
             build_max: 100,
         ),
