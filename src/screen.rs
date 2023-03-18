@@ -36,6 +36,7 @@ impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Centering>()
             .add_startup_system(setup)
+            .add_startup_system(setup_main_menu_background)
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
@@ -441,45 +442,36 @@ fn keyboard_input(
 #[derive(Component)]
 struct MainMenuBackground;
 
-fn main_menu_background(
+fn setup_main_menu_background(
     mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let bg_material = materials.add(ColorMaterial {
+        color: Color::GRAY,
+        texture: None,
+    });
+    let bg_mesh = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(100000.0, 100000.0))));
+    commands
+        .spawn(MaterialMesh2dBundle {
+            mesh: bg_mesh.clone().into(),
+            transform: Transform::from_xyz(0.0, 0.0, 998.0),
+            material: bg_material.clone(),
+            ..default()
+        })
+        .insert(MainMenuBackground);
+}
+
+fn main_menu_background(
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
-    mut initialized: Local<bool>,
     mut bg_meshes: Query<&mut Visibility, With<MainMenuBackground>>,
-    (mut meshes, mut materials): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
-    (mut bg_mesh, mut bg_material): (
-        Local<Option<Handle<Mesh>>>,
-        Local<Option<Handle<ColorMaterial>>>,
-    ),
 ) {
     let translation = &mut camera_query.get_single_mut().unwrap().1.translation;
     translation.x = 0.0;
     translation.y = 0.0;
 
-    let bg_material = bg_material.get_or_insert_with(|| {
-        materials.add(ColorMaterial {
-            color: Color::GRAY,
-            texture: None,
-        })
-    });
-    let bg_mesh = bg_mesh.get_or_insert_with(|| {
-        meshes.add(Mesh::from(shape::Quad::new(Vec2::new(100000.0, 100000.0))))
-    });
-
-    if !*initialized {
-        commands
-            .spawn(MaterialMesh2dBundle {
-                mesh: bg_mesh.clone().into(),
-                transform: Transform::from_xyz(0.0, 0.0, 998.0),
-                material: bg_material.clone(),
-                ..default()
-            })
-            .insert(MainMenuBackground);
-        *initialized = true;
-    } else {
-        for mut bg in bg_meshes.iter_mut() {
-            *bg = Visibility::Visible;
-        }
+    for mut bg in bg_meshes.iter_mut() {
+        *bg = Visibility::Visible;
     }
 }
 
