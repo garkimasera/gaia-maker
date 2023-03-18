@@ -12,6 +12,7 @@
     "cost": "コスト",
     "demolition": "撤去",
     "density": "密度",
+    "details": "詳細",
     "difference-in-elevation": "高低差",
     "enabled": "有効",
     "exit": "終了",
@@ -84,6 +85,7 @@
     // Messages
     "msg/welcome": "{$app_name} へようこそ",
     "msg/loading-failed": "ロード失敗",
+    "msg/loading-failed-description": "ロードに失敗しました。セーブデータが存在していないか、バージョンの異なるセーブデータである可能性があります。",
 
     // Help
     "basics": "基本",

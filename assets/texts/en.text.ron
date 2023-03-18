@@ -12,6 +12,7 @@
     "cost": "Cost",
     "demolition": "Demolition",
     "density": "Density",
+    "details": "Details",
     "difference-in-elevation": "Difference in Elevation",
     "enabled": "Enabled",
     "exit": "Exit",
@@ -84,6 +85,7 @@
     // Messages
     "msg/welcome": "Welcome to {$app_name} !",
     "msg/loading-failed": "Loading failed",
+    "msg/loading-failed-description": "Load failed. The saved data may not exist or may be a different version or corrupt.",
 
     // Help
     "basics": "Basics",

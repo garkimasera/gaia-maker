@@ -87,8 +87,10 @@ pub fn main_menu(
                 .collapsible(false)
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                 .show(egui_ctxs.ctx_mut(), |ui| {
-                    ui.label(&state.error);
-                    ui.separator();
+                    ui.label(t!("msg/loading-failed-description"));
+                    ui.collapsing(t!("details"), |ui| {
+                        ui.label(&state.error);
+                    });
                     ui.vertical_centered(|ui| {
                         if ui.button(t!("close")).clicked() {
                             state.mode = MainMenuMode::Menu;
