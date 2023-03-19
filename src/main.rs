@@ -41,6 +41,7 @@ struct Args {}
 fn main() {
     let _args = Args::parse();
 
+    screen::window_open();
     let window_size = screen::preferred_window_size();
 
     App::new()
@@ -50,7 +51,7 @@ fn main() {
                 title: APP_NAME.into(),
                 present_mode: PresentMode::Fifo,
                 resolution: WindowResolution::new(window_size.0 as f32, window_size.1 as f32),
-                canvas: Some("#pixel-gaia-screen".into()),
+                canvas: Some("#game-screen".into()),
                 ..default()
             }),
             ..default()

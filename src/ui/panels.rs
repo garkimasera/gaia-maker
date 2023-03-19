@@ -335,5 +335,6 @@ fn game_menu(
     if ui.button(t!("exit")).clicked() {
         app_exit_events.send(bevy::app::AppExit);
         ui.close_menu();
+        crate::screen::window_close();
     }
 }

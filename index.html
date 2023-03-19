@@ -12,9 +12,11 @@
             align-items: center;
             justify-content: center;
         }
-        #pixel-gaia-screen {
-            width: 0px;
-            height: 0px;
+        #start-screen {
+            display: block;
+        }
+        #game-screen {
+            display: none;
         }
     </style>
   </head>
@@ -26,7 +28,7 @@
 
       function start() {
         let start_screen = document.getElementById('start-screen');
-        start_screen.remove();
+        start_screen.style.display = "none";
         init();
       }
       let start_button = document.getElementById('start-button');
@@ -35,6 +37,6 @@
     <div id="start-screen">
       <input type="button" value="start" id="start-button">
     </div>
-    <canvas id="pixel-gaia-screen"></canvas>
+    <canvas id="game-screen"></canvas>
   </body>
 </html>
