@@ -1,3 +1,4 @@
+use bevy::app::AppExit;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
@@ -45,6 +46,7 @@ pub fn main_menu(
     mut conf: ResMut<Conf>,
     mut ew_conf_change: EventWriter<ConfChange>,
     mut ew_manage_planet_eror: EventReader<ManagePlanetError>,
+    mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
 ) {
     if let Some(e) = ew_manage_planet_eror.iter().next() {
@@ -66,6 +68,10 @@ pub fn main_menu(
                         }
                         if ui.button(t!("load")).clicked() {
                             ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+                        }
+                        if ui.button(t!("exit")).clicked() {
+                            app_exit_events.send(bevy::app::AppExit);
+                            crate::screen::window_close();
                         }
 
                         ui.separator();

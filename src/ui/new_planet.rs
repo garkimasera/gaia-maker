@@ -6,7 +6,7 @@ use crate::{
     sim::ManagePlanet,
 };
 
-use super::main_menu::MainMenuState;
+use super::main_menu::{MainMenuMode, MainMenuState};
 
 #[derive(Clone, Debug)]
 pub struct NewPlanetState {
@@ -81,6 +81,10 @@ pub fn new_planet(
                 );
 
                 ui.separator();
+
+                if ui.button(t!("cancel")).clicked() {
+                    state.mode = MainMenuMode::Menu;
+                }
 
                 if ui.button(t!("start")).clicked() {
                     let mut atmo_mass = params.default_start_params.atmo_mass.clone();

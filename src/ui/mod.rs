@@ -150,7 +150,7 @@ fn layers_window(
 
     let rect = egui::Window::new(t!("layers"))
         .open(&mut wos.layers)
-        .vscroll(true)
+        .vscroll(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
             layers_menu(ui, &mut current_layer, &mut update_map);
         })
