@@ -309,11 +309,12 @@ fn update_hover_tile(
     }
     color_entities.clear();
 
-    if *hover_tile.2 == Visibility::Inherited {
+    if *hover_tile.2 == Visibility::Hidden {
         return;
     }
 
     let size = match &*cursor_mode {
+        CursorMode::Demolition => StructureSize::Small,
         CursorMode::Build(kind) => params.structures[kind].size,
         CursorMode::EditBiome(_) => StructureSize::Small,
         _ => {

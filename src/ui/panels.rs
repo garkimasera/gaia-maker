@@ -42,7 +42,7 @@ pub fn panels(
                 ui,
                 &cursor_mode,
                 &planet,
-                hover_tile.get_single().unwrap(),
+                hover_tile.single(),
                 &textures,
                 &conf,
             );
