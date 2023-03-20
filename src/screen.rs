@@ -455,9 +455,9 @@ fn setup_main_menu_background(
     let bg_mesh = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(100000.0, 100000.0))));
     commands
         .spawn(MaterialMesh2dBundle {
-            mesh: bg_mesh.clone().into(),
+            mesh: bg_mesh.into(),
             transform: Transform::from_xyz(0.0, 0.0, 998.0),
-            material: bg_material.clone(),
+            material: bg_material,
             ..default()
         })
         .insert(MainMenuBackground);
