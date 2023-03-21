@@ -46,6 +46,8 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 
     let s = encoder.finish()?.into_inner();
 
+    log::info!("save {} bytes to local storage", s.len());
+
     crate::conf::get_storage()?
         .set_item(&format!("save/{}", file_name), &s)
         .map_err(|e| anyhow!("setItem failed: {:?}", e))?;
