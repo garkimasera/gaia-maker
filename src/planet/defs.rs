@@ -1,7 +1,7 @@
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
+use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
 
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
@@ -166,10 +166,10 @@ impl Default for StructureSize {
 pub enum Structure {
     None,
     Occupied { by: Coords },
-    OxygenGenerator { state: StructureState },
-    Rainmaker { state: StructureState },
-    FertilizationPlant { state: StructureState },
-    Heater { state: StructureState },
+    OxygenGenerator { state: StructureBuildingState },
+    Rainmaker { state: StructureBuildingState },
+    FertilizationPlant { state: StructureBuildingState },
+    Heater { state: StructureBuildingState },
 }
 
 impl Structure {
@@ -177,17 +177,17 @@ impl Structure {
         self.into()
     }
 
-    pub fn _state(&mut self) -> Option<StructureState> {
+    pub fn _building_state(&self) -> Option<&StructureBuildingState> {
         match self {
-            Self::OxygenGenerator { state } => Some(*state),
-            Self::Rainmaker { state } => Some(*state),
-            Self::FertilizationPlant { state } => Some(*state),
-            Self::Heater { state } => Some(*state),
+            Self::OxygenGenerator { state } => Some(state),
+            Self::Rainmaker { state } => Some(state),
+            Self::FertilizationPlant { state } => Some(state),
+            Self::Heater { state } => Some(state),
             _ => None,
         }
     }
 
-    pub fn _state_mut(&mut self) -> Option<&mut StructureState> {
+    pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
@@ -199,7 +199,7 @@ impl Structure {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
-pub enum StructureState {
+pub enum StructureBuildingState {
     Working,
     Stopped,
     Disabled,
@@ -235,7 +235,7 @@ pub struct BuildingAttrs {
     #[serde(default)]
     pub upkeep: ResourceMap,
     #[serde(default)]
-    pub produces: ResourceMap,
+    pub produce: ResourceMap,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub build_max: Option<u32>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
@@ -288,6 +288,38 @@ pub enum StarSystemBuildingKind {
     AmmoniaExtractor,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
+pub enum SpaceBuildingKind {
+    Orbital(OrbitalBuildingKind),
+    StarSystem(StarSystemBuildingKind),
+}
+
+impl SpaceBuildingKind {
+    pub fn iter() -> impl Iterator<Item = Self> {
+        OrbitalBuildingKind::iter()
+            .map(Self::Orbital)
+            .chain(StarSystemBuildingKind::iter().map(Self::StarSystem))
+    }
+}
+
+impl From<OrbitalBuildingKind> for SpaceBuildingKind {
+    fn from(kind: OrbitalBuildingKind) -> Self {
+        Self::Orbital(kind)
+    }
+}
+
+impl From<StarSystemBuildingKind> for SpaceBuildingKind {
+    fn from(kind: StarSystemBuildingKind) -> Self {
+        Self::StarSystem(kind)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
+pub enum BuildingKind {
+    Structure(StructureKind),
+    Space(SpaceBuildingKind),
+}
+
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
@@ -320,6 +352,23 @@ pub struct Params {
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, BuildingAttrs>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, BuildingAttrs>,
+}
+
+impl Params {
+    pub fn building_attrs(&self, kind: BuildingKind) -> Option<&BuildingAttrs> {
+        match kind {
+            BuildingKind::Structure(kind) => self
+                .structures
+                .get(&kind)
+                .map(|structure_attrs| &structure_attrs.building),
+            BuildingKind::Space(SpaceBuildingKind::Orbital(kind)) => {
+                self.orbital_buildings.get(&kind)
+            }
+            BuildingKind::Space(SpaceBuildingKind::StarSystem(kind)) => {
+                self.star_system_buildings.get(&kind)
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

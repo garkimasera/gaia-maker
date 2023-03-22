@@ -214,9 +214,9 @@ fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
             });
         ui.label(s);
     }
-    if !attrs.produces.is_empty() {
-        ui.label(egui::RichText::new(t!("produces")).strong());
-        let mut resources = attrs.produces.iter().collect::<Vec<_>>();
+    if !attrs.produce.is_empty() {
+        ui.label(egui::RichText::new(t!("produce")).strong());
+        let mut resources = attrs.produce.iter().collect::<Vec<_>>();
         resources.sort_by_key(|(resource, _)| *resource);
         let s = resources
             .iter()

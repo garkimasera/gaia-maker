@@ -8,12 +8,16 @@ pub struct Resources {
     pub diff: ResourceMap,
 }
 
+pub fn empty_resource_map() -> ResourceMap {
+    ResourceKind::iter().map(|kind| (kind, 0.0)).collect()
+}
+
 impl Default for Resources {
     fn default() -> Self {
         Resources {
-            stock: ResourceKind::iter().map(|kind| (kind, 0.0)).collect(),
+            stock: empty_resource_map(),
             cap: ResourceKind::iter().map(|kind| (kind, 1.0E+06)).collect(),
-            diff: ResourceKind::iter().map(|kind| (kind, 0.0)).collect(),
+            diff: empty_resource_map(),
         }
     }
 }
@@ -23,19 +27,20 @@ impl Resources {
         let mut res = Resources::default();
 
         for (kind, v) in &start_params.resources {
-            *res.get_stock_mut(*kind) += v;
+            *res.stock.get_mut(kind).unwrap() += v;
         }
 
         res
     }
 
-    pub fn get_stock_mut(&mut self, kind: ResourceKind) -> &mut f32 {
-        self.stock.get_mut(&kind).unwrap()
+    pub fn add(&mut self, kind: ResourceKind, value: f32) {
+        let v = self.stock.get_mut(&kind).unwrap();
+        *v = (*v + value).clamp(0.0, self.cap[&kind]);
     }
 
     pub fn remove_by_map(&mut self, map: &ResourceMap) {
         for (kind, v) in map {
-            *self.get_stock_mut(*kind) -= v;
+            self.add(*kind, *v);
         }
     }
 }

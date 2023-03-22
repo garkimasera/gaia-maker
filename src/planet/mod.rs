@@ -60,6 +60,7 @@ impl Default for Tile {
 pub struct Building {
     pub n: u32,
     pub enabled: u32,
+    pub working: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -71,8 +72,7 @@ pub struct Planet {
     pub map: Array2d<Tile>,
     pub atmo: Atmosphere,
     pub water: Water,
-    pub orbit: FnvHashMap<OrbitalBuildingKind, Building>,
-    pub star_system: FnvHashMap<StarSystemBuildingKind, Building>,
+    pub space_buildings: FnvHashMap<SpaceBuildingKind, Building>,
 }
 
 impl Planet {
@@ -97,21 +97,18 @@ impl Planet {
             map,
             atmo: Atmosphere::new(start_params),
             water: Water::new(start_params),
-            orbit: OrbitalBuildingKind::iter()
-                .map(|kind| (kind, Building::default()))
-                .collect(),
-            star_system: StarSystemBuildingKind::iter()
+            space_buildings: SpaceBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
         };
 
         for (kind, &n) in &start_params.orbital_buildings {
-            let building = planet.orbit.get_mut(kind).unwrap();
+            let building = planet.space_building_mut(*kind);
             building.n = n;
             building.enabled = n;
         }
         for (kind, &n) in &start_params.star_system_buildings {
-            let building = planet.star_system.get_mut(kind).unwrap();
+            let building = planet.space_building_mut(*kind);
             building.n = n;
             building.enabled = n;
         }
@@ -142,7 +139,7 @@ impl Planet {
     pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
         self.cycles += 1;
 
-        self::buildings::advance(self, params);
+        self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);
         self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);

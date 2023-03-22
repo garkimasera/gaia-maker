@@ -319,11 +319,11 @@ fn game_menu(
     next_game_state: &mut NextState<GameState>,
 ) {
     if ui.button(t!("save")).clicked() {
-        ew_manage_planet.send(ManagePlanet::Save("test.planet".into()));
+        ew_manage_planet.send(ManagePlanet::Save("main.planet".into()));
         ui.close_menu();
     }
     if ui.button(t!("load")).clicked() {
-        ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+        ew_manage_planet.send(ManagePlanet::Load("main.planet".into()));
         ui.close_menu();
     }
     ui.separator();

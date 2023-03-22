@@ -34,9 +34,9 @@ pub fn star_system_window(
                         let buildable = planet.buildable(&params.star_system_buildings[&kind])
                             && params.star_system_buildings[&kind]
                                 .build_max
-                                .map(|build_max| build_max > planet.star_system[&kind].n)
+                                .map(|build_max| build_max > planet.space_building(kind).n)
                                 .unwrap_or(true);
-                        let building = planet.star_system.get_mut(&kind).unwrap();
+                        let building = planet.space_building_mut(kind);
                         ui.label(t!(kind.as_ref()));
                         ui.label(format!("{}", building.n));
                         ui.add(egui::Slider::new(&mut building.enabled, 0..=building.n));
@@ -48,7 +48,7 @@ pub fn star_system_window(
                             })
                             .clicked()
                         {
-                            planet.build_star_system_building(kind, &params);
+                            planet.build_space_building(kind, &params);
                         }
                         ui.end_row();
                     }

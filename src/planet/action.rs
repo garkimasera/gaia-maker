@@ -45,18 +45,14 @@ impl Planet {
         self.map[p].structure = Structure::None;
     }
 
-    pub fn build_orbital_building(&mut self, kind: OrbitalBuildingKind, params: &Params) {
-        self.res
-            .remove_by_map(&params.orbital_buildings[&kind].cost);
-        let building = self.orbit.get_mut(&kind).unwrap();
-        building.n += 1;
-        building.enabled += 1;
-    }
-
-    pub fn build_star_system_building(&mut self, kind: StarSystemBuildingKind, params: &Params) {
-        self.res
-            .remove_by_map(&params.star_system_buildings[&kind].cost);
-        let building = self.star_system.get_mut(&kind).unwrap();
+    pub fn build_space_building(&mut self, kind: impl Into<SpaceBuildingKind>, params: &Params) {
+        let kind = kind.into();
+        let cost = &params
+            .building_attrs(BuildingKind::Space(kind))
+            .unwrap()
+            .cost;
+        self.res.remove_by_map(cost);
+        let building = self.space_building_mut(kind);
         building.n += 1;
         building.enabled += 1;
     }

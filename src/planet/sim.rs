@@ -1,5 +1,5 @@
 use super::*;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::f32::consts::PI;
 use strum::AsRefStr;
 
@@ -23,6 +23,8 @@ pub struct Sim {
     pub vapor_new: Array2d<f32>,
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,
+    /// The number of working buildings
+    pub working_buildings: HashMap<BuildingKind, u32>,
     /// Events occured in simulation
     pub events: VecDeque<Event>,
 }
@@ -57,6 +59,7 @@ impl Sim {
             vapor,
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
+            working_buildings: HashMap::new(),
             events,
         }
     }

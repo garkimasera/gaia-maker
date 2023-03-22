@@ -6,7 +6,8 @@
         rows: 2,
         building: (
             cost: { material: 200 },
-            upkeep: { energy: 10.0 },
+            upkeep: { energy: 10000.0 },
+            effect: SprayToAtmo( kind: oxygen, mass: 500 ),
         ),
     ),
     rainmaker: (

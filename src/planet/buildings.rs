@@ -1,119 +1,131 @@
 use super::*;
+use fnv::FnvHashMap;
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-enum BuildingKind {
-    Structure(StructureKind),
-    Orbital(OrbitalBuildingKind),
-    StarSystem(StarSystemBuildingKind),
-}
-
-pub fn advance(planet: &mut Planet, params: &Params) {
-    let c = CheckUpkeepProduces::new(planet, params);
-    planet.res.stock = c.stock;
-    planet.res.diff = c.diff;
-
-    apply_building_effect(planet, &c.stopped_buildings, params);
-}
-
-#[derive(Default)]
-struct CheckUpkeepProduces {
-    stock: ResourceMap,
-    diff: ResourceMap,
-    stopped_buildings: FnvHashMap<BuildingKind, u32>,
-}
-
-impl CheckUpkeepProduces {
-    fn new(planet: &Planet, params: &Params) -> Self {
-        let mut c = CheckUpkeepProduces {
-            stock: planet.res.stock.clone(),
-            ..Default::default()
-        };
-
-        for (kind, b) in &planet.orbit {
-            let building = &params.orbital_buildings[kind];
-            c.check_building(BuildingKind::Orbital(*kind), b.enabled, building, planet);
-        }
-
-        for (kind, b) in &planet.star_system {
-            let building = &params.star_system_buildings[kind];
-            c.check_building(BuildingKind::StarSystem(*kind), b.enabled, building, planet);
-        }
-
-        for tile in planet.map.iter() {
-            let kind = tile.structure.kind();
-            if let Some(a) = params.structures.get(&kind) {
-                c.check_building(BuildingKind::Structure(kind), 1, a.as_ref(), planet);
-            }
-        }
-
-        c
+impl Planet {
+    pub fn space_building(&mut self, kind: impl Into<SpaceBuildingKind>) -> &Building {
+        self.space_buildings.get(&kind.into()).unwrap()
     }
 
-    fn check_building(
-        &mut self,
-        kind: BuildingKind,
-        n: u32,
-        building: &BuildingAttrs,
-        planet: &Planet,
-    ) {
-        let available_by_upkeep = building
+    pub fn space_building_mut(&mut self, kind: impl Into<SpaceBuildingKind>) -> &mut Building {
+        self.space_buildings.get_mut(&kind.into()).unwrap()
+    }
+}
+
+pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let working_buildings = update_upkeep_produce(planet, sim, params);
+    apply_building_effect(planet, &working_buildings, params);
+}
+
+fn update_upkeep_produce(
+    planet: &mut Planet,
+    sim: &mut Sim,
+    params: &Params,
+) -> FnvHashMap<BuildingKind, u32> {
+    let mut working_buildings = FnvHashMap::default();
+    let mut produce = empty_resource_map();
+
+    for v in planet.res.diff.values_mut() {
+        *v = 0.0;
+    }
+
+    for kind in SpaceBuildingKind::iter() {
+        let Some(attrs) = params.building_attrs(BuildingKind::Space(kind)) else { continue };
+        let max = max_workable_buildings(attrs, planet);
+        let building = planet.space_building_mut(kind);
+        let working = max.min(building.enabled);
+        building.working = working;
+        sim.working_buildings
+            .insert(BuildingKind::Space(kind), working);
+        add_upkeep_produce(
+            attrs,
+            building.enabled,
+            working,
+            &mut planet.res,
+            &mut produce,
+        );
+        working_buildings.insert(BuildingKind::Space(kind), working);
+    }
+
+    for p in planet.map.iter_idx() {
+        let structure = &mut planet.map[p].structure;
+        let kind = BuildingKind::Structure(structure.kind());
+        let Some(building_state) = structure.building_state_mut() else { continue };
+        let Some(attrs) = params.building_attrs(kind) else { continue };
+
+        if *building_state == StructureBuildingState::Disabled {
+            continue;
+        }
+
+        let workable = attrs
             .upkeep
             .iter()
-            .map(|(resource_kind, v)| self.stock[resource_kind] / v)
-            .min_by(|a, b| a.total_cmp(b));
+            .all(|(resource_kind, value)| planet.res.stock[resource_kind] > *value);
+        let working = if workable { 1 } else { 0 };
 
-        let available_by_produce = building
-            .produces
-            .iter()
-            .map(|(resource_kind, v)| {
-                (planet.res.cap[resource_kind] - self.stock[resource_kind]) / v
-            })
-            .min_by(|a, b| a.total_cmp(b));
+        add_upkeep_produce(attrs, 1, working, &mut planet.res, &mut produce);
 
-        let n_available = match (available_by_upkeep, available_by_produce) {
-            (None, None) => n,
-            (Some(a), None) | (None, Some(a)) => a.clamp(0.0, n as f32) as u32,
-            (Some(a), Some(b)) => {
-                let a = a.min(b);
-                a.clamp(0.0, n as f32) as u32
-            }
-        };
-
-        *self.stopped_buildings.entry(kind).or_default() += n - n_available;
-
-        let a = n_available as f32;
-        for (resource_kind, v) in &building.upkeep {
-            *self.diff.entry(*resource_kind).or_default() -= *v * a;
-            *self.stock.get_mut(resource_kind).unwrap() -= *v * a;
+        if workable {
+            *working_buildings.entry(kind).or_insert(0) += 1;
+            *building_state = StructureBuildingState::Working;
+        } else {
+            *building_state = StructureBuildingState::Stopped;
         }
+    }
 
-        for (resource_kind, v) in &building.produces {
-            *self.diff.entry(*resource_kind).or_default() += *v * a;
-            *self.stock.get_mut(resource_kind).unwrap() += *v * a;
-        }
+    for (resource_kind, produce) in produce {
+        planet.res.add(resource_kind, produce);
+    }
+
+    working_buildings
+}
+
+fn max_workable_buildings(attrs: &BuildingAttrs, planet: &Planet) -> u32 {
+    let n = attrs
+        .upkeep
+        .iter()
+        .map(|(resource_kind, upkeep)| (planet.res.stock[resource_kind] / upkeep) as u32)
+        .min()
+        .unwrap_or(u32::MAX);
+
+    if let Some(build_max) = attrs.build_max {
+        n.min(build_max)
+    } else {
+        n
+    }
+}
+
+fn add_upkeep_produce(
+    attrs: &BuildingAttrs,
+    enabled: u32,
+    working: u32,
+    res: &mut Resources,
+    produce: &mut ResourceMap,
+) {
+    for (resource_kind, &value) in &attrs.upkeep {
+        res.add(*resource_kind, -(value * working as f32));
+        *res.diff.get_mut(resource_kind).unwrap() -= value * enabled as f32;
+    }
+
+    for (resource_kind, &value) in &attrs.produce {
+        *produce.get_mut(resource_kind).unwrap() += value * working as f32;
+        *res.diff.get_mut(resource_kind).unwrap() += value * enabled as f32;
     }
 }
 
 fn apply_building_effect(
     planet: &mut Planet,
-    stopped_buildings: &FnvHashMap<BuildingKind, u32>,
+    working_buildings: &FnvHashMap<BuildingKind, u32>,
     params: &Params,
 ) {
-    for (&orbital_building_kind, Building { enabled, .. }) in &planet.orbit {
-        if let Some(effect) = &params.orbital_buildings[&orbital_building_kind].effect {
-            let n = enabled
-                - stopped_buildings
-                    .get(&BuildingKind::Orbital(orbital_building_kind))
-                    .copied()
-                    .unwrap_or(0);
+    for (&kind, &n) in working_buildings {
+        let Some(effect) = &params.building_attrs(kind).and_then(|attrs| attrs.effect) else { continue };
 
-            #[allow(clippy::single_match)]
-            match effect {
-                BuildingEffect::SprayToAtmo { kind, mass } => {
-                    *planet.atmo.mass.get_mut(kind).unwrap() += mass * n as f32;
-                }
-                _ => (),
+        #[allow(clippy::single_match)]
+        match effect {
+            BuildingEffect::SprayToAtmo { kind, mass } => {
+                *planet.atmo.mass.get_mut(kind).unwrap() += mass * n as f32;
             }
+            _ => (),
         }
     }
 }

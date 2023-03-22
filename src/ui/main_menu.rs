@@ -67,7 +67,7 @@ pub fn main_menu(
                             state.mode = MainMenuMode::NewPlanet;
                         }
                         if ui.button(t!("load")).clicked() {
-                            ew_manage_planet.send(ManagePlanet::Load("test.planet".into()));
+                            ew_manage_planet.send(ManagePlanet::Load("main.planet".into()));
                         }
                         if ui.button(t!("exit")).clicked() {
                             app_exit_events.send(bevy::app::AppExit);
