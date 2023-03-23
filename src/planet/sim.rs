@@ -5,6 +5,8 @@ use strum::AsRefStr;
 
 /// Holds data for simulation
 pub struct Sim {
+    /// Before start simulation or not
+    pub before_start: bool,
     /// The number of tiles
     pub n_tile: u32,
     /// Tile area [m^2]
@@ -50,6 +52,7 @@ impl Sim {
         }
 
         Sim {
+            before_start: false,
             n_tile: size.0 * size.1,
             tile_area,
             atemp,

@@ -125,6 +125,7 @@ impl Planet {
 
         // Simulate before start
         let mut sim = Sim::new(&planet);
+        sim.before_start = true;
         for _ in 0..start_params.cycles_before_start {
             planet.advance(&mut sim, params);
         }

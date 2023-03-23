@@ -116,10 +116,10 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Biome transistion
-    process_biome_transition(planet, params);
+    process_biome_transition(planet, sim, params);
 }
 
-fn process_biome_transition(planet: &mut Planet, params: &Params) {
+fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
         let tile = &planet.map[p];
         let current_biome = tile.biome;
@@ -137,9 +137,12 @@ fn process_biome_transition(planet: &mut Planet, params: &Params) {
                 Biome::Ocean
             };
             if current_biome != next_biome {
-                let transition_probability =
-                    1.0 / params.biomes[&next_biome].mean_transition_time as f64;
-                if thread_rng().gen_bool(transition_probability) {
+                let transition_probability = if sim.before_start {
+                    params.sim.before_start_biome_transition_probability
+                } else {
+                    1.0 / params.biomes[&next_biome].mean_transition_time
+                };
+                if thread_rng().gen_bool(transition_probability as f64) {
                     planet.map[p].biome = next_biome;
                 }
             }
@@ -160,8 +163,12 @@ fn process_biome_transition(planet: &mut Planet, params: &Params) {
                 continue;
             };
 
-        let transition_probability = 1.0 / params.biomes[&next_biome].mean_transition_time as f64;
-        if thread_rng().gen_bool(transition_probability) {
+        let transition_probability = if sim.before_start {
+            params.sim.before_start_biome_transition_probability
+        } else {
+            1.0 / params.biomes[&next_biome].mean_transition_time
+        };
+        if thread_rng().gen_bool(transition_probability as f64) {
             planet.map[p].biome = next_biome;
         }
     }
