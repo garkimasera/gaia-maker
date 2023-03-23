@@ -177,7 +177,7 @@ impl Structure {
         self.into()
     }
 
-    pub fn _building_state(&self) -> Option<&StructureBuildingState> {
+    pub fn building_state(&self) -> Option<&StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
             Self::Rainmaker { state } => Some(state),

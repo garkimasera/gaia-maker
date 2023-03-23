@@ -12,17 +12,15 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     sim.fertility_effect.fill(0.0);
 
     for p in map_iter_idx {
-        if let Some(structure_param) = params.structures.get(&planet.map[p].structure.kind()) {
-            if let Some(BuildingEffect::Fertilize {
-                increment,
-                max,
-                range,
-            }) = structure_param.building.effect
-            {
-                for (_, p) in CDistRangeIter::new(p, range as _) {
-                    if planet.map.in_range(p) && planet.map[p].fertility < max {
-                        sim.fertility_effect[p] += increment;
-                    }
+        if let Some(&BuildingEffect::Fertilize {
+            increment,
+            max,
+            range,
+        }) = planet.working_building_effect(p, params)
+        {
+            for (_, p) in CDistRangeIter::new(p, range as _) {
+                if planet.map.in_range(p) && planet.map[p].fertility < max {
+                    sim.fertility_effect[p] += increment;
                 }
             }
         }

@@ -9,6 +9,21 @@ impl Planet {
     pub fn space_building_mut(&mut self, kind: impl Into<SpaceBuildingKind>) -> &mut Building {
         self.space_buildings.get_mut(&kind.into()).unwrap()
     }
+
+    pub fn working_building_effect<'a>(
+        &self,
+        p: Coords,
+        params: &'a Params,
+    ) -> Option<&'a BuildingEffect> {
+        if self.map[p].structure.building_state() == Some(&StructureBuildingState::Working) {
+            params
+                .structures
+                .get(&self.map[p].structure.kind())
+                .and_then(|s| s.building.effect.as_ref())
+        } else {
+            None
+        }
+    }
 }
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {

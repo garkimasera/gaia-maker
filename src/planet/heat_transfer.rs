@@ -63,14 +63,10 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 })
                 .sum();
 
-            let structure_heat = if let Some(structure_param) =
-                params.structures.get(&planet.map[p].structure.kind())
+            let structure_heat = if let Some(BuildingEffect::Heater { heat }) =
+                planet.working_building_effect(p, params)
             {
-                if let Some(BuildingEffect::Heater { heat }) = structure_param.building.effect {
-                    heat
-                } else {
-                    0.0
-                }
+                *heat
             } else {
                 0.0
             };

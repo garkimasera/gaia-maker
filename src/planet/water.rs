@@ -81,10 +81,7 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
     for _ in 0..params.sim.n_loop_vapor_calc {
         for p in map_iter_idx {
             let biome = planet.map[p].biome;
-            let building_effect = &params
-                .structures
-                .get(&planet.map[p].structure.kind())
-                .and_then(|s| s.building.effect);
+            let building_effect = planet.working_building_effect(p, params);
 
             if biome == Biome::Ocean {
                 sim.vapor_new[p] = linear_interpolation(
@@ -96,7 +93,7 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
                 additional_water,
             }) = building_effect
             {
-                sim.vapor_new[p] = *value / RAINFALL_DURATION;
+                sim.vapor_new[p] = value / RAINFALL_DURATION;
                 planet.water.water_volume += additional_water;
             } else {
                 let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
