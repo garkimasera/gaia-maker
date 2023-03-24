@@ -40,6 +40,7 @@ pub enum ResourceKind {
     Energy,
     Material,
     Ice,
+    Carbon,
     Nitrogen,
 }
 
@@ -282,9 +283,10 @@ pub enum OrbitalBuildingKind {
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum StarSystemBuildingKind {
+    DysonSwarmUnit,
     AsteroidMiningStation,
     IceMiningStation,
-    DysonSwarmUnit,
+    MethaneExtractor,
     AmmoniaExtractor,
 }
 

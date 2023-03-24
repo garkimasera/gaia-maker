@@ -17,7 +17,7 @@
         rows: 2,
         building: (
             cost: { material: 100 },
-            upkeep: { energy: 1000, ice: 1 },
+            upkeep: { energy: 2000, ice: 1 },
             effect: Vapor ( value: 5000, additional_water: 1e+9 ),
         ),
     ),

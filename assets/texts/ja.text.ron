@@ -32,7 +32,7 @@
     "orbit": "軌道",
     "oxygen": "酸素",
     "planet": "惑星",
-    "produces": "産出",
+    "produce": "産出",
     "radius": "半径",
     "rainfall": "降水量",
     "save": "セーブ",
@@ -53,6 +53,7 @@
     "energy": "エネルギー",
     "ice": "氷",
     "material": "素材",
+    "carbon": "炭素",
     "nitrogen": "窒素",
 
     // Biomes
@@ -75,13 +76,14 @@
 
     // Orbital Buildings
     "fusion-reactor": "核融合炉",
-    "nitrogen-sprayer": "窒素散布器",
+    "nitrogen-sprayer": "窒素散布機",
 
     // Star System Buildings
     "asteroid-mining-station": "小惑星採掘ステーション",
     "ice-mining-station": "氷採掘ステーション",
     "dyson-swarm-unit": "ダイソンスウォームユニット",
-    "ammonia-extractor": "アンモニア抽出ステーション",
+    "methane-extractor": "メタン抽出機",
+    "ammonia-extractor": "アンモニア抽出機",
 
     // Messages
     "msg/welcome": "{$app_name} へようこそ",
@@ -104,10 +106,11 @@
     "help/fusion-reactor": "核融合炉は施設の稼働に必要となるエネルギーを供給します。核融合は宇宙文明にとって不可欠な高効率のエネルギー源ですが、それ以上のエネルギーが必要なのであれば、巨大な核融合炉、恒星の利用が必要でしょう。",
     "help/nitrogen-sprayer": "窒素散布器は窒素を大気中に散布します。窒素は基本的に地殻にほとんど存在しないので、アンモニアを大気として持つ別の天体から輸送する必要があります。",
 
+    "help/dyson-swarm-unit": "ダイソンスウォームは、恒星の発するエネルギーを余すことなく利用するための巨大建造物です。ユニットひとつひとつは光を反射して需要地まで届ける巨大な鏡に過ぎませんが、数が揃えば惑星改造にも十分なほどのエネルギーを供給します。",
     "help/asteroid-mining-station": "小惑星採掘ステーションは、小惑星から鉱石を採掘し、建築などに利用可能な素材に加工します。",
     "help/ice-mining-station": "氷採掘ステーションは、氷を豊富に含む天体から氷を採掘します。",
-    "help/dyson-swarm-unit": "ダイソンスウォームは、恒星の発するエネルギーを余すことなく利用するための巨大建造物です。ユニットひとつひとつは光を反射して需要地まで届ける巨大な鏡に過ぎませんが、十分な数が揃えば惑星改造にも十分なほどのエネルギーを供給します。",
-    "help/ammonia-extractor": "アンモニア抽出ステーションは、アンモニアが大気もしくは固体の状態で含まれる天体から窒素を抽出します。",
+    "help/methane-extractor": "メタン抽出機は、メタンが気体もしくは固体の状態で含まれる天体から炭素を抽出します。",
+    "help/ammonia-extractor": "アンモニア抽出機は、アンモニアが気体もしくは固体の状態で含まれる天体から窒素を抽出します。",
 
     // Events
     "event/start": "    あなたは不毛な未開の惑星に到着しました。惑星の状態に応じて各種施設を建設し、生命に適した環境に作り変えましょう。

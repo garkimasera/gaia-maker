@@ -53,6 +53,7 @@
     "energy": "Energy",
     "ice": "Ice",
     "material": "Material",
+    "carbon": "Carbon",
     "nitrogen": "Nitrogen",
 
     // Biomes
@@ -81,6 +82,7 @@
     "asteroid-mining-station": "Asteroid Mining Station",
     "ice-mining-station": "Ice Mining Station",
     "dyson-swarm-unit": "Dyson Swarm Unit",
+    "methane-extractor": "Methane Extractor",
     "ammonia-extractor": "Ammonia Extractor",
 
     // Messages
@@ -104,10 +106,11 @@
     "help/fusion-reactor": "Fusion reactors provide the energy needed to operate facilities. Fusion is a highly efficient energy source essential to space civilization, but if more energy is needed, it will require the use of giant fusion reactors, stars.",
     "help/nitrogen-sprayer": "Nitrogen spreaders spray nitrogen into the atmosphere. Since nitrogen is essentially almost nonexistent in the planet's crust, it must be transported from other celestial bodies that have ammonia as their atmosphere.",
 
+    "help/dyson-swarm-unit": "The Dyson Swarm is a megastructure designed to harness all the energy emitted by a star. Each unit is merely a giant mirror that reflects light and delivers it to the demand location, but in sufficient numbers, they provide enough energy for terraforming.",
     "help/asteroid-mining-station": "Asteroid mining stations mine ore from asteroids and process it into materials that can be used for construction and other purposes.",
     "help/ice-mining-station": "Ice mining stations mine ice from ice-rich celestial bodies.",
-    "help/dyson-swarm-unit": "The Dyson Swarm is a megastructure designed to harness all the energy emitted by a star. Each unit is merely a giant mirror that reflects light and delivers it to the demand location, but in sufficient numbers, they provide enough energy for terraforming.",
-    "help/ammonia-extractor": "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in air or solid form.",
+    "help/methane-extractor": "Methane extractors extract carbon from celestial bodies containing methane in gaseous or solid form.",
+    "help/ammonia-extractor": "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in gaseous or solid form.",
 
     // Events
     "event/start": "    You have arrived on a barren, undeveloped planet. Depending on the conditions of the planet, you can build various facilities to transform it into an environment suitable for life.
