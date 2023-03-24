@@ -69,7 +69,7 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
     ui.label(format!(
         "{}: {:.2} atm",
         t!("atmosphere-pressure"),
-        planet.atmo.atm
+        planet.atmo.atm()
     ));
     ui.separator();
 
@@ -80,7 +80,7 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
             ui.label(t!(gas_kind.as_ref()));
             ui.label(&format!(
                 "{:.2}%",
-                planet.atmo.mass[&gas_kind] / total_mass * 100.0
+                planet.atmo.mass(gas_kind) / total_mass * 100.0
             ));
             ui.end_row();
         }

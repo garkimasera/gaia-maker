@@ -87,14 +87,13 @@ fn planet_ui(ui: &mut egui::Ui, planet: &mut Planet) {
 
 fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
     for gas_kind in GasKind::iter() {
+        let mut value = planet.atmo.mass(gas_kind);
         ui.add(
-            egui::Slider::new(
-                planet.atmo.mass.get_mut(&gas_kind).unwrap(),
-                1.0e+5..=1.0e+11,
-            )
-            .text(t!(gas_kind.as_ref()))
-            .logarithmic(true),
+            egui::Slider::new(&mut value, 1.0e+5..=1.0e+11)
+                .text(t!(gas_kind.as_ref()))
+                .logarithmic(true),
         );
+        planet.atmo.set_mass(gas_kind, value);
     }
 }
 

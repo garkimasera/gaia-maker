@@ -89,9 +89,10 @@ pub fn new_planet(
                 if ui.button(t!("start")).clicked() {
                     let mut atmo_mass = params.default_start_params.atmo_mass.clone();
                     *atmo_mass.get_mut(&GasKind::Nitrogen).unwrap() =
-                        params.new_planet.nitrogen.max * state.new_planet.nitrogen / 100.0;
+                        (params.new_planet.nitrogen.max * state.new_planet.nitrogen) as f64 / 100.0;
                     *atmo_mass.get_mut(&GasKind::CarbonDioxide).unwrap() =
-                        params.new_planet.carbon_dioxide.max * state.new_planet.carbon_dioxide
+                        (params.new_planet.carbon_dioxide.max * state.new_planet.carbon_dioxide)
+                            as f64
                             / 100.0;
 
                     let start_params = StartParams {

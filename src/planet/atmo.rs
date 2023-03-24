@@ -7,9 +7,9 @@ const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Atmosphere {
-    pub atm: f32,
+    atm: f32,
     /// Gases mass [Mt]
-    pub mass: FnvHashMap<GasKind, f32>,
+    mass: FnvHashMap<GasKind, f64>,
 }
 
 impl Atmosphere {
@@ -21,19 +21,35 @@ impl Atmosphere {
     }
 
     pub fn total_mass(&self) -> f32 {
-        self.mass.values().sum()
+        self.mass.values().sum::<f64>() as f32
+    }
+
+    pub fn atm(&self) -> f32 {
+        self.atm
     }
 
     pub fn partial_pressure(&self, kind: GasKind) -> f32 {
-        self.atm * self.mass[&kind] / self.total_mass()
+        self.atm * self.mass[&kind] as f32 / self.total_mass()
+    }
+
+    pub fn mass(&self, kind: GasKind) -> f32 {
+        *self.mass.get(&kind).unwrap() as f32
+    }
+
+    pub fn set_mass(&mut self, kind: GasKind, value: f32) {
+        *self.mass.get_mut(&kind).unwrap() = value as f64;
+    }
+
+    pub fn add(&mut self, kind: GasKind, value: f32) {
+        *self.mass.get_mut(&kind).unwrap() += value as f64;
     }
 
     pub fn remove_carbon(&mut self, value: f32) -> bool {
         let carbon_weight = value * CO2_CARBON_WEIGHT_RATIO;
         let co2_mass = self.mass.get_mut(&GasKind::CarbonDioxide).unwrap();
-        if *co2_mass > carbon_weight {
-            *co2_mass -= carbon_weight;
-            *self.mass.get_mut(&GasKind::Oxygen).unwrap() += value * CO2_OXYGEN_WEIGHT_RATIO;
+        if *co2_mass > carbon_weight as f64 {
+            *co2_mass -= carbon_weight as f64;
+            self.add(GasKind::Oxygen, value * CO2_OXYGEN_WEIGHT_RATIO);
             true
         } else {
             false
@@ -41,7 +57,7 @@ impl Atmosphere {
     }
 
     pub fn release_carbon(&mut self, value: f32) {
-        *self.mass.get_mut(&GasKind::CarbonDioxide).unwrap() += value * CO2_CARBON_WEIGHT_RATIO;
+        self.add(GasKind::CarbonDioxide, value * CO2_CARBON_WEIGHT_RATIO);
     }
 }
 

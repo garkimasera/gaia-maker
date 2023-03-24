@@ -377,7 +377,7 @@ pub struct StartParams {
     pub size: (u32, u32),
     pub difference_in_elevation: f32,
     pub resources: ResourceMap,
-    pub atmo_mass: FnvHashMap<GasKind, f32>,
+    pub atmo_mass: FnvHashMap<GasKind, f64>,
     pub water_volume: f32,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
