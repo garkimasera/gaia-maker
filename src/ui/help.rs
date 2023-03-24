@@ -42,6 +42,7 @@ impl AsRef<str> for HelpItem {
 pub enum BasicsItem {
     #[default]
     Concept,
+    Administrator,
 }
 
 #[allow(clippy::derivable_impls)]
