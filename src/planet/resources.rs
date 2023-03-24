@@ -39,8 +39,8 @@ impl Resources {
     }
 
     pub fn remove_by_map(&mut self, map: &ResourceMap) {
-        for (kind, v) in map {
-            self.add(*kind, *v);
+        for (&kind, &v) in map {
+            self.add(kind, -v);
         }
     }
 }
