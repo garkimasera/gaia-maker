@@ -15,7 +15,7 @@ pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
-pub use self::stat::Stat;
+pub use self::stat::{Record, Stat};
 pub use self::water::*;
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
@@ -103,7 +103,7 @@ impl Planet {
             space_buildings: SpaceBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
-            stat: Stat::default(),
+            stat: Stat::new(params),
         };
 
         for (kind, &n) in &start_params.orbital_buildings {
@@ -149,6 +149,7 @@ impl Planet {
         self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
+        self::stat::update_stats(self, params);
     }
 
     pub fn n_tile(&self) -> u32 {

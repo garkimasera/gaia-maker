@@ -348,6 +348,7 @@ pub struct Params {
     pub sim: SimParams,
     pub new_planet: NewPlanetParams,
     pub default_start_params: StartParams,
+    pub history: HistoryParams,
     #[serde(skip)]
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
     #[serde(skip)]
@@ -466,4 +467,10 @@ pub struct NewPlanetParams {
     pub water_volume: NewPlanetPercentageParam,
     pub nitrogen: NewPlanetPercentageParam,
     pub carbon_dioxide: NewPlanetPercentageParam,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct HistoryParams {
+    pub max_record: usize,
+    pub interval_cycles: u64,
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{egui, egui::plot, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
@@ -12,6 +12,7 @@ pub enum Panel {
     #[default]
     Planet,
     Atmosphere,
+    History,
 }
 
 pub fn stat_window(
@@ -20,7 +21,9 @@ pub fn stat_window(
     mut wos: ResMut<WindowsOpenState>,
     conf: Res<Conf>,
     planet: Res<Planet>,
+    params: Res<Params>,
     mut current_panel: Local<Panel>,
+    mut current_graph_item: Local<GraphItem>,
 ) {
     if !wos.stat {
         return;
@@ -40,6 +43,7 @@ pub fn stat_window(
             match *current_panel {
                 Panel::Planet => planet_stat(ui, &planet),
                 Panel::Atmosphere => atmo_stat(ui, &planet),
+                Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
         })
         .unwrap()
@@ -96,4 +100,50 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
             ui.end_row();
         }
     });
+}
+
+fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params: &Params) {
+    egui::ComboBox::from_id_source("graph-items")
+        .selected_text(t!(item.as_ref()))
+        .show_ui(ui, |ui| {
+            for graph_item in GraphItem::iter() {
+                ui.selectable_value(item, graph_item, t!(graph_item.as_ref()));
+            }
+        });
+
+    let history = planet.stat.history();
+    let line: plot::PlotPoints = (0..params.history.max_record)
+        .map(|i| {
+            [
+                (params.history.max_record - i) as f64 * params.history.interval_cycles as f64,
+                item.record_to_value(history.get(i)),
+            ]
+        })
+        .collect();
+    let line = plot::Line::new(line);
+    plot::Plot::new("history")
+        .allow_drag(false)
+        .allow_zoom(false)
+        .show(ui, |plot_ui| plot_ui.line(line));
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
+#[strum(serialize_all = "kebab-case")]
+pub enum GraphItem {
+    #[default]
+    AverageAirTemprature,
+    AverageRainfall,
+}
+
+impl GraphItem {
+    fn record_to_value(&self, record: Option<&Record>) -> f64 {
+        match self {
+            Self::AverageAirTemprature => record
+                .map(|record| record.average_air_temp - KELVIN_CELSIUS)
+                .unwrap_or(0.0) as f64,
+            Self::AverageRainfall => record
+                .map(|record| record.average_rainfall as f64)
+                .unwrap_or(0.0),
+        }
+    }
 }
