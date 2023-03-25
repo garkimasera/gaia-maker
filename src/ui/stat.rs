@@ -67,6 +67,17 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
 
 fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
     ui.label(format!(
+        "{}: {:.1} °C",
+        t!("average-air-temprature"),
+        planet.stat.average_air_temp - KELVIN_CELSIUS
+    ));
+    ui.label(format!(
+        "{}: {:.0} mm",
+        t!("average-rainfall"),
+        planet.stat.average_rainfall
+    ));
+    ui.separator();
+    ui.label(format!(
         "{}: {:.2} atm",
         t!("atmosphere-pressure"),
         planet.atmo.atm()

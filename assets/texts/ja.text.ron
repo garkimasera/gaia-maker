@@ -1,9 +1,11 @@
 {
     // UI
     "add": "追加",
+    "air-temprature": "気温",
     "atmosphere": "大気",
     "atmosphere-pressure": "気圧",
-    "air-temprature": "気温",
+    "average-air-temprature": "平均気温",
+    "average-rainfall": "平均降水量",
     "biomass": "生物量",
     "build": "建設",
     "cancel": "キャンセル",

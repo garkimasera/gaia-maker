@@ -118,9 +118,15 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
         std::mem::swap(&mut sim.vapor, &mut sim.vapor_new);
     }
 
+    let mut sum_rainfall = 0.0;
+
     // Set calculated new rainfall
     for p in map_iter_idx {
         planet.map[p].vapor = sim.vapor[p];
-        planet.map[p].rainfall = sim.vapor[p] * RAINFALL_DURATION;
+        let rainfall = sim.vapor[p] * RAINFALL_DURATION;
+        planet.map[p].rainfall = rainfall;
+        sum_rainfall += rainfall as f64;
     }
+
+    planet.stat.average_rainfall = sum_rainfall as f32 / planet.n_tile() as f32;
 }

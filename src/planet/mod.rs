@@ -8,12 +8,14 @@ mod map_generator;
 mod misc;
 mod resources;
 mod sim;
+mod stat;
 mod water;
 
 pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
+pub use self::stat::Stat;
 pub use self::water::*;
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
@@ -73,6 +75,7 @@ pub struct Planet {
     pub atmo: Atmosphere,
     pub water: Water,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, Building>,
+    pub stat: Stat,
 }
 
 impl Planet {
@@ -100,6 +103,7 @@ impl Planet {
             space_buildings: SpaceBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
+            stat: Stat::default(),
         };
 
         for (kind, &n) in &start_params.orbital_buildings {
@@ -145,6 +149,11 @@ impl Planet {
         self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
+    }
+
+    pub fn n_tile(&self) -> u32 {
+        let size = self.map.size();
+        size.0 * size.1
     }
 
     pub fn calc_longitude_latitude<T: Into<Coords>>(&self, coords: T) -> (f32, f32) {

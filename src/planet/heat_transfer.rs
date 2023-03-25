@@ -80,10 +80,16 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);
     }
 
+    let mut sum_temp = 0.0;
+
     // Set calculated new temprature
     for p in map_iter_idx {
-        planet.map[p].temp = sim.atemp[p];
+        let t = sim.atemp[p];
+        planet.map[p].temp = t;
+        sum_temp += t as f64;
     }
+
+    planet.stat.average_air_temp = sum_temp as f32 / planet.n_tile() as f32;
 }
 
 fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {

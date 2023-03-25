@@ -1,9 +1,11 @@
 {
     // UI
     "add": "Add",
+    "air-temprature": "Temprature",
     "atmosphere": "Atmosphere",
     "atmosphere-pressure": "Atmospheric Pressure",
-    "air-temprature": "Temprature",
+    "average-air-temprature": "Average Temprature",
+    "average-rainfall": "Average Rainfall",
     "biomass": "Biomass",
     "build": "Build",
     "cancel": "Cancel",
