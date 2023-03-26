@@ -10,6 +10,17 @@
             effect: SprayToAtmo( kind: oxygen, mass: 500 ),
         ),
     ),
+    carbon_dioxide_sprayer: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 2,
+        building: (
+            cost: { material: 100 },
+            upkeep: { energy: 2000, carbon: 50 },
+            effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3 ),
+        ),
+    ),
     rainmaker: (
         width: 48,
         height: 48,

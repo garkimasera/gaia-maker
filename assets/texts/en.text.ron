@@ -73,6 +73,7 @@
 
     // Structures
     "oxygen-generator": "Oxygen Generator",
+    "carbon-dioxide-sprayer": "Carbon Dioxide Sprayer",
     "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
@@ -104,6 +105,7 @@
     "help/administrator": "The player, the administrator, has come a long way over the years in an interstellar spacecraft to this star system containing a terraforming candidate planet. The administrator possesses technology equivalent to a Type II civilization and also possesses terraforming technology for an Earth-like planet. They have also brought genetic data of various plants and animals from their home planet for terraforming.\n\nA Type II civilization is a civilization that, on the Kardashev scale, has the technological level to harness the entire energy of a given star system. They collect stellar energy through the Dyson Sphere and use this abundant energy for interstellar travel and terraforming.",
 
     "help/oxygen-generator": "Oxygen generators isolate oxygen from oxides in the planet's crust. The process requires a large amount of energy.",
+    "help/carbon-dioxide-sprayer": "Carbon dioxide sprayers release carbon dioxide into the atmosphere. Carbon is required for operation.",
     "help/rainmaker": "Rainmakers convert ice into water vapor and release it into the atmosphere. In addition to increasing surrounding rainfall, it also slightly raises sea level of the planet.",
     "help/fertilization-plant": "Fertilization Plants slowly transform the surrounding area into soil suitable for plant growth. Plant growth requires soil with sufficient nutrients, and Fertilization Plant promotes their formation by deploying fertilizers and soil improvement drones.",
     "help/heater": "Heaters emit energy into the atmosphere as heat, raising the surrounding temperature.",
