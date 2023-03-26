@@ -122,12 +122,16 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
         .collect();
     let line = plot::Line::new(line);
 
+    let item_copy = *item;
+    let label_formatter = move |_s: &str, value: &plot::PlotPoint| item_copy.format_value(value.y);
+
     plot::Plot::new("history")
         .allow_drag(false)
         .allow_zoom(false)
         .allow_scroll(false)
+        .label_formatter(label_formatter)
         .show_x(false)
-        .show_y(false)
+        .show_y(true)
         .show(ui, |plot_ui| plot_ui.line(line));
 }
 
@@ -156,6 +160,17 @@ impl GraphItem {
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),
+        }
+    }
+
+    fn format_value(&self, value: f64) -> String {
+        match self {
+            Self::AverageAirTemprature => format!("{:.1} °C", value),
+            Self::AverageRainfall => format!("{:.0} mm", value),
+            Self::Biomass => format!("{:.1} Gt", value),
+            Self::Oxygen => format!("{:.2e} atm", value),
+            Self::Nitrogen => format!("{:.2e} atm", value),
+            Self::CarbonDioxide => format!("{:.2e} atm", value),
         }
     }
 }
