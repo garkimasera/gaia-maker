@@ -15,6 +15,7 @@ pub struct Stat {
 pub struct Record {
     pub average_air_temp: f32,
     pub average_rainfall: f32,
+    pub biomass: f32,
     pub p_o2: f32,
     pub p_n2: f32,
     pub p_co2: f32,
@@ -43,9 +44,16 @@ pub fn update_stats(planet: &mut Planet, params: &Params) {
         return;
     }
 
+    let mut biomass = 0.0;
+
+    for p in planet.map.iter_idx() {
+        biomass += planet.map[p].biomass as f64;
+    }
+
     let record = Record {
         average_air_temp: planet.stat.average_air_temp,
         average_rainfall: planet.stat.average_rainfall,
+        biomass: (biomass * 1e-3) as f32,
         p_o2: planet.atmo.partial_pressure(GasKind::Oxygen),
         p_n2: planet.atmo.partial_pressure(GasKind::Nitrogen),
         p_co2: planet.atmo.partial_pressure(GasKind::CarbonDioxide),
