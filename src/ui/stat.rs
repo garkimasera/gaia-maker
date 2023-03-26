@@ -121,9 +121,12 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
         })
         .collect();
     let line = plot::Line::new(line);
+
     plot::Plot::new("history")
         .allow_drag(false)
         .allow_zoom(false)
+        .show_x(false)
+        .show_y(false)
         .show(ui, |plot_ui| plot_ui.line(line));
 }
 

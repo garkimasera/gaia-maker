@@ -29,6 +29,10 @@ impl Stat {
     pub fn history(&self) -> &VecDeque<Record> {
         &self.history
     }
+
+    pub fn clear_history(&mut self) {
+        self.history.clear();
+    }
 }
 
 pub fn update_stats(planet: &mut Planet, params: &Params) {

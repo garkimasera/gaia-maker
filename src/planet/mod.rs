@@ -137,6 +137,8 @@ impl Planet {
         // Reset
         planet.cycles = 0;
         planet.res = Resources::new(start_params);
+        planet.stat.clear_history();
+        self::stat::update_stats(&mut planet, params);
 
         planet
     }
