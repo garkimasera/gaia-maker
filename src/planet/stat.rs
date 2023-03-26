@@ -15,6 +15,9 @@ pub struct Stat {
 pub struct Record {
     pub average_air_temp: f32,
     pub average_rainfall: f32,
+    pub p_o2: f32,
+    pub p_n2: f32,
+    pub p_co2: f32,
 }
 
 impl Stat {
@@ -43,6 +46,9 @@ pub fn update_stats(planet: &mut Planet, params: &Params) {
     let record = Record {
         average_air_temp: planet.stat.average_air_temp,
         average_rainfall: planet.stat.average_rainfall,
+        p_o2: planet.atmo.partial_pressure(GasKind::Oxygen),
+        p_n2: planet.atmo.partial_pressure(GasKind::Nitrogen),
+        p_co2: planet.atmo.partial_pressure(GasKind::CarbonDioxide),
     };
 
     planet.stat.history.push_front(record);

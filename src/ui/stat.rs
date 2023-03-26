@@ -125,6 +125,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
     plot::Plot::new("history")
         .allow_drag(false)
         .allow_zoom(false)
+        .allow_scroll(false)
         .show_x(false)
         .show_y(false)
         .show(ui, |plot_ui| plot_ui.line(line));
@@ -136,6 +137,9 @@ pub enum GraphItem {
     #[default]
     AverageAirTemprature,
     AverageRainfall,
+    Oxygen,
+    Nitrogen,
+    CarbonDioxide,
 }
 
 impl GraphItem {
@@ -147,6 +151,9 @@ impl GraphItem {
             Self::AverageRainfall => record
                 .map(|record| record.average_rainfall as f64)
                 .unwrap_or(0.0),
+            Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
+            Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
+            Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),
         }
     }
 }
