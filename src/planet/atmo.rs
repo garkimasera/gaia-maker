@@ -45,10 +45,11 @@ impl Atmosphere {
     }
 
     pub fn remove_carbon(&mut self, value: f32) -> bool {
-        let carbon_weight = value * CO2_CARBON_WEIGHT_RATIO;
-        let co2_mass = self.mass.get_mut(&GasKind::CarbonDioxide).unwrap();
-        if *co2_mass > carbon_weight as f64 {
-            *co2_mass -= carbon_weight as f64;
+        debug_assert!(value >= 0.0);
+        let co2_mass = value * CO2_CARBON_WEIGHT_RATIO;
+        let co2_mass_in_atmo = self.mass.get_mut(&GasKind::CarbonDioxide).unwrap();
+        if *co2_mass_in_atmo > co2_mass as f64 {
+            *co2_mass_in_atmo -= co2_mass as f64;
             self.add(GasKind::Oxygen, value * CO2_OXYGEN_WEIGHT_RATIO);
             true
         } else {

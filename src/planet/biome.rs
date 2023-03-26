@@ -112,6 +112,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             );
             planet.map[p].buried_carbon +=
                 carbon_weight * params.sim.decreased_biomass_to_buried_carbon_ratio;
+            planet.map[p].biomass += v;
         }
     }
 
