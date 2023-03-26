@@ -128,7 +128,7 @@
         cycles_before_start: 100,
     ),
     history: (
-        max_record: 100,
+        max_record: 101,
         interval_cycles: 100,
     ),
     orbital_buildings: {

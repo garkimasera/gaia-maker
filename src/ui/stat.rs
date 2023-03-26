@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use bevy::prelude::*;
 use bevy_egui::{egui, egui::plot, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
@@ -115,7 +117,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
     let line: plot::PlotPoints = (0..params.history.max_record)
         .map(|i| {
             [
-                (params.history.max_record - i) as f64 * params.history.interval_cycles as f64,
+                (params.history.max_record - i - 1) as f64 * params.history.interval_cycles as f64,
                 item.record_to_value(history.get(i)),
             ]
         })
@@ -124,12 +126,15 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
 
     let item_copy = *item;
     let label_formatter = move |_s: &str, value: &plot::PlotPoint| item_copy.format_value(value.y);
+    let x_range = (params.history.max_record as f64 - 1.0) * params.history.interval_cycles as f64;
+    let x_axis_formatter = move |x, _range: &RangeInclusive<f64>| format!("{}", -x_range + x);
 
     plot::Plot::new("history")
         .allow_drag(false)
         .allow_zoom(false)
         .allow_scroll(false)
         .label_formatter(label_formatter)
+        .x_axis_formatter(x_axis_formatter)
         .show_x(false)
         .show_y(true)
         .show(ui, |plot_ui| plot_ui.line(line));
