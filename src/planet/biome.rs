@@ -26,6 +26,13 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
     }
 
+    let nitrogen_factor = linear_interpolation(
+        &params.sim.nitrogen_fertility_table,
+        planet.atmo.partial_pressure(GasKind::Nitrogen),
+    );
+
+    let mut sum_diff = 0.0;
+
     for p in map_iter_idx {
         let temp_factor = linear_interpolation(
             &params.sim.temprature_fertility_table,
@@ -33,7 +40,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         );
         let rainfall_factor =
             linear_interpolation(&params.sim.rainfall_fertility_table, planet.map[p].rainfall);
-        let max_fertility = (temp_factor + rainfall_factor) / 2.0;
+        let max_fertility = 100.0 * temp_factor * rainfall_factor * nitrogen_factor;
 
         let fertility = planet.map[p].fertility;
         let diff = max_fertility - fertility;
@@ -72,14 +79,17 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             0.0
         };
 
-        planet.map[p].fertility =
-            (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
-
-        if planet.map[p].fertility < max_fertility {
-            planet.map[p].fertility =
-                (planet.map[p].fertility + sim.fertility_effect[p]).min(max_fertility);
+        let mut new_fertility = (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
+        if new_fertility < max_fertility {
+            new_fertility = (new_fertility + sim.fertility_effect[p]).min(max_fertility);
         }
+        sum_diff += (new_fertility - fertility) as f64;
+        planet.map[p].fertility = new_fertility;
     }
+    planet.atmo.add(
+        GasKind::Nitrogen,
+        -sum_diff * params.sim.soil_nitrogen as f64 * sim.tile_area as f64,
+    );
 
     // Biomass
     let speed_factor_by_atmo =

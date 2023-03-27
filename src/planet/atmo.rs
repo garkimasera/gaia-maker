@@ -40,8 +40,8 @@ impl Atmosphere {
         *self.mass.get_mut(&kind).unwrap() = value as f64;
     }
 
-    pub fn add(&mut self, kind: GasKind, value: f32) {
-        *self.mass.get_mut(&kind).unwrap() += value as f64;
+    pub fn add(&mut self, kind: GasKind, value: impl Into<f64>) {
+        *self.mass.get_mut(&kind).unwrap() += value.into();
     }
 
     pub fn remove_carbon(&mut self, value: f32) -> bool {

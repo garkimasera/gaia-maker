@@ -422,6 +422,8 @@ pub struct SimParams {
     pub temprature_fertility_table: Vec<(f32, f32)>,
     /// Max fertility table by rainfall
     pub rainfall_fertility_table: Vec<(f32, f32)>,
+    /// Max fertility table by nitrogen atm
+    pub nitrogen_fertility_table: Vec<(f32, f32)>,
     /// Fertility growth from biomass
     pub fertility_growth_from_biomass_table: Vec<(f32, f32)>,
     /// Base decrement value of fertility
@@ -432,6 +434,8 @@ pub struct SimParams {
     pub sea_fertility_attenuation_factor: f32,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
+    /// Nitrogen in soil per area [m2] each percent
+    pub soil_nitrogen: f32,
     /// Max biomass by fertility
     pub max_biomass_fertility_table: Vec<(f32, f32)>,
     /// Base biomass increase speed
