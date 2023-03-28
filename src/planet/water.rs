@@ -126,6 +126,10 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
         let rainfall = sim.vapor[p] * RAINFALL_DURATION;
         planet.map[p].rainfall = rainfall;
         sum_rainfall += rainfall as f64;
+        sim.humidity[p] = (rainfall
+            - params.sim.humidity_factors.0
+                * (planet.map[p].temp - KELVIN_CELSIUS + params.sim.humidity_factors.1))
+            .max(0.0);
     }
 
     planet.stat.average_rainfall = sum_rainfall as f32 / planet.n_tile() as f32;

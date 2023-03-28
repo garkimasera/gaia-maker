@@ -58,6 +58,7 @@ impl Atmosphere {
     }
 
     pub fn release_carbon(&mut self, value: f32) {
+        self.add(GasKind::Oxygen, -value * CO2_OXYGEN_WEIGHT_RATIO);
         self.add(GasKind::CarbonDioxide, value * CO2_CARBON_WEIGHT_RATIO);
     }
 }

@@ -418,10 +418,12 @@ pub struct SimParams {
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
     pub ocean_vaporization_table: Vec<(f32, f32)>,
+    /// Humidity calculation factors (humidity = rainfall - factors.0 * (temprature + factors.1))
+    pub humidity_factors: (f32, f32),
     /// Max fertility table by temprature
     pub temprature_fertility_table: Vec<(f32, f32)>,
-    /// Max fertility table by rainfall
-    pub rainfall_fertility_table: Vec<(f32, f32)>,
+    /// Max fertility table by humidity
+    pub humidity_fertility_table: Vec<(f32, f32)>,
     /// Max fertility table by nitrogen atm
     pub nitrogen_fertility_table: Vec<(f32, f32)>,
     /// Fertility growth from biomass
@@ -446,8 +448,10 @@ pub struct SimParams {
     pub biomass_growth_speed_atm_table: Vec<(f32, f32)>,
     /// Biomass growth speed factor by CO2
     pub biomass_growth_speed_co2_table: Vec<(f32, f32)>,
-    /// Ratio of biomass to buried carbon on decreasing
-    pub decreased_biomass_to_buried_carbon_ratio: f32,
+    /// Table of decreased biomass to buried carbon ratio by oxygen atm
+    pub biomass_to_buried_carbon_ratio_o2_table: Vec<(f32, f32)>,
+    /// Table of decreased biomass to buried carbon ratio by carbon dioxide atm
+    pub biomass_to_buried_carbon_ratio_co2_table: Vec<(f32, f32)>,
     /// Sea biomass factor compared to land
     pub sea_biomass_factor: f32,
     /// Biome transition probability before start simulation

@@ -39,7 +39,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             planet.map[p].temp - KELVIN_CELSIUS,
         );
         let rainfall_factor =
-            linear_interpolation(&params.sim.rainfall_fertility_table, planet.map[p].rainfall);
+            linear_interpolation(&params.sim.humidity_fertility_table, sim.humidity[p]);
         let max_fertility = 100.0 * temp_factor * rainfall_factor * nitrogen_factor;
 
         let fertility = planet.map[p].fertility;
@@ -101,6 +101,14 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 &params.sim.biomass_growth_speed_co2_table,
                 planet.atmo.partial_pressure(GasKind::CarbonDioxide),
             );
+    let biomass_to_buried_carbon_ratio = linear_interpolation(
+        &params.sim.biomass_to_buried_carbon_ratio_o2_table,
+        planet.atmo.partial_pressure(GasKind::Oxygen),
+    )
+    .min(linear_interpolation(
+        &params.sim.biomass_to_buried_carbon_ratio_co2_table,
+        planet.atmo.partial_pressure(GasKind::CarbonDioxide),
+    ));
 
     for p in map_iter_idx {
         let max = calc_max_biomass(planet, params, p);
@@ -117,11 +125,10 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 planet.map[p].biomass += v;
             }
         } else {
-            planet.atmo.release_carbon(
-                carbon_weight * (1.0 - params.sim.decreased_biomass_to_buried_carbon_ratio),
-            );
-            planet.map[p].buried_carbon +=
-                carbon_weight * params.sim.decreased_biomass_to_buried_carbon_ratio;
+            planet
+                .atmo
+                .release_carbon(carbon_weight * (1.0 - biomass_to_buried_carbon_ratio));
+            planet.map[p].buried_carbon += carbon_weight * biomass_to_buried_carbon_ratio;
             planet.map[p].biomass += v;
         }
     }
