@@ -14,6 +14,11 @@ pub enum ManagePlanet {
     Load(String),
 }
 
+#[derive(Clone, Default, Debug, Resource)]
+pub struct DebugTools {
+    pub sim_every_frame: bool,
+}
+
 impl Resource for Planet {}
 impl Resource for Params {}
 impl Resource for Sim {}
@@ -22,6 +27,7 @@ impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
+            .init_resource::<DebugTools>()
             .add_system(
                 start_sim
                     .in_schedule(OnEnter(GameState::Running))
@@ -42,16 +48,18 @@ fn update(
     mut sim: ResMut<Sim>,
     params: Res<Params>,
     speed: Res<GameSpeed>,
+    debug_tools: Res<DebugTools>,
     mut count_frame: Local<u64>,
     mut last_update: Local<Option<u64>>,
 ) {
     *count_frame += 1;
 
-    match *speed {
-        GameSpeed::Paused => {
+    match (*speed, debug_tools.sim_every_frame) {
+        (GameSpeed::Paused, _) => {
             return;
         }
-        GameSpeed::Normal => {
+        (_, true) => (),
+        (GameSpeed::Normal, _) => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
                     < 60 * params.sim.sim_normal_loop_duration_ms / 1000
@@ -59,7 +67,7 @@ fn update(
                 return;
             }
         }
-        GameSpeed::Fast => {
+        (GameSpeed::Fast, _) => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
                     < 60 * params.sim.sim_fast_loop_duration_ms / 1000

@@ -405,9 +405,10 @@ fn keyboard_input(
     conf: Res<Conf>,
 ) {
     // Shortcut keys
-    if keys.just_pressed(KeyCode::E) && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
+    if keys.just_pressed(KeyCode::F12)
+        && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
     {
-        wos.edit_planet = !wos.edit_planet;
+        wos.debug_tools = !wos.debug_tools;
     }
 
     // Keys for moving camera

@@ -1,4 +1,4 @@
-mod edit_planet;
+mod debug_tools;
 mod help;
 mod main_menu;
 mod new_planet;
@@ -37,7 +37,7 @@ pub struct WindowsOpenState {
     pub stat: bool,
     pub message: bool,
     pub help: bool,
-    pub edit_planet: bool,
+    pub debug_tools: bool,
 }
 
 #[derive(Clone, Default, Resource)]
@@ -67,7 +67,7 @@ impl Plugin for UiPlugin {
                     layers_window,
                     msg_window,
                     help::help_window,
-                    edit_planet::edit_planet_window,
+                    debug_tools::debug_tools_window,
                 )
                     .in_set(OnUpdate(GameState::Running))
                     .in_set(UiWindowsSystemSet),

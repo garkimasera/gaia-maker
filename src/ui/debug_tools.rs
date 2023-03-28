@@ -1,6 +1,6 @@
 use super::{convert_rect, CursorMode, OccupiedScreenSpace, WindowsOpenState};
-use crate::conf::Conf;
 use crate::planet::*;
+use crate::{conf::Conf, sim::DebugTools};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
@@ -9,28 +9,30 @@ use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 #[strum(serialize_all = "kebab-case")]
 pub enum Panel {
     #[default]
+    Sim,
     Map,
     Planet,
     Atmosphere,
     Water,
 }
 
-pub fn edit_planet_window(
+pub fn debug_tools_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
+    mut debug_tools: ResMut<DebugTools>,
     conf: Res<Conf>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,
 ) {
-    if !wos.edit_planet {
+    if !wos.debug_tools {
         return;
     }
 
-    let rect = egui::Window::new("Planet editing tools")
-        .open(&mut wos.edit_planet)
+    let rect = egui::Window::new("Debug Tools")
+        .open(&mut wos.debug_tools)
         .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
@@ -41,6 +43,7 @@ pub fn edit_planet_window(
             ui.separator();
 
             match *current_panel {
+                Panel::Sim => sim_ui(ui, &mut debug_tools),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmosphere => atmo_ui(ui, &mut planet),
@@ -53,6 +56,10 @@ pub fn edit_planet_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn sim_ui(ui: &mut egui::Ui, debug_tools: &mut DebugTools) {
+    ui.checkbox(&mut debug_tools.sim_every_frame, "sim every frame");
 }
 
 #[derive(Default, Debug)]
