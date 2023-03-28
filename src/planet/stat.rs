@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct Stat {
     pub average_air_temp: f32,
     pub average_rainfall: f32,
+    pub sum_biomass: f32,
     history: VecDeque<Record>,
 }
 
@@ -26,6 +27,7 @@ impl Stat {
         Self {
             average_air_temp: 0.0,
             average_rainfall: 0.0,
+            sum_biomass: 0.0,
             history: VecDeque::with_capacity(params.history.max_record + 1),
         }
     }
@@ -44,16 +46,10 @@ pub fn update_stats(planet: &mut Planet, params: &Params) {
         return;
     }
 
-    let mut biomass = 0.0;
-
-    for p in planet.map.iter_idx() {
-        biomass += planet.map[p].biomass as f64;
-    }
-
     let record = Record {
         average_air_temp: planet.stat.average_air_temp,
         average_rainfall: planet.stat.average_rainfall,
-        biomass: (biomass * 1e-3) as f32,
+        biomass: planet.stat.sum_biomass,
         p_o2: planet.atmo.partial_pressure(GasKind::Oxygen),
         p_n2: planet.atmo.partial_pressure(GasKind::Nitrogen),
         p_co2: planet.atmo.partial_pressure(GasKind::CarbonDioxide),

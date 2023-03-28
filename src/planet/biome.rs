@@ -92,15 +92,16 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     );
 
     // Biomass
-    let speed_factor_by_atmo =
-        0.5 * linear_interpolation(
-            &params.sim.biomass_growth_speed_atm_table,
-            planet.atmo.atm(),
-        ) + 0.5
-            * linear_interpolation(
-                &params.sim.biomass_growth_speed_co2_table,
-                planet.atmo.partial_pressure(GasKind::CarbonDioxide),
-            );
+    let mut sum_biomass = 0.0;
+    let density_to_mass = sim.tile_area * 1.0e-9;
+    let speed_factor_by_atmo = linear_interpolation(
+        &params.sim.biomass_growth_speed_atm_table,
+        planet.atmo.atm(),
+    )
+    .min(linear_interpolation(
+        &params.sim.biomass_growth_speed_co2_table,
+        planet.atmo.partial_pressure(GasKind::CarbonDioxide),
+    ));
     let biomass_to_buried_carbon_ratio = linear_interpolation(
         &params.sim.biomass_to_buried_carbon_ratio_o2_table,
         planet.atmo.partial_pressure(GasKind::Oxygen),
@@ -111,27 +112,31 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     ));
 
     for p in map_iter_idx {
-        let max = calc_max_biomass(planet, params, p);
-        let diff = max - planet.map[p].biomass;
+        let max = calc_max_biomass_density(planet, params, p);
+        let biomass = &mut planet.map[p].biomass;
+        let diff = max - *biomass;
         let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
             params.sim.base_biomass_increase_speed * speed_factor_by_atmo
         } else {
             diff * params.sim.base_biomass_decrease_speed
         };
 
-        let carbon_weight = sim.tile_area * v.abs() * 1.0e-9;
+        let carbon_weight = density_to_mass * v.abs();
         if v > 0.0 {
             if planet.atmo.remove_carbon(carbon_weight) {
-                planet.map[p].biomass += v;
+                *biomass += v;
             }
+            sum_biomass += *biomass as f64;
         } else {
             planet
                 .atmo
                 .release_carbon(carbon_weight * (1.0 - biomass_to_buried_carbon_ratio));
+            *biomass += v;
+            sum_biomass += *biomass as f64;
             planet.map[p].buried_carbon += carbon_weight * biomass_to_buried_carbon_ratio;
-            planet.map[p].biomass += v;
         }
     }
+    planet.stat.sum_biomass = sum_biomass as f32 * density_to_mass;
 
     // Biome transistion
     process_biome_transition(planet, sim, params);
@@ -205,7 +210,7 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
         && req.biomass <= tile.biomass
 }
 
-fn calc_max_biomass(planet: &Planet, params: &Params, p: Coords) -> f32 {
+fn calc_max_biomass_density(planet: &Planet, params: &Params, p: Coords) -> f32 {
     linear_interpolation(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,

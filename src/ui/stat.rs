@@ -161,7 +161,9 @@ impl GraphItem {
             Self::AverageRainfall => record
                 .map(|record| record.average_rainfall as f64)
                 .unwrap_or(0.0),
-            Self::Biomass => record.map(|record| record.biomass as f64).unwrap_or(0.0),
+            Self::Biomass => record
+                .map(|record| record.biomass as f64 * 1e-3)
+                .unwrap_or(0.0),
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),
