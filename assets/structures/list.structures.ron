@@ -10,6 +10,17 @@
             effect: SprayToAtmo( kind: oxygen, mass: 500 ),
         ),
     ),
+    nitrogen_sprayer: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 2,
+        building: (
+            cost: { material: 100 },
+            upkeep: { energy: 10, nitrogen: 200 },
+            effect: SprayToAtmo( kind: nitrogen, mass: 200 ),
+        ),
+    ),
     carbon_dioxide_sprayer: (
         width: 48,
         height: 48,

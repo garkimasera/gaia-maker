@@ -119,6 +119,7 @@ impl Planet {
 
         let buildable_structures = &[
             StructureKind::OxygenGenerator,
+            StructureKind::NitrogenSprayer,
             StructureKind::CarbonDioxideSprayer,
             StructureKind::Rainmaker,
             StructureKind::FertilizationPlant,

@@ -168,12 +168,6 @@
             produce: { energy: 1000 },
             build_max: 100,
         ),
-        nitrogen_sprayer: (
-            cost: { material: 40 },
-            upkeep: { nitrogen: 100 },
-            effect: SprayToAtmo( kind: nitrogen, mass: 100 ),
-            build_max: 10,
-        ),
     },
     star_system_buildings: {
         dyson_swarm_unit: (
@@ -200,9 +194,9 @@
             build_max: 100,
         ),
         ammonia_extractor: (
-            cost: { material: 200 },
-            upkeep: { energy: 10000 },
-            produce: { nitrogen: 10 },
+            cost: { material: 500 },
+            upkeep: { energy: 100000 },
+            produce: { nitrogen: 100 },
             build_max: 100,
         ),
     },

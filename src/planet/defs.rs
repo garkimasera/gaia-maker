@@ -168,6 +168,7 @@ pub enum Structure {
     None,
     Occupied { by: Coords },
     OxygenGenerator { state: StructureBuildingState },
+    NitrogenSprayer { state: StructureBuildingState },
     CarbonDioxideSprayer { state: StructureBuildingState },
     Rainmaker { state: StructureBuildingState },
     FertilizationPlant { state: StructureBuildingState },
@@ -182,6 +183,7 @@ impl Structure {
     pub fn building_state(&self) -> Option<&StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
+            Self::NitrogenSprayer { state } => Some(state),
             Self::CarbonDioxideSprayer { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
             Self::FertilizationPlant { state } => Some(state),
@@ -193,6 +195,7 @@ impl Structure {
     pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
+            Self::NitrogenSprayer { state } => Some(state),
             Self::CarbonDioxideSprayer { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
             Self::FertilizationPlant { state } => Some(state),
@@ -265,7 +268,6 @@ pub struct BuildingAttrs {
 #[strum(serialize_all = "kebab-case")]
 pub enum OrbitalBuildingKind {
     FusionReactor,
-    NitrogenSprayer,
 }
 
 #[derive(
