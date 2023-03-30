@@ -132,15 +132,22 @@ fn apply_building_effect(
     working_buildings: &FnvHashMap<BuildingKind, u32>,
     params: &Params,
 ) {
+    planet.state.solar_power_multiplier = 1.0;
+
     for (&kind, &n) in working_buildings {
         let Some(effect) = &params.building_attrs(kind).and_then(|attrs| attrs.effect) else { continue };
 
         #[allow(clippy::single_match)]
         match effect {
+            BuildingEffect::MultiplySolarPower { value } => {
+                planet.state.solar_power_multiplier += value * n as f32;
+            }
             BuildingEffect::SprayToAtmo { kind, mass } => {
                 planet.atmo.add(*kind, mass * n as f32);
             }
             _ => (),
         }
     }
+
+    planet.state.solar_power = planet.basics.solar_constant * planet.state.solar_power_multiplier;
 }

@@ -68,7 +68,8 @@ pub struct Building {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
     pub cycles: u64,
-    pub basics: PlanetBasics,
+    pub basics: Basics,
+    pub state: State,
     pub player: Player,
     pub res: Resources,
     pub map: Array2d<Tile>,
@@ -95,6 +96,7 @@ impl Planet {
         let mut planet = Planet {
             cycles: 0,
             basics: start_params.basics.clone(),
+            state: State::default(),
             player: Player::default(),
             res: Resources::new(start_params),
             map,

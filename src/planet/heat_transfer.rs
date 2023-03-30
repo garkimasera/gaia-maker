@@ -30,7 +30,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         for p in map_iter_idx {
             let old_heat_amount = sim.atmo_heat_cap[p] * sim.atemp[p];
 
-            let solar_power = planet.basics.solar_constant
+            let solar_power = planet.state.solar_power
                 * planet.calc_longitude_latitude(p).1.cos()
                 * (1.0 - sim.albedo[p])
                 * params.sim.sunlight_day_averaging_factor;

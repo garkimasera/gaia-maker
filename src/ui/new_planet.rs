@@ -2,7 +2,7 @@ use bevy::prelude::EventWriter;
 use bevy_egui::{egui, EguiContexts};
 
 use crate::{
-    planet::{GasKind, Params, PlanetBasics, StartParams},
+    planet::{Basics, GasKind, Params, StartParams},
     sim::ManagePlanet,
 };
 
@@ -96,7 +96,7 @@ pub fn new_planet(
                             / 100.0;
 
                     let start_params = StartParams {
-                        basics: PlanetBasics {
+                        basics: Basics {
                             solar_constant: state.new_planet.solar_constant,
                             ..params.default_start_params.clone().basics
                         },

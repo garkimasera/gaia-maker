@@ -67,7 +67,11 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
             ui.label(format!("{:.1} g/cm³", planet.basics.density / 1000.0));
             ui.end_row();
             ui.label(t!("solar-constant"));
-            ui.label(format!("{:.0} W/m²", planet.basics.solar_constant));
+            ui.label(format!(
+                "{:.0} W/m² ({:+.0}%)",
+                planet.basics.solar_constant,
+                (planet.state.solar_power_multiplier - 1.0) * 100.0
+            ));
         });
 }
 

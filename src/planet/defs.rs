@@ -10,13 +10,30 @@ pub const KELVIN_CELSIUS: f32 = 273.15;
 pub const RAINFALL_DURATION: f32 = 360.0;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct PlanetBasics {
+pub struct Basics {
     /// Planet density [kg/m^3]
     pub density: f32,
     /// Planet radius [m]
     pub radius: f32,
     /// Solar constant at the planet [W/m^2]
     pub solar_constant: f32,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct State {
+    /// Multiplier for solar power
+    pub solar_power_multiplier: f32,
+    /// Solar power at the planet [W/m^2]
+    pub solar_power: f32,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            solar_power_multiplier: 1.0,
+            solar_power: 0.0,
+        }
+    }
 }
 
 #[derive(
@@ -268,6 +285,8 @@ pub struct BuildingAttrs {
 #[strum(serialize_all = "kebab-case")]
 pub enum OrbitalBuildingKind {
     FusionReactor,
+    OrbitalMirror,
+    SolarShield,
 }
 
 #[derive(
@@ -330,6 +349,9 @@ pub enum BuildingKind {
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
+    MultiplySolarPower {
+        value: f32,
+    },
     SprayToAtmo {
         kind: GasKind,
         mass: f32,
@@ -381,7 +403,7 @@ impl Params {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartParams {
-    pub basics: PlanetBasics,
+    pub basics: Basics,
     pub size: (u32, u32),
     pub difference_in_elevation: f32,
     pub resources: ResourceMap,

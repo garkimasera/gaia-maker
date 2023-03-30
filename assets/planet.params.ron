@@ -168,6 +168,18 @@
             produce: { energy: 1000 },
             build_max: 100,
         ),
+        orbital_mirror: (
+            cost: { material: 5 },
+            upkeep: { energy: 10 },
+            build_max: 100,
+            effect: MultiplySolarPower( value: 0.01 ),
+        ),
+        solar_shield: (
+            cost: { material: 5 },
+            upkeep: { energy: 10 },
+            build_max: 100,
+            effect: MultiplySolarPower( value: -0.01 ),
+        ),
     },
     star_system_buildings: {
         dyson_swarm_unit: (
