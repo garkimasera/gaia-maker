@@ -1,4 +1,4 @@
-use super::*;
+use super::{misc::linear_interpolation, *};
 use fnv::FnvHashMap;
 
 impl Planet {
@@ -135,12 +135,22 @@ fn apply_building_effect(
     planet.state.solar_power_multiplier = 1.0;
 
     for (&kind, &n) in working_buildings {
-        let Some(effect) = &params.building_attrs(kind).and_then(|attrs| attrs.effect) else { continue };
+        let Some(effect) = &params.building_attrs(kind).and_then(|attrs| attrs.effect.as_ref())
+            else { continue };
 
         #[allow(clippy::single_match)]
         match effect {
             BuildingEffect::MultiplySolarPower { value } => {
                 planet.state.solar_power_multiplier += value * n as f32;
+            }
+            BuildingEffect::RemoveAtmo {
+                mass,
+                efficiency_table,
+            } => {
+                let efficiency = linear_interpolation(efficiency_table, planet.atmo.atm());
+                planet
+                    .atmo
+                    .remove_atmo(*mass as f64 * n as f64 * efficiency as f64);
             }
             BuildingEffect::SprayToAtmo { kind, mass } => {
                 planet.atmo.add(*kind, mass * n as f32);

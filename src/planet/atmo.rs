@@ -41,7 +41,8 @@ impl Atmosphere {
     }
 
     pub fn add(&mut self, kind: GasKind, value: impl Into<f64>) {
-        *self.mass.get_mut(&kind).unwrap() += value.into();
+        let mass = self.mass.get_mut(&kind).unwrap();
+        *mass = (*mass + value.into()).max(0.0);
     }
 
     pub fn remove_carbon(&mut self, value: f32) -> bool {
@@ -60,6 +61,16 @@ impl Atmosphere {
     pub fn release_carbon(&mut self, value: f32) {
         self.add(GasKind::Oxygen, -value * CO2_OXYGEN_WEIGHT_RATIO);
         self.add(GasKind::CarbonDioxide, value * CO2_CARBON_WEIGHT_RATIO);
+    }
+
+    pub fn remove_atmo(&mut self, value: impl Into<f64>) {
+        let value = value.into();
+        let total_mass = self.total_mass() as f64;
+        for kind in GasKind::iter() {
+            let mass = self.mass.get_mut(&kind).unwrap();
+            let v = value * *mass / total_mass;
+            *mass = (*mass - v).max(0.0);
+        }
     }
 }
 

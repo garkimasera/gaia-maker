@@ -83,6 +83,7 @@
     "fusion-reactor": "Fusion Reactor",
     "orbital-mirror": "Orbital Mirror",
     "solar-shield": "Solar Shield",
+    "ion-irradiator": "Ion Irradiator",
 
     // Star System Buildings
     "asteroid-mining-station": "Asteroid Mining Station",
@@ -116,6 +117,7 @@
     "help/fusion-reactor": "Fusion reactors provide the energy needed to operate facilities. Fusion is a highly efficient energy source essential to space civilization, but if more energy is needed, it will require the use of giant fusion reactors, stars.",
     "help/orbital-mirror": "Orbital mirrors reflect stellar light and increase the amount of light energy reaching the planet's surface. Each orbital mirror increases solar power by 1%.",
     "help/solar-shield": "Solar shields block stellar light and reduce the amount of light energy reaching the planet's surface. Each solar shield reduces solar power by 1%.",
+    "help/ion-irradiator": "Ion radiators collide accelerated ions with the planet's atmosphere, which bounce the molecules off into space. The effect is to reduce atmospheric pressure by reducing the mass of the planet's atmosphere.",
 
     "help/dyson-swarm-unit": "The Dyson Swarm is one form of the Dyson Sphere, a massive structure designed to harness the full energy emitted by a star. Each unit is merely a giant mirror that reflects light and delivers it to the demand location, but in sufficient numbers, they provide enough energy for terraforming.",
     "help/asteroid-mining-station": "Asteroid mining stations mine ore from asteroids and process it into materials that can be used for construction and other purposes.",

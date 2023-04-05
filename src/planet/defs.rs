@@ -287,6 +287,7 @@ pub enum OrbitalBuildingKind {
     FusionReactor,
     OrbitalMirror,
     SolarShield,
+    IonIrradiator,
 }
 
 #[derive(
@@ -346,11 +347,15 @@ pub enum BuildingKind {
     Space(SpaceBuildingKind),
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
     MultiplySolarPower {
         value: f32,
+    },
+    RemoveAtmo {
+        mass: f32,
+        efficiency_table: Vec<(f32, f32)>,
     },
     SprayToAtmo {
         kind: GasKind,

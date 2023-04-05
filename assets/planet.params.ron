@@ -1,7 +1,7 @@
 (
     sim: (
-        sim_normal_loop_duration_ms: 1000,
-        sim_fast_loop_duration_ms: 250,
+        sim_normal_loop_duration_ms: 250,
+        sim_fast_loop_duration_ms: 100,
         total_mass_per_atm: 5.0e+9,
         secs_per_cycle: 86400,
         air_heat_cap: 1000.0,
@@ -179,6 +179,12 @@
             upkeep: { energy: 10 },
             build_max: 100,
             effect: MultiplySolarPower( value: -0.01 ),
+        ),
+        ion_irradiator: (
+            cost: { material: 1000 },
+            upkeep: { energy: 400000 },
+            build_max: 100,
+            effect: RemoveAtmo( mass: 5000, efficiency_table: [(0.0, 0.0), (0.1, 1.0), (500, 1.0)] ),
         ),
     },
     star_system_buildings: {
