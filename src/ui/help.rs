@@ -43,6 +43,7 @@ pub enum BasicsItem {
     #[default]
     Concept,
     Administrator,
+    Terraforming,
 }
 
 #[allow(clippy::derivable_impls)]

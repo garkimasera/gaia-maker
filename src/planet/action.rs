@@ -1,9 +1,9 @@
 use super::*;
 
 impl Planet {
-    pub fn buildable(&self, building: &BuildingAttrs) -> bool {
+    pub fn buildable(&self, building: &BuildingAttrs, n: u32) -> bool {
         for (kind, v) in &building.cost {
-            if *v > self.res.stock[kind] {
+            if *v * n as f32 > self.res.stock[kind] {
                 return false;
             }
         }

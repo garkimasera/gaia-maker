@@ -50,7 +50,7 @@ fn cursor_action(
             CursorMode::Build(kind) => match kind {
                 StructureKind::None => (),
                 _ => {
-                    if planet.buildable(params.structures[&kind].as_ref()) {
+                    if planet.buildable(params.structures[&kind].as_ref(), 1) {
                         update_map.update();
                         let size = params.structures[&kind].size;
                         if planet.placeable(coords, size) {
