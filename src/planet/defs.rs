@@ -469,6 +469,8 @@ pub struct SimParams {
     pub soil_nitrogen: f32,
     /// Max biomass by fertility
     pub max_biomass_fertility_table: Vec<(f32, f32)>,
+    /// Max biomass by O2
+    pub max_biomass_factor_o2_table: Vec<(f32, f32)>,
     /// Base biomass increase speed
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed

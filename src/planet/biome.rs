@@ -110,9 +110,11 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         &params.sim.biomass_to_buried_carbon_ratio_co2_table,
         planet.atmo.partial_pressure(GasKind::CarbonDioxide),
     ));
+    let max_biomass_density_planet_factor = calc_max_biomass_density_planet_factor(planet, params);
 
     for p in map_iter_idx {
-        let max = calc_max_biomass_density(planet, params, p);
+        let max =
+            calc_tile_max_biomass_density(planet, params, p, max_biomass_density_planet_factor);
         let biomass = &mut planet.map[p].biomass;
         let diff = max - *biomass;
         let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
@@ -210,7 +212,12 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
         && req.biomass <= tile.biomass
 }
 
-fn calc_max_biomass_density(planet: &Planet, params: &Params, p: Coords) -> f32 {
+fn calc_tile_max_biomass_density(
+    planet: &Planet,
+    params: &Params,
+    p: Coords,
+    planet_factor: f32,
+) -> f32 {
     linear_interpolation(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,
@@ -218,5 +225,12 @@ fn calc_max_biomass_density(planet: &Planet, params: &Params, p: Coords) -> f32 
         1.0
     } else {
         params.sim.sea_biomass_factor
-    }
+    } * planet_factor
+}
+
+fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f32 {
+    linear_interpolation(
+        &params.sim.max_biomass_factor_o2_table,
+        planet.atmo.partial_pressure(GasKind::Oxygen),
+    )
 }
