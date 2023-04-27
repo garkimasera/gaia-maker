@@ -13,7 +13,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Calculate heat capacity of tiles
     for p in map_iter_idx {
-        sim.atmo_heat_cap[p] = air_heat_cap_per_tile + params.sim.surface_heat_cap * sim.tile_area;
+        sim.atmo_heat_cap[p] =
+            air_heat_cap_per_tile + params.sim.land_surface_heat_cap * sim.tile_area;
     }
 
     // Calculate albedo of tiles

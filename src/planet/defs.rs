@@ -427,8 +427,12 @@ pub struct SimParams {
     pub secs_per_cycle: f32,
     /// Heat capacity of air [J/(kg*K)]
     pub air_heat_cap: f32,
-    /// Heat capacity of planet surface [J/(kg*m^3)]
-    pub surface_heat_cap: f32,
+    /// Heat capacity of planet land surface [J/(K*m^2)]
+    pub land_surface_heat_cap: f32,
+    /// Heat capacity of planet sea [J/(K*m^3)]
+    pub sea_heat_cap: f32,
+    /// Depth of sea surface [m]
+    pub sea_surface_depth: f32,
     /// Factor to average sunlight power per day
     pub sunlight_day_averaging_factor: f32,
     /// The ratio of tile air diffusion
