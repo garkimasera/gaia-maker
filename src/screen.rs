@@ -487,33 +487,35 @@ fn main_menu_background_exit(mut bg_meshes: Query<&mut Visibility, With<MainMenu
 fn window_resize() {}
 
 #[cfg(target_arch = "wasm32")]
-fn window_resize(mut _window: Query<&mut Window, With<PrimaryWindow>>) {
-    // let Ok(mut window) = window.get_single_mut() else {
-    //         return;
-    //     };
+fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
+    let Ok(mut window) = window.get_single_mut() else {
+            return;
+        };
 
-    // let Some(w) = web_sys::window() else {
-    //     return;
-    // };
+    let Some(w) = web_sys::window() else {
+        return;
+    };
 
-    // let Some(width) = w
-    //     .inner_width()
-    //     .ok()
-    //     .and_then(|width| width.as_f64())
-    //     .map(|width| width as f32) else {
-    //         return;
-    //     };
-    // let Some(height) = w
-    //     .inner_height()
-    //     .ok()
-    //     .and_then(|height| height.as_f64())
-    //     .map(|height| height as f32) else {
-    //         return;
-    //     };
+    let Some(width) = w
+        .inner_width()
+        .ok()
+        .and_then(|width| width.as_f64())
+        .map(|width| width as f32) else {
+            return;
+        };
+    let Some(height) = w
+        .inner_height()
+        .ok()
+        .and_then(|height| height.as_f64())
+        .map(|height| height as f32) else {
+            return;
+        };
 
-    // if window.width() != width as f32 || window.height() != height as f32 {
-    //     window.resolution.set(width, height);
-    // }
+    if window.width() != width as f32 || window.height() != height as f32 {
+        window
+            .resolution
+            .set(width - width % 2.0, height - height % 2.0);
+    }
 }
 
 const DEFAULT_WINDOW_SIZE: (u32, u32) = (1280, 720);
