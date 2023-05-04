@@ -63,6 +63,11 @@ pub enum UiTexture {
     IconOrbit,
     IconPower,
     IconRainfall,
+    IconResourceEnergy,
+    IconResourceMaterial,
+    IconResourceIce,
+    IconResourceCarbon,
+    IconResourceNitrogen,
     IconSpeedFast,
     IconSpeedFastSelected,
     IconSpeedNormal,
@@ -73,6 +78,18 @@ pub enum UiTexture {
     IconStat,
     TileColored,
     TileCursor,
+}
+
+impl From<ResourceKind> for UiTexture {
+    fn from(kind: ResourceKind) -> Self {
+        match kind {
+            ResourceKind::Energy => Self::IconResourceEnergy,
+            ResourceKind::Material => Self::IconResourceMaterial,
+            ResourceKind::Ice => Self::IconResourceIce,
+            ResourceKind::Carbon => Self::IconResourceCarbon,
+            ResourceKind::Nitrogen => Self::IconResourceNitrogen,
+        }
+    }
 }
 
 define_asset_list_from_enum! {

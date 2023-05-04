@@ -182,12 +182,10 @@ fn sidebar(
     let mut stock: Vec<_> = planet.res.stock.iter().collect();
     stock.sort_by_key(|&(res, _)| res);
     for (kind, v) in stock.into_iter() {
+        let (texture, size) = &textures.0[&UiTexture::from(*kind)];
         ui.horizontal(|ui| {
-            ui.label(&format!(
-                "{}: {}",
-                t!(kind.as_ref()),
-                kind.display_with_value(*v)
-            ));
+            ui.image(texture, *size).on_hover_text(t!(kind.as_ref()));
+            ui.label(kind.display_with_value(*v).to_string());
             let diff = planet.res.diff[kind];
             let sign = if diff > 0.0 { '+' } else { '-' };
             ui.label(
