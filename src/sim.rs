@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::draw::UpdateMap;
-use crate::screen::Centering;
+use crate::screen::{Centering, HoverTile};
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
@@ -49,6 +49,7 @@ fn update(
     params: Res<Params>,
     speed: Res<GameSpeed>,
     debug_tools: Res<DebugTools>,
+    hover_tile: Query<&HoverTile>,
     mut count_frame: Local<u64>,
     mut last_update: Local<Option<u64>>,
 ) {
@@ -77,6 +78,12 @@ fn update(
         }
     }
     *last_update = Some(*count_frame);
+    crate::planet::debug_log::clear_logs(
+        hover_tile
+            .get_single()
+            .ok()
+            .and_then(|hover_tile| hover_tile.0),
+    );
     update_map.update();
     planet.advance(&mut sim, &params);
 }

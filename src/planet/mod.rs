@@ -11,6 +11,8 @@ mod sim;
 mod stat;
 mod water;
 
+pub mod debug_log;
+
 pub use self::atmo::Atmosphere;
 pub use self::defs::*;
 pub use self::resources::*;

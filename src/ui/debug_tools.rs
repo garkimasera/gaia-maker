@@ -9,6 +9,7 @@ use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 #[strum(serialize_all = "kebab-case")]
 pub enum Panel {
     #[default]
+    TileInfo,
     Sim,
     Map,
     Planet,
@@ -43,6 +44,7 @@ pub fn debug_tools_window(
             ui.separator();
 
             match *current_panel {
+                Panel::TileInfo => info_ui(ui),
                 Panel::Sim => sim_ui(ui, &mut debug_tools),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
@@ -56,6 +58,20 @@ pub fn debug_tools_window(
     occupied_screen_space
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
+}
+
+fn info_ui(ui: &mut egui::Ui) {
+    let tile_logs = crate::planet::debug_log::tile_logs();
+
+    egui::Grid::new("star_system_buildings")
+        .striped(true)
+        .show(ui, |ui| {
+            for (name, data) in tile_logs.iter() {
+                ui.label(*name);
+                ui.label(data);
+                ui.end_row();
+            }
+        });
 }
 
 fn sim_ui(ui: &mut egui::Ui, debug_tools: &mut DebugTools) {
