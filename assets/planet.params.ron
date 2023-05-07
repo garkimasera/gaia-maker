@@ -8,8 +8,11 @@
         land_surface_heat_cap: 5.0e+6,
         sea_heat_cap: 4.0e+6,
         sea_surface_depth: 10,
+        sea_heat_transfer_layer_thickness: 8,
+        max_deep_sea_layer_thickness: 300,
         sunlight_day_averaging_factor: 0.32,
         air_diffusion_factor: 0.22,
+        sea_diffusion_factor: 0.01,
         n_loop_atmo_heat_calc: 8,
         co2_green_house_effect_table: [
             (0.0, 0.0),

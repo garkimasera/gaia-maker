@@ -17,6 +17,10 @@ pub struct Sim {
     pub atemp_new: Array2d<f32>,
     /// Atmosphere heat capacity [J/K]
     pub atmo_heat_cap: Array2d<f32>,
+    /// Sea temprature
+    pub stemp: Array2d<f32>,
+    /// Sea heat capacity [J/K]
+    pub sea_heat_cap: Array2d<f32>,
     /// Tile albedo
     pub albedo: Array2d<f32>,
     /// Vapor in air
@@ -60,6 +64,8 @@ impl Sim {
             atemp,
             atemp_new: Array2d::new(size.0, size.1, 0.0),
             atmo_heat_cap: Array2d::new(size.0, size.1, 0.0),
+            stemp: Array2d::new(size.0, size.1, 0.0),
+            sea_heat_cap: Array2d::new(size.0, size.1, 0.0),
             albedo: Array2d::new(size.0, size.1, 0.0),
             vapor,
             vapor_new: Array2d::new(size.0, size.1, 0.0),

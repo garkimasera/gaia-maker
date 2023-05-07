@@ -433,10 +433,16 @@ pub struct SimParams {
     pub sea_heat_cap: f32,
     /// Depth of sea surface [m]
     pub sea_surface_depth: f32,
+    /// Thickness of sea heat transfer layer [m]
+    pub sea_heat_transfer_layer_thickness: f32,
+    /// Max thickness of deep sea layer [m]
+    pub max_deep_sea_layer_thickness: f32,
     /// Factor to average sunlight power per day
     pub sunlight_day_averaging_factor: f32,
     /// The ratio of tile air diffusion
     pub air_diffusion_factor: f32,
+    /// The ratio of tile sea diffusion
+    pub sea_diffusion_factor: f32,
     /// The number of loop of atmosphere heat transfer calculation
     pub n_loop_atmo_heat_calc: usize,
     /// Greeh house effect table of CO2

@@ -18,6 +18,9 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             _ => params.sim.land_surface_heat_cap,
         };
         sim.atmo_heat_cap[p] = air_heat_cap_per_tile + surface_heat_cap * sim.tile_area;
+
+        let deep_layer_thickness = deep_sea_layer_thickness(p, planet, params);
+        sim.sea_heat_cap[p] = params.sim.sea_heat_cap * deep_layer_thickness * sim.tile_area;
     }
 
     // Calculate albedo of tiles
@@ -85,9 +88,63 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);
     }
 
-    let mut sum_temp = 0.0;
+    // Sea heat diffusion
+    for p in map_iter_idx {
+        sim.stemp[p] = planet.map[p].sea_temp;
+    }
+
+    for p in map_iter_idx {
+        if sim.sea_heat_cap[p] == 0.0 {
+            continue;
+        }
+        let old_heat_amount = sim.sea_heat_cap[p] * sim.stemp[p];
+        let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
+            .into_iter()
+            .map(|dir| {
+                if let Some(adjacent_tile) =
+                    CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
+                {
+                    if sim.sea_heat_cap[adjacent_tile] == 0.0 {
+                        0.0
+                    } else {
+                        let delta_temp = sim.stemp[adjacent_tile] - sim.stemp[p];
+                        let c = sim.sea_heat_cap[p].min(sim.sea_heat_cap[adjacent_tile]);
+                        0.5 * params.sim.sea_diffusion_factor * c * delta_temp
+                    }
+                } else {
+                    0.0
+                }
+            })
+            .sum();
+        let heat_amount = old_heat_amount + adjacent_tile_flow;
+        planet.map[p].sea_temp = heat_amount / sim.sea_heat_cap[p];
+    }
+
+    // Heat transfer between atmosphere and sea
+    for p in map_iter_idx {
+        let deep_layer_thickness = deep_sea_layer_thickness(p, planet, params);
+        if deep_layer_thickness == 0.0 {
+            planet.map[p].sea_temp = f32::NAN;
+            continue;
+        }
+
+        let d = params
+            .sim
+            .sea_heat_transfer_layer_thickness
+            .min(deep_layer_thickness);
+        let t_surface = sim.atemp[p];
+        let t_deep = planet.map[p].sea_temp;
+        let t = (t_surface + t_deep) / 2.0;
+        sim.atemp[p] = (t_surface * (params.sim.sea_surface_depth - 0.5 * d) + t * 0.5 * d)
+            / params.sim.sea_surface_depth;
+        planet.map[p].sea_temp =
+            (t_deep * (deep_layer_thickness - 0.5 * d) + t * 0.5 * d) / deep_layer_thickness;
+
+        tile_log(p, "sea_temp", |p| planet.map[p].sea_temp);
+    }
 
     // Set calculated new temprature
+    let mut sum_temp = 0.0;
     for p in map_iter_idx {
         let t = sim.atemp[p];
         planet.map[p].temp = t;
@@ -95,6 +152,12 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     planet.stat.average_air_temp = sum_temp as f32 / planet.n_tile() as f32;
+}
+
+fn deep_sea_layer_thickness(p: Coords, planet: &Planet, params: &Params) -> f32 {
+    (-planet.height_above_sea_level(p) - params.sim.sea_surface_depth)
+        .min(params.sim.max_deep_sea_layer_thickness)
+        .max(0.0)
 }
 
 fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {
