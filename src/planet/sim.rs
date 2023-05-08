@@ -11,6 +11,10 @@ pub struct Sim {
     pub n_tile: u32,
     /// Tile area [m^2]
     pub tile_area: f32,
+    /// Tile insolation [J/m^2]
+    pub insolation: Array2d<f32>,
+    /// Solar constant at last insolation calculation
+    pub insolation_calculated_by_solar_constant: f32,
     /// Atmosphere temprature
     pub atemp: Array2d<f32>,
     /// Atmosphere and surface temprature (used for calculation)
@@ -61,6 +65,8 @@ impl Sim {
             before_start: false,
             n_tile: size.0 * size.1,
             tile_area,
+            insolation: Array2d::new(size.0, size.1, 0.0),
+            insolation_calculated_by_solar_constant: 0.0,
             atemp,
             atemp_new: Array2d::new(size.0, size.1, 0.0),
             atmo_heat_cap: Array2d::new(size.0, size.1, 0.0),

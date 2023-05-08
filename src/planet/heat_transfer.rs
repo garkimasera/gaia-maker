@@ -11,6 +11,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let atmo_mass_per_tile = planet.atmo.total_mass() / (size.0 as f32 * size.1 as f32);
     let air_heat_cap_per_tile = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9;
 
+    calc_insolation(planet, sim, params);
+
     // Calculate heat capacity of tiles
     for p in map_iter_idx {
         let surface_heat_cap = match planet.map[p].biome {
@@ -38,10 +40,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         for p in map_iter_idx {
             let old_heat_amount = sim.atmo_heat_cap[p] * sim.atemp[p];
 
-            let solar_power = planet.state.solar_power
-                * planet.calc_longitude_latitude(p).1.cos()
-                * (1.0 - sim.albedo[p])
-                * params.sim.sunlight_day_averaging_factor;
+            let insolation = sim.insolation[p] * (1.0 - sim.albedo[p]);
 
             let greenhouse_effect = greenhouse_effect
                 * (1.0
@@ -50,7 +49,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                         * planet.atmo.atm())
                 .max(0.0);
 
-            let inflow = solar_power * sim.tile_area;
+            let inflow = insolation * sim.tile_area;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT
                 * sim.atemp[p].powi(4)
@@ -163,4 +162,17 @@ fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {
         &params.sim.co2_green_house_effect_table,
         planet.atmo.partial_pressure(GasKind::CarbonDioxide),
     )
+}
+
+fn calc_insolation(planet: &Planet, sim: &mut Sim, params: &Params) {
+    let solar_power = planet.state.solar_power;
+    if (sim.insolation_calculated_by_solar_constant - solar_power).abs() < 1.0e-3 {
+        return;
+    }
+
+    for p in planet.map.iter_idx() {
+        let latitude = planet.calc_longitude_latitude(p).1;
+        sim.insolation[p] = solar_power
+            * linear_interpolation(&params.sim.latitude_insolation_table, latitude.abs());
+    }
 }

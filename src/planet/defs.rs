@@ -437,8 +437,8 @@ pub struct SimParams {
     pub sea_heat_transfer_layer_thickness: f32,
     /// Max thickness of deep sea layer [m]
     pub max_deep_sea_layer_thickness: f32,
-    /// Factor to average sunlight power per day
-    pub sunlight_day_averaging_factor: f32,
+    /// Latitude and averaged insolation table
+    pub latitude_insolation_table: Vec<(f32, f32)>,
     /// The ratio of tile air diffusion
     pub air_diffusion_factor: f32,
     /// The ratio of tile sea diffusion
