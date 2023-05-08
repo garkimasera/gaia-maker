@@ -20,5 +20,5 @@ pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
         }
     }
 
-    panic!("invalid input for interpolation")
+    panic!("invalid input for interpolation: {}", x)
 }

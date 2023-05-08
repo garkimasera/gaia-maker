@@ -127,18 +127,16 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             planet.map[p].sea_temp = f32::NAN;
             continue;
         }
-
         let d = params
             .sim
             .sea_heat_transfer_layer_thickness
             .min(deep_layer_thickness);
         let t_surface = sim.atemp[p];
         let t_deep = planet.map[p].sea_temp;
-        let t = (t_surface + t_deep) / 2.0;
-        sim.atemp[p] = (t_surface * (params.sim.sea_surface_depth - 0.5 * d) + t * 0.5 * d)
-            / params.sim.sea_surface_depth;
-        planet.map[p].sea_temp =
-            (t_deep * (deep_layer_thickness - 0.5 * d) + t * 0.5 * d) / deep_layer_thickness;
+        let t_deep = if t_deep.is_nan() { t_surface } else { t_deep };
+        let delta_q = 0.25 * (t_deep - t_surface) * sim.tile_area * d * params.sim.sea_heat_cap;
+        sim.atemp[p] = t_surface + delta_q / sim.atmo_heat_cap[p];
+        planet.map[p].sea_temp = t_deep - delta_q / sim.sea_heat_cap[p];
 
         tile_log(p, "sea_temp", |p| planet.map[p].sea_temp);
     }

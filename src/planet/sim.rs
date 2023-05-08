@@ -13,9 +13,9 @@ pub struct Sim {
     pub tile_area: f32,
     /// Atmosphere temprature
     pub atemp: Array2d<f32>,
-    /// Atmosphere temprature (used for calculation)
+    /// Atmosphere and surface temprature (used for calculation)
     pub atemp_new: Array2d<f32>,
-    /// Atmosphere heat capacity [J/K]
+    /// Atmosphere and surface heat capacity [J/K]
     pub atmo_heat_cap: Array2d<f32>,
     /// Sea temprature
     pub stemp: Array2d<f32>,
