@@ -120,6 +120,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Heat transfer between atmosphere and sea
+    let mut sum_sea_temp = 0.0;
+    let mut n_sea_tile = 0;
     for p in map_iter_idx {
         let deep_layer_thickness = deep_sea_layer_thickness(p, planet, params);
         if deep_layer_thickness == 0.0 {
@@ -134,8 +136,13 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let t_deep = planet.map[p].sea_temp;
         let t_deep = if t_deep.is_nan() { t_surface } else { t_deep };
         let delta_q = 0.25 * (t_deep - t_surface) * sim.tile_area * d * params.sim.sea_heat_cap;
+
         sim.atemp[p] = t_surface + delta_q / sim.atmo_heat_cap[p];
-        planet.map[p].sea_temp = t_deep - delta_q / sim.sea_heat_cap[p];
+
+        let sea_temp = t_deep - delta_q / sim.sea_heat_cap[p];
+        planet.map[p].sea_temp = sea_temp;
+        sum_sea_temp += sea_temp as f64;
+        n_sea_tile += 1;
 
         tile_log(p, "sea_temp", |p| planet.map[p].sea_temp);
     }
@@ -149,6 +156,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     planet.stat.average_air_temp = sum_temp as f32 / planet.n_tile() as f32;
+    if n_sea_tile > 0 {
+        planet.stat.average_sea_temp = sum_sea_temp as f32 / n_sea_tile as f32;
+    } else {
+        planet.stat.average_sea_temp = KELVIN_CELSIUS;
+    }
 }
 
 fn deep_sea_layer_thickness(p: Coords, planet: &Planet, params: &Params) -> f32 {

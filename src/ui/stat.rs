@@ -149,6 +149,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
 pub enum GraphItem {
     #[default]
     AverageAirTemprature,
+    AverageSeaTemprature,
     AverageRainfall,
     Biomass,
     Oxygen,
@@ -161,6 +162,9 @@ impl GraphItem {
         match self {
             Self::AverageAirTemprature => record
                 .map(|record| record.average_air_temp - KELVIN_CELSIUS)
+                .unwrap_or(0.0) as f64,
+            Self::AverageSeaTemprature => record
+                .map(|record| record.average_sea_temp - KELVIN_CELSIUS)
                 .unwrap_or(0.0) as f64,
             Self::AverageRainfall => record
                 .map(|record| record.average_rainfall as f64)
@@ -177,6 +181,7 @@ impl GraphItem {
     fn format_value(&self, value: f64) -> String {
         match self {
             Self::AverageAirTemprature => format!("{:.1} °C", value),
+            Self::AverageSeaTemprature => format!("{:.1} °C", value),
             Self::AverageRainfall => format!("{:.0} mm", value),
             Self::Biomass => format!("{:.1} Gt", value),
             Self::Oxygen => format!("{:.2e} atm", value),
