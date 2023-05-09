@@ -512,9 +512,7 @@ fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
         };
 
     if window.width() != width as f32 || window.height() != height as f32 {
-        window
-            .resolution
-            .set(width - width % 2.0, height - height % 2.0);
+        window.resolution.set(width, height);
     }
 }
 
@@ -546,8 +544,7 @@ pub fn preferred_window_size() -> (u32, u32) {
     let width = width as u32;
     let height = height as u32;
 
-    // Workaround for drawing in web
-    (width - width % 2, height - height % 2)
+    (width, height)
 }
 
 #[cfg(not(target_arch = "wasm32"))]

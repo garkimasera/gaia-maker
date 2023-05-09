@@ -178,11 +178,55 @@ fn create_assets_list(
     let biome_asset_list = biome_asset_list
         .get(&params_asset_collection.biomes)
         .unwrap();
+    let mut biome_texture_rects = HashMap::new();
+    for j in 0..4 {
+        for i in 0..3 {
+            let x = (TILE_SIZE + 2.0) * i as f32;
+            let y = (TILE_SIZE + 2.0) * j as f32;
+            let rect_size = Vec2::new(PIECE_SIZE, PIECE_SIZE);
+            biome_texture_rects.insert(
+                (i * 2, j * 2),
+                Rect::from_center_size(
+                    Vec2::new(x + 1.0 + PIECE_SIZE * 0.5, y + 1.0 + PIECE_SIZE * 0.5),
+                    rect_size,
+                ),
+            );
+            biome_texture_rects.insert(
+                (i * 2 + 1, j * 2),
+                Rect::from_center_size(
+                    Vec2::new(x + 1.0 + PIECE_SIZE * 1.5, y + 1.0 + PIECE_SIZE * 0.5),
+                    rect_size,
+                ),
+            );
+            biome_texture_rects.insert(
+                (i * 2, j * 2 + 1),
+                Rect::from_center_size(
+                    Vec2::new(x + 1.0 + PIECE_SIZE * 0.5, y + 1.0 + PIECE_SIZE * 1.5),
+                    rect_size,
+                ),
+            );
+            biome_texture_rects.insert(
+                (i * 2 + 1, j * 2 + 1),
+                Rect::from_center_size(
+                    Vec2::new(x + 1.0 + PIECE_SIZE * 1.5, y + 1.0 + PIECE_SIZE * 1.5),
+                    rect_size,
+                ),
+            );
+        }
+    }
+
     let biomes = Biome::iter()
         .map(|biome| {
             let image = biome_textures.get(biome);
-            let texture_atlas =
-                TextureAtlas::from_grid(image, Vec2::new(PIECE_SIZE, PIECE_SIZE), 6, 8, None, None);
+            let mut texture_atlas = TextureAtlas::new_empty(
+                image,
+                Vec2::new((TILE_SIZE + 2.0) * 3.0, (TILE_SIZE + 2.0) * 4.0),
+            );
+            for j in 0..8 {
+                for i in 0..6 {
+                    texture_atlas.add_texture(biome_texture_rects[&(i, j)]);
+                }
+            }
             (biome, texture_atlas_assets.add(texture_atlas))
         })
         .collect();
