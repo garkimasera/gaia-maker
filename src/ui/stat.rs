@@ -130,8 +130,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
 
     let item_copy = *item;
     let label_formatter = move |_s: &str, value: &plot::PlotPoint| item_copy.format_value(value.y);
-    let x_range = (params.history.max_record as f64 - 1.0) * params.history.interval_cycles as f64;
-    let x_axis_formatter = move |x, _range: &RangeInclusive<f64>| format!("{}", -x_range + x);
+    let x_axis_formatter = move |_, _range: &RangeInclusive<f64>| "".to_string();
 
     plot::Plot::new("history")
         .allow_drag(false)
