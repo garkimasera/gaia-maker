@@ -572,26 +572,11 @@ pub fn window_close() {}
 
 #[cfg(target_arch = "wasm32")]
 pub fn window_close() {
-    use wasm_bindgen::JsCast;
     let Some(document) = web_sys::window().and_then(|window| window.document()) else {
         return;
     };
-    let Some(start_screen) = document.get_element_by_id("start-screen") else {
+    let Some(location) = document.location() else {
         return;
     };
-    let Some(start_screen) = start_screen.dyn_ref::<web_sys::HtmlElement>() else {
-        return;
-    };
-    let Some(game_screen) = document.get_element_by_id("game-screen") else {
-        return;
-    };
-    let Some(game_screen) = game_screen.dyn_ref::<web_sys::HtmlElement>() else {
-        return;
-    };
-    if let Err(e) = start_screen.style().set_property("display", "block") {
-        log::warn!("{:?}", e);
-    }
-    if let Err(e) = game_screen.style().set_property("display", "none") {
-        log::warn!("{:?}", e);
-    }
+    let _ = location.reload();
 }

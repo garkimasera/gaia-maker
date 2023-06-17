@@ -26,14 +26,14 @@ rand = "0.8"
 regex = "1"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
-serde_with = "2"
+serde_with = "3"
 strum = { version = "0.24", features = ["derive"] }
 
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["Window", "Storage"] }
+web-sys = { version = "0.3", features = ["Window", "Storage", "Location"] }
 
 [profile.dev]
 opt-level = 1
