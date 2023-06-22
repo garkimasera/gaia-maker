@@ -36,7 +36,7 @@ jobs:
           command: build
           args: --release --target wasm32-unknown-unknown
       - run: |
-          wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/pixel-gaia.wasm
+          wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/gaia-maker.wasm
           mv index.html ./out/
           mv assets ./out/
       - name: Upload artifact

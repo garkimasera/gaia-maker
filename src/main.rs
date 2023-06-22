@@ -32,7 +32,7 @@ use bevy::{
     winit::WinitSettings,
 };
 
-const APP_NAME: &str = concat!("Pixel Gaia v", env!("CARGO_PKG_VERSION"));
+const APP_NAME: &str = concat!("Gaia Maker v", env!("CARGO_PKG_VERSION"));
 
 #[derive(Clone, Parser, Debug)]
 #[clap(author, version)]

@@ -1,10 +1,10 @@
-# Pixel Gaia
+# Gaia Maker
 
 Biological simulation game written in Rust
 
 ## Try in your web browser
 
-https://garkimasera.github.io/pixel-gaia/
+https://garkimasera.github.io/gaia-maker/
 
 ## Concept
 
