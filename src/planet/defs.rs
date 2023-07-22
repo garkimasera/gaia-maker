@@ -190,6 +190,7 @@ pub enum Structure {
     Rainmaker { state: StructureBuildingState },
     FertilizationPlant { state: StructureBuildingState },
     Heater { state: StructureBuildingState },
+    Settlement { settlement: Settlement },
 }
 
 impl Structure {
@@ -227,6 +228,22 @@ pub enum StructureBuildingState {
     Working,
     Stopped,
     Disabled,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct Settlement {
+    age: CivilizationAge,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum CivilizationAge {
+    StoneAge,
+    BronzeAge,
+    IronAge,
+    IndustrialAge,
+    AtomicAge,
+    EarlySpaceAge,
 }
 
 #[derive(

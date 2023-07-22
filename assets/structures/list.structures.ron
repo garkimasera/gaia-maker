@@ -65,4 +65,11 @@
             effect: Heater ( heat: 1.0e+18 ),
         ),
     ),
+    settlement: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 1,
+        building: (),
+    ),
 }
