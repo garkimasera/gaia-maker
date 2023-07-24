@@ -18,6 +18,7 @@ pub enum SoundEffect {
 
 impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(AudioPlugin).add_audio_channel::<SEChannel>();
+        app.add_plugins(AudioPlugin)
+            .add_audio_channel::<SEChannel>();
     }
 }

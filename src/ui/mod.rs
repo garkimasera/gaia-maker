@@ -48,18 +48,26 @@ pub struct UiWindowsSystemSet;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(EguiPlugin)
+        app.add_plugins(EguiPlugin)
             .init_resource::<WindowsOpenState>()
             .init_resource::<OverlayLayerKind>()
-            .add_systems((setup_fonts, load_textures).in_schedule(OnExit(GameState::AssetLoading)))
-            .add_system(main_menu::set_main_menu_state.in_schedule(OnEnter(GameState::MainMenu)))
-            .add_system(main_menu::main_menu.in_set(OnUpdate(GameState::MainMenu)))
-            .add_system(
+            .add_systems(
+                OnExit(GameState::AssetLoading),
+                (setup_fonts, load_textures),
+            )
+            .add_systems(OnEnter(GameState::MainMenu), main_menu::set_main_menu_state)
+            .add_systems(
+                Update,
+                main_menu::main_menu.run_if(in_state(GameState::MainMenu)),
+            )
+            .add_systems(
+                Update,
                 panels::panels
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .before(UiWindowsSystemSet),
             )
             .add_systems(
+                Update,
                 (
                     orbit::orbit_window,
                     star_system::star_system_window,
@@ -69,7 +77,7 @@ impl Plugin for UiPlugin {
                     help::help_window,
                     debug_tools::debug_tools_window,
                 )
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),
             );
     }

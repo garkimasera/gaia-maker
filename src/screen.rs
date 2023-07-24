@@ -15,7 +15,7 @@ use geom::Coords;
 #[derive(Clone, Copy, Debug)]
 pub struct ScreenPlugin;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Event)]
 pub struct Centering(pub Vec2);
 
 #[derive(Clone, Debug, Resource)]
@@ -35,36 +35,40 @@ impl Default for CursorMode {
 impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Centering>()
-            .add_startup_system(setup)
-            .add_startup_system(setup_main_menu_background)
+            .add_systems(Startup, setup)
+            .add_systems(Startup, setup_main_menu_background)
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
-            .add_system(main_menu_background.in_schedule(OnEnter(GameState::MainMenu)))
-            .add_system(main_menu_background_exit.in_schedule(OnExit(GameState::MainMenu)))
-            .add_system(setup_cursor.in_schedule(OnEnter(GameState::Running)))
-            .add_system(
+            .add_systems(OnEnter(GameState::MainMenu), main_menu_background)
+            .add_systems(OnExit(GameState::MainMenu), main_menu_background_exit)
+            .add_systems(OnEnter(GameState::Running), setup_cursor)
+            .add_systems(
+                Update,
                 on_enter_running
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .after(GameSystemSet::StartSim),
             )
             .add_systems(
+                Update,
                 (centering, on_resize)
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .before(GameSystemSet::Draw),
             )
-            .add_system(
+            .add_systems(
+                Update,
                 update_hover_tile
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .in_set(GameSystemSet::UpdateHoverTile),
             )
-            .add_system(
+            .add_systems(
+                Update,
                 mouse_event
-                    .in_set(OnUpdate(GameState::Running))
+                    .run_if(in_state(GameState::Running))
                     .after(GameSystemSet::UpdateHoverTile),
             )
-            .add_system(keyboard_input.in_set(OnUpdate(GameState::Running)))
-            .add_system(window_resize);
+            .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)))
+            .add_systems(Update, window_resize);
     }
 }
 
@@ -143,7 +147,7 @@ fn mouse_event(
         return;
     };
     let pos = if let Some(pos) = window.cursor_position() {
-        pos
+        Vec2::new(pos.x, window.height() - pos.y)
     } else {
         return;
     };
@@ -271,7 +275,7 @@ fn update_hover_tile(
             return;
         };
     let cursor_pos = if let Some(pos) = window.cursor_position() {
-        pos
+        Vec2::new(pos.x, window.height() - pos.y)
     } else {
         return;
     };
@@ -406,7 +410,7 @@ fn keyboard_input(
 ) {
     // Shortcut keys
     if keys.just_pressed(KeyCode::F12)
-        && (keys.pressed(KeyCode::LAlt) || keys.pressed(KeyCode::RAlt))
+        && (keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight))
     {
         wos.debug_tools = !wos.debug_tools;
     }

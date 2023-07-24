@@ -19,9 +19,9 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
-            .add_plugin(RonAssetPlugin::<BiomeAssetList>::new(&["biomes.ron"]))
-            .add_plugin(RonAssetPlugin::<StructureAssetList>::new(&[
+        app.add_plugins(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
+            .add_plugins(RonAssetPlugin::<BiomeAssetList>::new(&["biomes.ron"]))
+            .add_plugins(RonAssetPlugin::<StructureAssetList>::new(&[
                 "structures.ron",
             ]))
             .add_loading_state(
@@ -34,7 +34,7 @@ impl Plugin for AssetsPlugin {
             .add_collection_to_loading_state::<_, BiomeTextures>(GameState::AssetLoading)
             .add_collection_to_loading_state::<_, StructureTextures>(GameState::AssetLoading)
             .add_collection_to_loading_state::<_, SoundEffects>(GameState::AssetLoading)
-            .add_system(create_assets_list.in_schedule(OnExit(GameState::AssetLoading)));
+            .add_systems(OnExit(GameState::AssetLoading), create_assets_list);
     }
 }
 
@@ -113,15 +113,42 @@ pub struct UiAssets {
 #[uuid = "b0aaec37-3e9e-42d0-9370-aaacbe550799"]
 pub struct ParamsAsset(Params);
 
+impl bevy::reflect::TypePath for ParamsAsset {
+    fn type_path() -> &'static str {
+        "gaia_maker::assets::ParamsAsset"
+    }
+    fn short_type_path() -> &'static str {
+        "ParamsAsset"
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, TypeUuid)]
 #[serde(transparent)]
 #[uuid = "99d5021f-98fb-4873-b16a-bd9619b8b074"]
 pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
 
+impl bevy::reflect::TypePath for BiomeAssetList {
+    fn type_path() -> &'static str {
+        "gaia_maker::assets::BiomeAssetList"
+    }
+    fn short_type_path() -> &'static str {
+        "BiomeAssetList"
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, TypeUuid)]
 #[serde(transparent)]
 #[uuid = "801a2daa-956d-469a-8e83-3610fbca21fd"]
 pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);
+
+impl bevy::reflect::TypePath for StructureAssetList {
+    fn type_path() -> &'static str {
+        "gaia_maker::assets::StructureAssetList"
+    }
+    fn short_type_path() -> &'static str {
+        "StructureAssetList"
+    }
+}
 
 #[derive(Resource)]
 pub struct TextureAtlasMaps {

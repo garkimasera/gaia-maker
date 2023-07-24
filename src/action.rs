@@ -12,7 +12,7 @@ use crate::GameState;
 #[derive(Clone, Copy, Debug)]
 pub struct ActionPlugin;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Event)]
 pub struct CursorAction {
     pub coords: Coords,
     pub drag: bool,
@@ -21,7 +21,7 @@ pub struct CursorAction {
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CursorAction>()
-            .add_system(cursor_action.in_set(OnUpdate(GameState::Running)));
+            .add_systems(Update, cursor_action.run_if(in_state(GameState::Running)));
     }
 }
 

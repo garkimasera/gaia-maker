@@ -9,8 +9,8 @@ pub struct MsgPlugin;
 impl Plugin for MsgPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MsgHolder>()
-            .add_system(setup_msgs.in_schedule(OnEnter(GameState::Running)))
-            .add_system(update_msgs.in_set(OnUpdate(GameState::Running)));
+            .add_systems(OnEnter(GameState::Running), setup_msgs)
+            .add_systems(Update, update_msgs.run_if(in_state(GameState::Running)));
     }
 }
 

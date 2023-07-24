@@ -12,7 +12,18 @@ use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 use crate::{assets::TranslationTexts, planet::ResourceKind, GameState};
 
 #[derive(
-    Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, EnumIter, EnumString, AsRefStr,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    EnumIter,
+    EnumString,
+    AsRefStr,
+    Reflect,
 )]
 pub enum Lang {
     #[strum(serialize = "en")]
@@ -60,15 +71,15 @@ pub fn get_lang() -> Lang {
 #[derive(Clone, Copy, Debug)]
 pub struct TextPlugin;
 
-#[derive(Clone, Debug, Default, Deserialize, TypeUuid)]
+#[derive(Clone, Debug, Default, Deserialize, TypeUuid, Reflect)]
 #[serde(transparent)]
 #[uuid = "c5967cb0-5b5a-433e-b659-8a96ff47422f"]
 pub struct TranslationText(HashMap<String, String>);
 
 impl Plugin for TextPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(RonAssetPlugin::<TranslationText>::new(&["text.ron"]))
-            .add_system(set_text.in_schedule(OnExit(GameState::AssetLoading)));
+        app.add_plugins(RonAssetPlugin::<TranslationText>::new(&["text.ron"]))
+            .add_systems(OnExit(GameState::AssetLoading), set_text);
     }
 }
 

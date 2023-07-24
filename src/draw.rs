@@ -9,7 +9,7 @@ use geom::{Array2d, Coords, Direction, RectIter};
 #[derive(Clone, Copy, Debug)]
 pub struct DrawPlugin;
 
-#[derive(Clone, Copy, Default, Debug, Resource)]
+#[derive(Clone, Copy, Default, Debug, Resource, Event)]
 pub struct UpdateMap {
     need_update: bool,
 }
@@ -30,15 +30,16 @@ impl Plugin for DrawPlugin {
             .init_resource::<UpdateMap>()
             .init_resource::<LayeredTexMap>()
             .add_systems(
+                Update,
                 (
                     update_layered_tex_map.pipe(spawn_map_textures),
                     spawn_structure_textures,
                     spawn_overlay_meshes,
                 )
                     .in_set(GameSystemSet::Draw)
-                    .in_set(OnUpdate(GameState::Running)),
+                    .run_if(in_state(GameState::Running)),
             )
-            .add_system(reset_update_map.after(GameSystemSet::Draw));
+            .add_systems(Update, reset_update_map.after(GameSystemSet::Draw));
     }
 }
 

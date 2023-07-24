@@ -30,9 +30,9 @@ pub struct ConfPlugin;
 impl Plugin for ConfPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ConfChange>()
-            .add_plugin(RonAssetPlugin::<Conf>::new(&["conf.ron"]))
-            .add_system(on_change)
-            .add_system(set_conf.in_schedule(OnExit(GameState::AssetLoading)));
+            .add_plugins(RonAssetPlugin::<Conf>::new(&["conf.ron"]))
+            .add_systems(Update, on_change)
+            .add_systems(OnExit(GameState::AssetLoading), set_conf);
     }
 }
 
@@ -58,7 +58,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
     command.insert_resource(conf);
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Resource, TypeUuid)]
+#[derive(Clone, Debug, Serialize, Deserialize, Resource, TypeUuid, Reflect)]
 #[uuid = "92795344-1b26-49fb-b352-e989043777c7"]
 pub struct Conf {
     pub lang: Lang,
@@ -68,7 +68,7 @@ pub struct Conf {
     pub camera_move_speed: f32,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Event)]
 pub struct ConfChange;
 
 impl Default for ConfChange {

@@ -237,6 +237,7 @@ pub struct Settlement {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
+#[allow(clippy::enum_variant_names)]
 pub enum CivilizationAge {
     StoneAge,
     BronzeAge,

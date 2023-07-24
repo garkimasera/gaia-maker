@@ -7,7 +7,7 @@ use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Event)]
 pub enum ManagePlanet {
     New(StartParams),
     Save(String),
@@ -28,13 +28,12 @@ impl Plugin for SimPlugin {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
             .init_resource::<DebugTools>()
-            .add_system(
-                start_sim
-                    .in_schedule(OnEnter(GameState::Running))
-                    .in_set(GameSystemSet::StartSim),
+            .add_systems(
+                OnEnter(GameState::Running),
+                start_sim.in_set(GameSystemSet::StartSim),
             )
-            .add_system(update.in_set(OnUpdate(GameState::Running)))
-            .add_system(manage_planet.before(GameSystemSet::Draw));
+            .add_systems(Update, update.run_if(in_state(GameState::Running)))
+            .add_systems(Update, manage_planet.before(GameSystemSet::Draw));
     }
 }
 
@@ -88,7 +87,7 @@ fn update(
     planet.advance(&mut sim, &params);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Event)]
 pub struct ManagePlanetError(pub String);
 
 fn manage_planet(
