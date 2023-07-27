@@ -1,6 +1,7 @@
 mod debug_tools;
 mod help;
 mod main_menu;
+mod map;
 mod new_planet;
 mod orbit;
 mod panels;
@@ -33,6 +34,7 @@ pub struct UiPlugin;
 pub struct WindowsOpenState {
     pub orbit: bool,
     pub star_system: bool,
+    pub map: bool,
     pub layers: bool,
     pub stat: bool,
     pub message: bool,
@@ -71,6 +73,7 @@ impl Plugin for UiPlugin {
                 (
                     orbit::orbit_window,
                     star_system::star_system_window,
+                    map::map_window,
                     stat::stat_window,
                     layers_window,
                     msg_window,

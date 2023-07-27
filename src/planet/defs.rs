@@ -113,6 +113,7 @@ pub struct BiomeAttrs {
     pub priority: u32,
     pub mean_transition_time: f32,
     pub requirements: BiomeRequirements,
+    pub color: [u8; 3],
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

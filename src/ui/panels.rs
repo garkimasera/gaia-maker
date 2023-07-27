@@ -118,6 +118,10 @@ fn toolbar(
         wos.star_system = !wos.star_system;
     }
 
+    if button(ui, UiTexture::IconMap, "map") {
+        wos.map = !wos.map;
+    }
+
     if button(ui, UiTexture::IconLayers, "layers") {
         wos.layers = !wos.layers;
     }

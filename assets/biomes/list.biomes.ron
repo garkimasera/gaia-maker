@@ -11,6 +11,7 @@
             fertility: 0.0,
             biomass: 0.0,
         ),
+        color: (198, 118, 37),
     ),
     ocean: (
         z: 90.0,
@@ -24,6 +25,7 @@
             fertility: 0.0,
             biomass: 0.0,
         ),
+        color: (43, 82, 187),
     ),
     sea_ice: (
         z: 95.0,
@@ -37,6 +39,7 @@
             fertility: 0.0,
             biomass: 0.0,
         ),
+        color: (234, 238, 241),
     ),
     desert: (
         z: 50.0,
@@ -50,6 +53,7 @@
             fertility: 0.0,
             biomass: 0.0,
         ),
+        color: (211, 141, 66),
     ),
     ice_field: (
         z: 70.0,
@@ -63,6 +67,7 @@
             fertility: 0.0,
             biomass: 0.0,
         ),
+        color: (234, 238, 241),
     ),
     tundra: (
         z: 45.0,
@@ -76,6 +81,7 @@
             fertility: 10.0,
             biomass: 1.0,
         ),
+        color: (171, 171, 171),
     ),
     grassland: (
         z: 40.0,
@@ -89,6 +95,7 @@
             fertility: 20.0,
             biomass: 1.0,
         ),
+        color: (94, 138, 64),
     ),
     boreal_forest: (
         z: 35.0,
@@ -102,6 +109,7 @@
             fertility: 40.0,
             biomass: 8.0,
         ),
+        color: (24, 80, 22),
     ),
     temperate_forest: (
         z: 34.0,
@@ -115,6 +123,7 @@
             fertility: 40.0,
             biomass: 9.0,
         ),
+        color: (37, 117, 19),
     ),
     tropical_rainforest: (
         z: 33.0,
@@ -128,5 +137,6 @@
             fertility: 40.0,
             biomass: 9.0,
         ),
+        color: (44, 192, 1),
     ),
 }

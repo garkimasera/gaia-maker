@@ -58,6 +58,7 @@ pub enum UiTexture {
     IconHeight,
     IconHelp,
     IconLayers,
+    IconMap,
     IconMaterial,
     IconMessage,
     IconOrbit,
