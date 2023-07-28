@@ -28,13 +28,18 @@ pub const N_POINTS: usize = 64;
 
 #[derive(Resource)]
 pub struct ColorMaterials {
-    pub white_yellow_red: Vec<Handle<ColorMaterial>>,
-    pub brown_white: Vec<Handle<ColorMaterial>>,
-    pub blue_dark_blue: Vec<Handle<ColorMaterial>>,
+    pub white_yellow_red: Vec<(Color, Handle<ColorMaterial>)>,
+    pub brown_white: Vec<(Color, Handle<ColorMaterial>)>,
+    pub blue_dark_blue: Vec<(Color, Handle<ColorMaterial>)>,
 }
 
 impl ColorMaterials {
-    pub fn get(&self, planet: &Planet, p: Coords, kind: OverlayLayerKind) -> Handle<ColorMaterial> {
+    pub fn get(
+        &self,
+        planet: &Planet,
+        p: Coords,
+        kind: OverlayLayerKind,
+    ) -> &(Color, Handle<ColorMaterial>) {
         match kind {
             OverlayLayerKind::None => unreachable!(),
             OverlayLayerKind::AirTemprature => {
@@ -46,11 +51,11 @@ impl ColorMaterials {
                     (((temp - 263.15) / (50.0 / N_POINTS as f32)) as usize).clamp(0, N_POINTS - 1)
                 };
 
-                self.white_yellow_red[i].clone()
+                &self.white_yellow_red[i]
             }
             OverlayLayerKind::Rainfall => {
                 if planet.map[p].biome == Biome::Ocean {
-                    self.blue_dark_blue[32].clone()
+                    &self.blue_dark_blue[32]
                 } else {
                     let rainfall = planet.map[p].rainfall;
 
@@ -59,7 +64,7 @@ impl ColorMaterials {
                     } else {
                         ((rainfall / 40.0) as usize).clamp(0, N_POINTS - 1)
                     };
-                    self.white_yellow_red[i].clone()
+                    &self.white_yellow_red[i]
                 }
             }
             OverlayLayerKind::Height => {
@@ -67,18 +72,37 @@ impl ColorMaterials {
 
                 if h > 0.0 {
                     let i = (h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
-                    self.brown_white[i].clone()
+                    &self.brown_white[i]
                 } else {
                     let i = (-h / 3000.0 * 64.0).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
-                    self.blue_dark_blue[i].clone()
+                    &self.blue_dark_blue[i]
                 }
             }
             OverlayLayerKind::Fertility => {
                 let i = (planet.map[p].fertility / 100.0 * N_POINTS as f32)
                     .clamp(0.0, N_POINTS as f32 - 1.0) as usize;
-                self.white_yellow_red[i].clone()
+                &self.white_yellow_red[i]
             }
         }
+    }
+
+    pub fn get_handle(
+        &self,
+        planet: &Planet,
+        p: Coords,
+        kind: OverlayLayerKind,
+    ) -> Handle<ColorMaterial> {
+        self.get(planet, p, kind).1.clone()
+    }
+
+    pub fn get_rgb(&self, planet: &Planet, p: Coords, kind: OverlayLayerKind) -> [u8; 3] {
+        let color = self.get(planet, p, kind).0;
+
+        [
+            (color.r() * 255.0) as u8,
+            (color.g() * 255.0) as u8,
+            (color.b() * 255.0) as u8,
+        ]
     }
 }
 
@@ -101,10 +125,11 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 }
             };
 
-            materials.add(ColorMaterial {
+            let handle = materials.add(ColorMaterial {
                 color,
                 texture: None,
-            })
+            });
+            (color, handle)
         })
         .collect::<Vec<_>>();
 
@@ -117,10 +142,11 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 blue: b as f32 / 256.0,
                 alpha: 0.4,
             };
-            materials.add(ColorMaterial {
+            let handle = materials.add(ColorMaterial {
                 color,
                 texture: None,
-            })
+            });
+            (color, handle)
         })
         .collect::<Vec<_>>();
 
@@ -133,10 +159,11 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 blue: b as f32 / 256.0,
                 alpha: 0.4,
             };
-            materials.add(ColorMaterial {
+            let handle = materials.add(ColorMaterial {
                 color,
                 texture: None,
-            })
+            });
+            (color, handle)
         })
         .collect::<Vec<_>>();
 

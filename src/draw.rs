@@ -257,7 +257,7 @@ fn spawn_overlay_meshes(
             .spawn(MaterialMesh2dBundle {
                 mesh: tile_mesh.clone().into(),
                 transform: Transform::from_xyz(x, y, 800.0),
-                material: color_materials.get(&planet, p, *current_layer),
+                material: color_materials.get_handle(&planet, p, *current_layer),
                 ..default()
             })
             .id();
