@@ -126,11 +126,15 @@ fn map_ui(
         egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
         egui::Color32::WHITE,
     );
-    let stroke = egui::Stroke {
+    let stroke1 = egui::Stroke {
+        width: 1.0,
+        color: egui::Color32::BLACK,
+    };
+    let stroke2 = egui::Stroke {
         width: 1.0,
         color: egui::Color32::WHITE,
     };
-    let r = egui::Rect::from_two_pos(
+    let r1 = egui::Rect::from_two_pos(
         egui::pos2(
             in_screen_tile_range.to.0 as f32 * scale,
             h as f32 - in_screen_tile_range.y_to_from_not_clamped.0 as f32 * scale,
@@ -141,16 +145,28 @@ fn map_ui(
         ),
     )
     .translate(rect.left_top().to_vec2());
-    painter.rect_stroke(r, egui::Rounding::none(), stroke);
+    let r2 = egui::Rect::from_two_pos(r1.min + egui::vec2(1.0, 1.0), r1.max - egui::vec2(1.0, 1.0));
+    painter.rect_stroke(r1, egui::Rounding::none(), stroke1);
+    painter.rect_stroke(r2, egui::Rounding::none(), stroke2);
     painter.rect_stroke(
-        r.translate(egui::vec2(w as f32, 0.0)),
+        r1.translate(egui::vec2(w as f32, 0.0)),
         egui::Rounding::none(),
-        stroke,
+        stroke1,
     );
     painter.rect_stroke(
-        r.translate(egui::vec2(-(w as f32), 0.0)),
+        r2.translate(egui::vec2(w as f32, 0.0)),
         egui::Rounding::none(),
-        stroke,
+        stroke2,
+    );
+    painter.rect_stroke(
+        r1.translate(egui::vec2(-(w as f32), 0.0)),
+        egui::Rounding::none(),
+        stroke1,
+    );
+    painter.rect_stroke(
+        r2.translate(egui::vec2(-(w as f32), 0.0)),
+        egui::Rounding::none(),
+        stroke2,
     );
 
     response
