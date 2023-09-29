@@ -177,16 +177,19 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
         let Some((_, next_biome)) = Biome::iter()
             .filter_map(|biome| {
                 let priority = params.biomes[&biome].priority;
-                if biome != current_biome && priority > current_priority
-                    && check_requirements(tile, biome, params) {
+                if biome != current_biome
+                    && priority > current_priority
+                    && check_requirements(tile, biome, params)
+                {
                     Some((priority, biome))
                 } else {
                     None
                 }
             })
-            .max_by_key(|(priority, _)| *priority) else {
-                continue;
-            };
+            .max_by_key(|(priority, _)| *priority)
+        else {
+            continue;
+        };
 
         let transition_probability = if sim.before_start {
             params.sim.before_start_biome_transition_probability

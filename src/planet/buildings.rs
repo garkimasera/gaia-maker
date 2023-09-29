@@ -44,7 +44,9 @@ fn update_upkeep_produce(
     }
 
     for kind in SpaceBuildingKind::iter() {
-        let Some(attrs) = params.building_attrs(BuildingKind::Space(kind)) else { continue };
+        let Some(attrs) = params.building_attrs(BuildingKind::Space(kind)) else {
+            continue;
+        };
         let max = max_workable_buildings(attrs, planet);
         let building = planet.space_building_mut(kind);
         let working = max.min(building.enabled);
@@ -64,8 +66,12 @@ fn update_upkeep_produce(
     for p in planet.map.iter_idx() {
         let structure = &mut planet.map[p].structure;
         let kind = BuildingKind::Structure(structure.kind());
-        let Some(building_state) = structure.building_state_mut() else { continue };
-        let Some(attrs) = params.building_attrs(kind) else { continue };
+        let Some(building_state) = structure.building_state_mut() else {
+            continue;
+        };
+        let Some(attrs) = params.building_attrs(kind) else {
+            continue;
+        };
 
         if *building_state == StructureBuildingState::Disabled {
             continue;
@@ -135,8 +141,12 @@ fn apply_building_effect(
     planet.state.solar_power_multiplier = 1.0;
 
     for (&kind, &n) in working_buildings {
-        let Some(effect) = &params.building_attrs(kind).and_then(|attrs| attrs.effect.as_ref())
-            else { continue };
+        let Some(effect) = &params
+            .building_attrs(kind)
+            .and_then(|attrs| attrs.effect.as_ref())
+        else {
+            continue;
+        };
 
         #[allow(clippy::single_match)]
         match effect {

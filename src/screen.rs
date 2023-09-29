@@ -76,6 +76,7 @@ impl Plugin for ScreenPlugin {
 pub struct InScreenTileRange {
     pub from: Coords,
     pub to: Coords,
+    pub y_to_from_not_clamped: (i32, i32),
 }
 
 #[derive(Clone, Copy, Default, Debug, Component)]
@@ -86,6 +87,7 @@ impl Default for InScreenTileRange {
         Self {
             from: Coords(0, 0),
             to: Coords(0, 0),
+            y_to_from_not_clamped: (0, 0),
         }
     }
 }
@@ -244,13 +246,14 @@ fn centering(
         transform.x = transform.x.round();
         transform.y = transform.y.round();
 
-        // Update in screnn tile range
+        // Update in screen tile range
         let x0 = ((transform.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
-        let y0 = (((transform.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1)
-            .clamp(0, planet.map.size().1 as i32 - 1);
+        let y0 = ((transform.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
         let x1 = ((transform.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
-        let y1 = (((transform.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1)
-            .clamp(0, planet.map.size().1 as i32 - 1);
+        let y1 = ((transform.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
+        in_screen_tile_range.y_to_from_not_clamped = (y0, y1);
+        let y0 = y0.clamp(0, planet.map.size().1 as i32 - 1);
+        let y1 = y1.clamp(0, planet.map.size().1 as i32 - 1);
         in_screen_tile_range.from = Coords(x0, y0);
         in_screen_tile_range.to = Coords(x1, y1);
     }
@@ -272,8 +275,8 @@ fn update_hover_tile(
 ) {
     let mut hover_tile = hover_tile.get_single_mut().unwrap();
     let Ok(window) = window.get_single() else {
-            return;
-        };
+        return;
+    };
     let cursor_pos = if let Some(pos) = window.cursor_position() {
         Vec2::new(pos.x, window.height() - pos.y)
     } else {
@@ -493,8 +496,8 @@ fn window_resize() {}
 #[cfg(target_arch = "wasm32")]
 fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
     let Ok(mut window) = window.get_single_mut() else {
-            return;
-        };
+        return;
+    };
 
     let Some(w) = web_sys::window() else {
         return;
@@ -504,16 +507,18 @@ fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
         .inner_width()
         .ok()
         .and_then(|width| width.as_f64())
-        .map(|width| width as f32) else {
-            return;
-        };
+        .map(|width| width as f32)
+    else {
+        return;
+    };
     let Some(height) = w
         .inner_height()
         .ok()
         .and_then(|height| height.as_f64())
-        .map(|height| height as f32) else {
-            return;
-        };
+        .map(|height| height as f32)
+    else {
+        return;
+    };
 
     if window.width() != width as f32 || window.height() != height as f32 {
         window.resolution.set(width, height);
@@ -533,18 +538,12 @@ pub fn preferred_window_size() -> (u32, u32) {
         return DEFAULT_WINDOW_SIZE;
     };
 
-    let Some(width) = w
-        .inner_width()
-        .ok()
-        .and_then(|width| width.as_f64()) else {
-            return DEFAULT_WINDOW_SIZE;
-        };
-    let Some(height) = w
-        .inner_height()
-        .ok()
-        .and_then(|height| height.as_f64()) else {
-            return DEFAULT_WINDOW_SIZE;
-        };
+    let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
+        return DEFAULT_WINDOW_SIZE;
+    };
+    let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
+        return DEFAULT_WINDOW_SIZE;
+    };
     let width = width as u32;
     let height = height as u32;
 

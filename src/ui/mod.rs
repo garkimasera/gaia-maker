@@ -53,11 +53,13 @@ impl Plugin for UiPlugin {
         app.add_plugins(EguiPlugin)
             .init_resource::<WindowsOpenState>()
             .init_resource::<OverlayLayerKind>()
+            .init_resource::<map::NeedUpdate>()
             .add_systems(
                 OnExit(GameState::AssetLoading),
                 (setup_fonts, load_textures),
             )
             .add_systems(OnEnter(GameState::MainMenu), main_menu::set_main_menu_state)
+            .add_systems(OnEnter(GameState::Running), map::update)
             .add_systems(
                 Update,
                 main_menu::main_menu.run_if(in_state(GameState::MainMenu)),

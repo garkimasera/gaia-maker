@@ -103,7 +103,9 @@ fn manage_planet(
         return;
     };
 
-    let Some(e) = er_manage_planet.iter().next() else { return; };
+    let Some(e) = er_manage_planet.iter().next() else {
+        return;
+    };
     let new_planet = match e {
         ManagePlanet::New(start_params) => {
             let planet = Planet::new(start_params, &params);
