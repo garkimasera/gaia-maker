@@ -18,6 +18,7 @@ pub enum MapLayer {
     AirTemprature,
     Rainfall,
     Fertility,
+    Biomass,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Resource)]
@@ -202,6 +203,9 @@ fn map_img(
                 }
                 MapLayer::Fertility => {
                     color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Fertility)
+                }
+                MapLayer::Biomass => {
+                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Biomass)
                 }
             };
             egui::Color32::from_rgba_unmultiplied(color[0], color[1], color[2], 255)
