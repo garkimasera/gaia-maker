@@ -81,6 +81,7 @@ fn sim_ui(ui: &mut egui::Ui, debug_tools: &mut DebugTools) {
 #[derive(Default, Debug)]
 pub struct MapPanel {
     biome: Biome,
+    settlement_age: CivilizationAge,
 }
 
 impl MapPanel {
@@ -96,6 +97,26 @@ impl MapPanel {
             if ui.button("Edit biome").clicked() || matches!(*cursor_mode, CursorMode::EditBiome(_))
             {
                 *cursor_mode = CursorMode::EditBiome(self.biome);
+            }
+        });
+        ui.horizontal(|ui| {
+            egui::ComboBox::from_id_source(CivilizationAge::default())
+                .selected_text(AsRef::<str>::as_ref(&self.settlement_age))
+                .show_ui(ui, |ui| {
+                    for age in CivilizationAge::iter() {
+                        ui.selectable_value(
+                            &mut self.settlement_age,
+                            age,
+                            AsRef::<str>::as_ref(&age),
+                        );
+                    }
+                });
+            if ui.button("Place settlement").clicked()
+                || matches!(*cursor_mode, CursorMode::PlaceSettlement(_))
+            {
+                *cursor_mode = CursorMode::PlaceSettlement(Settlement {
+                    age: self.settlement_age,
+                });
             }
         });
     }

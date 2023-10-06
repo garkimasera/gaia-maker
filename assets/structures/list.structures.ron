@@ -68,8 +68,8 @@
     settlement: (
         width: 48,
         height: 48,
-        columns: 1,
-        rows: 1,
+        columns: 6,
+        rows: 2,
         building: (),
     ),
 }

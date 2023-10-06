@@ -194,7 +194,18 @@ fn spawn_structure_textures(
         if !matches!(structure, Structure::None | Structure::Occupied { .. }) {
             let kind: StructureKind = structure.into();
             let attrs = &params.structures[&kind];
-            let index = if monochrome { attrs.columns } else { 0 };
+
+            let index = if let Structure::Settlement { settlement } = structure {
+                settlement.age as usize
+            } else {
+                0
+            };
+            let index = if monochrome {
+                index + attrs.columns
+            } else {
+                index
+            };
+
             let sprite = TextureAtlasSprite { index, ..default() };
             let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
             let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;

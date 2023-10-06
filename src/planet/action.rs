@@ -60,4 +60,8 @@ impl Planet {
     pub fn edit_biome(&mut self, coords: Coords, biome: Biome) {
         self.map[coords].biome = biome;
     }
+
+    pub fn place_settlement(&mut self, coords: Coords, settlement: Settlement) {
+        self.map[coords].structure = Structure::Settlement { settlement };
+    }
 }

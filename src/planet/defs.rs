@@ -233,14 +233,19 @@ pub enum StructureBuildingState {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Settlement {
-    age: CivilizationAge,
+    pub age: CivilizationAge,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 #[allow(clippy::enum_variant_names)]
+#[derive(
+    Clone, Copy, PartialEq, Eq, Default, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter,
+)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+#[repr(u8)]
 pub enum CivilizationAge {
-    StoneAge,
+    #[default]
+    StoneAge = 0,
     BronzeAge,
     IronAge,
     IndustrialAge,

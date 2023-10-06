@@ -24,6 +24,7 @@ pub enum CursorMode {
     Demolition,
     Build(StructureKind),
     EditBiome(Biome),
+    PlaceSettlement(Settlement),
 }
 
 impl Default for CursorMode {

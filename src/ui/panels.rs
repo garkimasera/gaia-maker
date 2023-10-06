@@ -216,6 +216,9 @@ fn sidebar(
         CursorMode::EditBiome(biome) => {
             ui.label(format!("biome editing: {}", biome.as_ref()));
         }
+        CursorMode::PlaceSettlement(settlement) => {
+            ui.label(format!("settlement: {}", settlement.age.as_ref()));
+        }
     }
 
     ui.separator();

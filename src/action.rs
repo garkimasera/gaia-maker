@@ -43,10 +43,6 @@ fn cursor_action(
                 update_map.update();
                 planet.demolition(coords);
             }
-            CursorMode::EditBiome(biome) => {
-                update_map.update();
-                planet.edit_biome(coords, biome);
-            }
             CursorMode::Build(kind) => match kind {
                 StructureKind::None => (),
                 _ => {
@@ -60,6 +56,14 @@ fn cursor_action(
                     }
                 }
             },
+            CursorMode::EditBiome(biome) => {
+                update_map.update();
+                planet.edit_biome(coords, biome);
+            }
+            CursorMode::PlaceSettlement(settlement) => {
+                update_map.update();
+                planet.place_settlement(coords, settlement);
+            }
         }
     }
 }
