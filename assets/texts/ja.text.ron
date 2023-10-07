@@ -80,6 +80,15 @@
     "rainmaker": "降雨装置",
     "fertilization-plant": "肥沃化工場",
     "heater": "ヒーター",
+    "settlement": "居住地",
+    
+    // Civilization Ages
+    "stone-age": "石器時代",
+    "bronze-age": "青銅器時代",
+    "iron-age": "鉄器時代",
+    "industrial-age": "工業化時代",
+    "atomic-age": "原子力時代",
+    "early-space-age": "初期宇宙時代",
 
     // Orbital Buildings
     "fusion-reactor": "核融合炉",

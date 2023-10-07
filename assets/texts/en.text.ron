@@ -80,6 +80,15 @@
     "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
+    "settlement": "Settlement",
+
+    // Civilization Ages
+    "stone-age": "Stone Age",
+    "bronze-age": "Bronze Age",
+    "iron-age": "Iron Age",
+    "industrial-age": "Industrial Age",
+    "atomic-age": "Atomic Age",
+    "early-space-age": "Early Space Age",
 
     // Orbital Buildings
     "fusion-reactor": "Fusion Reactor",
