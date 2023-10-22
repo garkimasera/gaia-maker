@@ -26,7 +26,6 @@ pub struct NeedUpdate(bool);
 
 pub fn map_window(
     mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut ew_centering: EventWriter<Centering>,
     mut need_update: ResMut<NeedUpdate>,
@@ -34,7 +33,11 @@ pub fn map_window(
     planet: Res<Planet>,
     params: Res<Params>,
     color_materials: Res<ColorMaterials>,
-    in_screen_tile_range: Res<InScreenTileRange>,
+    mut screen: (
+        Res<InScreenTileRange>,
+        ResMut<OccupiedScreenSpace>,
+        Res<bevy_egui::EguiSettings>,
+    ),
     (mut map_tex_handle, mut image_update_counter, mut map_layer, mut before_map_layer): (
         Local<Option<egui::TextureHandle>>,
         Local<usize>,
@@ -81,7 +84,7 @@ pub fn map_window(
                         }
                     });
                 ui.separator();
-                let response = map_ui(ui, map_tex_handle, &in_screen_tile_range, m as f32);
+                let response = map_ui(ui, map_tex_handle, &screen, m as f32);
                 if response.clicked() {
                     if let Some(pos) = response.interact_pointer_pos {
                         let pos = pos - response.rect.min;
@@ -97,7 +100,8 @@ pub fn map_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
+    screen
+        .1
         .window_rects
         .push(convert_rect(rect, conf.scale_factor));
 }
@@ -109,7 +113,11 @@ pub fn update(mut need_update: ResMut<NeedUpdate>) {
 fn map_ui(
     ui: &mut egui::Ui,
     map_tex_handle: &egui::TextureHandle,
-    in_screen_tile_range: &InScreenTileRange,
+    (in_screen_tile_range, occupied_screen_space, egui_settings): &(
+        Res<InScreenTileRange>,
+        ResMut<OccupiedScreenSpace>,
+        Res<bevy_egui::EguiSettings>,
+    ),
     scale: f32,
 ) -> egui::Response {
     let [w, h] = map_tex_handle.size();
@@ -135,13 +143,15 @@ fn map_ui(
         width: 1.0,
         color: egui::Color32::WHITE,
     };
+    let hide_by_sidebar = (occupied_screen_space.occupied_left * egui_settings.scale_factor as f32
+        / TILE_SIZE) as i32;
     let r1 = egui::Rect::from_two_pos(
         egui::pos2(
             in_screen_tile_range.to.0 as f32 * scale,
             h as f32 - in_screen_tile_range.y_to_from_not_clamped.0 as f32 * scale,
         ),
         egui::pos2(
-            in_screen_tile_range.from.0 as f32 * scale,
+            (in_screen_tile_range.from.0 + hide_by_sidebar) as f32 * scale,
             h as f32 - in_screen_tile_range.y_to_from_not_clamped.1 as f32 * scale,
         ),
     )
