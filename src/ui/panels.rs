@@ -96,17 +96,15 @@ fn toolbar(
     textures: &EguiTextures,
     planet: &Planet,
     params: &Params,
-    conf: &Conf,
+    _conf: &Conf,
 ) {
     let button = |ui: &mut egui::Ui, icon: UiTexture, s: &str| {
-        let (handle, size) = &textures.0[&icon];
-        ui.add(egui::ImageButton::new(handle.id(), conf.tex_size(*size)))
+        ui.add(egui::ImageButton::new(textures.0[&icon]))
             .on_hover_text(t!(s))
             .clicked()
     };
 
-    let (handle, size) = &textures.0[&UiTexture::IconBuild];
-    ui.menu_image_button(handle.id(), *size, |ui| {
+    ui.menu_image_button(textures.0[&UiTexture::IconBuild], |ui| {
         build_menu(ui, cursor_mode, planet, params);
     });
 
@@ -165,8 +163,8 @@ fn toolbar(
         wos.message = !wos.message;
     }
 
-    let (handle, size) = &textures.0[&UiTexture::IconGameMenu];
-    ui.menu_image_button(handle.id(), *size, |ui| {
+    let image = textures.0[&UiTexture::IconGameMenu];
+    ui.menu_image_button(image, |ui| {
         game_menu(ui, app_exit_events, ew_manage_planet, next_game_state);
     });
 
@@ -186,9 +184,9 @@ fn sidebar(
     let mut stock: Vec<_> = planet.res.stock.iter().collect();
     stock.sort_by_key(|&(res, _)| res);
     for (kind, v) in stock.into_iter() {
-        let (texture, size) = &textures.0[&UiTexture::from(*kind)];
+        let texture = textures.0[&UiTexture::from(*kind)];
         ui.horizontal(|ui| {
-            ui.image(texture, *size).on_hover_text(t!(kind.as_ref()));
+            ui.image(texture).on_hover_text(t!(kind.as_ref()));
             ui.label(kind.display_with_value(*v).to_string());
             let diff = planet.res.diff[kind];
             let sign = if diff > 0.0 { '+' } else { '-' };
@@ -227,9 +225,9 @@ fn sidebar(
     if let Some(p) = hover_tile.0 {
         let tile = &planet.map[p];
 
-        let (texture, size) = &textures.0[&UiTexture::IconCoordinates];
         ui.horizontal(|ui| {
-            ui.image(texture, *size).on_hover_text(t!("coordinates"));
+            ui.image(textures.0[&UiTexture::IconCoordinates])
+                .on_hover_text(t!("coordinates"));
             ui.label(format!("[{}, {}]", p.0, p.1))
                 .on_hover_text(t!("coordinates"));
 
@@ -271,10 +269,9 @@ fn sidebar(
         ];
 
         for (icon, label, s) in items {
-            let (texture, size) = &textures.0[icon];
             let s = t!(s);
             ui.horizontal(|ui| {
-                ui.image(texture, *size).on_hover_text(&s);
+                ui.image(textures.0[icon]).on_hover_text(&s);
                 ui.label(label).on_hover_text(s);
             });
         }

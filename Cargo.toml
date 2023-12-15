@@ -8,15 +8,16 @@ authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
 anyhow = "1"
 arrayvec = "0.7"
 base64 = "0.21"
-bevy = { version = "0.11", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_winit", "png", "x11", "webgl2"] }
-bevy_asset_loader = "0.17"
-bevy_common_assets = { version = "0.7", features = ["ron"] }
-bevy_egui = "0.21"
-bevy_kira_audio = "0.17"
+bevy = { version = "0.12", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_winit", "png", "x11", "webgl2"] }
+bevy_asset_loader = "0.18"
+bevy_common_assets = { version = "0.8", features = ["ron"] }
+bevy_egui = "0.24"
+bevy_kira_audio = "0.18"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
 crossbeam = "0.8"
 dirs = "5"
+egui_plot = "0.24"
 flate2 = "1"
 fnv = "1"
 log = "0.4"

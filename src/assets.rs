@@ -109,7 +109,7 @@ pub struct UiAssets {
     pub font: Handle<GunzipBin>,
 }
 
-#[derive(Clone, Debug, Deserialize, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
 #[serde(transparent)]
 #[uuid = "b0aaec37-3e9e-42d0-9370-aaacbe550799"]
 pub struct ParamsAsset(Params);
@@ -123,7 +123,7 @@ impl bevy::reflect::TypePath for ParamsAsset {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
 #[serde(transparent)]
 #[uuid = "99d5021f-98fb-4873-b16a-bd9619b8b074"]
 pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
@@ -137,7 +137,7 @@ impl bevy::reflect::TypePath for BiomeAssetList {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
 #[serde(transparent)]
 #[uuid = "801a2daa-956d-469a-8e83-3610fbca21fd"]
 pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);

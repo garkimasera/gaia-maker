@@ -38,7 +38,7 @@ impl Plugin for ConfPlugin {
 
 fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>>) {
     if let Some(conf) = &conf {
-        if er_conf_change.iter().next().is_some() {
+        if er_conf_change.read().next().is_some() {
             if let Err(e) = save(conf) {
                 log::error!("cannot save conf: {}", e);
             }
@@ -58,7 +58,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
     command.insert_resource(conf);
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Resource, TypeUuid, Reflect)]
+#[derive(Clone, Debug, Serialize, Deserialize, Asset, Resource, TypeUuid, Reflect)]
 #[uuid = "92795344-1b26-49fb-b352-e989043777c7"]
 pub struct Conf {
     pub lang: Lang,

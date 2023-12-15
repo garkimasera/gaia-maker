@@ -1,7 +1,8 @@
 use std::ops::RangeInclusive;
 
 use bevy::prelude::*;
-use bevy_egui::{egui, egui::plot, EguiContexts};
+use bevy_egui::{egui, EguiContexts};
+use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
@@ -117,12 +118,21 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
             }
         });
 
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
     let history = planet.stat.history();
     let line: plot::PlotPoints = (0..params.history.max_record)
         .map(|i| {
+            let value = item.record_to_value(history.get(i));
+            if value < min {
+                min = value;
+            }
+            if value > max {
+                max = value;
+            }
             [
                 (params.history.max_record - i - 1) as f64 * params.history.interval_cycles as f64,
-                item.record_to_value(history.get(i)),
+                value,
             ]
         })
         .collect();
@@ -130,7 +140,8 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
 
     let item_copy = *item;
     let label_formatter = move |_s: &str, value: &plot::PlotPoint| item_copy.format_value(value.y);
-    let x_axis_formatter = move |_, _range: &RangeInclusive<f64>| "".to_string();
+    let x_axis_formatter = move |_, _, _range: &RangeInclusive<f64>| "".to_string();
+    let bound_margin = (max - min) * 0.08 + 1.0e-5;
 
     plot::Plot::new("history")
         .allow_drag(false)
@@ -140,7 +151,17 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
         .x_axis_formatter(x_axis_formatter)
         .show_x(false)
         .show_y(true)
-        .show(ui, |plot_ui| plot_ui.line(line));
+        .auto_bounds_y()
+        .show(ui, |plot_ui| {
+            plot_ui.set_plot_bounds(plot::PlotBounds::from_min_max(
+                [0.0, min - bound_margin],
+                [
+                    (params.history.max_record - 1) as f64 * params.history.interval_cycles as f64,
+                    max + bound_margin,
+                ],
+            ));
+            plot_ui.line(line)
+        });
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]

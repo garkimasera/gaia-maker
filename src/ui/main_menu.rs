@@ -49,7 +49,7 @@ pub fn main_menu(
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
 ) {
-    if let Some(e) = ew_manage_planet_eror.iter().next() {
+    if let Some(e) = ew_manage_planet_eror.read().next() {
         state.mode = MainMenuMode::Error;
         state.error = e.0.clone();
     }

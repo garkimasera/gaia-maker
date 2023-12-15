@@ -103,7 +103,7 @@ fn manage_planet(
         return;
     };
 
-    let Some(e) = er_manage_planet.iter().next() else {
+    let Some(e) = er_manage_planet.read().next() else {
         return;
     };
     let new_planet = match e {

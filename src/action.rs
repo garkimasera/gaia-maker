@@ -34,7 +34,7 @@ fn cursor_action(
     audio_se: Res<AudioSE>,
     sound_effects: Res<SoundEffects>,
 ) {
-    for e in er.iter() {
+    for e in er.read() {
         let CursorAction { coords, .. } = *e;
 
         match *cursor_mode {

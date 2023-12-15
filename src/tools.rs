@@ -28,7 +28,7 @@ macro_rules! define_asset_list_from_enum {
                                 .get_resource::<AssetServer>()
                                 .expect("Cannot get AssetServer");
                             let handle = asset_server
-                                .get_handle(&format!("{}/{}.{}", $dir_path, s, $file_ext));
+                                .get_handle(&format!("{}/{}.{}", $dir_path, s, $file_ext)).unwrap();
                             map.insert(e, handle);
                         }
                         $struct_name { $field: map }
@@ -36,7 +36,7 @@ macro_rules! define_asset_list_from_enum {
                 )
             }
 
-            fn load(world: &mut World) -> Vec<HandleUntyped> {
+            fn load(world: &mut World) -> Vec<UntypedHandle> {
                 let cell = world.cell();
                 let asset_server = cell
                     .get_resource::<AssetServer>()
@@ -48,7 +48,7 @@ macro_rules! define_asset_list_from_enum {
                 <$enum_name as strum::IntoEnumIterator>::iter()
                     .map(|e| {
                         let s: &str = e.as_ref();
-                        asset_server.load_untyped(&format!("{}/{}.{}", $dir_path, s, $file_ext))
+                        asset_server.load_untyped(&format!("{}/{}.{}", $dir_path, s, $file_ext)).untyped()
                     })
                     .collect()
             }

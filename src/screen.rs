@@ -108,7 +108,7 @@ pub fn setup_cursor(
     }
     commands
         .spawn(SpriteBundle {
-            texture: asset_server.get_handle("ui/tile-cursor.png"),
+            texture: asset_server.get_handle("ui/tile-cursor.png").unwrap(),
             visibility: Visibility::Hidden,
             ..default()
         })
@@ -216,7 +216,7 @@ fn centering(
     planet: Res<Planet>,
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
 ) {
-    for e in er_centering.iter() {
+    for e in er_centering.read() {
         update_map.update();
         let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
         let Ok(window) = window.get_single() else {
@@ -390,7 +390,7 @@ fn on_resize(
     screen: Res<OccupiedScreenSpace>,
     egui_settings: ResMut<bevy_egui::EguiSettings>,
 ) {
-    for _ in er.iter() {
+    for _ in er.read() {
         let transform = camera_query.get_single().unwrap().1;
         let mut translation = transform.translation.xy();
 

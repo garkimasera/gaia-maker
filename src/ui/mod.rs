@@ -10,7 +10,7 @@ mod stat;
 
 use bevy::{math::Rect, prelude::*};
 use bevy_egui::{
-    egui::{self, FontData, FontDefinitions, FontFamily},
+    egui::{self, load::SizedTexture, FontData, FontDefinitions, FontFamily},
     EguiContexts, EguiPlugin, EguiSettings,
 };
 use std::collections::HashMap;
@@ -43,7 +43,7 @@ pub struct WindowsOpenState {
 }
 
 #[derive(Clone, Default, Resource)]
-pub struct EguiTextures(HashMap<UiTexture, (egui::TextureHandle, egui::Vec2)>);
+pub struct EguiTextures(HashMap<UiTexture, SizedTexture>);
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
 pub struct UiWindowsSystemSet;
@@ -121,6 +121,7 @@ fn load_textures(
     mut egui_ctxs: EguiContexts,
     images: Res<Assets<Image>>,
     ui_textures: Res<UiTextures>,
+    mut texture_handles: Local<Vec<egui::TextureHandle>>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
 
@@ -128,9 +129,8 @@ fn load_textures(
 
     for (k, handle) in ui_textures.textures.iter() {
         let image = images.get(handle).unwrap();
-        let size = egui::Vec2::new(image.size().x, image.size().y);
         let color_image = egui::ColorImage {
-            size: [size.x as usize, size.y as usize],
+            size: [image.size().x as usize, image.size().y as usize],
             pixels: image
                 .data
                 .windows(4)
@@ -143,7 +143,14 @@ fn load_textures(
         let texture_handle =
             ctx.load_texture(k.as_ref(), color_image, egui::TextureOptions::NEAREST);
 
-        egui_textures.insert(*k, (texture_handle, size));
+        egui_textures.insert(
+            *k,
+            SizedTexture {
+                id: texture_handle.id(),
+                size: egui::Vec2::new(image.size().x as f32, image.size().y as f32),
+            },
+        );
+        texture_handles.push(texture_handle);
     }
 
     commands.insert_resource(EguiTextures(egui_textures));
@@ -234,12 +241,5 @@ fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {
     Rect {
         min: Vec2::new(rect.left() * scale_factor, rect.top() * scale_factor),
         max: Vec2::new(rect.right() * scale_factor, rect.bottom() * scale_factor),
-    }
-}
-
-impl Conf {
-    fn tex_size(&self, size: egui::Vec2) -> egui::Vec2 {
-        let factor = 1.0;
-        egui::Vec2::new(size.x * factor, size.y * factor)
     }
 }
