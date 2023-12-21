@@ -40,6 +40,7 @@ pub fn panels(
         .show(egui_ctxs.ctx_mut(), |ui| {
             sidebar(
                 ui,
+                &mut wos,
                 &cursor_mode,
                 &planet,
                 hover_tile.single(),
@@ -159,10 +160,6 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
-    if button(ui, UiTexture::IconMessage, "messages") {
-        wos.message = !wos.message;
-    }
-
     let image = textures.0[&UiTexture::IconGameMenu];
     ui.menu_image_button(image, |ui| {
         game_menu(ui, app_exit_events, ew_manage_planet, next_game_state);
@@ -175,11 +172,12 @@ fn toolbar(
 
 fn sidebar(
     ui: &mut egui::Ui,
+    wos: &mut WindowsOpenState,
     cursor_mode: &CursorMode,
     planet: &Planet,
     hover_tile: &HoverTile,
     textures: &EguiTextures,
-    _conf: &Conf,
+    conf: &Conf,
 ) {
     let mut stock: Vec<_> = planet.res.stock.iter().collect();
     stock.sort_by_key(|&(res, _)| res);
@@ -290,7 +288,13 @@ fn sidebar(
 
         if let Some(s) = s {
             ui.label(s);
+        } else {
+            ui.label("");
         }
+
+        ui.separator();
+
+        super::message::msg_list(ui, wos, planet, conf);
     }
 }
 

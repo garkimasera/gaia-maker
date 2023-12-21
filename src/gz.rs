@@ -38,7 +38,6 @@ impl AssetLoader for GzLoader {
             let mut decoded = Vec::new();
             gz.read_to_end(&mut decoded)?;
 
-            // load_context.set_default_asset(LoadedAsset::new(GunzipBin(decoded)));
             Ok(GunzipBin(decoded))
         })
     }

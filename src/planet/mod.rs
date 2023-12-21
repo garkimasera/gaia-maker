@@ -6,6 +6,8 @@ mod defs;
 mod heat_transfer;
 mod map_generator;
 mod misc;
+mod monitoring;
+mod msg;
 mod resources;
 mod sim;
 mod stat;
@@ -15,6 +17,7 @@ pub mod debug_log;
 
 pub use self::atmo::Atmosphere;
 pub use self::defs::*;
+pub use self::msg::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
 pub use self::stat::{Record, Stat};
@@ -81,6 +84,7 @@ pub struct Planet {
     pub water: Water,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, Building>,
     pub stat: Stat,
+    pub msgs: MsgHolder,
 }
 
 impl Planet {
@@ -97,6 +101,9 @@ impl Planet {
             map[p].height = *height;
         }
 
+        let mut msgs = MsgHolder::default();
+        msgs.append(0, MsgKind::Welcome);
+
         let mut planet = Planet {
             cycles: 0,
             basics: start_params.basics.clone(),
@@ -110,6 +117,7 @@ impl Planet {
                 .map(|kind| (kind, Building::default()))
                 .collect(),
             stat: Stat::new(params),
+            msgs,
         };
 
         for (kind, &n) in &start_params.orbital_buildings {
@@ -160,6 +168,7 @@ impl Planet {
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
         self::stat::update_stats(self, params);
+        self::monitoring::monitor(self, params);
     }
 
     pub fn n_tile(&self) -> u32 {

@@ -2,6 +2,6 @@
     lang: English,
     scale_factor: 1.0,
     font_scale: 1.2,
-    max_message: 20,
+    messages_in_menu: 8,
     camera_move_speed: 48.0,
 )

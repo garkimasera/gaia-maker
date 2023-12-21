@@ -17,6 +17,7 @@ bincode = "1"
 clap = { version = "4", features = ["derive"] }
 crossbeam = "0.8"
 dirs = "5"
+egui_extras = "0.24.2"
 egui_plot = "0.24"
 flate2 = "1"
 fnv = "1"

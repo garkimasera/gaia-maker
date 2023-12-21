@@ -64,7 +64,7 @@ pub struct Conf {
     pub lang: Lang,
     pub scale_factor: f32,
     pub font_scale: f32,
-    pub max_message: usize,
+    pub messages_in_menu: usize,
     pub camera_move_speed: f32,
 }
 

@@ -9,7 +9,11 @@ use std::collections::HashMap;
 use std::sync::RwLock;
 use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 
-use crate::{assets::TranslationTexts, planet::ResourceKind, GameState};
+use crate::{
+    assets::TranslationTexts,
+    planet::{Msg, MsgKind, ResourceKind},
+    GameState,
+};
 
 #[derive(
     Clone,
@@ -146,5 +150,30 @@ impl std::fmt::Display for WithUnitDisplay {
         } else {
             write!(f, "{:.0}{}", self.value / 1000.0, unit1)
         }
+    }
+}
+
+impl Msg {
+    pub fn icon(&self) -> &'static str {
+        match &self.kind {
+            MsgKind::Welcome => "ℹ",
+            _ => "⚠",
+        }
+    }
+
+    pub fn text(&self) -> String {
+        match &self.kind {
+            MsgKind::Welcome => t!("msg/welcome"; app_name=crate::APP_NAME),
+            MsgKind::WarnHighTemp => t!("msg/warn-high-temp"),
+            MsgKind::WarnLowTemp => t!("msg/warn-low-temp"),
+        }
+    }
+}
+
+pub fn split_to_head_body(s: &str) -> (&str, Option<&str>) {
+    if let Some((head, body)) = s.split_once('\n') {
+        (head, Some(body))
+    } else {
+        (s, None)
     }
 }

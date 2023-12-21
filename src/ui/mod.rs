@@ -2,6 +2,7 @@ mod debug_tools;
 mod help;
 mod main_menu;
 mod map;
+mod message;
 mod new_planet;
 mod orbit;
 mod panels;
@@ -21,11 +22,12 @@ use crate::{
     conf::Conf,
     draw::UpdateMap,
     gz::GunzipBin,
-    msg::MsgHolder,
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
     GameState,
 };
+
+use self::message::MsgDialog;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
@@ -37,7 +39,7 @@ pub struct WindowsOpenState {
     pub map: bool,
     pub layers: bool,
     pub stat: bool,
-    pub message: bool,
+    pub msg_dialogs: Vec<MsgDialog>,
     pub help: bool,
     pub debug_tools: bool,
 }
@@ -78,7 +80,7 @@ impl Plugin for UiPlugin {
                     map::map_window,
                     stat::stat_window,
                     layers_window,
-                    msg_window,
+                    message::msg_dialogs,
                     help::help_window,
                     debug_tools::debug_tools_window,
                 )
@@ -200,41 +202,6 @@ fn layers_menu(
         *current_layer = new_layer;
         update_map.update();
     }
-}
-
-fn msg_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut wos: ResMut<WindowsOpenState>,
-    msg_holder: Res<MsgHolder>,
-    conf: Res<Conf>,
-) {
-    if !wos.message {
-        return;
-    }
-
-    let (_msg_kind, s) = msg_holder.latest();
-
-    let mut open = true;
-    let rect = egui::Window::new(t!("messages"))
-        .open(&mut wos.message)
-        .vscroll(true)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            ui.label(s);
-            ui.separator();
-            ui.vertical_centered(|ui| {
-                if ui.button(t!("close")).clicked() {
-                    open = false;
-                }
-            });
-        })
-        .unwrap()
-        .response
-        .rect;
-    wos.message = open && wos.message;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
 }
 
 fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {

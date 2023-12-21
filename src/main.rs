@@ -9,8 +9,6 @@ use clap::Parser;
 mod tools;
 #[macro_use]
 mod text;
-#[macro_use]
-mod msg;
 
 mod action;
 mod assets;
@@ -58,7 +56,6 @@ fn main() {
         }))
         .add_plugins(gz::GzPlugin)
         .add_plugins(text::TextPlugin)
-        .add_plugins(msg::MsgPlugin)
         .add_plugins(conf::ConfPlugin)
         .add_plugins(assets::AssetsPlugin)
         .add_plugins(overlay::OverlayPlugin)

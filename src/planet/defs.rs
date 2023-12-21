@@ -411,6 +411,7 @@ pub struct Params {
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
     pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, BuildingAttrs>,
     pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, BuildingAttrs>,
+    pub monitoring: MonitoringParams,
 }
 
 impl Params {
@@ -549,4 +550,11 @@ pub struct NewPlanetParams {
 pub struct HistoryParams {
     pub max_record: usize,
     pub interval_cycles: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MonitoringParams {
+    pub interval_cycles: u64,
+    pub warn_high_temp_threshold: f32,
+    pub warn_low_temp_threshold: f32,
 }
