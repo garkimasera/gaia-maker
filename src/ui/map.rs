@@ -103,7 +103,7 @@ pub fn map_window(
     screen
         .1
         .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
+        .push(convert_rect(rect, conf.ui.scale_factor));
 }
 
 pub fn update(mut need_update: ResMut<NeedUpdate>) {

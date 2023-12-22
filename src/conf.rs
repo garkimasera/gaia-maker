@@ -62,10 +62,16 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
 #[uuid = "92795344-1b26-49fb-b352-e989043777c7"]
 pub struct Conf {
     pub lang: Lang,
+    pub camera_move_speed: f32,
+    pub ui: UiConf,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,
-    pub messages_in_menu: usize,
-    pub camera_move_speed: f32,
+    pub messages_in_list: usize,
+    pub min_sidebar_width: f32,
 }
 
 #[derive(Clone, Copy, Debug, Event)]

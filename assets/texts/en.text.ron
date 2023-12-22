@@ -104,6 +104,8 @@
     "ammonia-extractor": "Ammonia Extractor",
 
     // Messages
+    "msg/warn-high-temp": "Too high temperature\nAn effective way to lower the temperature is to operate the solar shield, an orbital structure, to block sunlight from reaching the ground surface.",
+    "msg/warn-low-temp": "Too low temperature\nAn effective way to raise the temperature is to operate the orbital mirros, to increase the amount of sunlight reaching the surface.",
     "msg/welcome": "Welcome to {$app_name} !",
     "msg/loading-failed": "Loading failed",
     "msg/loading-failed-description": "Load failed. The saved data may not exist or may be a different version or corrupt.",
@@ -139,7 +141,5 @@
     "help/ammonia-extractor": "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in gaseous or solid form.",
 
     // Events
-    "event/start": "    You have arrived on a barren, undeveloped planet. Depending on the conditions of the planet, you can build various facilities to transform it into an environment suitable for life.
-    You need Energy to maintain the facilities and Material to build them. Energy can be produced by building fusion reactors in orbit and Material can be produced by building asteroid mining stations in the star system.
-    Please refer to the help for further information as needed.",
+    "event/start": "Arrival at a new planet\nYou have arrived on a barren, undeveloped planet. Depending on the conditions of the planet, you can build various facilities to transform it into an environment suitable for life.\nYou need Energy to maintain the facilities and Material to build them. Energy can be produced by building fusion reactors in orbit and Material can be produced by building asteroid mining stations in the star system.\nPlease refer to the help for further information as needed.",
 }

@@ -11,7 +11,7 @@ pub struct MsgDialog {
     body: String,
 }
 
-pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, _conf: &Conf) {
+pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, conf: &Conf) {
     let text_height = egui::TextStyle::Body.resolve(ui.style()).size * 1.2;
 
     egui::ScrollArea::horizontal().show(ui, |ui| {
@@ -24,12 +24,11 @@ pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, 
             .min_scrolled_height(0.0);
 
         table.body(|mut body| {
-            for msg in planet.msgs.iter_temp().chain(planet.msgs.iter()) {
+            for msg in planet.msgs.iter().take(conf.ui.messages_in_list) {
                 body.row(text_height, |mut row| {
                     row.col(|ui| {
-                        ui.label(msg.icon());
-
-                        let text = msg.text();
+                        let (style, text) = msg.text();
+                        ui.label(style.icon());
                         let (head, body) = crate::text::split_to_head_body(&text);
                         if let Some(body) = body {
                             if ui.link(head).clicked() {
@@ -78,7 +77,7 @@ pub fn msg_dialogs(
             .rect;
         occupied_screen_space
             .window_rects
-            .push(convert_rect(rect, conf.scale_factor));
+            .push(convert_rect(rect, conf.ui.scale_factor));
         if !open {
             close_dialogs.push(i);
         }

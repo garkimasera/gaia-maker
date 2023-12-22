@@ -68,5 +68,5 @@ pub fn star_system_window(
         .rect;
     occupied_screen_space
         .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
+        .push(convert_rect(rect, conf.ui.scale_factor));
 }

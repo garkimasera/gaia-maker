@@ -1,5 +1,6 @@
 use bevy::{app::AppExit, prelude::*};
 use bevy_egui::{egui, EguiContexts};
+use geom::Coords;
 
 use crate::{
     assets::UiTexture,
@@ -28,15 +29,14 @@ pub fn panels(
         EventWriter<ManagePlanet>,
         ResMut<NextState<GameState>>,
     ),
-    planet: Res<Planet>,
-    textures: Res<EguiTextures>,
-    params: Res<Params>,
-    conf: Res<Conf>,
+    (planet, textures, params, conf): (Res<Planet>, Res<EguiTextures>, Res<Params>, Res<Conf>),
+    mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.window_rects.clear();
 
     occupied_screen_space.occupied_left = egui::SidePanel::left("left_panel")
         .resizable(true)
+        .min_width(conf.ui.min_sidebar_width)
         .show(egui_ctxs.ctx_mut(), |ui| {
             sidebar(
                 ui,
@@ -46,13 +46,14 @@ pub fn panels(
                 hover_tile.single(),
                 &textures,
                 &conf,
+                &mut last_hover_tile,
             );
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
         .rect
         .width()
-        * conf.scale_factor;
+        * conf.ui.scale_factor;
 
     occupied_screen_space.occupied_top = egui::TopBottomPanel::top("top_panel")
         .resizable(false)
@@ -80,7 +81,7 @@ pub fn panels(
         .response
         .rect
         .height()
-        * conf.scale_factor;
+        * conf.ui.scale_factor;
 }
 
 fn toolbar(
@@ -178,6 +179,7 @@ fn sidebar(
     hover_tile: &HoverTile,
     textures: &EguiTextures,
     conf: &Conf,
+    last_hover_tile: &mut Option<Coords>,
 ) {
     let mut stock: Vec<_> = planet.res.stock.iter().collect();
     stock.sort_by_key(|&(res, _)| res);
@@ -220,82 +222,85 @@ fn sidebar(
     ui.separator();
 
     // Information about the hovered tile
-    if let Some(p) = hover_tile.0 {
-        let tile = &planet.map[p];
-
-        ui.horizontal(|ui| {
-            ui.image(textures.0[&UiTexture::IconCoordinates])
-                .on_hover_text(t!("coordinates"));
-            ui.label(format!("[{}, {}]", p.0, p.1))
-                .on_hover_text(t!("coordinates"));
-
-            let (longitude, latitude) = planet.calc_longitude_latitude(p);
-            ui.label(format!(
-                "{:.0}°, {:.0}°",
-                longitude * 180.0 * std::f32::consts::FRAC_1_PI,
-                latitude * 180.0 * std::f32::consts::FRAC_1_PI,
-            ))
-            .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
-        });
-
-        let items: &[(UiTexture, String, &str)] = &[
-            (
-                UiTexture::IconHeight,
-                format!("{:.0} m", planet.height_above_sea_level(p)),
-                "height",
-            ),
-            (
-                UiTexture::IconAirTemprature,
-                format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
-                "air-temprature",
-            ),
-            (
-                UiTexture::IconRainfall,
-                format!("{:.0} mm", tile.rainfall),
-                "rainfall",
-            ),
-            (
-                UiTexture::IconFertility,
-                format!("{:.0} %", tile.fertility),
-                "fertility",
-            ),
-            (
-                UiTexture::IconBiomass,
-                format!("{:.1} kg/m²", tile.biomass),
-                "biomass",
-            ),
-        ];
-
-        for (icon, label, s) in items {
-            let s = t!(s);
-            ui.horizontal(|ui| {
-                ui.image(textures.0[icon]).on_hover_text(&s);
-                ui.label(label).on_hover_text(s);
-            });
-        }
-
-        ui.separator();
-
-        ui.label(t!(tile.biome.as_ref()));
-
-        let s = match &tile.structure {
-            Structure::None => None,
-            Structure::Occupied { by } => {
-                Some(crate::info::structure_info(&planet.map[*by].structure))
-            }
-            other => Some(crate::info::structure_info(other)),
-        };
-
-        if let Some(s) = s {
-            ui.label(s);
-        } else {
-            ui.label("");
-        }
-
-        ui.separator();
-
-        super::message::msg_list(ui, wos, planet, conf);
+    last_hover_tile.get_or_insert(Coords(0, 0));
+    if hover_tile.0.is_some() {
+        *last_hover_tile = hover_tile.0;
     }
+
+    let p = hover_tile.0.unwrap_or(last_hover_tile.unwrap());
+
+    let tile = &planet.map[p];
+
+    ui.horizontal(|ui| {
+        ui.image(textures.0[&UiTexture::IconCoordinates])
+            .on_hover_text(t!("coordinates"));
+        ui.label(format!("[{}, {}]", p.0, p.1))
+            .on_hover_text(t!("coordinates"));
+
+        let (longitude, latitude) = planet.calc_longitude_latitude(p);
+        ui.label(format!(
+            "{:.0}°, {:.0}°",
+            longitude * 180.0 * std::f32::consts::FRAC_1_PI,
+            latitude * 180.0 * std::f32::consts::FRAC_1_PI,
+        ))
+        .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
+    });
+
+    let items: &[(UiTexture, String, &str)] = &[
+        (
+            UiTexture::IconHeight,
+            format!("{:.0} m", planet.height_above_sea_level(p)),
+            "height",
+        ),
+        (
+            UiTexture::IconAirTemprature,
+            format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
+            "air-temprature",
+        ),
+        (
+            UiTexture::IconRainfall,
+            format!("{:.0} mm", tile.rainfall),
+            "rainfall",
+        ),
+        (
+            UiTexture::IconFertility,
+            format!("{:.0} %", tile.fertility),
+            "fertility",
+        ),
+        (
+            UiTexture::IconBiomass,
+            format!("{:.1} kg/m²", tile.biomass),
+            "biomass",
+        ),
+    ];
+
+    for (icon, label, s) in items {
+        let s = t!(s);
+        ui.horizontal(|ui| {
+            ui.image(textures.0[icon]).on_hover_text(&s);
+            ui.label(label).on_hover_text(s);
+        });
+    }
+
+    ui.separator();
+
+    ui.label(t!(tile.biome.as_ref()));
+
+    let s = match &tile.structure {
+        Structure::None => None,
+        Structure::Occupied { by } => Some(crate::info::structure_info(&planet.map[*by].structure)),
+        other => Some(crate::info::structure_info(other)),
+    };
+
+    if let Some(s) = s {
+        ui.label(s);
+    } else {
+        ui.label("");
+    }
+
+    ui.separator();
+
+    super::message::msg_list(ui, wos, planet, conf);
 }
 
 fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, params: &Params) {

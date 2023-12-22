@@ -98,12 +98,12 @@ fn setup_fonts(
     gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
     let conf = conf.get(&ui_assets.default_conf).unwrap().clone();
-    egui_settings.scale_factor = conf.scale_factor.into();
+    egui_settings.scale_factor = conf.ui.scale_factor.into();
 
     let font_data = gunzip_bin.get(&ui_assets.font).unwrap().clone();
     let mut fonts = FontDefinitions::default();
     let mut font_data = FontData::from_owned(font_data.0);
-    font_data.tweak.scale = conf.font_scale;
+    font_data.tweak.scale = conf.ui.font_scale;
     fonts.font_data.insert("m+_font".to_owned(), font_data);
     fonts
         .families
@@ -181,7 +181,7 @@ fn layers_window(
         .rect;
     occupied_screen_space
         .window_rects
-        .push(convert_rect(rect, conf.scale_factor));
+        .push(convert_rect(rect, conf.ui.scale_factor));
 }
 
 fn layers_menu(

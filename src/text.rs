@@ -154,18 +154,28 @@ impl std::fmt::Display for WithUnitDisplay {
 }
 
 impl Msg {
-    pub fn icon(&self) -> &'static str {
+    pub fn text(&self) -> (MsgStyle, String) {
+        use MsgStyle::*;
         match &self.kind {
-            MsgKind::Welcome => "ℹ",
-            _ => "⚠",
+            MsgKind::Welcome => (Notice, t!("msg/welcome"; app_name=crate::APP_NAME)),
+            MsgKind::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
+            MsgKind::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
+            MsgKind::EventStart => (Notice, t!("event/start")),
         }
     }
+}
 
-    pub fn text(&self) -> String {
-        match &self.kind {
-            MsgKind::Welcome => t!("msg/welcome"; app_name=crate::APP_NAME),
-            MsgKind::WarnHighTemp => t!("msg/warn-high-temp"),
-            MsgKind::WarnLowTemp => t!("msg/warn-low-temp"),
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum MsgStyle {
+    Notice,
+    Warn,
+}
+
+impl MsgStyle {
+    pub fn icon(&self) -> &str {
+        match self {
+            MsgStyle::Notice => "ℹ",
+            MsgStyle::Warn => "⚠",
         }
     }
 }

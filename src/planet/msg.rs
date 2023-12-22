@@ -24,7 +24,10 @@ impl MsgHolder {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Msg> {
-        self.msgs.values()
+        MsgIter {
+            msgs: self.msgs.values().peekable(),
+            temp_msgs: self.temp_msgs.iter().peekable(),
+        }
     }
 
     pub fn append_temp(&mut self, new_msg: Msg) {
@@ -43,9 +46,29 @@ impl MsgHolder {
         self.temp_msgs
             .retain(|msg| discriminant(&msg.kind) != discriminant(target));
     }
+}
 
-    pub fn iter_temp(&self) -> impl Iterator<Item = &Msg> {
-        self.temp_msgs.iter()
+struct MsgIter<'a> {
+    msgs: std::iter::Peekable<std::collections::btree_map::Values<'a, Reverse<u64>, Msg>>,
+    temp_msgs: std::iter::Peekable<std::slice::Iter<'a, Msg>>,
+}
+
+impl<'a> Iterator for MsgIter<'a> {
+    type Item = &'a Msg;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match (self.msgs.peek(), self.temp_msgs.peek()) {
+            (Some(msg), Some(temp_msg)) => {
+                if msg.cycles > temp_msg.cycles {
+                    self.msgs.next()
+                } else {
+                    self.temp_msgs.next()
+                }
+            }
+            (Some(_), None) => self.msgs.next(),
+            (None, Some(_)) => self.temp_msgs.next(),
+            (None, None) => None,
+        }
     }
 }
 
@@ -54,4 +77,5 @@ pub enum MsgKind {
     Welcome,
     WarnHighTemp,
     WarnLowTemp,
+    EventStart,
 }
