@@ -178,13 +178,30 @@ fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {
 
 fn calc_insolation(planet: &Planet, sim: &mut Sim, params: &Params) {
     let solar_power = planet.state.solar_power;
-    if (sim.insolation_calculated_by_solar_constant - solar_power).abs() < 1.0e-3 {
+    if (sim.solar_constant_before - solar_power).abs() < 1.0e-3 {
         return;
     }
+    sim.solar_constant_before = solar_power;
 
     for p in planet.map.iter_idx() {
         let latitude = planet.calc_longitude_latitude(p).1;
         sim.insolation[p] = solar_power
             * linear_interpolation(&params.sim.latitude_insolation_table, latitude.abs());
+    }
+}
+
+// Calculate initial temprature at the first simulation
+pub fn init_temp(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let greenhouse_effect = greenhouse_effect(planet, params);
+    let map_iter_idx = planet.map.iter_idx();
+
+    for p in map_iter_idx {
+        let t4 = (1.0 - sim.albedo[p]) * sim.insolation[p]
+            / (STEFAN_BOLTZMANN_CONSTANT * (1.0 - greenhouse_effect));
+        let t = t4.sqrt().sqrt();
+        planet.map[p].temp = t;
+        if sim.sea_heat_cap[p] > 0.0 {
+            planet.map[p].sea_temp = t;
+        }
     }
 }

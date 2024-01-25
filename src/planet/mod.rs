@@ -146,7 +146,18 @@ impl Planet {
         // Simulate before start
         let mut sim = Sim::new(&planet);
         sim.before_start = true;
-        for _ in 0..start_params.cycles_before_start {
+        planet.advance(&mut sim, params);
+        heat_transfer::init_temp(&mut planet, &mut sim, params);
+
+        let water_volume = planet.water.water_volume;
+        planet.water.water_volume = 0.0;
+        for _ in 0..(start_params.cycles_before_start / 2) {
+            // Advance without water to accelerate heat transfer calclation
+            planet.advance(&mut sim, params);
+        }
+        planet.water.water_volume = water_volume;
+
+        for _ in 0..(start_params.cycles_before_start / 2) {
             planet.advance(&mut sim, params);
         }
 
