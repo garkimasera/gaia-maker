@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
@@ -231,6 +233,16 @@ pub enum StructureBuildingState {
     Disabled,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Race {
+    pub name: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Civilization {
+    pub race: Race,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Settlement {
     pub age: CivilizationAge,
@@ -399,6 +411,30 @@ pub enum BuildingEffect {
     },
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[strum_discriminants(name(PlanetEventKind))]
+#[strum_discriminants(derive(
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    EnumIter,
+    AsRefStr,
+    Display
+))]
+#[strum_discriminants(serde(rename_all = "snake_case"))]
+#[strum_discriminants(strum(serialize_all = "kebab-case"))]
+pub enum PlanetEvent {
+    Civilize { target: u8 },
+}
+
+impl PlanetEvent {
+    pub fn kind(&self) -> PlanetEventKind {
+        self.into()
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub sim: SimParams,
@@ -522,6 +558,10 @@ pub struct SimParams {
     pub sea_biomass_factor: f32,
     /// Biome transition probability before start simulation
     pub before_start_biome_transition_probability: f32,
+    /// Duration of events
+    pub event_duration: HashMap<PlanetEventKind, u64>,
+    /// The max number of civilizations
+    pub max_civs: u8,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

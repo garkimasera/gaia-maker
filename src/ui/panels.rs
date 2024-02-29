@@ -14,7 +14,7 @@ use crate::{
     GameSpeed, GameState,
 };
 
-use super::{help::HelpItem, EguiTextures, WindowsOpenState};
+use super::{dialog::CivilizeDialog, help::HelpItem, Dialog, EguiTextures, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -108,6 +108,10 @@ fn toolbar(
 
     ui.menu_image_button(textures.0[&UiTexture::IconBuild], |ui| {
         build_menu(ui, cursor_mode, planet, params);
+    });
+
+    ui.menu_image_button(textures.0[&UiTexture::IconAction], |ui| {
+        action_menu(ui, wos, cursor_mode, planet, params);
     });
 
     if button(ui, UiTexture::IconOrbit, "orbit") {
@@ -300,7 +304,7 @@ fn sidebar(
 
     ui.separator();
 
-    super::message::msg_list(ui, wos, planet, conf);
+    super::dialog::msg_list(ui, wos, planet, conf);
 }
 
 fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, params: &Params) {
@@ -321,6 +325,27 @@ fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, 
             ui.end_row();
         }
     });
+}
+
+fn action_menu(
+    ui: &mut egui::Ui,
+    wos: &mut WindowsOpenState,
+    _cursor_mode: &mut CursorMode,
+    planet: &Planet,
+    params: &Params,
+) {
+    ui.menu_button(t!("project"), |_ui| {});
+    ui.menu_button(t!("civilization"), |ui| {
+        for _civ in planet.civs.values() {}
+        if planet.civs.len() < params.sim.max_civs as usize
+            && ui.button(t!("civilize-new")).clicked()
+        {
+            wos.dialogs
+                .push(Dialog::Civilize(CivilizeDialog::new(params)));
+            ui.close_menu();
+        }
+    });
+    ui.end_row();
 }
 
 fn game_menu(

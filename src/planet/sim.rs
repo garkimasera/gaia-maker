@@ -1,7 +1,6 @@
 use super::*;
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::f32::consts::PI;
-use strum::AsRefStr;
 
 /// Holds data for simulation
 pub struct Sim {
@@ -37,8 +36,6 @@ pub struct Sim {
     pub fertility_effect: Array2d<f32>,
     /// The number of working buildings
     pub working_buildings: HashMap<BuildingKind, u32>,
-    /// Events occured in simulation
-    pub events: VecDeque<Event>,
 }
 
 impl Sim {
@@ -54,11 +51,6 @@ impl Sim {
         for p in map_iter_idx {
             atemp[p] = planet.map[p].temp;
             vapor[p] = planet.map[p].vapor;
-        }
-
-        let mut events = VecDeque::new();
-        if planet.cycles == 0 {
-            events.push_back(Event::Start);
         }
 
         Sim {
@@ -78,13 +70,6 @@ impl Sim {
             humidity: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
             working_buildings: HashMap::new(),
-            events,
         }
     }
-}
-
-#[derive(Clone, Copy, Debug, AsRefStr)]
-#[strum(serialize_all = "kebab-case")]
-pub enum Event {
-    Start,
 }

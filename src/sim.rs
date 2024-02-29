@@ -14,6 +14,9 @@ pub enum ManagePlanet {
     Load(String),
 }
 
+#[derive(Clone, Debug, Event)]
+pub struct StartEvent(pub PlanetEvent);
+
 #[derive(Clone, Default, Debug, Resource)]
 pub struct DebugTools {
     pub sim_every_frame: bool,
@@ -27,12 +30,16 @@ impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
+            .add_event::<StartEvent>()
             .init_resource::<DebugTools>()
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
             )
-            .add_systems(Update, update.run_if(in_state(GameState::Running)))
+            .add_systems(
+                Update,
+                (update, start_event).run_if(in_state(GameState::Running)),
+            )
             .add_systems(Update, manage_planet.before(GameSystemSet::Draw));
     }
 }
@@ -85,6 +92,17 @@ fn update(
     );
     update_map.update();
     planet.advance(&mut sim, &params);
+}
+
+fn start_event(
+    mut planet: ResMut<Planet>,
+    mut sim: ResMut<Sim>,
+    mut er_start_event: EventReader<StartEvent>,
+    params: Res<Params>,
+) {
+    for event in er_start_event.read() {
+        planet.start_event(event.0.clone(), &mut sim, &params);
+    }
 }
 
 #[derive(Debug, Event)]

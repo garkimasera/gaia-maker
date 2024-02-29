@@ -1,8 +1,8 @@
 mod debug_tools;
+mod dialog;
 mod help;
 mod main_menu;
 mod map;
-mod message;
 mod new_planet;
 mod orbit;
 mod panels;
@@ -27,7 +27,7 @@ use crate::{
     GameState,
 };
 
-use self::message::MsgDialog;
+use self::dialog::{CivilizeDialog, MsgDialog};
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
@@ -39,9 +39,15 @@ pub struct WindowsOpenState {
     pub map: bool,
     pub layers: bool,
     pub stat: bool,
-    pub msg_dialogs: Vec<MsgDialog>,
+    pub dialogs: Vec<Dialog>,
     pub help: bool,
     pub debug_tools: bool,
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Dialog {
+    Msg(MsgDialog),
+    Civilize(CivilizeDialog),
 }
 
 #[derive(Clone, Default, Resource)]
@@ -80,7 +86,7 @@ impl Plugin for UiPlugin {
                     map::map_window,
                     stat::stat_window,
                     layers_window,
-                    message::msg_dialogs,
+                    dialog::dialogs,
                     help::help_window,
                     debug_tools::debug_tools_window,
                 )

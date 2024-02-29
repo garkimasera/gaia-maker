@@ -149,6 +149,8 @@
         ],
         sea_biomass_factor: 0.05,
         before_start_biome_transition_probability: 0.5,
+        event_duration: {civilize: 1000},
+        max_civs: 5,
     ),
     new_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

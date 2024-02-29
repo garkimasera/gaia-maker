@@ -11,6 +11,8 @@
     "build": "建設",
     "cancel": "キャンセル",
     "carbon-dioxide": "二酸化炭素",
+    "civilization": "文明",
+    "civilize-new": "新たな種族を文明化",
     "close": "閉じる",
     "coordinates": "座標",
     "cost": "コスト",
@@ -38,6 +40,7 @@
     "oxygen": "酸素",
     "planet": "惑星",
     "produce": "産出",
+    "project": "プロジェクト",
     "radius": "半径",
     "rainfall": "降水量",
     "save": "セーブ",
@@ -81,7 +84,7 @@
     "fertilization-plant": "肥沃化工場",
     "heater": "ヒーター",
     "settlement": "居住地",
-    
+
     // Civilization Ages
     "stone-age": "石器時代",
     "bronze-age": "青銅器時代",

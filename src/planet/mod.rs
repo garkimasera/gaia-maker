@@ -2,7 +2,9 @@ mod action;
 mod atmo;
 mod biome;
 mod buildings;
+mod civ;
 mod defs;
+mod event;
 mod heat_transfer;
 mod map_generator;
 mod misc;
@@ -16,7 +18,9 @@ mod water;
 pub mod debug_log;
 
 pub use self::atmo::Atmosphere;
+use self::civ::Civs;
 pub use self::defs::*;
+pub use self::event::*;
 pub use self::msg::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
@@ -83,6 +87,8 @@ pub struct Planet {
     pub atmo: Atmosphere,
     pub water: Water,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, Building>,
+    pub events: Events,
+    pub civs: Civs,
     pub stat: Stat,
     pub msgs: MsgHolder,
 }
@@ -116,6 +122,8 @@ impl Planet {
             space_buildings: SpaceBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
                 .collect(),
+            events: Events::default(),
+            civs: Civs::default(),
             stat: Stat::new(params),
             msgs,
         };
@@ -178,8 +186,13 @@ impl Planet {
         self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
+        self::event::advance(self, sim, params);
         self::stat::update_stats(self, params);
         self::monitoring::monitor(self, params);
+    }
+
+    pub fn start_event(&mut self, event: PlanetEvent, sim: &mut Sim, params: &Params) {
+        self::event::start_event(self, event, sim, params);
     }
 
     pub fn n_tile(&self) -> u32 {
