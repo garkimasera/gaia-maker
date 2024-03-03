@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
 use bevy_common_assets::ron::RonAssetPlugin;
 use crossbeam::atomic::AtomicCell;
 use once_cell::sync::Lazy;
@@ -75,9 +74,8 @@ pub fn get_lang() -> Lang {
 #[derive(Clone, Copy, Debug)]
 pub struct TextPlugin;
 
-#[derive(Clone, Debug, Default, Deserialize, Asset, TypeUuid, Reflect)]
+#[derive(Clone, Debug, Default, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-#[uuid = "c5967cb0-5b5a-433e-b659-8a96ff47422f"]
 pub struct TranslationText(HashMap<String, String>);
 
 impl Plugin for TextPlugin {

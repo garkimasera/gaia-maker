@@ -143,8 +143,8 @@ fn map_ui(
         width: 1.0,
         color: egui::Color32::WHITE,
     };
-    let hide_by_sidebar = (occupied_screen_space.occupied_left * egui_settings.scale_factor as f32
-        / TILE_SIZE) as i32;
+    let hide_by_sidebar =
+        (occupied_screen_space.occupied_left * egui_settings.scale_factor / TILE_SIZE) as i32;
     let r1 = egui::Rect::from_two_pos(
         egui::pos2(
             in_screen_tile_range.to.0 as f32 * scale,

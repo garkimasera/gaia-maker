@@ -43,7 +43,7 @@ fn main() {
     let window_size = screen::preferred_window_size();
 
     App::new()
-        .add_state::<GameState>()
+        .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: APP_NAME.into(),

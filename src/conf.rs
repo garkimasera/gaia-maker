@@ -1,7 +1,7 @@
 use crate::GameState;
 use crate::{assets::UiAssets, text::Lang};
 use anyhow::{anyhow, Result};
-use bevy::{prelude::*, reflect::TypeUuid};
+use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
@@ -58,8 +58,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
     command.insert_resource(conf);
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Asset, Resource, TypeUuid, Reflect)]
-#[uuid = "92795344-1b26-49fb-b352-e989043777c7"]
+#[derive(Clone, Debug, Serialize, Deserialize, Asset, Resource, TypePath)]
 pub struct Conf {
     pub lang: Lang,
     pub camera_move_speed: f32,

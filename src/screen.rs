@@ -139,7 +139,7 @@ fn mouse_event(
     mut ew_cursor_action: EventWriter<CursorAction>,
     mut ew_centering: EventWriter<Centering>,
     window: Query<&Window, With<PrimaryWindow>>,
-    mouse_button_input: Res<Input<MouseButton>>,
+    mouse_button_input: Res<ButtonInput<MouseButton>>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     occupied_screen_space: Res<OccupiedScreenSpace>,
     hover_tile: Query<(&HoverTile, &Transform), Without<OrthographicProjection>>,
@@ -238,8 +238,8 @@ fn centering(
             .clamp(-TILE_SIZE, (planet.map.size().1 + 1) as f32 * TILE_SIZE);
 
         let space_adjust = Vec3::new(
-            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor as f32,
-            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor as f32,
+            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor,
+            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
             0.0,
         ) / 2.0;
         *transform -= space_adjust;
@@ -395,8 +395,8 @@ fn on_resize(
         let mut translation = transform.translation.xy();
 
         let d = Vec2::new(
-            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor as f32,
-            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor as f32,
+            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor,
+            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
         ) / 2.0;
         translation += d;
         ew_centering.send(Centering(translation));
@@ -404,7 +404,7 @@ fn on_resize(
 }
 
 fn keyboard_input(
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut ew_centering: EventWriter<Centering>,
     mut wos: ResMut<WindowsOpenState>,
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
@@ -421,10 +421,10 @@ fn keyboard_input(
 
     // Keys for moving camera
     let direction = match (
-        keys.pressed(KeyCode::Up) || keys.pressed(KeyCode::W),
-        keys.pressed(KeyCode::Left) || keys.pressed(KeyCode::A),
-        keys.pressed(KeyCode::Down) || keys.pressed(KeyCode::S),
-        keys.pressed(KeyCode::Right) || keys.pressed(KeyCode::D),
+        keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW),
+        keys.pressed(KeyCode::ArrowLeft) || keys.pressed(KeyCode::KeyA),
+        keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyS),
+        keys.pressed(KeyCode::ArrowRight) || keys.pressed(KeyCode::KeyD),
     ) {
         (true, false, false, false) => Some((0.0, 1.0)),
         (true, true, false, false) => Some((-1.0, 1.0)),
@@ -441,8 +441,8 @@ fn keyboard_input(
         let camera_pos = camera_query.get_single().unwrap().1.translation.xy();
 
         let space_adjust = Vec2::new(
-            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor as f32,
-            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor as f32,
+            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor,
+            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
@@ -461,7 +461,7 @@ fn setup_main_menu_background(
         color: Color::GRAY,
         texture: None,
     });
-    let bg_mesh = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(100000.0, 100000.0))));
+    let bg_mesh = meshes.add(Mesh::from(Rectangle::new(100000.0, 100000.0)));
     commands
         .spawn(MaterialMesh2dBundle {
             mesh: bg_mesh.into(),

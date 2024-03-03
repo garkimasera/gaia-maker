@@ -5,7 +5,6 @@ use crate::planet::*;
 use crate::text::{Lang, TranslationText};
 use crate::GameState;
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
 use bevy_asset_loader::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use bevy_kira_audio::AudioSource;
@@ -25,15 +24,16 @@ impl Plugin for AssetsPlugin {
                 "structures.ron",
             ]))
             .add_loading_state(
-                LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::MainMenu),
+                LoadingState::new(GameState::AssetLoading)
+                    .continue_to_state(GameState::MainMenu)
+                    .load_collection::<TranslationTexts>()
+                    .load_collection::<UiTextures>()
+                    .load_collection::<UiAssets>()
+                    .load_collection::<ParamsAssetCollection>()
+                    .load_collection::<BiomeTextures>()
+                    .load_collection::<StructureTextures>()
+                    .load_collection::<SoundEffects>(),
             )
-            .add_collection_to_loading_state::<_, TranslationTexts>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, UiTextures>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, UiAssets>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, ParamsAssetCollection>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, BiomeTextures>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, StructureTextures>(GameState::AssetLoading)
-            .add_collection_to_loading_state::<_, SoundEffects>(GameState::AssetLoading)
             .add_systems(OnExit(GameState::AssetLoading), create_assets_list);
     }
 }
@@ -110,52 +110,22 @@ pub struct UiAssets {
     pub font: Handle<GunzipBin>,
 }
 
-#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-#[uuid = "b0aaec37-3e9e-42d0-9370-aaacbe550799"]
 pub struct ParamsAsset(Params);
 
-impl bevy::reflect::TypePath for ParamsAsset {
-    fn type_path() -> &'static str {
-        "gaia_maker::assets::ParamsAsset"
-    }
-    fn short_type_path() -> &'static str {
-        "ParamsAsset"
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-#[uuid = "99d5021f-98fb-4873-b16a-bd9619b8b074"]
 pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
 
-impl bevy::reflect::TypePath for BiomeAssetList {
-    fn type_path() -> &'static str {
-        "gaia_maker::assets::BiomeAssetList"
-    }
-    fn short_type_path() -> &'static str {
-        "BiomeAssetList"
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Asset, TypeUuid)]
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-#[uuid = "801a2daa-956d-469a-8e83-3610fbca21fd"]
 pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);
 
-impl bevy::reflect::TypePath for StructureAssetList {
-    fn type_path() -> &'static str {
-        "gaia_maker::assets::StructureAssetList"
-    }
-    fn short_type_path() -> &'static str {
-        "StructureAssetList"
-    }
-}
-
 #[derive(Resource)]
-pub struct TextureAtlasMaps {
-    pub biomes: FnvHashMap<Biome, Handle<TextureAtlas>>,
-    pub structures: FnvHashMap<StructureKind, Handle<TextureAtlas>>,
+pub struct TextureAtlasLayouts {
+    pub biomes: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
+    pub structures: FnvHashMap<StructureKind, Handle<TextureAtlasLayout>>,
 }
 
 #[derive(Debug, Resource, AssetCollection)]
@@ -195,14 +165,12 @@ define_asset_list_from_enum! {
 fn create_assets_list(
     mut command: Commands,
     params_asset_collection: Res<ParamsAssetCollection>,
-    biome_textures: Res<BiomeTextures>,
-    structure_textures: Res<StructureTextures>,
     (params_asset, biome_asset_list, structure_asset_list): (
         Res<Assets<ParamsAsset>>,
         Res<Assets<BiomeAssetList>>,
         Res<Assets<StructureAssetList>>,
     ),
-    mut texture_atlas_assets: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let biome_asset_list = biome_asset_list
         .get(&params_asset_collection.biomes)
@@ -246,11 +214,10 @@ fn create_assets_list(
 
     let biomes = Biome::iter()
         .map(|biome| {
-            let image = biome_textures.get(biome);
-            let mut texture_atlas = TextureAtlas::new_empty(
-                image,
-                Vec2::new((TILE_SIZE + 2.0) * 3.0, (TILE_SIZE + 2.0) * 4.0),
-            );
+            let mut texture_atlas = TextureAtlasLayout::new_empty(Vec2::new(
+                (TILE_SIZE + 2.0) * 3.0,
+                (TILE_SIZE + 2.0) * 4.0,
+            ));
             for j in 0..8 {
                 for i in 0..6 {
                     texture_atlas.add_texture(biome_texture_rects[&(i, j)]);
@@ -266,10 +233,8 @@ fn create_assets_list(
     let structures = StructureKind::iter()
         .filter(|structure| !matches!(structure, StructureKind::None | StructureKind::Occupied))
         .map(|structure| {
-            let image = structure_textures.get(structure);
             let attrs = &structure_asset_list.0[&structure];
-            let texture_atlas = TextureAtlas::from_grid(
-                image,
+            let texture_atlas = TextureAtlasLayout::from_grid(
                 Vec2::new(attrs.width as _, attrs.height as _),
                 attrs.columns,
                 attrs.rows,
@@ -290,5 +255,5 @@ fn create_assets_list(
     params.structures = structure_asset_list.0.clone();
 
     command.insert_resource(params);
-    command.insert_resource(TextureAtlasMaps { biomes, structures });
+    command.insert_resource(TextureAtlasLayouts { biomes, structures });
 }

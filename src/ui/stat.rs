@@ -151,7 +151,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
         .x_axis_formatter(x_axis_formatter)
         .show_x(false)
         .show_y(true)
-        .auto_bounds_y()
+        .auto_bounds(egui::Vec2b::new(false, true))
         .show(ui, |plot_ui| {
             plot_ui.set_plot_bounds(plot::PlotBounds::from_min_max(
                 [0.0, min - bound_margin],

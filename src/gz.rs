@@ -1,14 +1,12 @@
 use bevy::asset::io::{AsyncReadExt, Reader};
 use bevy::asset::{AssetLoader, BoxedFuture, LoadContext};
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
 use flate2::read::GzDecoder;
 use std::io::Read;
 
 pub struct GzPlugin;
 
-#[derive(Clone, PartialEq, Eq, Debug, Asset, TypeUuid, Reflect)]
-#[uuid = "87515d55-ca3b-4de1-86f8-a31f8bf0581c"]
+#[derive(Clone, PartialEq, Eq, Debug, Asset, TypePath)]
 pub struct GunzipBin(pub Vec<u8>);
 
 impl Plugin for GzPlugin {

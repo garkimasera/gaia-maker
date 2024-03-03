@@ -104,7 +104,7 @@ fn setup_fonts(
     gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
     let conf = conf.get(&ui_assets.default_conf).unwrap().clone();
-    egui_settings.scale_factor = conf.ui.scale_factor.into();
+    egui_settings.scale_factor = conf.ui.scale_factor;
 
     let font_data = gunzip_bin.get(&ui_assets.font).unwrap().clone();
     let mut fonts = FontDefinitions::default();

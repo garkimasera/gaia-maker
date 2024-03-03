@@ -102,7 +102,8 @@ fn spawn_map_textures(
     update_map: Res<UpdateMap>,
     ltm: Res<LayeredTexMap>,
     params: Res<Params>,
-    texture_atlas_maps: Res<TextureAtlasMaps>,
+    biome_textures: Res<BiomeTextures>,
+    texture_atlas_layouts: Res<TextureAtlasLayouts>,
     in_screen_tile_range: Res<InScreenTileRange>,
     current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
@@ -142,8 +143,6 @@ fn spawn_map_textures(
 
                 let index = grid_x + grid_y * 6;
 
-                let sprite = TextureAtlasSprite { index, ..default() };
-
                 let x = p_screen.0 as f32 * TILE_SIZE
                     + PIECE_SIZE * ((corner.0 + 1) / 2) as f32
                     + PIECE_SIZE / 2.0;
@@ -154,8 +153,12 @@ fn spawn_map_textures(
                 let tile_asset = &params.biomes[tile_idx];
                 let id = commands
                     .spawn(SpriteSheetBundle {
-                        texture_atlas: texture_atlas_maps.biomes[tile_idx].clone(),
-                        sprite,
+                        texture: biome_textures.get(*tile_idx),
+                        sprite: Sprite::default(),
+                        atlas: TextureAtlas {
+                            index,
+                            layout: texture_atlas_layouts.biomes[tile_idx].clone(),
+                        },
                         transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
                         visibility: Visibility::Visible,
                         ..default()
@@ -171,7 +174,8 @@ fn spawn_structure_textures(
     mut commands: Commands,
     update_map: Res<UpdateMap>,
     params: Res<Params>,
-    texture_atlas_maps: Res<TextureAtlasMaps>,
+    structure_textures: Res<StructureTextures>,
+    texture_atlas_layouts: Res<TextureAtlasLayouts>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
     current_layer: Res<OverlayLayerKind>,
@@ -206,13 +210,16 @@ fn spawn_structure_textures(
                 index
             };
 
-            let sprite = TextureAtlasSprite { index, ..default() };
             let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
             let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
             let id = commands
                 .spawn(SpriteSheetBundle {
-                    texture_atlas: texture_atlas_maps.structures[&kind].clone(),
-                    sprite,
+                    atlas: TextureAtlas {
+                        index,
+                        layout: texture_atlas_layouts.structures[&kind].clone(),
+                    },
+                    texture: structure_textures.get(kind),
+                    sprite: Sprite::default(),
                     transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
                     visibility: Visibility::Inherited,
                     ..default()
@@ -252,9 +259,7 @@ fn spawn_overlay_meshes(
     let tile_mesh = if let Some(tile_mesh) = tile_mesh.clone() {
         tile_mesh
     } else {
-        *tile_mesh = Some(meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
-            TILE_SIZE, TILE_SIZE,
-        )))));
+        *tile_mesh = Some(meshes.add(Mesh::from(Rectangle::new(TILE_SIZE, TILE_SIZE))));
         tile_mesh.clone().unwrap()
     };
 
