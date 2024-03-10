@@ -29,7 +29,7 @@ regex = "1"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_with = "3"
-strum = { version = "0.25", features = ["derive"] }
+strum = { version = "0.26", features = ["derive"] }
 
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 
