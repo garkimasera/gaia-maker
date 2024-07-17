@@ -63,7 +63,7 @@
         mean_transition_time: 80,
         requirements: (
             temprature: (-273.15, -15.0),
-            rainfall: (50.0, 100000.0),
+            rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
         ),

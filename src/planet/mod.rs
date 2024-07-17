@@ -45,6 +45,7 @@ pub struct Tile {
     pub rainfall: f32,
     pub vapor: f32,
     pub buried_carbon: f32,
+    pub ice: f32,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -65,6 +66,7 @@ impl Default for Tile {
             rainfall: 0.0,
             vapor: 0.0,
             buried_carbon: 0.0,
+            ice: 0.0,
         }
     }
 }

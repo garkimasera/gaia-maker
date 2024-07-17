@@ -556,6 +556,8 @@ pub struct SimParams {
     pub biomass_to_buried_carbon_ratio_co2_table: Vec<(f32, f32)>,
     /// Sea biomass factor compared to land
     pub sea_biomass_factor: f32,
+    /// Required thickness of ice for ice field [m]
+    pub ice_thickness_of_ice_field: f32,
     /// Biome transition probability before start simulation
     pub before_start_biome_transition_probability: f32,
     /// Duration of events

@@ -148,6 +148,7 @@
             (0.2, 1.0),
         ],
         sea_biomass_factor: 0.05,
+        ice_thickness_of_ice_field: 0.0,
         before_start_biome_transition_probability: 0.5,
         event_duration: {civilize: 1000},
         max_civs: 5,

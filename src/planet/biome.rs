@@ -1,4 +1,4 @@
-use super::{misc::linear_interpolation, *};
+use super::{debug_log::tile_log, misc::linear_interpolation, *};
 use geom::{CDistRangeIter, CyclicMode, Direction};
 use rand::{thread_rng, Rng};
 
@@ -140,6 +140,11 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
     planet.stat.sum_biomass = sum_biomass as f32 * density_to_mass;
 
+    // Ice
+    for p in map_iter_idx {
+        tile_log(p, "ice", |p| planet.map[p].ice);
+    }
+
     // Biome transistion
     process_biome_transition(planet, sim, params);
 }
@@ -174,6 +179,10 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             continue;
         }
 
+        if current_biome == Biome::IceField && tile.ice >= params.sim.ice_thickness_of_ice_field {
+            continue;
+        }
+
         let Some((_, next_biome)) = Biome::iter()
             .filter_map(|biome| {
                 let priority = params.biomes[&biome].priority;
@@ -203,6 +212,10 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
 }
 
 fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
+    if biome == Biome::IceField && tile.ice <= params.sim.ice_thickness_of_ice_field {
+        return false;
+    }
+
     let req = &params.biomes[&biome].requirements;
 
     let temp = tile.temp - KELVIN_CELSIUS;
