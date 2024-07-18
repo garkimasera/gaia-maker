@@ -37,11 +37,10 @@ macro_rules! define_asset_list_from_enum {
             }
 
             fn load(world: &mut World) -> Vec<UntypedHandle> {
-                let cell = world.cell();
-                let asset_server = cell
+                let asset_server = world
                     .get_resource::<AssetServer>()
                     .expect("Cannot get AssetServer");
-                let _asset_keys = cell
+                let _asset_keys = world
                     .get_resource::<bevy_asset_loader::prelude::DynamicAssets>()
                     .expect("Cannot get bevy_asset_loader::prelude::DynamicAssets");
 

@@ -152,17 +152,19 @@ fn spawn_map_textures(
 
                 let tile_asset = &params.biomes[tile_idx];
                 let id = commands
-                    .spawn(SpriteSheetBundle {
-                        texture: biome_textures.get(*tile_idx),
-                        sprite: Sprite::default(),
-                        atlas: TextureAtlas {
+                    .spawn((
+                        SpriteBundle {
+                            texture: biome_textures.get(*tile_idx),
+                            sprite: Sprite::default(),
+                            transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
+                            visibility: Visibility::Visible,
+                            ..default()
+                        },
+                        TextureAtlas {
                             index,
                             layout: texture_atlas_layouts.biomes[tile_idx].clone(),
                         },
-                        transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
-                        visibility: Visibility::Visible,
-                        ..default()
-                    })
+                    ))
                     .id();
                 tex_entities.push(id);
             }
@@ -213,17 +215,19 @@ fn spawn_structure_textures(
             let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
             let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
             let id = commands
-                .spawn(SpriteSheetBundle {
-                    atlas: TextureAtlas {
+                .spawn((
+                    SpriteBundle {
+                        texture: structure_textures.get(kind),
+                        sprite: Sprite::default(),
+                        transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
+                        visibility: Visibility::Inherited,
+                        ..default()
+                    },
+                    TextureAtlas {
                         index,
                         layout: texture_atlas_layouts.structures[&kind].clone(),
                     },
-                    texture: structure_textures.get(kind),
-                    sprite: Sprite::default(),
-                    transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
-                    visibility: Visibility::Inherited,
-                    ..default()
-                })
+                ))
                 .id();
             tex_entities.push(id);
         }

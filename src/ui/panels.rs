@@ -369,7 +369,7 @@ fn game_menu(
     }
     ui.separator();
     if ui.button(t!("exit")).clicked() {
-        app_exit_events.send(bevy::app::AppExit);
+        app_exit_events.send(bevy::app::AppExit::Success);
         ui.close_menu();
         crate::screen::window_close();
     }

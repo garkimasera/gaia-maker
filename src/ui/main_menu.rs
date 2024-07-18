@@ -70,7 +70,7 @@ pub fn main_menu(
                             ew_manage_planet.send(ManagePlanet::Load("main.planet".into()));
                         }
                         if ui.button(t!("exit")).clicked() {
-                            app_exit_events.send(bevy::app::AppExit);
+                            app_exit_events.send(bevy::app::AppExit::Success);
                             crate::screen::window_close();
                         }
 

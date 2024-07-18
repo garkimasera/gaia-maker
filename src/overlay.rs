@@ -102,12 +102,12 @@ impl ColorMaterials {
     }
 
     pub fn get_rgb(&self, planet: &Planet, p: Coords, kind: OverlayLayerKind) -> [u8; 3] {
-        let color = self.get(planet, p, kind).0;
+        let color: Srgba = self.get(planet, p, kind).0.into();
 
         [
-            (color.r() * 255.0) as u8,
-            (color.g() * 255.0) as u8,
-            (color.b() * 255.0) as u8,
+            (color.red * 255.0) as u8,
+            (color.green * 255.0) as u8,
+            (color.blue * 255.0) as u8,
         ]
     }
 }
@@ -116,19 +116,21 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
     let white_yellow_red = (0..N_POINTS)
         .map(|i| {
             let color = if i < N_POINTS / 2 {
-                Color::Rgba {
+                Srgba {
                     red: 1.0,
                     green: 1.0,
                     blue: 1.0 - (i as f32 / (N_POINTS / 2) as f32),
                     alpha: 0.4,
                 }
+                .into()
             } else {
-                Color::Rgba {
+                Srgba {
                     red: 1.0,
                     green: 1.0 - ((i - N_POINTS / 2) as f32 / (N_POINTS / 2) as f32),
                     blue: 0.0,
                     alpha: 0.4,
                 }
+                .into()
             };
 
             let handle = materials.add(ColorMaterial {
@@ -142,12 +144,13 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
     let brown_white = GRAD_BROWN_WIHTE
         .into_iter()
         .map(|[r, g, b]| {
-            let color = Color::Rgba {
+            let color = Srgba {
                 red: r as f32 / 256.0,
                 green: g as f32 / 256.0,
                 blue: b as f32 / 256.0,
                 alpha: 0.4,
-            };
+            }
+            .into();
             let handle = materials.add(ColorMaterial {
                 color,
                 texture: None,
@@ -159,12 +162,13 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
     let blue_dark_blue = BLUE_DARK_BLUE
         .into_iter()
         .map(|[r, g, b]| {
-            let color = Color::Rgba {
+            let color = Srgba {
                 red: r as f32 / 256.0,
                 green: g as f32 / 256.0,
                 blue: b as f32 / 256.0,
                 alpha: 0.4,
-            };
+            }
+            .into();
             let handle = materials.add(ColorMaterial {
                 color,
                 texture: None,

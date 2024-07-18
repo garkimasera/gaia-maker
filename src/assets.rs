@@ -178,34 +178,43 @@ fn create_assets_list(
     let mut biome_texture_rects = HashMap::new();
     for j in 0..4 {
         for i in 0..3 {
-            let x = (TILE_SIZE + 2.0) * i as f32;
-            let y = (TILE_SIZE + 2.0) * j as f32;
-            let rect_size = Vec2::new(PIECE_SIZE, PIECE_SIZE);
+            let x = (TILE_SIZE as u32 + 2) * i;
+            let y = (TILE_SIZE as u32 + 2) * j;
+            let rect_size = UVec2::new(PIECE_SIZE as u32, PIECE_SIZE as u32);
             biome_texture_rects.insert(
                 (i * 2, j * 2),
-                Rect::from_center_size(
-                    Vec2::new(x + 1.0 + PIECE_SIZE * 0.5, y + 1.0 + PIECE_SIZE * 0.5),
+                URect::from_center_size(
+                    UVec2::new(x + 1 + PIECE_SIZE as u32 / 2, y + 1 + PIECE_SIZE as u32 / 2),
                     rect_size,
                 ),
             );
             biome_texture_rects.insert(
                 (i * 2 + 1, j * 2),
-                Rect::from_center_size(
-                    Vec2::new(x + 1.0 + PIECE_SIZE * 1.5, y + 1.0 + PIECE_SIZE * 0.5),
+                URect::from_center_size(
+                    UVec2::new(
+                        x + 1 + (PIECE_SIZE * 1.5) as u32,
+                        y + 1 + PIECE_SIZE as u32 / 2,
+                    ),
                     rect_size,
                 ),
             );
             biome_texture_rects.insert(
                 (i * 2, j * 2 + 1),
-                Rect::from_center_size(
-                    Vec2::new(x + 1.0 + PIECE_SIZE * 0.5, y + 1.0 + PIECE_SIZE * 1.5),
+                URect::from_center_size(
+                    UVec2::new(
+                        x + 1 + PIECE_SIZE as u32 / 2,
+                        y + 1 + (PIECE_SIZE * 1.5) as u32,
+                    ),
                     rect_size,
                 ),
             );
             biome_texture_rects.insert(
                 (i * 2 + 1, j * 2 + 1),
-                Rect::from_center_size(
-                    Vec2::new(x + 1.0 + PIECE_SIZE * 1.5, y + 1.0 + PIECE_SIZE * 1.5),
+                URect::from_center_size(
+                    UVec2::new(
+                        x + 1 + (PIECE_SIZE * 1.5) as u32,
+                        y + 1 + (PIECE_SIZE * 1.5) as u32,
+                    ),
                     rect_size,
                 ),
             );
@@ -214,9 +223,9 @@ fn create_assets_list(
 
     let biomes = Biome::iter()
         .map(|biome| {
-            let mut texture_atlas = TextureAtlasLayout::new_empty(Vec2::new(
-                (TILE_SIZE + 2.0) * 3.0,
-                (TILE_SIZE + 2.0) * 4.0,
+            let mut texture_atlas = TextureAtlasLayout::new_empty(UVec2::new(
+                (TILE_SIZE as u32 + 2) * 3,
+                (TILE_SIZE as u32 + 2) * 4,
             ));
             for j in 0..8 {
                 for i in 0..6 {
@@ -235,9 +244,9 @@ fn create_assets_list(
         .map(|structure| {
             let attrs = &structure_asset_list.0[&structure];
             let texture_atlas = TextureAtlasLayout::from_grid(
-                Vec2::new(attrs.width as _, attrs.height as _),
-                attrs.columns,
-                attrs.rows,
+                UVec2::new(attrs.width, attrs.height),
+                attrs.columns as u32,
+                attrs.rows as u32,
                 None,
                 None,
             );

@@ -15,7 +15,7 @@ pub struct ActionPlugin;
 #[derive(Clone, Copy, Debug, Event)]
 pub struct CursorAction {
     pub coords: Coords,
-    pub drag: bool,
+    pub _drag: bool,
 }
 
 impl Plugin for ActionPlugin {

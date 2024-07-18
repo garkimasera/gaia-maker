@@ -7,7 +7,7 @@ pub struct Sim {
     /// Before start simulation or not
     pub before_start: bool,
     /// The number of tiles
-    pub n_tile: u32,
+    pub _n_tile: u32,
     /// Tile area [m^2]
     pub tile_area: f32,
     /// Tile insolation [J/m^2]
@@ -55,7 +55,7 @@ impl Sim {
 
         Sim {
             before_start: false,
-            n_tile: size.0 * size.1,
+            _n_tile: size.0 * size.1,
             tile_area,
             insolation: Array2d::new(size.0, size.1, 0.0),
             solar_constant_before: 0.0,

@@ -193,14 +193,14 @@ fn mouse_event(
         if mouse_button_input.just_pressed(MouseButton::Left) {
             ew_cursor_action.send(CursorAction {
                 coords,
-                drag: false,
+                _drag: false,
             });
             *prev_tile_coords = Some(coords);
             return;
         }
 
         if prev_tile_coords.is_some() && Some(coords) != *prev_tile_coords {
-            ew_cursor_action.send(CursorAction { coords, drag: true });
+            ew_cursor_action.send(CursorAction { coords, _drag: true });
             *prev_tile_coords = Some(coords);
         }
     }
@@ -458,7 +458,13 @@ fn setup_main_menu_background(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let bg_material = materials.add(ColorMaterial {
-        color: Color::GRAY,
+        color: Srgba {
+            red: 0.5,
+            green: 0.5,
+            blue: 0.5,
+            alpha: 1.0,
+        }
+        .into(),
         texture: None,
     });
     let bg_mesh = meshes.add(Mesh::from(Rectangle::new(100000.0, 100000.0)));

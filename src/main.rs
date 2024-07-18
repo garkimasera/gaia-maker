@@ -1,5 +1,4 @@
-#![warn(rust_2018_compatibility, future_incompatible, nonstandard_style)]
-#![allow(clippy::type_complexity)]
+#![allow(clippy::type_complexity, clippy::assigning_clones)]
 
 extern crate tile_geom as geom;
 
@@ -43,7 +42,6 @@ fn main() {
     let window_size = screen::preferred_window_size();
 
     App::new()
-        .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: APP_NAME.into(),
@@ -54,6 +52,7 @@ fn main() {
             }),
             ..default()
         }))
+        .init_state::<GameState>()
         .add_plugins(gz::GzPlugin)
         .add_plugins(text::TextPlugin)
         .add_plugins(conf::ConfPlugin)

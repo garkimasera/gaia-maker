@@ -1,6 +1,7 @@
 use bevy::asset::io::{AsyncReadExt, Reader};
-use bevy::asset::{AssetLoader, BoxedFuture, LoadContext};
+use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::*;
+use bevy::utils::ConditionalSendFuture;
 use flate2::read::GzDecoder;
 use std::io::Read;
 
@@ -28,7 +29,7 @@ impl AssetLoader for GzLoader {
         reader: &'a mut Reader,
         _settings: &'a Self::Settings,
         _load_context: &'a mut LoadContext<'_>,
-    ) -> BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
+    ) -> impl ConditionalSendFuture<Output = Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
             let mut bytes = Vec::new();
             reader.read_to_end(&mut bytes).await?;
