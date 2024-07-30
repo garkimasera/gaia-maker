@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use once_cell::sync::Lazy;
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, WindowsOpenState};
@@ -12,6 +11,7 @@ use crate::screen::OccupiedScreenSpace;
 use crate::text::Unit;
 
 use std::collections::BTreeMap;
+use std::sync::LazyLock;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumDiscriminants)]
 #[strum_discriminants(name(ItemGroup))]
@@ -65,7 +65,7 @@ impl From<ItemGroup> for HelpItem {
     }
 }
 
-static ITEM_LIST: Lazy<BTreeMap<ItemGroup, Vec<HelpItem>>> = Lazy::new(|| {
+static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|| {
     let mut map = BTreeMap::new();
 
     map.insert(

@@ -1,9 +1,9 @@
 use geom::Coords;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::{collections::BTreeMap, sync::RwLock};
 
-static POS_FOR_LOG: Lazy<RwLock<Option<Coords>>> = Lazy::new(RwLock::default);
-static TILE_LOGS: Lazy<RwLock<BTreeMap<&'static str, String>>> = Lazy::new(RwLock::default);
+static POS_FOR_LOG: LazyLock<RwLock<Option<Coords>>> = LazyLock::new(RwLock::default);
+static TILE_LOGS: LazyLock<RwLock<BTreeMap<&'static str, String>>> = LazyLock::new(RwLock::default);
 
 pub fn clear_logs(p: Option<Coords>) {
     *POS_FOR_LOG.write().unwrap() = p;

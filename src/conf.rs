@@ -8,11 +8,11 @@ use serde::{Deserialize, Serialize};
 const CONF_FILE_NAME: &str = "conf.ron";
 
 #[cfg(not(target_arch = "wasm32"))]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[cfg(not(target_arch = "wasm32"))]
-static DATA_DIR: Lazy<Option<std::path::PathBuf>> =
-    Lazy::new(|| dirs::data_dir().map(|path| path.join(env!("CARGO_PKG_NAME"))));
+static DATA_DIR: LazyLock<Option<std::path::PathBuf>> =
+    LazyLock::new(|| dirs::data_dir().map(|path| path.join(env!("CARGO_PKG_NAME"))));
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn data_dir() -> Option<&'static std::path::Path> {

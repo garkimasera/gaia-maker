@@ -200,7 +200,10 @@ fn mouse_event(
         }
 
         if prev_tile_coords.is_some() && Some(coords) != *prev_tile_coords {
-            ew_cursor_action.send(CursorAction { coords, _drag: true });
+            ew_cursor_action.send(CursorAction {
+                coords,
+                _drag: true,
+            });
             *prev_tile_coords = Some(coords);
         }
     }

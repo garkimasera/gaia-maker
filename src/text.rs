@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use crossbeam::atomic::AtomicCell;
-use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{LazyLock, RwLock};
 use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 
 use crate::{
@@ -60,8 +59,8 @@ macro_rules! t {
 }
 
 static LANG: AtomicCell<Lang> = AtomicCell::new(Lang::English);
-static TRANSLATION_TEXTS: Lazy<RwLock<HashMap<Lang, TranslationText>>> =
-    Lazy::new(|| RwLock::new(HashMap::default()));
+static TRANSLATION_TEXTS: LazyLock<RwLock<HashMap<Lang, TranslationText>>> =
+    LazyLock::new(|| RwLock::new(HashMap::default()));
 
 pub fn set_lang(lang: Lang) {
     LANG.store(lang);
@@ -110,7 +109,8 @@ pub fn get_text<S: AsRef<str>>(s: S, map: HashMap<String, String>) -> String {
 }
 
 pub fn replace(s: &str, map: HashMap<String, String>) -> String {
-    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\$([a-zA-Z][a-zA-Z0-9_-]*)\}").unwrap());
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"\{\$([a-zA-Z][a-zA-Z0-9_-]*)\}").unwrap());
 
     RE.replace_all(s, |caps: &Captures| {
         let name = caps.get(1).unwrap().as_str();
