@@ -558,6 +558,12 @@ pub struct SimParams {
     pub sea_biomass_factor: f32,
     /// Required thickness of ice for ice field [m]
     pub ice_thickness_of_ice_field: f32,
+    /// Ice melting temprature [K]
+    pub ice_melting_temprature: f32,
+    /// Ice melting speed [m/K]
+    pub ice_melting_height_per_temp: f32,
+    /// Factor for adding ice height from rainfall [m/(rainfall)mm]
+    pub fallen_snow_factor: f32,
     /// Biome transition probability before start simulation
     pub before_start_biome_transition_probability: f32,
     /// Duration of events

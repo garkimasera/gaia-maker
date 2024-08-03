@@ -5,10 +5,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Water {
-    /// Volume of water [m^3]
+    /// Volume of water including ice [m^3]
     pub water_volume: f32,
     /// Sea level [m]
     pub sea_level: f32,
+    /// Volume of ice [m^3]
+    pub ice_volume: f32,
 }
 
 impl Water {
@@ -16,6 +18,16 @@ impl Water {
         Water {
             water_volume: start_params.water_volume,
             sea_level: 0.0,
+            ice_volume: 0.0,
+        }
+    }
+
+    pub fn sea_water_volume(&self) -> f32 {
+        let v = self.water_volume - self.ice_volume;
+        if v > 0.0 {
+            v
+        } else {
+            0.0
         }
     }
 }
@@ -36,6 +48,7 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     advance_rainfall_calc(planet, sim, params);
+    snow_calc(planet, sim, params);
 }
 
 fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
@@ -49,7 +62,7 @@ fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
         }
     }
 
-    v - planet.water.water_volume
+    v - planet.water.sea_water_volume()
 }
 
 fn bisection<F: Fn(f32) -> f32>(
@@ -134,4 +147,27 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
     }
 
     planet.stat.average_rainfall = sum_rainfall as f32 / planet.n_tile() as f32;
+}
+
+pub fn snow_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let mut ice_height_sum = 0.0;
+
+    for p in planet.map.iter_idx() {
+        let t = planet.map[p].temp;
+        let tile = &mut planet.map[p];
+
+        if t > params.sim.ice_melting_temprature && tile.ice > 0.0 {
+            let d = t - params.sim.ice_melting_temprature;
+            tile.ice -= params.sim.ice_melting_height_per_temp * d;
+            if tile.ice < 0.0 {
+                tile.ice = 0.0;
+            }
+        } else {
+            tile.ice += tile.rainfall * params.sim.fallen_snow_factor;
+        }
+
+        ice_height_sum += tile.ice as f64;
+    }
+
+    planet.water.ice_volume = ice_height_sum as f32 * sim.tile_area;
 }

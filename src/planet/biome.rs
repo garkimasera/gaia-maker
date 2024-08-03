@@ -179,7 +179,10 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             continue;
         }
 
-        if current_biome == Biome::IceField && tile.ice >= params.sim.ice_thickness_of_ice_field {
+        if tile.ice >= params.sim.ice_thickness_of_ice_field {
+            if current_biome != Biome::IceField {
+                planet.map[p].biome = Biome::IceField;
+            }
             continue;
         }
 
