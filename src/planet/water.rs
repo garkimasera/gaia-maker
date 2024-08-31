@@ -156,11 +156,13 @@ pub fn snow_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let t = planet.map[p].temp;
         let tile = &mut planet.map[p];
 
-        if t > params.sim.ice_melting_temprature && tile.ice > 0.0 {
-            let d = t - params.sim.ice_melting_temprature;
-            tile.ice -= params.sim.ice_melting_height_per_temp * d;
-            if tile.ice < 0.0 {
-                tile.ice = 0.0;
+        if t > params.sim.ice_melting_temprature {
+            if tile.ice > 0.0 {
+                let d = t - params.sim.ice_melting_temprature;
+                tile.ice -= params.sim.ice_melting_height_per_temp * d;
+                if tile.ice < 0.0 {
+                    tile.ice = 0.0;
+                }
             }
         } else {
             tile.ice += tile.rainfall * params.sim.fallen_snow_factor;

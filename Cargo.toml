@@ -11,7 +11,7 @@ base64 = "0.22"
 bevy = { version = "0.14", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_winit", "png", "x11", "webgl2"] }
 bevy_asset_loader = "0.21"
 bevy_common_assets = { version = "0.11", features = ["ron"] }
-bevy_egui = "0.28"
+bevy_egui = "0.29"
 bevy_kira_audio = "0.20"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
