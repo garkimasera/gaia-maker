@@ -74,8 +74,26 @@ impl Default for Tile {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Building {
     pub n: u32,
-    pub enabled: u32,
     pub working: u32,
+    pub control: BuildingControlValue,
+}
+
+impl Building {
+    fn enabled(&self) -> u32 {
+        match self.control {
+            BuildingControlValue::AlwaysEnabled => self.n,
+            BuildingControlValue::EnabledNumber(n) => n,
+            BuildingControlValue::IncreaseRate(_) => self.n,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, PartialOrd, Default, Debug, Serialize, Deserialize)]
+pub enum BuildingControlValue {
+    #[default]
+    AlwaysEnabled,
+    EnabledNumber(u32),
+    IncreaseRate(i32),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -130,27 +148,29 @@ impl Planet {
             msgs,
         };
 
-        for (kind, &n) in &start_params.orbital_buildings {
-            let building = planet.space_building_mut(*kind);
+        for (&kind, &n) in &start_params.orbital_buildings {
+            let building = planet.space_building_mut(kind);
             building.n = n;
-            building.enabled = n;
+            if params.building_attrs(kind).unwrap().control == BuildingControl::EnabledNumber {
+                building.control = BuildingControlValue::EnabledNumber(n);
+            }
         }
-        for (kind, &n) in &start_params.star_system_buildings {
-            let building = planet.space_building_mut(*kind);
+        for (&kind, &n) in &start_params.star_system_buildings {
+            let building = planet.space_building_mut(kind);
             building.n = n;
-            building.enabled = n;
+            if params.building_attrs(kind).unwrap().control == BuildingControl::EnabledNumber {
+                building.control = BuildingControlValue::EnabledNumber(n);
+            }
         }
 
-        let buildable_structures = &[
-            StructureKind::OxygenGenerator,
-            StructureKind::NitrogenSprayer,
-            StructureKind::CarbonDioxideSprayer,
-            StructureKind::Rainmaker,
-            StructureKind::FertilizationPlant,
-            StructureKind::Heater,
-        ];
-        for structure_kind in buildable_structures {
-            planet.player.buildable_structures.insert(*structure_kind);
+        for structure_kind in StructureKind::iter() {
+            if params
+                .building_attrs(structure_kind)
+                .map(|attrs| !attrs.cost.is_empty())
+                .unwrap_or_default()
+            {
+                planet.player.buildable_structures.insert(structure_kind);
+            }
         }
 
         // Simulate before start
@@ -173,7 +193,7 @@ impl Planet {
 
         // Reset
         planet.cycles = 0;
-        planet.res = Resources::new(start_params);
+        planet.res.reset(start_params);
         planet.stat.clear_history();
         self::stat::update_stats(&mut planet, params);
 
@@ -182,6 +202,11 @@ impl Planet {
 
     pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
         self.cycles += 1;
+
+        // Parameters need to initialize before simulation.
+        self.state.solar_power_multiplier = 1.0;
+        self.res.energy = 0.0;
+        self.res.used_energy = 0.0;
 
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);

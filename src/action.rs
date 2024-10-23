@@ -73,12 +73,6 @@ fn new_structure(kind: StructureKind) -> Structure {
         StructureKind::OxygenGenerator => Structure::OxygenGenerator {
             state: StructureBuildingState::Working,
         },
-        StructureKind::NitrogenSprayer => Structure::NitrogenSprayer {
-            state: StructureBuildingState::Working,
-        },
-        StructureKind::CarbonDioxideSprayer => Structure::CarbonDioxideSprayer {
-            state: StructureBuildingState::Working,
-        },
         StructureKind::Rainmaker => Structure::Rainmaker {
             state: StructureBuildingState::Working,
         },

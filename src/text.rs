@@ -137,7 +137,7 @@ impl Unit for ResourceKind {
 impl std::fmt::Display for WithUnitDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         let (unit0, unit1) = match self.kind {
-            ResourceKind::Energy => ("PJ", "EJ"),
+            ResourceKind::Material => ("Mt", "Gt"),
             _ => ("Mt", "Gt"),
         };
 

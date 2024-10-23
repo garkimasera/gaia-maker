@@ -4,9 +4,8 @@ mod help;
 mod main_menu;
 mod map;
 mod new_planet;
-mod orbit;
 mod panels;
-mod star_system;
+mod space_buildings;
 mod stat;
 
 use bevy::{math::Rect, prelude::*};
@@ -81,8 +80,8 @@ impl Plugin for UiPlugin {
             .add_systems(
                 Update,
                 (
-                    orbit::orbit_window,
-                    star_system::star_system_window,
+                    space_buildings::orbit_window,
+                    space_buildings::star_system_window,
                     map::map_window,
                     stat::stat_window,
                     layers_window,

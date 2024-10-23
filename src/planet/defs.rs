@@ -56,7 +56,6 @@ impl Default for State {
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum ResourceKind {
-    Energy,
     Material,
     Ice,
     Carbon,
@@ -188,8 +187,6 @@ pub enum Structure {
     None,
     Occupied { by: Coords },
     OxygenGenerator { state: StructureBuildingState },
-    NitrogenSprayer { state: StructureBuildingState },
-    CarbonDioxideSprayer { state: StructureBuildingState },
     Rainmaker { state: StructureBuildingState },
     FertilizationPlant { state: StructureBuildingState },
     Heater { state: StructureBuildingState },
@@ -204,8 +201,6 @@ impl Structure {
     pub fn building_state(&self) -> Option<&StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
-            Self::NitrogenSprayer { state } => Some(state),
-            Self::CarbonDioxideSprayer { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
             Self::FertilizationPlant { state } => Some(state),
             Self::Heater { state } => Some(state),
@@ -216,8 +211,6 @@ impl Structure {
     pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
         match self {
             Self::OxygenGenerator { state } => Some(state),
-            Self::NitrogenSprayer { state } => Some(state),
-            Self::CarbonDioxideSprayer { state } => Some(state),
             Self::Rainmaker { state } => Some(state),
             Self::FertilizationPlant { state } => Some(state),
             Self::Heater { state } => Some(state),
@@ -291,6 +284,8 @@ pub enum GasKind {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BuildingAttrs {
     #[serde(default)]
+    pub energy: f32,
+    #[serde(default)]
     pub cost: ResourceMap,
     #[serde(default)]
     pub upkeep: ResourceMap,
@@ -300,6 +295,20 @@ pub struct BuildingAttrs {
     pub build_max: Option<u32>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub effect: Option<BuildingEffect>,
+    #[serde(default)]
+    pub control: BuildingControl,
+}
+
+#[derive(
+    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Serialize, Deserialize, AsRefStr,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum BuildingControl {
+    #[default]
+    AlwaysEnabled,
+    EnabledNumber,
+    IncreaseRate,
 }
 
 #[derive(
@@ -322,7 +331,8 @@ pub struct BuildingAttrs {
 pub enum OrbitalBuildingKind {
     FusionReactor,
     OrbitalMirror,
-    SolarShield,
+    NitrogenSprayer,
+    CarbonDioxideSprayer,
     IonIrradiator,
 }
 
@@ -383,12 +393,22 @@ pub enum BuildingKind {
     Space(SpaceBuildingKind),
 }
 
+impl From<StructureKind> for BuildingKind {
+    fn from(kind: StructureKind) -> Self {
+        BuildingKind::Structure(kind)
+    }
+}
+
+impl<T: Into<SpaceBuildingKind>> From<T> for BuildingKind {
+    fn from(kind: T) -> Self {
+        BuildingKind::Space(kind.into())
+    }
+}
+
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
-    MultiplySolarPower {
-        value: f32,
-    },
+    AdjustSolarPower,
     RemoveAtmo {
         mass: f32,
         efficiency_table: Vec<(f32, f32)>,
@@ -438,7 +458,7 @@ impl PlanetEvent {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub sim: SimParams,
-    pub new_planet: NewPlanetParams,
+    pub custom_planet: CustomPlanetParams,
     pub default_start_params: StartParams,
     pub history: HistoryParams,
     #[serde(skip)]
@@ -451,8 +471,8 @@ pub struct Params {
 }
 
 impl Params {
-    pub fn building_attrs(&self, kind: BuildingKind) -> Option<&BuildingAttrs> {
-        match kind {
+    pub fn building_attrs<T: Into<BuildingKind>>(&self, kind: T) -> Option<&BuildingAttrs> {
+        match kind.into() {
             BuildingKind::Structure(kind) => self
                 .structures
                 .get(&kind)
@@ -586,7 +606,7 @@ pub struct NewPlanetPercentageParam {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NewPlanetParams {
+pub struct CustomPlanetParams {
     pub solar_constant: NewPlanetRangedParam,
     pub difference_in_elevation: NewPlanetRangedParam,
     pub water_volume: NewPlanetPercentageParam,

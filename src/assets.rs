@@ -85,7 +85,6 @@ pub enum UiTexture {
 impl From<ResourceKind> for UiTexture {
     fn from(kind: ResourceKind) -> Self {
         match kind {
-            ResourceKind::Energy => Self::IconResourceEnergy,
             ResourceKind::Material => Self::IconResourceMaterial,
             ResourceKind::Ice => Self::IconResourceIce,
             ResourceKind::Carbon => Self::IconResourceCarbon,

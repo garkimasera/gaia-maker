@@ -2,6 +2,10 @@ use super::*;
 
 impl Planet {
     pub fn buildable(&self, building: &BuildingAttrs, n: u32) -> bool {
+        if self.res.surplus_energy() < -building.energy {
+            return false;
+        }
+
         for (kind, v) in &building.cost {
             if *v * n as f32 > self.res.stock[kind] {
                 return false;
@@ -54,7 +58,21 @@ impl Planet {
         self.res.remove_by_map(cost);
         let building = self.space_building_mut(kind);
         building.n += 1;
-        building.enabled += 1;
+
+        if let BuildingControlValue::EnabledNumber(enabled) = &mut building.control {
+            *enabled += 1;
+        } else if building.n == 1 {
+            // Set initial control value at the first build
+            match params.building_attrs(kind).unwrap().control {
+                BuildingControl::AlwaysEnabled => (),
+                BuildingControl::EnabledNumber => {
+                    building.control = BuildingControlValue::EnabledNumber(1);
+                }
+                BuildingControl::IncreaseRate => {
+                    building.control = BuildingControlValue::IncreaseRate(0);
+                }
+            }
+        }
     }
 
     pub fn edit_biome(&mut self, coords: Coords, biome: Biome) {

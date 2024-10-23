@@ -1,4 +1,4 @@
-#![allow(clippy::type_complexity, clippy::assigning_clones)]
+#![allow(clippy::type_complexity)]
 
 extern crate tile_geom as geom;
 

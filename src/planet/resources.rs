@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Resources {
+    pub energy: f32,
+    pub used_energy: f32,
     pub stock: ResourceMap,
     pub cap: ResourceMap,
     pub diff: ResourceMap,
@@ -15,6 +17,8 @@ pub fn empty_resource_map() -> ResourceMap {
 impl Default for Resources {
     fn default() -> Self {
         Resources {
+            energy: 0.0,
+            used_energy: 0.0,
             stock: empty_resource_map(),
             cap: ResourceKind::iter().map(|kind| (kind, 1.0E+06)).collect(),
             diff: empty_resource_map(),
@@ -42,5 +46,17 @@ impl Resources {
         for (&kind, &v) in map {
             self.add(kind, -v);
         }
+    }
+
+    pub fn surplus_energy(&self) -> f32 {
+        self.energy - self.used_energy
+    }
+
+    pub fn reset(&mut self, start_params: &StartParams) {
+        let initial = Self::new(start_params);
+
+        self.stock = initial.stock;
+        self.cap = initial.cap;
+        self.diff = initial.diff;
     }
 }

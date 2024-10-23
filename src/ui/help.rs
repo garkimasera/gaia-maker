@@ -5,7 +5,8 @@ use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 use super::{convert_rect, WindowsOpenState};
 use crate::conf::Conf;
 use crate::planet::{
-    BuildingAttrs, OrbitalBuildingKind, Params, StarSystemBuildingKind, StructureKind,
+    BuildingAttrs, OrbitalBuildingKind, Params, SpaceBuildingKind, StarSystemBuildingKind,
+    StructureKind,
 };
 use crate::screen::OccupiedScreenSpace;
 use crate::text::Unit;
@@ -33,6 +34,15 @@ impl AsRef<str> for HelpItem {
             HelpItem::StarSystemBuildings(star_system_building_kind) => {
                 star_system_building_kind.as_ref()
             }
+        }
+    }
+}
+
+impl<T: Into<SpaceBuildingKind>> From<T> for HelpItem {
+    fn from(kind: T) -> Self {
+        match kind.into() {
+            SpaceBuildingKind::Orbital(kind) => HelpItem::OrbitalBuildings(kind),
+            SpaceBuildingKind::StarSystem(kind) => HelpItem::StarSystemBuildings(kind),
         }
     }
 }
@@ -194,8 +204,15 @@ fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
             });
         ui.label(s);
     }
-    if !attrs.upkeep.is_empty() {
+    if !attrs.upkeep.is_empty() || attrs.energy < 0.0 {
         ui.label(egui::RichText::new(t!("upkeep")).strong());
+
+        let s = if attrs.energy < 0.0 {
+            format!("{}: {}TW", t!("energy"), -attrs.energy)
+        } else {
+            String::new()
+        };
+
         let mut resources = attrs.upkeep.iter().collect::<Vec<_>>();
         resources.sort_by_key(|(resource, _)| *resource);
         let s = resources
@@ -207,7 +224,7 @@ fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
                     resource.display_with_value(**value)
                 )
             })
-            .fold(String::new(), |mut s0, s1| {
+            .fold(s, |mut s0, s1| {
                 if !s0.is_empty() {
                     s0.push_str(", ");
                 }
@@ -216,8 +233,15 @@ fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
             });
         ui.label(s);
     }
-    if !attrs.produce.is_empty() {
+    if !attrs.produce.is_empty() || attrs.energy > 0.0 {
         ui.label(egui::RichText::new(t!("produce")).strong());
+
+        let s = if attrs.energy > 0.0 {
+            format!("{}: {}TW", t!("energy"), attrs.energy)
+        } else {
+            String::new()
+        };
+
         let mut resources = attrs.produce.iter().collect::<Vec<_>>();
         resources.sort_by_key(|(resource, _)| *resource);
         let s = resources
@@ -229,7 +253,7 @@ fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
                     resource.display_with_value(**value)
                 )
             })
-            .fold(String::new(), |mut s0, s1| {
+            .fold(s, |mut s0, s1| {
                 if !s0.is_empty() {
                     s0.push_str(", ");
                 }

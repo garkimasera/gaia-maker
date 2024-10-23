@@ -49,13 +49,13 @@ fn update_upkeep_produce(
         };
         let max = max_workable_buildings(attrs, planet);
         let building = planet.space_building_mut(kind);
-        let working = max.min(building.enabled);
+        let working = max.min(building.enabled());
         building.working = working;
         sim.working_buildings
             .insert(BuildingKind::Space(kind), working);
         add_upkeep_produce(
             attrs,
-            building.enabled,
+            building.enabled(),
             working,
             &mut planet.res,
             &mut produce,
@@ -122,6 +122,12 @@ fn add_upkeep_produce(
     res: &mut Resources,
     produce: &mut ResourceMap,
 ) {
+    if attrs.energy > 0.0 {
+        res.energy += attrs.energy * working as f32;
+    } else {
+        res.used_energy += -attrs.energy * working as f32;
+    }
+
     for (resource_kind, &value) in &attrs.upkeep {
         res.add(*resource_kind, -(value * working as f32));
         *res.diff.get_mut(resource_kind).unwrap() -= value * enabled as f32;
@@ -138,8 +144,6 @@ fn apply_building_effect(
     working_buildings: &FnvHashMap<BuildingKind, u32>,
     params: &Params,
 ) {
-    planet.state.solar_power_multiplier = 1.0;
-
     for (&kind, &n) in working_buildings {
         let Some(effect) = &params
             .building_attrs(kind)
@@ -148,10 +152,19 @@ fn apply_building_effect(
             continue;
         };
 
-        #[allow(clippy::single_match)]
+        let control_value = if let BuildingKind::Space(kind) = kind {
+            Some(planet.space_building(kind).control)
+        } else {
+            None
+        };
+
         match effect {
-            BuildingEffect::MultiplySolarPower { value } => {
-                planet.state.solar_power_multiplier += value * n as f32;
+            BuildingEffect::AdjustSolarPower => {
+                if n > 0 {
+                    if let Some(BuildingControlValue::IncreaseRate(rate)) = control_value {
+                        planet.state.solar_power_multiplier += (rate as f32) / 100.0;
+                    }
+                }
             }
             BuildingEffect::RemoveAtmo {
                 mass,

@@ -185,6 +185,17 @@ fn sidebar(
     conf: &Conf,
     last_hover_tile: &mut Option<Coords>,
 ) {
+    // Energy
+    ui.horizontal(|ui| {
+        let texture = textures.0[&UiTexture::IconResourceEnergy];
+        ui.image(texture).on_hover_text(t!("energy"));
+        ui.label(format!(
+            "{:.1} / {:.1} TW",
+            planet.res.used_energy, planet.res.energy
+        ));
+    });
+
+    // Resources
     let mut stock: Vec<_> = planet.res.stock.iter().collect();
     stock.sort_by_key(|&(res, _)| res);
     for (kind, v) in stock.into_iter() {

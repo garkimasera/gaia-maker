@@ -5,31 +5,9 @@
         columns: 1,
         rows: 2,
         building: (
+            energy: -100,
             cost: { material: 200 },
-            upkeep: { energy: 10000.0 },
             effect: SprayToAtmo( kind: oxygen, mass: 500 ),
-        ),
-    ),
-    nitrogen_sprayer: (
-        width: 48,
-        height: 48,
-        columns: 1,
-        rows: 2,
-        building: (
-            cost: { material: 100 },
-            upkeep: { energy: 10, nitrogen: 200 },
-            effect: SprayToAtmo( kind: nitrogen, mass: 200 ),
-        ),
-    ),
-    carbon_dioxide_sprayer: (
-        width: 48,
-        height: 48,
-        columns: 1,
-        rows: 2,
-        building: (
-            cost: { material: 100 },
-            upkeep: { energy: 2000, carbon: 50 },
-            effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3 ),
         ),
     ),
     rainmaker: (
@@ -38,8 +16,9 @@
         columns: 1,
         rows: 2,
         building: (
+            energy: -2,
             cost: { material: 100 },
-            upkeep: { energy: 2000, ice: 1 },
+            upkeep: { ice: 1 },
             effect: Vapor ( value: 5000, additional_water: 1e+9 ),
         ),
     ),
@@ -49,8 +28,8 @@
         columns: 1,
         rows: 2,
         building: (
+            energy: -0.02,
             cost: { material: 100 },
-            upkeep: { energy: 2.0 },
             effect: Fertilize ( increment: 0.1, max: 40.0, range: 2 ),
         ),
     ),
@@ -60,8 +39,8 @@
         columns: 1,
         rows: 2,
         building: (
+            energy: -10,
             cost: { material: 100 },
-            upkeep: { energy: 1000 },
             effect: Heater ( heat: 1.0e+18 ),
         ),
     ),
