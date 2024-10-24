@@ -20,7 +20,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     env:
-      - RUSTFLAGS: "--cfg=web_sys_unstable_apis" # for bevy_egui
+      RUSTFLAGS: "--cfg=web_sys_unstable_apis" # for bevy_egui
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
