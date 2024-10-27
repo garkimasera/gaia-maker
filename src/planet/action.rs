@@ -5,11 +5,8 @@ impl Planet {
         if self.res.surplus_energy() < -building.energy {
             return false;
         }
-
-        for (kind, v) in &building.cost {
-            if *v * n as f32 > self.res.stock[kind] {
-                return false;
-            }
+        if building.cost * n as f32 > self.res.material {
+            return false;
         }
         true
     }
@@ -31,7 +28,14 @@ impl Planet {
         true
     }
 
-    pub fn place(&mut self, p: Coords, size: StructureSize, structure: Structure, params: &Params) {
+    pub fn place(
+        &mut self,
+        p: Coords,
+        size: StructureSize,
+        structure: Structure,
+        sim: &mut Sim,
+        params: &Params,
+    ) {
         assert!(self.placeable(p, size));
 
         let kind = structure.kind();
@@ -41,21 +45,24 @@ impl Planet {
             self.map[p + p_rel].structure = Structure::Occupied { by: p };
         }
 
-        self.res
-            .remove_by_map(&params.structures[&kind].building.cost);
+        self.res.material -= params.structures[&kind].building.cost;
+        self.update(sim, params);
     }
 
-    pub fn demolition(&mut self, p: Coords) {
+    pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
         self.map[p].structure = Structure::None;
+        self.update(sim, params);
     }
 
-    pub fn build_space_building(&mut self, kind: impl Into<SpaceBuildingKind>, params: &Params) {
+    pub fn build_space_building(
+        &mut self,
+        kind: impl Into<SpaceBuildingKind>,
+        sim: &mut Sim,
+        params: &Params,
+    ) {
         let kind = kind.into();
-        let cost = &params
-            .building_attrs(BuildingKind::Space(kind))
-            .unwrap()
-            .cost;
-        self.res.remove_by_map(cost);
+        let cost = &params.building_attrs(BuildingKind::Space(kind)).cost;
+        self.res.material -= cost;
         let building = self.space_building_mut(kind);
         building.n += 1;
 
@@ -63,7 +70,7 @@ impl Planet {
             *enabled += 1;
         } else if building.n == 1 {
             // Set initial control value at the first build
-            match params.building_attrs(kind).unwrap().control {
+            match params.building_attrs(kind).control {
                 BuildingControl::AlwaysEnabled => (),
                 BuildingControl::EnabledNumber => {
                     building.control = BuildingControlValue::EnabledNumber(1);
@@ -73,6 +80,7 @@ impl Planet {
                 }
             }
         }
+        self.update(sim, params);
     }
 
     pub fn edit_biome(&mut self, coords: Coords, biome: Biome) {

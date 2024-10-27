@@ -33,8 +33,7 @@ pub struct UiPlugin;
 
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
-    pub orbit: bool,
-    pub star_system: bool,
+    pub space_building: bool,
     pub map: bool,
     pub layers: bool,
     pub stat: bool,
@@ -80,8 +79,7 @@ impl Plugin for UiPlugin {
             .add_systems(
                 Update,
                 (
-                    space_buildings::orbit_window,
-                    space_buildings::star_system_window,
+                    space_buildings::space_buildings_window,
                     map::map_window,
                     stat::stat_window,
                     layers_window,

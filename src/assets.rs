@@ -54,6 +54,7 @@ pub enum UiTexture {
     IconBiomass,
     IconBuild,
     IconCoordinates,
+    IconEnergy,
     IconFertility,
     IconGameMenu,
     IconHeight,
@@ -62,14 +63,9 @@ pub enum UiTexture {
     IconMap,
     IconMaterial,
     IconMessage,
-    IconOrbit,
     IconPower,
     IconRainfall,
-    IconResourceEnergy,
-    IconResourceMaterial,
-    IconResourceIce,
-    IconResourceCarbon,
-    IconResourceNitrogen,
+    IconSpaceBuildings,
     IconSpeedFast,
     IconSpeedFastSelected,
     IconSpeedNormal,
@@ -80,17 +76,6 @@ pub enum UiTexture {
     IconStat,
     TileColored,
     TileCursor,
-}
-
-impl From<ResourceKind> for UiTexture {
-    fn from(kind: ResourceKind) -> Self {
-        match kind {
-            ResourceKind::Material => Self::IconResourceMaterial,
-            ResourceKind::Ice => Self::IconResourceIce,
-            ResourceKind::Carbon => Self::IconResourceCarbon,
-            ResourceKind::Nitrogen => Self::IconResourceNitrogen,
-        }
-    }
 }
 
 define_asset_list_from_enum! {

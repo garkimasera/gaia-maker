@@ -2,7 +2,7 @@ use super::{misc::linear_interpolation, *};
 use fnv::FnvHashMap;
 
 impl Planet {
-    pub fn space_building(&mut self, kind: impl Into<SpaceBuildingKind>) -> &Building {
+    pub fn space_building(&self, kind: impl Into<SpaceBuildingKind>) -> &Building {
         self.space_buildings.get(&kind.into()).unwrap()
     }
 
@@ -26,145 +26,50 @@ impl Planet {
     }
 }
 
-pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    let working_buildings = update_upkeep_produce(planet, sim, params);
-    apply_building_effect(planet, &working_buildings, params);
-}
+pub fn update(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    update_working_buildings(planet, &mut sim.working_buildings);
 
-fn update_upkeep_produce(
-    planet: &mut Planet,
-    sim: &mut Sim,
-    params: &Params,
-) -> FnvHashMap<BuildingKind, u32> {
-    let mut working_buildings = FnvHashMap::default();
-    let mut produce = empty_resource_map();
-
-    for v in planet.res.diff.values_mut() {
-        *v = 0.0;
-    }
-
-    for kind in SpaceBuildingKind::iter() {
-        let Some(attrs) = params.building_attrs(BuildingKind::Space(kind)) else {
-            continue;
-        };
-        let max = max_workable_buildings(attrs, planet);
-        let building = planet.space_building_mut(kind);
-        let working = max.min(building.enabled());
-        building.working = working;
-        sim.working_buildings
-            .insert(BuildingKind::Space(kind), working);
-        add_upkeep_produce(
-            attrs,
-            building.enabled(),
-            working,
-            &mut planet.res,
-            &mut produce,
-        );
-        working_buildings.insert(BuildingKind::Space(kind), working);
-    }
-
-    for p in planet.map.iter_idx() {
-        let structure = &mut planet.map[p].structure;
-        let kind = BuildingKind::Structure(structure.kind());
-        let Some(building_state) = structure.building_state_mut() else {
-            continue;
-        };
-        let Some(attrs) = params.building_attrs(kind) else {
-            continue;
-        };
-
-        if *building_state == StructureBuildingState::Disabled {
+    for (&kind, &n) in &sim.working_buildings {
+        if n == 0 {
             continue;
         }
-
-        let workable = attrs
-            .upkeep
-            .iter()
-            .all(|(resource_kind, value)| planet.res.stock[resource_kind] > *value);
-        let working = if workable { 1 } else { 0 };
-
-        add_upkeep_produce(attrs, 1, working, &mut planet.res, &mut produce);
-
-        if workable {
-            *working_buildings.entry(kind).or_insert(0) += 1;
-            *building_state = StructureBuildingState::Working;
-        } else {
-            *building_state = StructureBuildingState::Stopped;
-        }
-    }
-
-    for (resource_kind, produce) in produce {
-        planet.res.add(resource_kind, produce);
-    }
-
-    working_buildings
-}
-
-fn max_workable_buildings(attrs: &BuildingAttrs, planet: &Planet) -> u32 {
-    let n = attrs
-        .upkeep
-        .iter()
-        .map(|(resource_kind, upkeep)| (planet.res.stock[resource_kind] / upkeep) as u32)
-        .min()
-        .unwrap_or(u32::MAX);
-
-    if let Some(build_max) = attrs.build_max {
-        n.min(build_max)
-    } else {
-        n
-    }
-}
-
-fn add_upkeep_produce(
-    attrs: &BuildingAttrs,
-    enabled: u32,
-    working: u32,
-    res: &mut Resources,
-    produce: &mut ResourceMap,
-) {
-    if attrs.energy > 0.0 {
-        res.energy += attrs.energy * working as f32;
-    } else {
-        res.used_energy += -attrs.energy * working as f32;
-    }
-
-    for (resource_kind, &value) in &attrs.upkeep {
-        res.add(*resource_kind, -(value * working as f32));
-        *res.diff.get_mut(resource_kind).unwrap() -= value * enabled as f32;
-    }
-
-    for (resource_kind, &value) in &attrs.produce {
-        *produce.get_mut(resource_kind).unwrap() += value * working as f32;
-        *res.diff.get_mut(resource_kind).unwrap() += value * enabled as f32;
-    }
-}
-
-fn apply_building_effect(
-    planet: &mut Planet,
-    working_buildings: &FnvHashMap<BuildingKind, u32>,
-    params: &Params,
-) {
-    for (&kind, &n) in working_buildings {
-        let Some(effect) = &params
-            .building_attrs(kind)
-            .and_then(|attrs| attrs.effect.as_ref())
-        else {
-            continue;
-        };
-
+        let attrs = params.building_attrs(kind);
         let control_value = if let BuildingKind::Space(kind) = kind {
             Some(planet.space_building(kind).control)
         } else {
             None
         };
+        if attrs.energy > 0.0 {
+            planet.res.energy += attrs.energy * n as f32;
+        } else {
+            planet.res.used_energy += -attrs.energy * n as f32;
+        }
 
-        match effect {
-            BuildingEffect::AdjustSolarPower => {
-                if n > 0 {
-                    if let Some(BuildingControlValue::IncreaseRate(rate)) = control_value {
-                        planet.state.solar_power_multiplier += (rate as f32) / 100.0;
-                    }
+        match &attrs.effect {
+            Some(BuildingEffect::ProduceMaterial { mass }) => {
+                planet.res.diff_material += mass * n as f32;
+            }
+            Some(BuildingEffect::AdjustSolarPower) => {
+                if let Some(BuildingControlValue::IncreaseRate(rate)) = control_value {
+                    planet.state.solar_power_multiplier += (rate as f32) / 100.0;
                 }
+            }
+            _ => (),
+        }
+    }
+}
+
+pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    for (&kind, &n) in &sim.working_buildings {
+        if n == 0 {
+            continue;
+        }
+        let Some(effect) = &params.building_attrs(kind).effect.as_ref() else {
+            continue;
+        };
+        match effect {
+            BuildingEffect::ProduceMaterial { mass } => {
+                planet.res.material += mass * n as f32;
             }
             BuildingEffect::RemoveAtmo {
                 mass,
@@ -181,6 +86,29 @@ fn apply_building_effect(
             _ => (),
         }
     }
+}
 
-    planet.state.solar_power = planet.basics.solar_constant * planet.state.solar_power_multiplier;
+fn update_working_buildings(
+    planet: &Planet,
+    working_buildings: &mut FnvHashMap<BuildingKind, u32>,
+) {
+    working_buildings.clear();
+
+    for kind in SpaceBuildingKind::iter() {
+        let n = planet.space_building(kind).enabled();
+        working_buildings.insert(BuildingKind::Space(kind), n);
+    }
+
+    for p in planet.map.iter_idx() {
+        let structure = &planet.map[p].structure;
+        let kind = BuildingKind::Structure(structure.kind());
+        let Some(building_state) = structure.building_state() else {
+            continue;
+        };
+        if *building_state == StructureBuildingState::Disabled {
+            continue;
+        }
+
+        *working_buildings.entry(kind).or_insert(0) += 1;
+    }
 }

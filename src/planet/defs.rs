@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
+use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
@@ -37,32 +37,6 @@ impl Default for State {
         }
     }
 }
-
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Debug,
-    Serialize,
-    Deserialize,
-    EnumString,
-    EnumIter,
-    AsRefStr,
-)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "kebab-case")]
-pub enum ResourceKind {
-    Material,
-    Ice,
-    Carbon,
-    Nitrogen,
-}
-
-pub type ResourceMap = fnv::FnvHashMap<ResourceKind, f32>;
 
 #[derive(
     Clone,
@@ -208,14 +182,23 @@ impl Structure {
         }
     }
 
-    pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
-        match self {
-            Self::OxygenGenerator { state } => Some(state),
-            Self::Rainmaker { state } => Some(state),
-            Self::FertilizationPlant { state } => Some(state),
-            Self::Heater { state } => Some(state),
-            _ => None,
-        }
+    // pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
+    //     match self {
+    //         Self::OxygenGenerator { state } => Some(state),
+    //         Self::Rainmaker { state } => Some(state),
+    //         Self::FertilizationPlant { state } => Some(state),
+    //         Self::Heater { state } => Some(state),
+    //         _ => None,
+    //     }
+    // }
+}
+
+impl StructureKind {
+    pub fn buildable_by_player(self) -> bool {
+        matches!(
+            self,
+            Self::OxygenGenerator | Self::Rainmaker | Self::FertilizationPlant | Self::Heater
+        )
     }
 }
 
@@ -286,11 +269,7 @@ pub struct BuildingAttrs {
     #[serde(default)]
     pub energy: f32,
     #[serde(default)]
-    pub cost: ResourceMap,
-    #[serde(default)]
-    pub upkeep: ResourceMap,
-    #[serde(default)]
-    pub produce: ResourceMap,
+    pub cost: f32,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub build_max: Option<u32>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
@@ -328,63 +307,14 @@ pub enum BuildingControl {
 )]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
-pub enum OrbitalBuildingKind {
+pub enum SpaceBuildingKind {
     FusionReactor,
+    AsteroidMiningStation,
+    DysonSwarmUnit,
     OrbitalMirror,
     NitrogenSprayer,
     CarbonDioxideSprayer,
     IonIrradiator,
-}
-
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Debug,
-    Serialize,
-    Deserialize,
-    EnumString,
-    EnumIter,
-    AsRefStr,
-)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "kebab-case")]
-pub enum StarSystemBuildingKind {
-    DysonSwarmUnit,
-    AsteroidMiningStation,
-    IceMiningStation,
-    MethaneExtractor,
-    AmmoniaExtractor,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
-pub enum SpaceBuildingKind {
-    Orbital(OrbitalBuildingKind),
-    StarSystem(StarSystemBuildingKind),
-}
-
-impl SpaceBuildingKind {
-    pub fn iter() -> impl Iterator<Item = Self> {
-        OrbitalBuildingKind::iter()
-            .map(Self::Orbital)
-            .chain(StarSystemBuildingKind::iter().map(Self::StarSystem))
-    }
-}
-
-impl From<OrbitalBuildingKind> for SpaceBuildingKind {
-    fn from(kind: OrbitalBuildingKind) -> Self {
-        Self::Orbital(kind)
-    }
-}
-
-impl From<StarSystemBuildingKind> for SpaceBuildingKind {
-    fn from(kind: StarSystemBuildingKind) -> Self {
-        Self::StarSystem(kind)
-    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize, Deserialize)]
@@ -408,6 +338,9 @@ impl<T: Into<SpaceBuildingKind>> From<T> for BuildingKind {
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingEffect {
+    ProduceMaterial {
+        mass: f32,
+    },
     AdjustSolarPower,
     RemoveAtmo {
         mass: f32,
@@ -465,24 +398,15 @@ pub struct Params {
     pub biomes: FnvHashMap<Biome, BiomeAttrs>,
     #[serde(skip)]
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
-    pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, BuildingAttrs>,
-    pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, BuildingAttrs>,
+    pub space_buildings: FnvHashMap<SpaceBuildingKind, BuildingAttrs>,
     pub monitoring: MonitoringParams,
 }
 
 impl Params {
-    pub fn building_attrs<T: Into<BuildingKind>>(&self, kind: T) -> Option<&BuildingAttrs> {
+    pub fn building_attrs<T: Into<BuildingKind>>(&self, kind: T) -> &BuildingAttrs {
         match kind.into() {
-            BuildingKind::Structure(kind) => self
-                .structures
-                .get(&kind)
-                .map(|structure_attrs| &structure_attrs.building),
-            BuildingKind::Space(SpaceBuildingKind::Orbital(kind)) => {
-                self.orbital_buildings.get(&kind)
-            }
-            BuildingKind::Space(SpaceBuildingKind::StarSystem(kind)) => {
-                self.star_system_buildings.get(&kind)
-            }
+            BuildingKind::Structure(kind) => &self.structures[&kind].building,
+            BuildingKind::Space(kind) => &self.space_buildings[&kind],
         }
     }
 }
@@ -492,11 +416,10 @@ pub struct StartParams {
     pub basics: Basics,
     pub size: (u32, u32),
     pub difference_in_elevation: f32,
-    pub resources: ResourceMap,
+    pub material: f32,
     pub atmo_mass: FnvHashMap<GasKind, f64>,
     pub water_volume: f32,
-    pub orbital_buildings: FnvHashMap<OrbitalBuildingKind, u32>,
-    pub star_system_buildings: FnvHashMap<StarSystemBuildingKind, u32>,
+    pub space_buildings: FnvHashMap<SpaceBuildingKind, u32>,
     pub cycles_before_start: u32,
 }
 

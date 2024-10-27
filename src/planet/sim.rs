@@ -35,7 +35,7 @@ pub struct Sim {
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,
     /// The number of working buildings
-    pub working_buildings: HashMap<BuildingKind, u32>,
+    pub working_buildings: fnv::FnvHashMap<BuildingKind, u32>,
 }
 
 impl Sim {
@@ -69,7 +69,7 @@ impl Sim {
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             humidity: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
-            working_buildings: HashMap::new(),
+            working_buildings: HashMap::default(),
         }
     }
 }

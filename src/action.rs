@@ -29,6 +29,7 @@ fn cursor_action(
     mut er: EventReader<CursorAction>,
     mut update_map: ResMut<UpdateMap>,
     cursor_mode: Res<CursorMode>,
+    mut sim: ResMut<Sim>,
     params: Res<Params>,
     mut planet: ResMut<Planet>,
     audio_se: Res<AudioSE>,
@@ -41,7 +42,7 @@ fn cursor_action(
             CursorMode::Normal => (),
             CursorMode::Demolition => {
                 update_map.update();
-                planet.demolition(coords);
+                planet.demolition(coords, &mut sim, &params);
             }
             CursorMode::Build(kind) => match kind {
                 StructureKind::None => (),
@@ -50,7 +51,7 @@ fn cursor_action(
                         update_map.update();
                         let size = params.structures[&kind].size;
                         if planet.placeable(coords, size) {
-                            planet.place(coords, size, new_structure(kind), &params);
+                            planet.place(coords, size, new_structure(kind), &mut sim, &params);
                             audio_se.play(sound_effects.get(SoundEffect::Build));
                         }
                     }

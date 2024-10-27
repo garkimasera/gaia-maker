@@ -9,7 +9,7 @@ use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 
 use crate::{
     assets::TranslationTexts,
-    planet::{Msg, MsgKind, ResourceKind},
+    planet::{Msg, MsgKind},
     GameState,
 };
 
@@ -119,34 +119,27 @@ pub fn replace(s: &str, map: HashMap<String, String>) -> String {
     .into_owned()
 }
 
-pub struct WithUnitDisplay {
-    kind: ResourceKind,
-    value: f32,
-}
-
-pub trait Unit {
-    fn display_with_value(&self, value: f32) -> WithUnitDisplay;
-}
-
-impl Unit for ResourceKind {
-    fn display_with_value(&self, value: f32) -> WithUnitDisplay {
-        WithUnitDisplay { kind: *self, value }
-    }
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum WithUnitDisplay {
+    Energy(f32),
+    Material(f32),
 }
 
 impl std::fmt::Display for WithUnitDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        let (unit0, unit1) = match self.kind {
-            ResourceKind::Material => ("Mt", "Gt"),
-            _ => ("Mt", "Gt"),
-        };
-
-        if self.value < 1.0 {
-            write!(f, "{}{}", self.value, unit0)
-        } else if self.value < 100000.0 {
-            write!(f, "{:.0}{}", self.value, unit0)
-        } else {
-            write!(f, "{:.0}{}", self.value / 1000.0, unit1)
+        match *self {
+            WithUnitDisplay::Energy(value) => {
+                write!(f, "{}TW", value)
+            }
+            WithUnitDisplay::Material(value) => {
+                if value < 1.0 {
+                    write!(f, "{}Mt", value)
+                } else if value < 100000.0 {
+                    write!(f, "{:.0}Mt", value)
+                } else {
+                    write!(f, "{:.0}Gt", value / 1000.0)
+                }
+            }
         }
     }
 }

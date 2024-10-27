@@ -74,7 +74,6 @@ impl Default for Tile {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Building {
     pub n: u32,
-    pub working: u32,
     pub control: BuildingControlValue,
 }
 
@@ -148,27 +147,16 @@ impl Planet {
             msgs,
         };
 
-        for (&kind, &n) in &start_params.orbital_buildings {
+        for (&kind, &n) in &start_params.space_buildings {
             let building = planet.space_building_mut(kind);
             building.n = n;
-            if params.building_attrs(kind).unwrap().control == BuildingControl::EnabledNumber {
-                building.control = BuildingControlValue::EnabledNumber(n);
-            }
-        }
-        for (&kind, &n) in &start_params.star_system_buildings {
-            let building = planet.space_building_mut(kind);
-            building.n = n;
-            if params.building_attrs(kind).unwrap().control == BuildingControl::EnabledNumber {
+            if params.building_attrs(kind).control == BuildingControl::EnabledNumber {
                 building.control = BuildingControlValue::EnabledNumber(n);
             }
         }
 
         for structure_kind in StructureKind::iter() {
-            if params
-                .building_attrs(structure_kind)
-                .map(|attrs| !attrs.cost.is_empty())
-                .unwrap_or_default()
-            {
+            if structure_kind.buildable_by_player() {
                 planet.player.buildable_structures.insert(structure_kind);
             }
         }
@@ -193,20 +181,16 @@ impl Planet {
 
         // Reset
         planet.cycles = 0;
-        planet.res.reset(start_params);
         planet.stat.clear_history();
-        self::stat::update_stats(&mut planet, params);
+        planet.res.material = 0.0;
+        self::stat::record_stats(&mut planet, params);
 
         planet
     }
 
     pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
+        self.update(sim, params);
         self.cycles += 1;
-
-        // Parameters need to initialize before simulation.
-        self.state.solar_power_multiplier = 1.0;
-        self.res.energy = 0.0;
-        self.res.used_energy = 0.0;
 
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);
@@ -214,8 +198,19 @@ impl Planet {
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
         self::event::advance(self, sim, params);
-        self::stat::update_stats(self, params);
+        self::stat::record_stats(self, params);
         self::monitoring::monitor(self, params);
+    }
+
+    /// Update after user action without advance the cycle
+    pub fn update(&mut self, sim: &mut Sim, params: &Params) {
+        // Variables need to initialize before simulation
+        self.res.reset_before_reset();
+        self.state.solar_power_multiplier = 1.0;
+
+        self::buildings::update(self, sim, params);
+
+        self.state.solar_power = self.basics.solar_constant * self.state.solar_power_multiplier;
     }
 
     pub fn start_event(&mut self, event: PlanetEvent, sim: &mut Sim, params: &Params) {

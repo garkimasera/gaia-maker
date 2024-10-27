@@ -4,12 +4,9 @@ use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{convert_rect, WindowsOpenState};
 use crate::conf::Conf;
-use crate::planet::{
-    BuildingAttrs, OrbitalBuildingKind, Params, SpaceBuildingKind, StarSystemBuildingKind,
-    StructureKind,
-};
+use crate::planet::{BuildingAttrs, BuildingEffect, Params, SpaceBuildingKind, StructureKind};
 use crate::screen::OccupiedScreenSpace;
-use crate::text::Unit;
+use crate::text::WithUnitDisplay;
 
 use std::collections::BTreeMap;
 use std::sync::LazyLock;
@@ -21,8 +18,7 @@ use std::sync::LazyLock;
 pub enum HelpItem {
     Basics(BasicsItem),
     Structures(StructureKind),
-    OrbitalBuildings(OrbitalBuildingKind),
-    StarSystemBuildings(StarSystemBuildingKind),
+    SpaceBuildings(SpaceBuildingKind),
 }
 
 impl AsRef<str> for HelpItem {
@@ -30,19 +26,7 @@ impl AsRef<str> for HelpItem {
         match self {
             HelpItem::Basics(basic_items) => basic_items.as_ref(),
             HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
-            HelpItem::OrbitalBuildings(orbital_building_kind) => orbital_building_kind.as_ref(),
-            HelpItem::StarSystemBuildings(star_system_building_kind) => {
-                star_system_building_kind.as_ref()
-            }
-        }
-    }
-}
-
-impl<T: Into<SpaceBuildingKind>> From<T> for HelpItem {
-    fn from(kind: T) -> Self {
-        match kind.into() {
-            SpaceBuildingKind::Orbital(kind) => HelpItem::OrbitalBuildings(kind),
-            SpaceBuildingKind::StarSystem(kind) => HelpItem::StarSystemBuildings(kind),
+            HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
         }
     }
 }
@@ -98,15 +82,9 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
             .collect(),
     );
     map.insert(
-        ItemGroup::OrbitalBuildings,
-        OrbitalBuildingKind::iter()
-            .map(HelpItem::OrbitalBuildings)
-            .collect(),
-    );
-    map.insert(
-        ItemGroup::StarSystemBuildings,
-        StarSystemBuildingKind::iter()
-            .map(HelpItem::StarSystemBuildings)
+        ItemGroup::SpaceBuildings,
+        SpaceBuildingKind::iter()
+            .map(HelpItem::SpaceBuildings)
             .collect(),
     );
 
@@ -170,8 +148,7 @@ impl HelpItem {
     pub fn ui(&self, ui: &mut egui::Ui, params: &Params) {
         if let Some(building_attrs) = match self {
             HelpItem::Structures(kind) => Some(&params.structures[kind].building),
-            HelpItem::OrbitalBuildings(kind) => Some(&params.orbital_buildings[kind]),
-            HelpItem::StarSystemBuildings(kind) => Some(&params.star_system_buildings[kind]),
+            HelpItem::SpaceBuildings(kind) => Some(&params.space_buildings[kind]),
             _ => None,
         } {
             ui_building_attr(ui, building_attrs);
@@ -182,84 +159,44 @@ impl HelpItem {
 }
 
 fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
-    if !attrs.cost.is_empty() {
+    // Cost
+    if attrs.cost > 0.0 {
         ui.label(egui::RichText::new(t!("cost")).strong());
-        let mut resources = attrs.cost.iter().collect::<Vec<_>>();
-        resources.sort_by_key(|(resource, _)| *resource);
-        let s = resources
-            .into_iter()
-            .map(|(resource, value)| {
-                format!(
-                    "{}: {}",
-                    t!(resource.as_ref()),
-                    resource.display_with_value(*value)
-                )
-            })
-            .fold(String::new(), |mut s0, s1| {
-                if !s0.is_empty() {
-                    s0.push_str(", ");
-                }
-                s0.push_str(&s1);
-                s0
-            });
+        let s = format!(
+            "{}: {}",
+            t!("material"),
+            WithUnitDisplay::Material(attrs.cost),
+        );
         ui.label(s);
     }
-    if !attrs.upkeep.is_empty() || attrs.energy < 0.0 {
+    // Upkeep
+    if attrs.energy < 0.0 {
         ui.label(egui::RichText::new(t!("upkeep")).strong());
-
-        let s = if attrs.energy < 0.0 {
-            format!("{}: {}TW", t!("energy"), -attrs.energy)
-        } else {
-            String::new()
-        };
-
-        let mut resources = attrs.upkeep.iter().collect::<Vec<_>>();
-        resources.sort_by_key(|(resource, _)| *resource);
-        let s = resources
-            .iter()
-            .map(|(resource, value)| {
-                format!(
-                    "{}: {}",
-                    t!(resource.as_ref()),
-                    resource.display_with_value(**value)
-                )
-            })
-            .fold(s, |mut s0, s1| {
-                if !s0.is_empty() {
-                    s0.push_str(", ");
-                }
-                s0.push_str(&s1);
-                s0
-            });
+        let s = format!(
+            "{}: {}",
+            t!("energy"),
+            WithUnitDisplay::Energy(-attrs.energy),
+        );
         ui.label(s);
     }
-    if !attrs.produce.is_empty() || attrs.energy > 0.0 {
+    // Produce
+    let s = if attrs.energy > 0.0 {
+        Some(format!(
+            "{}: {}",
+            t!("energy"),
+            WithUnitDisplay::Energy(attrs.energy),
+        ))
+    } else if let Some(BuildingEffect::ProduceMaterial { mass }) = &attrs.effect {
+        Some(format!(
+            "{}: {}",
+            t!("material"),
+            WithUnitDisplay::Material(*mass),
+        ))
+    } else {
+        None
+    };
+    if let Some(s) = s {
         ui.label(egui::RichText::new(t!("produce")).strong());
-
-        let s = if attrs.energy > 0.0 {
-            format!("{}: {}TW", t!("energy"), attrs.energy)
-        } else {
-            String::new()
-        };
-
-        let mut resources = attrs.produce.iter().collect::<Vec<_>>();
-        resources.sort_by_key(|(resource, _)| *resource);
-        let s = resources
-            .iter()
-            .map(|(resource, value)| {
-                format!(
-                    "{}: {}",
-                    t!(resource.as_ref()),
-                    resource.display_with_value(**value)
-                )
-            })
-            .fold(s, |mut s0, s1| {
-                if !s0.is_empty() {
-                    s0.push_str(", ");
-                }
-                s0.push_str(&s1);
-                s0
-            });
         ui.label(s);
-    }
+    };
 }

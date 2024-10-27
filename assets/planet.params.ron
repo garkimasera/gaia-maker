@@ -171,19 +171,15 @@
         ),
         size: (128, 64),
         difference_in_elevation: 7000.0,
-        resources: {
-            material: 1000.0,
-        },
+        material: 1000.0,
         atmo_mass: {
             oxygen: 0,
             nitrogen: 1.0e+7,
             carbon_dioxide: 2.0e+8,
         },
         water_volume: 5.0e+17,
-        orbital_buildings: {
+        space_buildings: {
             fusion_reactor: 3,
-        },
-        star_system_buildings: {
             asteroid_mining_station: 2,
         },
         cycles_before_start: 100,
@@ -192,70 +188,48 @@
         max_record: 101,
         interval_cycles: 100,
     ),
-    orbital_buildings: {
+    space_buildings: {
         fusion_reactor: (
             energy: 10,
-            cost: { material: 500 },
+            cost: 500,
             build_max: 100,
+        ),
+        asteroid_mining_station: (
+            energy: -1,
+            cost: 200.0,
+            effect: ProduceMaterial( mass: 10 ),
+            build_max: 100,
+        ),
+        dyson_swarm_unit: (
+            energy: 500,
+            cost: 100000,
+            build_max: 1000,
         ),
         orbital_mirror: (
             energy: -0.1,
-            cost: { material: 1000 },
+            cost: 1000,
             build_max: 1,
             effect: AdjustSolarPower,
             control: increase_rate,
         ),
         nitrogen_sprayer: (
-            energy: -0.5,
-            cost: { material: 100 },
-            upkeep: { nitrogen: 200 },
+            energy: -50,
+            cost: 100,
             effect: SprayToAtmo( kind: nitrogen, mass: 200 ),
             control: enabled_number,
         ),
         carbon_dioxide_sprayer: (
-            energy: -1,
-            cost: { material: 100 },
-            upkeep: { carbon: 50 },
+            energy: -10,
+            cost: 100,
             effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3 ),
             control: enabled_number,
         ),
         ion_irradiator: (
             energy: -4000,
-            cost: { material: 1000 },
+            cost: 1000,
             build_max: 100,
             effect: RemoveAtmo( mass: 5000, efficiency_table: [(0.0, 0.0), (0.1, 1.0), (500, 1.0)] ),
             control: enabled_number,
-        ),
-    },
-    star_system_buildings: {
-        dyson_swarm_unit: (
-            energy: 500,
-            cost: { material: 100000 },
-            build_max: 1000,
-        ),
-        asteroid_mining_station: (
-            energy: -1,
-            cost: { material: 200 },
-            produce: { material: 10 },
-            build_max: 100,
-        ),
-        ice_mining_station: (
-            energy: -100,
-            cost: { material: 1000 },
-            produce: { ice: 1000 },
-            build_max: 100,
-        ),
-        methane_extractor: (
-            energy: -100,
-            cost: { material: 200 },
-            produce: { carbon: 10 },
-            build_max: 100,
-        ),
-        ammonia_extractor: (
-            energy: -1000,
-            cost: { material: 500 },
-            produce: { nitrogen: 100 },
-            build_max: 100,
         ),
     },
     monitoring: (

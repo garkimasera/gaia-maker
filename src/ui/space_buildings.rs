@@ -6,30 +6,32 @@ use super::{convert_rect, help::HelpItem, OccupiedScreenSpace, WindowsOpenState}
 use crate::conf::Conf;
 use crate::planet::*;
 
-pub fn orbit_window(
+pub fn space_buildings_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
+    mut sim: ResMut<Sim>,
     conf: Res<Conf>,
     params: Res<Params>,
 ) {
-    if !wos.orbit {
+    if !wos.space_building {
         return;
     }
 
-    let rect = egui::Window::new(t!("orbit"))
-        .open(&mut wos.orbit)
+    let rect = egui::Window::new(t!("space-buildings"))
+        .open(&mut wos.space_building)
         .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
-            for kind in OrbitalBuildingKind::iter() {
+            for kind in SpaceBuildingKind::iter() {
                 ui.vertical(|ui| {
                     buildng_row(
                         ui,
                         kind,
                         &mut planet,
+                        &mut sim,
                         &params,
-                        params.building_attrs(kind).unwrap(),
+                        params.building_attrs(kind),
                     );
                 });
                 ui.separator();
@@ -43,47 +45,11 @@ pub fn orbit_window(
         .push(convert_rect(rect, conf.ui.scale_factor));
 }
 
-pub fn star_system_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut planet: ResMut<Planet>,
-    conf: Res<Conf>,
-    params: Res<Params>,
-) {
-    if !wos.star_system {
-        return;
-    }
-
-    let rect = egui::Window::new(t!("star-system"))
-        .open(&mut wos.star_system)
-        .vscroll(true)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            for kind in StarSystemBuildingKind::iter() {
-                ui.vertical(|ui| {
-                    buildng_row(
-                        ui,
-                        kind,
-                        &mut planet,
-                        &params,
-                        params.building_attrs(kind).unwrap(),
-                    );
-                });
-                ui.separator();
-            }
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
-}
-
-pub fn buildng_row<T: Into<SpaceBuildingKind> + AsRef<str> + Copy>(
+pub fn buildng_row(
     ui: &mut egui::Ui,
-    kind: T,
+    kind: SpaceBuildingKind,
     planet: &mut Planet,
+    sim: &mut Sim,
     params: &Params,
     attrs: &BuildingAttrs,
 ) {
@@ -102,20 +68,20 @@ pub fn buildng_row<T: Into<SpaceBuildingKind> + AsRef<str> + Copy>(
     ui.horizontal(|ui| {
         let building_text = format!("{} x{}\t", t!(kind.as_ref()), building.n);
         ui.add(egui::Label::new(building_text).extend());
-        let help_item: HelpItem = kind.into().into();
+        let help_item = HelpItem::SpaceBuildings(kind);
         ui.label("?").on_hover_ui(|ui| help_item.ui(ui, params));
     });
 
     ui.horizontal(|ui| {
         if ui.add_enabled(buildable, egui::Button::new("+1")).clicked() {
-            planet.build_space_building(kind, params);
+            planet.build_space_building(kind, sim, params);
         }
         if ui
             .add_enabled(buildable10, egui::Button::new("+10"))
             .clicked()
         {
             for _ in 0..10 {
-                planet.build_space_building(kind, params);
+                planet.build_space_building(kind, sim, params);
             }
         }
     });

@@ -44,7 +44,7 @@ impl Stat {
     }
 }
 
-pub fn update_stats(planet: &mut Planet, params: &Params) {
+pub fn record_stats(planet: &mut Planet, params: &Params) {
     if planet.cycles % params.history.interval_cycles != 0 {
         return;
     }

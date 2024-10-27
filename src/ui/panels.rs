@@ -10,7 +10,7 @@ use crate::{
     planet::{Params, Planet, Structure, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
-    text::Unit,
+    text::WithUnitDisplay,
     GameSpeed, GameState,
 };
 
@@ -114,12 +114,8 @@ fn toolbar(
         action_menu(ui, wos, cursor_mode, planet, params);
     });
 
-    if button(ui, UiTexture::IconOrbit, "orbit") {
-        wos.orbit = !wos.orbit;
-    }
-
-    if button(ui, UiTexture::IconStarSystem, "star-system") {
-        wos.star_system = !wos.star_system;
+    if button(ui, UiTexture::IconSpaceBuildings, "space-buildings") {
+        wos.space_building = !wos.space_building;
     }
 
     if button(ui, UiTexture::IconMap, "map") {
@@ -187,7 +183,7 @@ fn sidebar(
 ) {
     // Energy
     ui.horizontal(|ui| {
-        let texture = textures.0[&UiTexture::IconResourceEnergy];
+        let texture = textures.0[&UiTexture::IconEnergy];
         ui.image(texture).on_hover_text(t!("energy"));
         ui.label(format!(
             "{:.1} / {:.1} TW",
@@ -195,23 +191,19 @@ fn sidebar(
         ));
     });
 
-    // Resources
-    let mut stock: Vec<_> = planet.res.stock.iter().collect();
-    stock.sort_by_key(|&(res, _)| res);
-    for (kind, v) in stock.into_iter() {
-        let texture = textures.0[&UiTexture::from(*kind)];
-        ui.horizontal(|ui| {
-            ui.image(texture).on_hover_text(t!(kind.as_ref()));
-            ui.label(kind.display_with_value(*v).to_string());
-            let diff = planet.res.diff[kind];
-            let sign = if diff > 0.0 { '+' } else { '-' };
-            ui.label(
-                egui::RichText::new(format!("({}{})", sign, kind.display_with_value(diff.abs())))
-                    .small(),
-            );
-        });
-    }
-
+    // Material
+    ui.horizontal(|ui| {
+        let texture = textures.0[&UiTexture::IconMaterial];
+        ui.image(texture).on_hover_text(t!("material"));
+        ui.label(WithUnitDisplay::Material(planet.res.material).to_string());
+        ui.label(
+            egui::RichText::new(format!(
+                "(+{})",
+                WithUnitDisplay::Material(planet.res.diff_material)
+            ))
+            .small(),
+        );
+    });
     ui.separator();
 
     // Information about selected tool

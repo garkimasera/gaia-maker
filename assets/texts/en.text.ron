@@ -118,8 +118,7 @@
     "concept": "Concept",
     "administrator": "Administrator",
     "terraforming": "Terraforming",
-    "orbital-buildings": "Orbital Buildings",
-    "star-system-buildings": "Star System Buildings",
+    "space-buildings": "Buildings",
     
     "help/concept": "In Gaia Maker, players assume the role of administrator of an undeveloped planet and the star system that contains it, and are responsible for terraforming and operating the facility. Terraforming is the process of improving a barren planet into a habitable environment. Terraforming is essential for humans to establish large settlements outside of Earth. Various types of facilities are constructed to adjust the atmosphere, temperature, and vegetation on the planet. In this way, we can create an ideal environment for life.",
     "help/administrator": "The player, the administrator, has come a long way over the years in an interstellar spacecraft to this star system containing a terraforming candidate planet. The administrator possesses technology equivalent to a Type II civilization and also possesses terraforming technology for an Earth-like planet. They have also brought genetic data of various plants and animals from their home planet for terraforming.\n\nA Type II civilization is a civilization that, on the Kardashev scale, has the technological level to harness the entire energy of a given star system. They collect stellar energy through the Dyson Sphere and use this abundant energy for interstellar travel and terraforming.",

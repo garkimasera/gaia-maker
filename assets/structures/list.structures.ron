@@ -6,7 +6,7 @@
         rows: 2,
         building: (
             energy: -100,
-            cost: { material: 200 },
+            cost: 200,
             effect: SprayToAtmo( kind: oxygen, mass: 500 ),
         ),
     ),
@@ -16,9 +16,8 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -2,
-            cost: { material: 100 },
-            upkeep: { ice: 1 },
+            energy: -20,
+            cost: 100,
             effect: Vapor ( value: 5000, additional_water: 1e+9 ),
         ),
     ),
@@ -29,7 +28,7 @@
         rows: 2,
         building: (
             energy: -0.02,
-            cost: { material: 100 },
+            cost: 50,
             effect: Fertilize ( increment: 0.1, max: 40.0, range: 2 ),
         ),
     ),
@@ -40,7 +39,7 @@
         rows: 2,
         building: (
             energy: -10,
-            cost: { material: 100 },
+            cost: 100,
             effect: Heater ( heat: 1.0e+18 ),
         ),
     ),
