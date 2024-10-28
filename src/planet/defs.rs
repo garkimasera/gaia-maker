@@ -262,6 +262,7 @@ pub enum GasKind {
     Oxygen,
     Nitrogen,
     CarbonDioxide,
+    Argon,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
