@@ -28,6 +28,8 @@ pub use self::stat::{Record, Stat};
 pub use self::water::*;
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
+use misc::SymmetricalLinearDist;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::f32::consts::PI;
@@ -136,7 +138,7 @@ impl Planet {
             player: Player::default(),
             res: Resources::new(start_params),
             map,
-            atmo: Atmosphere::new(start_params),
+            atmo: Atmosphere::new(start_params, params),
             water: Water::new(start_params),
             space_buildings: SpaceBuildingKind::iter()
                 .map(|kind| (kind, Building::default()))
@@ -237,4 +239,41 @@ impl Planet {
     pub fn height_above_sea_level(&self, p: Coords) -> f32 {
         self.map[p].height - self.water.sea_level
     }
+}
+
+pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
+    let mut rng = rand::thread_rng();
+
+    let start_planet = params
+        .start_planets
+        .iter()
+        .find(|start_planet| start_planet.id == id)
+        .unwrap();
+
+    let mut atmo = params.default_start_params.atmo.clone();
+
+    *atmo.get_mut(&GasKind::Nitrogen).unwrap() = rng
+        .sample(SymmetricalLinearDist::from(start_planet.nitrogen))
+        .into();
+    *atmo.get_mut(&GasKind::CarbonDioxide).unwrap() = rng
+        .sample(SymmetricalLinearDist::from(start_planet.carbon_dioxide))
+        .into();
+
+    StartParams {
+        basics: Basics {
+            solar_constant: floor(
+                10.0,
+                rng.sample(SymmetricalLinearDist::from(start_planet.solar_constant)),
+            ),
+            ..params.default_start_params.clone().basics
+        },
+        difference_in_elevation: rng.sample(SymmetricalLinearDist::from(start_planet.elevation)),
+        water_volume: rng.sample(SymmetricalLinearDist::from(start_planet.water_volume)),
+        atmo,
+        ..params.default_start_params.clone()
+    }
+}
+
+fn floor(a: f32, f: f32) -> f32 {
+    (f / a).floor() * a
 }

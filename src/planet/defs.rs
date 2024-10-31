@@ -400,6 +400,7 @@ pub struct Params {
     #[serde(skip)]
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, BuildingAttrs>,
+    pub start_planets: Vec<StartPlanet>,
     pub monitoring: MonitoringParams,
 }
 
@@ -418,7 +419,7 @@ pub struct StartParams {
     pub size: (u32, u32),
     pub difference_in_elevation: f32,
     pub material: f32,
-    pub atmo_mass: FnvHashMap<GasKind, f64>,
+    pub atmo: FnvHashMap<GasKind, f64>,
     pub water_volume: f32,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, u32>,
     pub cycles_before_start: u32,
@@ -542,6 +543,28 @@ pub struct CustomPlanetParams {
 pub struct HistoryParams {
     pub max_record: usize,
     pub interval_cycles: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct StartPlanet {
+    pub id: String,
+    pub difficulty: PlanetDifficulty,
+    pub solar_constant: (f32, f32),
+    pub elevation: (f32, f32),
+    pub water_volume: (f32, f32),
+    pub nitrogen: (f32, f32),
+    pub carbon_dioxide: (f32, f32),
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, EnumString, AsRefStr)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum PlanetDifficulty {
+    VeryEasy,
+    Easy,
+    Normal,
+    Hard,
+    VeryHard,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

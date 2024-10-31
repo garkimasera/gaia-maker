@@ -13,11 +13,14 @@ pub struct Atmosphere {
 }
 
 impl Atmosphere {
-    pub fn new(start_params: &StartParams) -> Self {
-        Atmosphere {
-            atm: 0.0,
-            mass: start_params.atmo_mass.clone(),
-        }
+    pub fn new(start_params: &StartParams, params: &Params) -> Self {
+        let mass = start_params
+            .atmo
+            .iter()
+            .map(|(gas_kind, atm)| (*gas_kind, atm * params.sim.total_mass_per_atm as f64))
+            .collect();
+
+        Atmosphere { atm: 0.0, mass }
     }
 
     pub fn total_mass(&self) -> f32 {

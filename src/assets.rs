@@ -27,9 +27,9 @@ impl Plugin for AssetsPlugin {
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
                     .load_collection::<TranslationTexts>()
+                    .load_collection::<ParamsAssetCollection>()
                     .load_collection::<UiTextures>()
                     .load_collection::<UiAssets>()
-                    .load_collection::<ParamsAssetCollection>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
                     .load_collection::<SoundEffects>(),

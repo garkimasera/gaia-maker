@@ -1,3 +1,5 @@
+use rand::Rng;
+
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     assert!(table.len() > 2);
     let first = table.first().unwrap();
@@ -21,4 +23,37 @@ pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     }
 
     panic!("invalid input for interpolation: {}", x)
+}
+
+/// Random sampling [mean - d, mean + d] with linear distribution.
+#[derive(Clone, Copy, Debug)]
+pub struct SymmetricalLinearDist {
+    mean: f32,
+    d: f32,
+}
+
+impl SymmetricalLinearDist {
+    pub fn new(mean: f32, d: f32) -> Self {
+        Self { mean, d }
+    }
+}
+
+impl From<(f32, f32)> for SymmetricalLinearDist {
+    fn from(a: (f32, f32)) -> Self {
+        Self::new(a.0, a.1)
+    }
+}
+
+impl rand::distributions::Distribution<f32> for SymmetricalLinearDist {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> f32 {
+        let r: f32 = rng.gen_range(0.0..=1.0);
+
+        let x = if r < 0.5 {
+            (2.0 * r).sqrt() - 1.0
+        } else {
+            -(2.0 - 2.0 * r).sqrt() + 1.0
+        };
+
+        self.mean + self.d * x
+    }
 }
