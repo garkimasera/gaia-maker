@@ -40,7 +40,8 @@ jobs:
       - run: |
           wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/gaia-maker.wasm
           mv index.html ./out/
-          mv assets ./out/
+          tar czf ./assets.tar.gz -C ./assets .
+          mv assets.tar.gz -t ./out/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
