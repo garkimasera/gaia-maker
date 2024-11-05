@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::audio::SoundEffect;
 use crate::conf::Conf;
 use crate::gz::GunzipBin;
@@ -228,6 +230,12 @@ fn create_assets_list(
             params.start_planets.push(start_planet);
         }
     }
+    params
+        .start_planets
+        .sort_by(|a, b| match a.difficulty.cmp(&b.difficulty) {
+            Ordering::Equal => a.id.cmp(&b.id),
+            o => o,
+        });
 
     command.insert_resource(params);
     command.insert_resource(TextureAtlasLayouts { biomes, structures });

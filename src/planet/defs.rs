@@ -557,7 +557,9 @@ pub struct StartPlanet {
     pub carbon_dioxide: (f32, f32),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, EnumString, AsRefStr)]
+#[derive(
+    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize, EnumString, AsRefStr,
+)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum PlanetDifficulty {
