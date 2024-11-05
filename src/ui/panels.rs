@@ -3,7 +3,6 @@ use bevy_egui::{egui, EguiContexts};
 use geom::Coords;
 
 use crate::{
-    assets::UiTexture,
     conf::Conf,
     draw::UpdateMap,
     overlay::OverlayLayerKind,
@@ -100,60 +99,60 @@ fn toolbar(
     params: &Params,
     _conf: &Conf,
 ) {
-    let button = |ui: &mut egui::Ui, icon: UiTexture, s: &str| {
-        ui.add(egui::ImageButton::new(textures.0[&icon]))
+    let button = |ui: &mut egui::Ui, path: &str, s: &str| {
+        ui.add(egui::ImageButton::new(textures.get(path)))
             .on_hover_text(t!(s))
             .clicked()
     };
 
-    ui.menu_image_button(textures.0[&UiTexture::IconBuild], |ui| {
+    ui.menu_image_button(textures.get("ui/icon-build"), |ui| {
         build_menu(ui, cursor_mode, planet, params);
     });
 
-    ui.menu_image_button(textures.0[&UiTexture::IconAction], |ui| {
+    ui.menu_image_button(textures.get("ui/icon-action"), |ui| {
         action_menu(ui, wos, cursor_mode, planet, params);
     });
 
-    if button(ui, UiTexture::IconSpaceBuildings, "space-buildings") {
+    if button(ui, "ui/icon-space-buildings", "space-buildings") {
         wos.space_building = !wos.space_building;
     }
 
-    if button(ui, UiTexture::IconMap, "map") {
+    if button(ui, "ui/icon-map", "map") {
         wos.map = !wos.map;
     }
 
-    if button(ui, UiTexture::IconLayers, "layers") {
+    if button(ui, "ui/icon-layers", "layers") {
         wos.layers = !wos.layers;
     }
 
-    if button(ui, UiTexture::IconStat, "statistics") {
+    if button(ui, "ui/icon-stat", "statistics") {
         wos.stat = !wos.stat;
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     let texture = if *speed == GameSpeed::Paused {
-        UiTexture::IconSpeedPausedSelected
+        "ui/icon-speed-paused-selected"
     } else {
-        UiTexture::IconSpeedPaused
+        "ui/icon-speed-paused"
     };
     if button(ui, texture, "speed-paused") {
         *speed = GameSpeed::Paused;
     }
 
     let texture = if *speed == GameSpeed::Normal {
-        UiTexture::IconSpeedNormalSelected
+        "ui/icon-speed-normal-selected"
     } else {
-        UiTexture::IconSpeedNormal
+        "ui/icon-speed-normal"
     };
     if button(ui, texture, "speed-normal") {
         *speed = GameSpeed::Normal;
     }
 
     let texture = if *speed == GameSpeed::Fast {
-        UiTexture::IconSpeedFastSelected
+        "ui/icon-speed-fast-selected"
     } else {
-        UiTexture::IconSpeedFast
+        "ui/icon-speed-fast"
     };
     if button(ui, texture, "speed-fast") {
         *speed = GameSpeed::Fast;
@@ -161,12 +160,12 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
-    let image = textures.0[&UiTexture::IconGameMenu];
+    let image = textures.get("ui/icon-game-menu");
     ui.menu_image_button(image, |ui| {
         game_menu(ui, app_exit_events, ew_manage_planet, next_game_state);
     });
 
-    if button(ui, UiTexture::IconHelp, "help") {
+    if button(ui, "ui/icon-help", "help") {
         wos.help = !wos.help;
     }
 }
@@ -183,7 +182,7 @@ fn sidebar(
 ) {
     // Energy
     ui.horizontal(|ui| {
-        let texture = textures.0[&UiTexture::IconEnergy];
+        let texture = textures.get("ui/icon-energy");
         ui.image(texture).on_hover_text(t!("energy"));
         ui.label(format!(
             "{:.1} / {:.1} TW",
@@ -193,7 +192,7 @@ fn sidebar(
 
     // Material
     ui.horizontal(|ui| {
-        let texture = textures.0[&UiTexture::IconMaterial];
+        let texture = textures.get("ui/icon-material");
         ui.image(texture).on_hover_text(t!("material"));
         ui.label(WithUnitDisplay::Material(planet.res.material).to_string());
         ui.label(
@@ -239,7 +238,7 @@ fn sidebar(
     let tile = &planet.map[p];
 
     ui.horizontal(|ui| {
-        ui.image(textures.0[&UiTexture::IconCoordinates])
+        ui.image(textures.get("ui/icon-coordinates"))
             .on_hover_text(t!("coordinates"));
         ui.label(format!("[{}, {}]", p.0, p.1))
             .on_hover_text(t!("coordinates"));
@@ -253,29 +252,29 @@ fn sidebar(
         .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
     });
 
-    let items: &[(UiTexture, String, &str)] = &[
+    let items: &[(&str, String, &str)] = &[
         (
-            UiTexture::IconHeight,
+            "ui/icon-height",
             format!("{:.0} m", planet.height_above_sea_level(p)),
             "height",
         ),
         (
-            UiTexture::IconAirTemprature,
+            "ui/icon-air-temprature",
             format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
             "air-temprature",
         ),
         (
-            UiTexture::IconRainfall,
+            "ui/icon-rainfall",
             format!("{:.0} mm", tile.rainfall),
             "rainfall",
         ),
         (
-            UiTexture::IconFertility,
+            "ui/icon-fertility",
             format!("{:.0} %", tile.fertility),
             "fertility",
         ),
         (
-            UiTexture::IconBiomass,
+            "ui/icon-biomass",
             format!("{:.1} kg/m²", tile.biomass),
             "biomass",
         ),
@@ -284,7 +283,7 @@ fn sidebar(
     for (icon, label, s) in items {
         let s = t!(s);
         ui.horizontal(|ui| {
-            ui.image(textures.0[icon]).on_hover_text(&s);
+            ui.image(textures.get(icon)).on_hover_text(&s);
             ui.label(label).on_hover_text(s);
         });
     }

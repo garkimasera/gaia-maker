@@ -400,6 +400,7 @@ pub struct Params {
     #[serde(skip)]
     pub structures: FnvHashMap<StructureKind, StructureAttrs>,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, BuildingAttrs>,
+    #[serde(skip)]
     pub start_planets: Vec<StartPlanet>,
     pub monitoring: MonitoringParams,
 }

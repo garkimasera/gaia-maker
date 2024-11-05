@@ -9,6 +9,7 @@ use crate::text::Lang;
 use strum::IntoEnumIterator;
 
 use super::new_planet::NewPlanetState;
+use super::EguiTextures;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum MainMenuMode {
@@ -48,6 +49,7 @@ pub fn main_menu(
     mut ew_manage_planet_eror: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
+    textures: Res<EguiTextures>,
 ) {
     if let Some(e) = ew_manage_planet_eror.read().next() {
         state.mode = MainMenuMode::Error;
@@ -86,7 +88,13 @@ pub fn main_menu(
                 .unwrap();
         }
         MainMenuMode::NewPlanet => {
-            super::new_planet::new_planet(&mut egui_ctxs, ew_manage_planet, &params, &mut state);
+            super::new_planet::new_planet(
+                &mut egui_ctxs,
+                ew_manage_planet,
+                &params,
+                &mut state,
+                &textures,
+            );
         }
         MainMenuMode::Error => {
             egui::Window::new(t!("msg/loading-failed"))

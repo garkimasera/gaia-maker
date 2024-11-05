@@ -1,3 +1,4 @@
 /target
 *.js
 *.wasm
+assets.tar.gz

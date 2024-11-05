@@ -1,7 +1,6 @@
 use bevy::asset::io::{AsyncReadExt, Reader};
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::*;
-use bevy::utils::ConditionalSendFuture;
 use flate2::read::GzDecoder;
 use std::io::Read;
 
@@ -24,21 +23,19 @@ impl AssetLoader for GzLoader {
     type Settings = ();
     type Error = Box<dyn std::error::Error + Send + Sync>;
 
-    fn load<'a>(
+    async fn load<'a>(
         &'a self,
-        reader: &'a mut Reader,
+        reader: &'a mut Reader<'_>,
         _settings: &'a Self::Settings,
         _load_context: &'a mut LoadContext<'_>,
-    ) -> impl ConditionalSendFuture<Output = Result<Self::Asset, Self::Error>> {
-        Box::pin(async move {
-            let mut bytes = Vec::new();
-            reader.read_to_end(&mut bytes).await?;
-            let mut gz = GzDecoder::new(&bytes[..]);
-            let mut decoded = Vec::new();
-            gz.read_to_end(&mut decoded)?;
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).await?;
+        let mut gz = GzDecoder::new(&bytes[..]);
+        let mut decoded = Vec::new();
+        gz.read_to_end(&mut decoded)?;
 
-            Ok(GunzipBin(decoded))
-        })
+        Ok(GunzipBin(decoded))
     }
 
     fn extensions(&self) -> &[&str] {

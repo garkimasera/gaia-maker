@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 use crate::{
-    assets::{UiAssets, UiTexture, UiTextures},
+    assets::UiAssets,
     conf::Conf,
     draw::UpdateMap,
     gz::GunzipBin,
@@ -49,7 +49,13 @@ pub enum Dialog {
 }
 
 #[derive(Clone, Default, Resource)]
-pub struct EguiTextures(HashMap<UiTexture, SizedTexture>);
+pub struct EguiTextures(HashMap<String, SizedTexture>);
+
+impl EguiTextures {
+    fn get(&self, path: &str) -> SizedTexture {
+        *self.0.get(path).unwrap()
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
 pub struct UiWindowsSystemSet;
@@ -125,31 +131,35 @@ fn load_textures(
     mut commands: Commands,
     mut egui_ctxs: EguiContexts,
     images: Res<Assets<Image>>,
-    ui_textures: Res<UiTextures>,
+    ui_assets: Res<UiAssets>,
     mut texture_handles: Local<Vec<egui::TextureHandle>>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
 
-    let mut egui_textures = HashMap::new();
+    let ui = ui_assets
+        .ui_imgs
+        .iter()
+        .map(|(path, handle)| (path.clone(), handle.clone()));
+    let start_planets = ui_assets.start_planet.iter().filter_map(|(path, handle)| {
+        if let Ok(handle) = handle.clone().try_typed::<Image>() {
+            Some((path.clone(), handle))
+        } else {
+            None
+        }
+    });
+    let textures = ui.chain(start_planets);
 
-    for (k, handle) in ui_textures.textures.iter() {
-        let image = images.get(handle).unwrap();
-        let color_image = egui::ColorImage {
-            size: [image.size().x as usize, image.size().y as usize],
-            pixels: image
-                .data
-                .windows(4)
-                .step_by(4)
-                .map(|rgba| {
-                    egui::Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], rgba[3])
-                })
-                .collect(),
+    let mut egui_textures = HashMap::new();
+    for (path, handle) in textures {
+        let image = images.get(&handle).unwrap();
+        let texture_handle = bevy_image_to_egui_texture(ctx, image, &path);
+
+        let Some(path) = path.strip_suffix(".png") else {
+            continue;
         };
-        let texture_handle =
-            ctx.load_texture(k.as_ref(), color_image, egui::TextureOptions::NEAREST);
 
         egui_textures.insert(
-            *k,
+            path.to_owned(),
             SizedTexture {
                 id: texture_handle.id(),
                 size: egui::Vec2::new(image.size().x as f32, image.size().y as f32),
@@ -159,6 +169,36 @@ fn load_textures(
     }
 
     commands.insert_resource(EguiTextures(egui_textures));
+}
+
+fn bevy_image_to_egui_texture(
+    ctx: &egui::Context,
+    image: &bevy::prelude::Image,
+    name: &str,
+) -> egui::TextureHandle {
+    let image = image
+        .clone()
+        .try_into_dynamic()
+        .unwrap_or_else(|_| panic!("not supported image format: {}", name))
+        .into_rgba8();
+    let w = image.width();
+    let h = image.height();
+
+    let mut pixels = Vec::new();
+    for y in 0..h {
+        for x in 0..w {
+            let pixel = image.get_pixel(x, y).0;
+            pixels.push(egui::Color32::from_rgba_unmultiplied(
+                pixel[0], pixel[1], pixel[2], pixel[3],
+            ));
+        }
+    }
+
+    let color_image = egui::ColorImage {
+        size: [w as usize, h as usize],
+        pixels,
+    };
+    ctx.load_texture(name, color_image, egui::TextureOptions::NEAREST)
 }
 
 fn layers_window(

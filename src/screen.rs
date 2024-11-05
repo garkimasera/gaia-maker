@@ -1,5 +1,5 @@
 use crate::action::CursorAction;
-use crate::assets::{UiTexture, UiTextures};
+use crate::assets::UiAssets;
 use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::ui::WindowsOpenState;
@@ -273,7 +273,7 @@ fn update_hover_tile(
     >,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     cursor_mode: Res<CursorMode>,
-    ui_textures: Res<UiTextures>,
+    ui_assets: Res<UiAssets>,
     params: Res<Params>,
     mut color_entities: Local<Vec<Entity>>,
 ) {
@@ -344,7 +344,7 @@ fn update_hover_tile(
 
         let id = commands
             .spawn(SpriteBundle {
-                texture: ui_textures.get(UiTexture::TileColored),
+                texture: ui_assets.tile_colored.clone(),
                 visibility: Visibility::Inherited,
                 transform,
                 ..default()

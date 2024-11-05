@@ -3,6 +3,7 @@ name = "gaia-maker"
 version = "0.1.0"
 edition = "2021"
 authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
+license = "GPL-3.0"
 
 [dependencies]
 anyhow = "1"
@@ -30,7 +31,9 @@ serde = { version = "1", features = ["derive"] }
 serde_with = "3"
 strum = { version = "0.26", features = ["derive"] }
 
+bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git" }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
+compact_str = { version = "0.8.0", features = ["serde"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

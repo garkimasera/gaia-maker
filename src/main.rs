@@ -2,8 +2,6 @@
 
 extern crate tile_geom as geom;
 
-use clap::Parser;
-
 #[macro_use]
 mod tools;
 #[macro_use]
@@ -28,6 +26,7 @@ use bevy::{
     window::{PresentMode, WindowResolution},
     winit::WinitSettings,
 };
+use clap::Parser;
 
 const APP_NAME: &str = concat!("Gaia Maker v", env!("CARGO_PKG_VERSION"));
 
@@ -42,6 +41,7 @@ fn main() {
     let window_size = screen::preferred_window_size();
 
     App::new()
+        .add_plugins(AssetPlugin)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: APP_NAME.into(),
@@ -90,4 +90,14 @@ pub enum GameSystemSet {
     Draw,
     StartSim,
     UpdateHoverTile,
+}
+
+struct AssetPlugin;
+
+impl Plugin for AssetPlugin {
+    fn build(&self, app: &mut App) {
+        if cfg!(target_arch = "wasm32") {
+            app.add_plugins(bevy_asset_tar::AssetTarPlugin::default());
+        }
+    }
 }

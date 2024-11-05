@@ -6,7 +6,10 @@ use crate::{
     sim::ManagePlanet,
 };
 
-use super::main_menu::{MainMenuMode, MainMenuState};
+use super::{
+    main_menu::{MainMenuMode, MainMenuState},
+    EguiTextures,
+};
 
 #[derive(Clone, Debug)]
 pub struct NewPlanetState {
@@ -42,6 +45,7 @@ pub fn new_planet(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: &Params,
     state: &mut MainMenuState,
+    textures: &EguiTextures,
 ) {
     egui::Window::new(t!("search-new-planet"))
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
@@ -72,7 +76,7 @@ pub fn new_planet(
 
                     ui.vertical(|ui| match &state.new_planet.planet {
                         NewPlanetKind::Id(id) => {
-                            planet_desc(ui, id, params);
+                            planet_desc(ui, id, params, textures);
                         }
                         NewPlanetKind::Custom => {
                             custom(ui, params, state);
@@ -121,7 +125,7 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
     ew_manage_planet.send(ManagePlanet::New(start_params));
 }
 
-fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params) {
+fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiTextures) {
     use crate::planet::PlanetDifficulty;
 
     let start_planet = params
@@ -137,7 +141,10 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params) {
         PlanetDifficulty::VeryHard => egui::Color32::RED,
     };
 
-    ui.heading(t!(id));
+    ui.horizontal(|ui| {
+        ui.image(textures.get(&format!("start_planets/{}", id)));
+        ui.heading(t!(id));
+    });
 
     ui.horizontal(|ui| {
         ui.label(format!("{}: ", t!("difficulty")));

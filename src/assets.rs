@@ -5,13 +5,13 @@ use crate::planet::*;
 use crate::text::{Lang, TranslationText};
 use crate::GameState;
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use bevy_asset_loader::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use bevy_kira_audio::AudioSource;
 use fnv::FnvHashMap;
 use serde::Deserialize;
-use std::collections::HashMap;
-use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
+use strum::IntoEnumIterator;
 
 #[derive(Clone, Copy, Debug)]
 pub struct AssetsPlugin;
@@ -23,12 +23,14 @@ impl Plugin for AssetsPlugin {
             .add_plugins(RonAssetPlugin::<StructureAssetList>::new(&[
                 "structures.ron",
             ]))
+            .add_plugins(RonAssetPlugin::<StartPlanetAsset>::new(&[
+                "start_planet.ron",
+            ]))
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
                     .load_collection::<TranslationTexts>()
                     .load_collection::<ParamsAssetCollection>()
-                    .load_collection::<UiTextures>()
                     .load_collection::<UiAssets>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
@@ -46,52 +48,18 @@ define_asset_list_from_enum! {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, EnumIter, EnumString, AsRefStr)]
-#[strum(serialize_all = "kebab-case")]
-pub enum UiTexture {
-    IconAction,
-    IconAirTemprature,
-    IconBiomass,
-    IconBuild,
-    IconCoordinates,
-    IconEnergy,
-    IconFertility,
-    IconGameMenu,
-    IconHeight,
-    IconHelp,
-    IconLayers,
-    IconMap,
-    IconMaterial,
-    IconMessage,
-    IconPower,
-    IconRainfall,
-    IconSpaceBuildings,
-    IconSpeedFast,
-    IconSpeedFastSelected,
-    IconSpeedNormal,
-    IconSpeedNormalSelected,
-    IconSpeedPaused,
-    IconSpeedPausedSelected,
-    IconStarSystem,
-    IconStat,
-    TileColored,
-    TileCursor,
-}
-
-define_asset_list_from_enum! {
-    #[asset(dir_path = "ui")]
-    #[asset(extension = "png")]
-    pub struct UiTextures {
-        pub textures: HashMap<UiTexture, Handle<Image>>,
-    }
-}
-
 #[derive(Debug, Resource, AssetCollection)]
 pub struct UiAssets {
     #[asset(path = "default.conf.ron")]
     pub default_conf: Handle<Conf>,
     #[asset(path = "fonts/Mplus2-SemiBold.otf.gz")]
     pub font: Handle<GunzipBin>,
+    #[asset(path = "ui", collection(mapped, typed))]
+    pub ui_imgs: HashMap<String, Handle<Image>>,
+    #[asset(path = "start_planets", collection(mapped))]
+    pub start_planet: HashMap<String, UntypedHandle>,
+    #[asset(path = "ui/tile-colored.png")]
+    pub tile_colored: Handle<Image>,
 }
 
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
@@ -105,6 +73,10 @@ pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
 pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);
+
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
+#[serde(transparent)]
+pub struct StartPlanetAsset(StartPlanet);
 
 #[derive(Resource)]
 pub struct TextureAtlasLayouts {
@@ -120,6 +92,8 @@ pub struct ParamsAssetCollection {
     biomes: Handle<BiomeAssetList>,
     #[asset(path = "structures/list.structures.ron")]
     structures: Handle<StructureAssetList>,
+    #[asset(path = "start_planets", collection(mapped))]
+    start_planet_handles: HashMap<String, UntypedHandle>,
 }
 
 define_asset_list_from_enum! {
@@ -149,10 +123,11 @@ define_asset_list_from_enum! {
 fn create_assets_list(
     mut command: Commands,
     params_asset_collection: Res<ParamsAssetCollection>,
-    (params_asset, biome_asset_list, structure_asset_list): (
+    (params_asset, biome_asset_list, structure_asset_list, start_planet_assets): (
         Res<Assets<ParamsAsset>>,
         Res<Assets<BiomeAssetList>>,
         Res<Assets<StructureAssetList>>,
+        Res<Assets<StartPlanetAsset>>,
     ),
     mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
@@ -246,6 +221,13 @@ fn create_assets_list(
         .0;
     params.biomes = biome_asset_list.0.clone();
     params.structures = structure_asset_list.0.clone();
+
+    for handle in params_asset_collection.start_planet_handles.values() {
+        if let Ok(handle) = handle.clone().try_typed::<StartPlanetAsset>() {
+            let start_planet = start_planet_assets.get(&handle).cloned().unwrap().0;
+            params.start_planets.push(start_planet);
+        }
+    }
 
     command.insert_resource(params);
     command.insert_resource(TextureAtlasLayouts { biomes, structures });

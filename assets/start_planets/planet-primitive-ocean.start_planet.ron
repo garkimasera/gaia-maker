@@ -1,0 +1,9 @@
+(
+    id: "planet-primitive-ocean",
+    difficulty: very_easy,
+    solar_constant: (1350, 120),
+    elevation: (7000.0, 1000.0),
+    water_volume: (2.0e+17, 0.2e+17),
+    nitrogen: (0.75, 0.08),
+    carbon_dioxide: (0.05, 0.01),
+)
