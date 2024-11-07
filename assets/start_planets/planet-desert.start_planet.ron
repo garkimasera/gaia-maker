@@ -1,0 +1,10 @@
+(
+    id: "planet-desert",
+    difficulty: normal,
+    solar_constant: (1200, 200),
+    elevation: (7000.0, 1000.0),
+    water_volume: (0.0, 0.0),
+    nitrogen: (0.75, 0.08),
+    carbon_dioxide: (0.08, 0.02),
+    initial_conditions: [],
+)

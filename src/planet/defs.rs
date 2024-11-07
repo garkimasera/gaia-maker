@@ -424,6 +424,7 @@ pub struct StartParams {
     pub water_volume: f32,
     pub space_buildings: FnvHashMap<SpaceBuildingKind, u32>,
     pub cycles_before_start: u32,
+    pub initial_conditions: Vec<InitialCondition>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -555,6 +556,7 @@ pub struct StartPlanet {
     pub water_volume: (f32, f32),
     pub nitrogen: (f32, f32),
     pub carbon_dioxide: (f32, f32),
+    pub initial_conditions: Vec<InitialCondition>,
 }
 
 #[derive(
@@ -575,4 +577,9 @@ pub struct MonitoringParams {
     pub interval_cycles: u64,
     pub warn_high_temp_threshold: f32,
     pub warn_low_temp_threshold: f32,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub enum InitialCondition {
+    Snowball { thickness: (f32, f32) },
 }

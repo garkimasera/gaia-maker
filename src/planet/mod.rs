@@ -6,6 +6,7 @@ mod civ;
 mod defs;
 mod event;
 mod heat_transfer;
+mod initial_conditions;
 mod map_generator;
 mod misc;
 mod monitoring;
@@ -176,6 +177,16 @@ impl Planet {
             planet.advance(&mut sim, params);
         }
         planet.water.water_volume = water_volume;
+        planet.advance(&mut sim, params);
+
+        for initial_condition in &start_params.initial_conditions {
+            initial_conditions::apply_initial_condition(
+                &mut planet,
+                &mut sim,
+                initial_condition.clone(),
+                params,
+            );
+        }
 
         for _ in 0..(start_params.cycles_before_start / 2) {
             planet.advance(&mut sim, params);
@@ -270,6 +281,7 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
         difference_in_elevation: rng.sample(SymmetricalLinearDist::from(start_planet.elevation)),
         water_volume: rng.sample(SymmetricalLinearDist::from(start_planet.water_volume)),
         atmo,
+        initial_conditions: start_planet.initial_conditions.clone(),
         ..params.default_start_params.clone()
     }
 }
