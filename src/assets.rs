@@ -60,6 +60,8 @@ pub struct UiAssets {
     pub ui_imgs: HashMap<String, Handle<Image>>,
     #[asset(path = "start_planets", collection(mapped))]
     pub start_planet: HashMap<String, UntypedHandle>,
+    #[asset(paths("logo.png"), collection(mapped, typed))]
+    pub other_imgs: HashMap<String, Handle<Image>>,
     #[asset(path = "ui/tile-colored.png")]
     pub tile_colored: Handle<Image>,
 }

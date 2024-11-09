@@ -2,3 +2,4 @@
 *.js
 *.wasm
 assets.tar.gz
+/logo.png
