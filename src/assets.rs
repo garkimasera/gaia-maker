@@ -28,6 +28,7 @@ impl Plugin for AssetsPlugin {
             .add_plugins(RonAssetPlugin::<StartPlanetAsset>::new(&[
                 "start_planet.ron",
             ]))
+            .add_plugins(RonAssetPlugin::<AnimalAsset>::new(&["animal.ron"]))
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
@@ -82,6 +83,10 @@ pub struct StructureAssetList(FnvHashMap<StructureKind, StructureAttrs>);
 #[serde(transparent)]
 pub struct StartPlanetAsset(StartPlanet);
 
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
+#[serde(transparent)]
+pub struct AnimalAsset(Animal);
+
 #[derive(Resource)]
 pub struct TextureAtlasLayouts {
     pub biomes: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
@@ -98,6 +103,8 @@ pub struct ParamsAssetCollection {
     structures: Handle<StructureAssetList>,
     #[asset(path = "start_planets", collection(mapped))]
     start_planet_handles: HashMap<String, UntypedHandle>,
+    #[asset(path = "animals", collection(mapped))]
+    animal_handles: HashMap<String, UntypedHandle>,
 }
 
 define_asset_list_from_enum! {
@@ -127,11 +134,12 @@ define_asset_list_from_enum! {
 fn create_assets_list(
     mut command: Commands,
     params_asset_collection: Res<ParamsAssetCollection>,
-    (params_asset, biome_asset_list, structure_asset_list, start_planet_assets): (
+    (params_asset, biome_asset_list, structure_asset_list, start_planet_assets, animal_assets): (
         Res<Assets<ParamsAsset>>,
         Res<Assets<BiomeAssetList>>,
         Res<Assets<StructureAssetList>>,
         Res<Assets<StartPlanetAsset>>,
+        Res<Assets<AnimalAsset>>,
     ),
     mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
@@ -238,6 +246,17 @@ fn create_assets_list(
             Ordering::Equal => a.id.cmp(&b.id),
             o => o,
         });
+
+    for (path, handle) in &params_asset_collection.animal_handles {
+        if let Ok(handle) = handle.clone().try_typed::<AnimalAsset>() {
+            let animal_id = path
+                .strip_prefix("animals/")
+                .and_then(|s| s.strip_suffix(".animal.ron"))
+                .expect("unexpected animal asset path");
+            let animal = animal_assets.get(&handle).cloned().unwrap().0;
+            params.animals.insert(animal_id.into(), animal);
+        }
+    }
 
     command.insert_resource(params);
     command.insert_resource(TextureAtlasLayouts { biomes, structures });

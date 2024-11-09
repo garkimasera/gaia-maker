@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use compact_str::CompactString;
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
@@ -210,8 +211,32 @@ pub enum StructureBuildingState {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Animal {
+    pub size: AnimalSize,
+    pub habitat: AnimalHabitat,
+    pub req_biomass: f32,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[repr(u8)]
+pub enum AnimalSize {
+    Small,
+    Middle,
+    Large,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AnimalHabitat {
+    Land,
+    Sea,
+    Biomes(Vec<Biome>),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Race {
-    pub name: String,
+    pub name: CompactString,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -402,6 +427,8 @@ pub struct Params {
     pub space_buildings: FnvHashMap<SpaceBuildingKind, BuildingAttrs>,
     #[serde(skip)]
     pub start_planets: Vec<StartPlanet>,
+    #[serde(skip)]
+    pub animals: HashMap<CompactString, Animal>,
     pub monitoring: MonitoringParams,
 }
 
