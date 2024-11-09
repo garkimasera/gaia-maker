@@ -1,6 +1,7 @@
 {
     // UI
     "air-temprature": "Temprature",
+    "argon": "Argon",
     "atmosphere": "Atmosphere",
     "atmosphere-pressure": "Atmospheric Pressure",
     "average-air-temprature": "Average Temprature",
@@ -10,6 +11,7 @@
     "biome": "Biome",
     "build": "Build",
     "cancel": "Cancel",
+    "carbon": "Carbon",
     "carbon-dioxide": "Carbon Dioxide",
     "civilization": "Civilization",
     "civilize-new": "Civilize a new race",
@@ -20,7 +22,14 @@
     "density": "Density",
     "details": "Details",
     "difference-in-elevation": "Difference in Elevation",
+    "difficulty": "Difficulty",
+    "difficulty-easy": "Easy",
+    "difficulty-hard": "Hard",
+    "difficulty-normal": "Normal",
+    "difficulty-very-easy": "Very Easy",
+    "difficulty-very-hard": "Very Hard",
     "enabled": "Enabled",
+    "energy": "Energy",
     "exit": "Exit",
     "fertility": "Fertility",
     "height": "Height",
@@ -30,11 +39,13 @@
     "layers": "Layers",
     "load": "Load",
     "longitude": "Longitude",
-    "messages": "Messages",
     "main-menu": "Main Menu",
     "map": "Map",
+    "material": "Material",
     "menu": "Menu",
+    "messages": "Messages",
     "new": "New",
+    "nitrogen": "Nitrogen",
     "none": "None",
     "orbit": "Orbit",
     "oxygen": "Oxygen",
@@ -45,24 +56,17 @@
     "rainfall": "Rainfall",
     "save": "Save",
     "search-new-planet": "Search New Planet",
+    "selected-tool": "Selected tool",
     "solar-constant": "Solar Constant",
-    "speed-paused": "Pause",
-    "speed-normal": "Normal speed",
     "speed-fast": "Fast speed",
+    "speed-normal": "Normal speed",
+    "speed-paused": "Pause",
     "star-system": "Star system",
     "start": "Start",
     "statistics": "Statistics",
     "structures": "Structures",
-    "selected-tool": "Selected tool",
     "upkeep": "Upkeep",
     "water": "Water",
-    
-    // Resources
-    "energy": "Energy",
-    "ice": "Ice",
-    "material": "Material",
-    "carbon": "Carbon",
-    "nitrogen": "Nitrogen",
 
     // Biomes
     "rock": "Rock",
@@ -78,8 +82,6 @@
 
     // Structures
     "oxygen-generator": "Oxygen Generator",
-    "nitrogen-sprayer": "Nitrogen Sprayer",
-    "carbon-dioxide-sprayer": "Carbon Dioxide Sprayer",
     "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
@@ -93,18 +95,24 @@
     "atomic-age": "Atomic Age",
     "early-space-age": "Early Space Age",
 
-    // Orbital Buildings
+    // Space Buildings
     "fusion-reactor": "Fusion Reactor",
+    "asteroid-mining-station": "Asteroid Mining Station",
+    "dyson-swarm-unit": "Dyson Swarm Unit",
     "orbital-mirror": "Orbital Mirror",
     "solar-shield": "Solar Shield",
+    "nitrogen-sprayer": "Nitrogen Sprayer",
+    "carbon-dioxide-sprayer": "Carbon Dioxide Sprayer",
     "ion-irradiator": "Ion Irradiator",
 
-    // Star System Buildings
-    "asteroid-mining-station": "Asteroid Mining Station",
-    "ice-mining-station": "Ice Mining Station",
-    "dyson-swarm-unit": "Dyson Swarm Unit",
-    "methane-extractor": "Methane Extractor",
-    "ammonia-extractor": "Ammonia Extractor",
+    // Planets
+    "planet-custom": "Custom",
+    "planet-primitive-ocean": "Primitive Ocean Planet",
+    "desc/planet-primitive-ocean": "A planet with a primitive ocean that is not inhabited by life. Although oxygen does not exist, life is easily maintained by the ocean. This is the celestial body most suited to terraforming.",
+    "planet-ice": "Ice Planet",
+    "desc/planet-ice": "This is a planet covered in ice. Due to its low temperature, no life exists there, but if the temperature could be raised somehow, water, which is essential for life, could be obtained.",
+    "planet-desert": "Desert Planet",
+    "desc/planet-desert": "This is a planet with almost no water, and its surface is covered in dry desert. Without supplying water, life would not be possible.",
 
     // Messages
     "msg/warn-high-temp": "Too high temperature\nAn effective way to lower the temperature is to operate the solar shield, an orbital structure, to block sunlight from reaching the ground surface.",

@@ -1,6 +1,7 @@
 {
     // UI
     "air-temprature": "気温",
+    "argon": "アルゴン",
     "atmosphere": "大気",
     "atmosphere-pressure": "気圧",
     "average-air-temprature": "平均気温",
@@ -10,6 +11,7 @@
     "biome": "バイオーム",
     "build": "建設",
     "cancel": "キャンセル",
+    "carbon": "炭素",
     "carbon-dioxide": "二酸化炭素",
     "civilization": "文明",
     "civilize-new": "新たな種族を文明化",
@@ -20,7 +22,14 @@
     "density": "密度",
     "details": "詳細",
     "difference-in-elevation": "高低差",
+    "difficulty": "難易度",
+    "difficulty-easy": "簡単",
+    "difficulty-hard": "難しい",
+    "difficulty-normal": "普通",
+    "difficulty-very-easy": "とても簡単",
+    "difficulty-very-hard": "とても難しい",
     "enabled": "有効",
+    "energy": "エネルギー",
     "exit": "終了",
     "fertility": "肥沃度",
     "height": "高さ",
@@ -30,11 +39,13 @@
     "layers": "レイヤー",
     "load": "ロード",
     "longitude": "経度",
-    "messages": "メッセージ",
     "main-menu": "メインメニュー",
     "map": "地図",
+    "material": "素材",
     "menu": "メニュー",
+    "messages": "メッセージ",
     "new": "新規",
+    "nitrogen": "窒素",
     "none": "なし",
     "orbit": "軌道",
     "oxygen": "酸素",
@@ -44,25 +55,18 @@
     "radius": "半径",
     "rainfall": "降水量",
     "save": "セーブ",
-    "search-new-planet": "新しい惑星をさがす",
+    "search-new-planet": "新しい惑星",
+    "selected-tool": "選択中のツール",
     "solar-constant": "太陽定数",
-    "speed-paused": "停止",
-    "speed-normal": "通常速度",
     "speed-fast": "高速",
+    "speed-normal": "通常速度",
+    "speed-paused": "停止",
     "star-system": "星系",
     "start": "開始",
     "statistics": "統計",
     "structures": "構造物",
-    "selected-tool": "選択中のツール",
     "upkeep": "維持",
     "water": "水",
-    
-    // Resources
-    "energy": "エネルギー",
-    "ice": "氷",
-    "material": "素材",
-    "carbon": "炭素",
-    "nitrogen": "窒素",
 
     // Biomes
     "rock": "岩石",
@@ -78,8 +82,6 @@
 
     // Structures
     "oxygen-generator": "酸素発生機",
-    "nitrogen-sprayer": "窒素散布機",
-    "carbon-dioxide-sprayer": "二酸化炭素散布機",
     "rainmaker": "降雨装置",
     "fertilization-plant": "肥沃化工場",
     "heater": "ヒーター",
@@ -93,18 +95,23 @@
     "atomic-age": "原子力時代",
     "early-space-age": "初期宇宙時代",
 
-    // Orbital Buildings
+    // Space Buildings
     "fusion-reactor": "核融合炉",
+    "asteroid-mining-station": "小惑星採掘ステーション",
+    "dyson-swarm-unit": "ダイソンスウォームユニット",
     "orbital-mirror": "軌道ミラー",
-    "solar-shield": "ソーラーシールド",
+    "nitrogen-sprayer": "窒素散布機",
+    "carbon-dioxide-sprayer": "二酸化炭素散布機",
     "ion-irradiator": "イオン放射機",
 
-    // Star System Buildings
-    "asteroid-mining-station": "小惑星採掘ステーション",
-    "ice-mining-station": "氷採掘ステーション",
-    "dyson-swarm-unit": "ダイソンスウォームユニット",
-    "methane-extractor": "メタン抽出機",
-    "ammonia-extractor": "アンモニア抽出機",
+    // Planets
+    "planet-custom": "カスタム",
+    "planet-primitive-ocean": "原始海洋惑星",
+    "desc/planet-primitive-ocean": "生命のいない、原始的な海洋が生成されている惑星です。酸素こそ存在しないものの、海洋によって生命の維持は容易です。最もテラフォーミングに向いた天体です。",
+    "planet-ice": "氷惑星",
+    "desc/planet-ice": "氷に覆われた惑星です。その低い温度のため生命は存在しませんが、なんらかの方法で気温を上げれば、生命に欠かせない水を得ることができます。",
+    "planet-desert": "砂漠惑星",
+    "desc/planet-desert": "水がほとんど存在しない惑星で、その表面は乾燥した砂漠です。水を供給しなければ生命は存在し得ないでしょう。",
 
     // Messages
     "msg/warn-high-temp": "高すぎる気温\n気温が高すぎます。気温を下げるには、軌道上建造物であるソーラーシールドを稼働させ、地表に届く太陽光を遮蔽することが効果的です。",
