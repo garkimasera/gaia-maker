@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-use crate::audio::SoundEffect;
 use crate::conf::Conf;
 use crate::gz::GunzipBin;
 use crate::planet::*;
@@ -37,7 +36,7 @@ impl Plugin for AssetsPlugin {
                     .load_collection::<UiAssets>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
-                    .load_collection::<SoundEffects>(),
+                    .load_collection::<AudioSources>(),
             )
             .add_systems(OnExit(GameState::AssetLoading), create_assets_list);
     }
@@ -123,12 +122,10 @@ define_asset_list_from_enum! {
     }
 }
 
-define_asset_list_from_enum! {
-    #[asset(dir_path = "se")]
-    #[asset(extension = "ogg")]
-    pub struct SoundEffects {
-        pub sound_effects: HashMap<SoundEffect, Handle<AudioSource>>,
-    }
+#[derive(Debug, Resource, AssetCollection)]
+pub struct AudioSources {
+    #[asset(path = "se", collection(mapped, typed))]
+    pub sound_effects: HashMap<String, Handle<AudioSource>>,
 }
 
 fn create_assets_list(

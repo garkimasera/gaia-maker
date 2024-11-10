@@ -1,9 +1,7 @@
 use bevy::prelude::*;
-use bevy_kira_audio::AudioControl;
 use geom::Coords;
 
-use crate::assets::SoundEffects;
-use crate::audio::{AudioSE, SoundEffect};
+use crate::audio::{AudioPlayer, ResAudioPlayer};
 use crate::draw::UpdateMap;
 use crate::planet::*;
 use crate::screen::CursorMode;
@@ -32,8 +30,7 @@ fn cursor_action(
     mut sim: ResMut<Sim>,
     params: Res<Params>,
     mut planet: ResMut<Planet>,
-    audio_se: Res<AudioSE>,
-    sound_effects: Res<SoundEffects>,
+    audio_player: ResAudioPlayer,
 ) {
     for e in er.read() {
         let CursorAction { coords, .. } = *e;
@@ -52,7 +49,7 @@ fn cursor_action(
                         let size = params.structures[&kind].size;
                         if planet.placeable(coords, size) {
                             planet.place(coords, size, new_structure(kind), &mut sim, &params);
-                            audio_se.play(sound_effects.get(SoundEffect::Build));
+                            audio_player.play_se("build");
                         }
                     }
                 }
