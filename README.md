@@ -1,6 +1,6 @@
 # ![Gaia Maker](assets/logo.png)
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/garkimasera/gaia-maker/blob/main/LICENSE)
 [![CI](https://github.com/garkimasera/gaia-maker/actions/workflows/ci.yml/badge.svg)](https://github.com/garkimasera/gaia-maker/actions/workflows/ci.yml)
 
 Biological simulation game written in Rust
@@ -12,7 +12,7 @@ https://garkimasera.github.io/gaia-maker/
 ## Concept
 
 * Focus on terraforming and planet engineering
-* Simple simulation for temprature, rainfall, and biomes 
+* Simple simulation for temperature, rainfall, and biomes 
 
 ## License
 

@@ -98,10 +98,9 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
             let building_effect = planet.working_building_effect(p, params);
 
             if biome == Biome::Ocean {
-                sim.vapor_new[p] = linear_interpolation(
-                    &params.sim.ocean_vaporization_table,
-                    planet.map[p].temp - KELVIN_CELSIUS,
-                ) / RAINFALL_DURATION;
+                sim.vapor_new[p] =
+                    linear_interpolation(&params.sim.ocean_vaporization_table, planet.map[p].temp)
+                        / RAINFALL_DURATION;
             } else if let Some(BuildingEffect::Vapor {
                 value,
                 additional_water,
@@ -156,9 +155,9 @@ pub fn snow_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let t = planet.map[p].temp;
         let tile = &mut planet.map[p];
 
-        if t > params.sim.ice_melting_temprature {
+        if t > params.sim.ice_melting_temp {
             if tile.ice > 0.0 {
-                let d = t - params.sim.ice_melting_temprature;
+                let d = t - params.sim.ice_melting_temp;
                 tile.ice -= params.sim.ice_melting_height_per_temp * d;
                 if tile.ice < 0.0 {
                     tile.ice = 0.0;

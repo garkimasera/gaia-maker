@@ -4,7 +4,10 @@ use compact_str::CompactString;
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
+
+use super::serde_with_types::*;
 
 pub const TILE_SIZE: f32 = 48.0;
 pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
@@ -92,10 +95,12 @@ pub struct BiomeAttrs {
     pub color: [u8; 3],
 }
 
+#[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BiomeRequirements {
-    /// Required temprature [°C]
-    pub temprature: (f32, f32),
+    /// Required temperature [°C]
+    #[serde_as(as = "(Celsius, Celsius)")]
+    pub temp: (f32, f32),
     /// Required rainfall [mm/year]
     pub rainfall: (f32, f32),
     /// Required fertility [%]
@@ -464,6 +469,7 @@ pub struct StartParams {
     pub initial_conditions: Vec<InitialCondition>,
 }
 
+#[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SimParams {
     pub sim_normal_loop_duration_ms: u64,
@@ -501,11 +507,13 @@ pub struct SimParams {
     /// The ratio of vapor loss
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
+    #[serde_as(as = "Vec<(Celsius, Celsius)>")]
     pub ocean_vaporization_table: Vec<(f32, f32)>,
-    /// Humidity calculation factors (humidity = rainfall - factors.0 * (temprature + factors.1))
+    /// Humidity calculation factors (humidity = rainfall - factors.0 * (temperature + factors.1))
     pub humidity_factors: (f32, f32),
-    /// Max fertility table by temprature
-    pub temprature_fertility_table: Vec<(f32, f32)>,
+    /// Max fertility table by temperature
+    #[serde_as(as = "Vec<(Celsius, Celsius)>")]
+    pub temperature_fertility_table: Vec<(f32, f32)>,
     /// Max fertility table by humidity
     pub humidity_fertility_table: Vec<(f32, f32)>,
     /// Max fertility table by nitrogen atm
@@ -542,8 +550,8 @@ pub struct SimParams {
     pub sea_biomass_factor: f32,
     /// Required thickness of ice for ice field [m]
     pub ice_thickness_of_ice_field: f32,
-    /// Ice melting temprature [K]
-    pub ice_melting_temprature: f32,
+    /// Ice melting temperature [K]
+    pub ice_melting_temp: f32,
     /// Ice melting speed [m/K]
     pub ice_melting_height_per_temp: f32,
     /// Factor for adding ice height from rainfall [m/(rainfall)mm]

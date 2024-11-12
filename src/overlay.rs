@@ -19,7 +19,7 @@ pub enum OverlayLayerKind {
     #[default]
     None,
     Height,
-    AirTemprature,
+    AirTemperature,
     Rainfall,
     Fertility,
     Biomass,
@@ -43,7 +43,7 @@ impl ColorMaterials {
     ) -> &(Color, Handle<ColorMaterial>) {
         match kind {
             OverlayLayerKind::None => unreachable!(),
-            OverlayLayerKind::AirTemprature => {
+            OverlayLayerKind::AirTemperature => {
                 let temp = planet.map[p].temp;
 
                 let i = if temp < 263.15 {

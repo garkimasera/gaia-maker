@@ -34,10 +34,8 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let mut sum_diff = 0.0;
 
     for p in map_iter_idx {
-        let temp_factor = linear_interpolation(
-            &params.sim.temprature_fertility_table,
-            planet.map[p].temp - KELVIN_CELSIUS,
-        );
+        let temp_factor =
+            linear_interpolation(&params.sim.temperature_fertility_table, planet.map[p].temp);
         let rainfall_factor =
             linear_interpolation(&params.sim.humidity_fertility_table, sim.humidity[p]);
         let max_fertility = 100.0 * temp_factor * rainfall_factor * nitrogen_factor;
@@ -160,8 +158,8 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
         };
 
         if current_biome.is_sea() {
-            let sea_ice_temp = params.biomes[&Biome::SeaIce].requirements.temprature.1;
-            let next_biome = if tile.temp - KELVIN_CELSIUS < sea_ice_temp {
+            let sea_ice_temp = params.biomes[&Biome::SeaIce].requirements.temp.1;
+            let next_biome = if tile.temp < sea_ice_temp {
                 Biome::SeaIce
             } else {
                 Biome::Ocean
@@ -221,10 +219,10 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
 
     let req = &params.biomes[&biome].requirements;
 
-    let temp = tile.temp - KELVIN_CELSIUS;
+    let temp = tile.temp;
 
-    req.temprature.0 <= temp
-        && temp <= req.temprature.1
+    req.temp.0 <= temp
+        && temp <= req.temp.1
         && req.rainfall.0 <= tile.rainfall
         && tile.rainfall <= req.rainfall.1
         && req.fertility <= tile.fertility

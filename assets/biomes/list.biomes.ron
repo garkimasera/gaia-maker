@@ -6,7 +6,7 @@
         priority: 1,
         mean_transition_time: 200,
         requirements: (
-            temprature: (-273.15, 10000.0),
+            temp: (-273.15, 10000.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -20,7 +20,7 @@
         priority: 0,
         mean_transition_time: 100,
         requirements: (
-            temprature: (-10.0, 100.0),
+            temp: (-10.0, 100.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -34,7 +34,7 @@
         priority: 0,
         mean_transition_time: 100,
         requirements: (
-            temprature: (-273.15, -20.0),
+            temp: (-273.15, -20.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -48,7 +48,7 @@
         priority: 2,
         mean_transition_time: 80,
         requirements: (
-            temprature: (0.0, 100.0),
+            temp: (0.0, 100.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -62,7 +62,7 @@
         priority: 2,
         mean_transition_time: 80,
         requirements: (
-            temprature: (-273.15, -15.0),
+            temp: (-273.15, -15.0),
             rainfall: (0.0, 100000.0),
             fertility: 0.0,
             biomass: 0.0,
@@ -76,7 +76,7 @@
         priority: 5,
         mean_transition_time: 100,
         requirements: (
-            temprature: (-15.0, 0.0),
+            temp: (-15.0, 0.0),
             rainfall: (50.0, 3000.0),
             fertility: 10.0,
             biomass: 1.0,
@@ -90,7 +90,7 @@
         priority: 10,
         mean_transition_time: 120,
         requirements: (
-            temprature: (0.0, 42.0),
+            temp: (0.0, 42.0),
             rainfall: (50.0, 4000.0),
             fertility: 20.0,
             biomass: 1.0,
@@ -104,7 +104,7 @@
         priority: 15,
         mean_transition_time: 150,
         requirements: (
-            temprature: (2.0, 15.0),
+            temp: (2.0, 15.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 8.0,
@@ -118,7 +118,7 @@
         priority: 20,
         mean_transition_time: 180,
         requirements: (
-            temprature: (15.0, 25.0),
+            temp: (15.0, 25.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 9.0,
@@ -132,7 +132,7 @@
         priority: 25,
         mean_transition_time: 180,
         requirements: (
-            temprature: (25.0, 40.0),
+            temp: (25.0, 40.0),
             rainfall: (300.0, 8000.0),
             fertility: 40.0,
             biomass: 9.0,

@@ -35,7 +35,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     let secs_per_loop = params.sim.secs_per_cycle / params.sim.n_loop_atmo_heat_calc as f32;
 
-    // Calculate new atmosphere temprature of tiles
+    // Calculate new atmosphere temperature of tiles
     for _ in 0..params.sim.n_loop_atmo_heat_calc {
         for p in map_iter_idx {
             let old_heat_amount = sim.atmo_heat_cap[p] * sim.atemp[p];
@@ -147,7 +147,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         tile_log(p, "sea_temp", |p| planet.map[p].sea_temp);
     }
 
-    // Set calculated new temprature
+    // Set calculated new temperature
     let mut sum_temp = 0.0;
     for p in map_iter_idx {
         let t = sim.atemp[p];
@@ -190,7 +190,7 @@ fn calc_insolation(planet: &Planet, sim: &mut Sim, params: &Params) {
     }
 }
 
-// Calculate initial temprature at the first simulation
+// Calculate initial temperature at the first simulation
 pub fn init_temp(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let greenhouse_effect = greenhouse_effect(planet, params);
     let map_iter_idx = planet.map.iter_idx();

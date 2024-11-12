@@ -14,13 +14,13 @@ pub struct Sim {
     pub insolation: Array2d<f32>,
     /// Solar constant at last insolation calculation
     pub solar_constant_before: f32,
-    /// Atmosphere temprature
+    /// Atmosphere temperature
     pub atemp: Array2d<f32>,
-    /// Atmosphere and surface temprature (used for calculation)
+    /// Atmosphere and surface temperature (used for calculation)
     pub atemp_new: Array2d<f32>,
     /// Atmosphere and surface heat capacity [J/K]
     pub atmo_heat_cap: Array2d<f32>,
-    /// Sea temprature
+    /// Sea temperature
     pub stemp: Array2d<f32>,
     /// Sea heat capacity [J/K]
     pub sea_heat_cap: Array2d<f32>,
@@ -30,7 +30,7 @@ pub struct Sim {
     pub vapor: Array2d<f32>,
     /// Vapor in air (used for calculation)
     pub vapor_new: Array2d<f32>,
-    /// Tile humidity that calculated by adjusting rainfall by temprature
+    /// Tile humidity that calculated by adjusting rainfall by temperature
     pub humidity: Array2d<f32>,
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,

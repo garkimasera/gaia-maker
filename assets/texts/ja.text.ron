@@ -1,12 +1,12 @@
 {
     // UI
-    "air-temprature": "気温",
+    "air-temperature": "気温",
     "argon": "アルゴン",
     "atmosphere": "大気",
     "atmosphere-pressure": "気圧",
-    "average-air-temprature": "平均気温",
+    "average-air-temperature": "平均気温",
     "average-rainfall": "平均降水量",
-    "average-sea-temprature": "平均海水温",
+    "average-sea-temperature": "平均海水温",
     "biomass": "生物量",
     "biome": "バイオーム",
     "build": "建設",

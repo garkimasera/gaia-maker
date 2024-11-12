@@ -15,7 +15,7 @@ pub enum MapLayer {
     #[default]
     Biome,
     Height,
-    AirTemprature,
+    AirTemperature,
     Rainfall,
     Fertility,
     Biomass,
@@ -205,8 +205,8 @@ fn map_img(
                 MapLayer::Height => {
                     color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Height)
                 }
-                MapLayer::AirTemprature => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::AirTemprature)
+                MapLayer::AirTemperature => {
+                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::AirTemperature)
                 }
                 MapLayer::Rainfall => {
                     color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Rainfall)

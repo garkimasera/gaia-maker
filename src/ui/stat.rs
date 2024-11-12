@@ -79,7 +79,7 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
 fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
     ui.label(format!(
         "{}: {:.1} °C",
-        t!("average-air-temprature"),
+        t!("average-air-temperature"),
         planet.stat.average_air_temp - KELVIN_CELSIUS
     ));
     ui.label(format!(
@@ -168,8 +168,8 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
 #[strum(serialize_all = "kebab-case")]
 pub enum GraphItem {
     #[default]
-    AverageAirTemprature,
-    AverageSeaTemprature,
+    AverageAirTemperature,
+    AverageSeaTemperature,
     AverageRainfall,
     Biomass,
     Oxygen,
@@ -180,10 +180,10 @@ pub enum GraphItem {
 impl GraphItem {
     fn record_to_value(&self, record: Option<&Record>) -> f64 {
         match self {
-            Self::AverageAirTemprature => record
+            Self::AverageAirTemperature => record
                 .map(|record| record.average_air_temp - KELVIN_CELSIUS)
                 .unwrap_or(0.0) as f64,
-            Self::AverageSeaTemprature => record
+            Self::AverageSeaTemperature => record
                 .map(|record| record.average_sea_temp - KELVIN_CELSIUS)
                 .unwrap_or(0.0) as f64,
             Self::AverageRainfall => record
@@ -200,8 +200,8 @@ impl GraphItem {
 
     fn format_value(&self, value: f64) -> String {
         match self {
-            Self::AverageAirTemprature => format!("{:.1} °C", value),
-            Self::AverageSeaTemprature => format!("{:.1} °C", value),
+            Self::AverageAirTemperature => format!("{:.1} °C", value),
+            Self::AverageSeaTemperature => format!("{:.1} °C", value),
             Self::AverageRainfall => format!("{:.0} mm", value),
             Self::Biomass => format!("{:.1} Gt", value),
             Self::Oxygen => format!("{:.2e} atm", value),

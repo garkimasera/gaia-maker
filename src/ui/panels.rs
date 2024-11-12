@@ -259,9 +259,9 @@ fn sidebar(
             "height",
         ),
         (
-            "ui/icon-air-temprature",
+            "ui/icon-air-temperature",
             format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
-            "air-temprature",
+            "air-temperature",
         ),
         (
             "ui/icon-rainfall",

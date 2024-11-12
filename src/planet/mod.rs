@@ -12,6 +12,7 @@ mod misc;
 mod monitoring;
 mod msg;
 mod resources;
+mod serde_with_types;
 mod sim;
 mod stat;
 mod water;

@@ -1,12 +1,12 @@
 {
     // UI
-    "air-temprature": "Temprature",
+    "air-temperature": "Temperature",
     "argon": "Argon",
     "atmosphere": "Atmosphere",
     "atmosphere-pressure": "Atmospheric Pressure",
-    "average-air-temprature": "Average Temprature",
+    "average-air-temperature": "Average Temperature",
     "average-rainfall": "Average Rainfall",
-    "average-sea-temprature": "Average Sea Temprature",
+    "average-sea-temperature": "Average Sea Temperature",
     "biomass": "Biomass",
     "biome": "Biome",
     "build": "Build",
