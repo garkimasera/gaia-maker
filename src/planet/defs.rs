@@ -211,19 +211,23 @@ pub enum StructureBuildingState {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Animal {
+pub struct AnimalAttr {
     pub size: AnimalSize,
     pub habitat: AnimalHabitat,
-    pub req_biomass: f32,
+    pub growth_speed: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[repr(u8)]
 pub enum AnimalSize {
-    Small,
-    Middle,
-    Large,
+    Small = 0,
+    Middle = 1,
+    Large = 2,
+}
+
+impl AnimalSize {
+    pub const LEN: usize = AnimalSize::Large as usize + 1;
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
@@ -232,6 +236,12 @@ pub enum AnimalHabitat {
     Land,
     Sea,
     Biomes(Vec<Biome>),
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct Animal {
+    id: CompactString,
+    n: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -428,7 +438,7 @@ pub struct Params {
     #[serde(skip)]
     pub start_planets: Vec<StartPlanet>,
     #[serde(skip)]
-    pub animals: HashMap<CompactString, Animal>,
+    pub animals: HashMap<CompactString, AnimalAttr>,
     pub monitoring: MonitoringParams,
 }
 

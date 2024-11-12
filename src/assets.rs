@@ -84,7 +84,7 @@ pub struct StartPlanetAsset(StartPlanet);
 
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-pub struct AnimalAsset(Animal);
+pub struct AnimalAsset(AnimalAttr);
 
 #[derive(Resource)]
 pub struct TextureAtlasLayouts {

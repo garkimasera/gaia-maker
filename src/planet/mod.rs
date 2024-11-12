@@ -40,6 +40,7 @@ use strum::IntoEnumIterator;
 pub struct Tile {
     pub biome: Biome,
     pub structure: Structure,
+    pub animal: [Option<Animal>; AnimalSize::LEN],
     pub height: f32,
     pub biomass: f32,
     pub fertility: f32,
@@ -61,6 +62,7 @@ impl Default for Tile {
         Self {
             biome: Biome::Rock,
             structure: Structure::None,
+            animal: [None, None, None],
             height: 0.0,
             biomass: 0.0,
             fertility: 0.0,
