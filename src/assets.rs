@@ -10,6 +10,7 @@ use bevy::utils::HashMap;
 use bevy_asset_loader::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use bevy_kira_audio::AudioSource;
+use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::Deserialize;
 use strum::IntoEnumIterator;
@@ -87,9 +88,18 @@ pub struct StartPlanetAsset(StartPlanet);
 pub struct AnimalAsset(AnimalAttr);
 
 #[derive(Resource)]
-pub struct TextureAtlasLayouts {
-    pub biomes: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
-    pub structures: FnvHashMap<StructureKind, Handle<TextureAtlasLayout>>,
+pub struct TextureHandles {
+    pub biome_layouts: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
+    pub structure_layouts: FnvHashMap<StructureKind, Handle<TextureAtlasLayout>>,
+    pub animals: HashMap<CompactString, LoadedTexture>,
+}
+
+#[derive(Clone, Debug)]
+pub struct LoadedTexture {
+    pub layout: Handle<TextureAtlasLayout>,
+    pub image: Handle<Image>,
+    pub _width: u32,
+    pub _height: u32,
 }
 
 #[derive(Debug, Resource, AssetCollection)]
@@ -130,6 +140,7 @@ pub struct AudioSources {
 
 fn create_assets_list(
     mut command: Commands,
+    images: Res<Assets<Image>>,
     params_asset_collection: Res<ParamsAssetCollection>,
     (params_asset, biome_asset_list, structure_asset_list, start_planet_assets, animal_assets): (
         Res<Assets<ParamsAsset>>,
@@ -140,6 +151,7 @@ fn create_assets_list(
     ),
     mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
+    // Biomes
     let biome_asset_list = biome_asset_list
         .get(&params_asset_collection.biomes)
         .unwrap();
@@ -188,7 +200,6 @@ fn create_assets_list(
             );
         }
     }
-
     let biomes = Biome::iter()
         .map(|biome| {
             let mut texture_atlas = TextureAtlasLayout::new_empty(UVec2::new(
@@ -204,6 +215,7 @@ fn create_assets_list(
         })
         .collect();
 
+    // Structures
     let structure_asset_list = structure_asset_list
         .get(&params_asset_collection.structures)
         .unwrap();
@@ -231,6 +243,7 @@ fn create_assets_list(
     params.biomes = biome_asset_list.0.clone();
     params.structures = structure_asset_list.0.clone();
 
+    // Start planets
     for handle in params_asset_collection.start_planet_handles.values() {
         if let Ok(handle) = handle.clone().try_typed::<StartPlanetAsset>() {
             let start_planet = start_planet_assets.get(&handle).cloned().unwrap().0;
@@ -244,17 +257,47 @@ fn create_assets_list(
             o => o,
         });
 
+    // Animals
+    let mut animals = HashMap::default();
     for (path, handle) in &params_asset_collection.animal_handles {
+        let animal_id: CompactString = path
+            .strip_prefix("animals/")
+            .and_then(|s| s.split_once('.'))
+            .expect("unexpected animal asset path")
+            .0
+            .into();
         if let Ok(handle) = handle.clone().try_typed::<AnimalAsset>() {
-            let animal_id = path
-                .strip_prefix("animals/")
-                .and_then(|s| s.strip_suffix(".animal.ron"))
-                .expect("unexpected animal asset path");
             let animal = animal_assets.get(&handle).cloned().unwrap().0;
-            params.animals.insert(animal_id.into(), animal);
+            params.animals.insert(animal_id, animal);
+            continue;
+        }
+        if let Ok(handle) = handle.clone().try_typed::<Image>() {
+            let image = images.get(&handle).unwrap();
+            let width = image.width() / 2;
+            let height = image.height() / 2;
+            let layout = texture_atlas_assets.add(TextureAtlasLayout::from_grid(
+                UVec2::new(width, height),
+                2,
+                2,
+                None,
+                None,
+            ));
+            animals.insert(
+                animal_id,
+                LoadedTexture {
+                    layout,
+                    image: handle,
+                    _width: width,
+                    _height: height,
+                },
+            );
         }
     }
 
     command.insert_resource(params);
-    command.insert_resource(TextureAtlasLayouts { biomes, structures });
+    command.insert_resource(TextureHandles {
+        biome_layouts: biomes,
+        structure_layouts: structures,
+        animals,
+    });
 }

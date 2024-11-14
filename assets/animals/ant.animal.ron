@@ -1,0 +1,5 @@
+(
+    size: small,
+    habitat: land,
+    growth_speed: 1.0,
+)

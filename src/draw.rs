@@ -20,6 +20,12 @@ impl UpdateMap {
     }
 }
 
+#[derive(Debug, Component)]
+pub struct AnimatedTexture;
+
+#[derive(Debug, Default, Resource)]
+pub struct AnimationCounter(usize);
+
 const CORNERS: [Coords; 4] = [Coords(-1, -1), Coords(-1, 1), Coords(1, 1), Coords(1, -1)];
 
 const CORNER_PIECE_GRID: [(usize, usize); 4] = [(0, 1), (0, 0), (1, 0), (1, 1)];
@@ -29,17 +35,25 @@ impl Plugin for DrawPlugin {
         app.add_event::<UpdateMap>()
             .init_resource::<UpdateMap>()
             .init_resource::<LayeredTexMap>()
+            .init_resource::<AnimationCounter>()
             .add_systems(
                 Update,
                 (
                     update_layered_tex_map.pipe(spawn_map_textures),
                     spawn_structure_textures,
+                    spawn_animal_textures,
                     spawn_overlay_meshes,
                 )
                     .in_set(GameSystemSet::Draw)
                     .run_if(in_state(GameState::Running)),
             )
-            .add_systems(Update, reset_update_map.after(GameSystemSet::Draw));
+            .add_systems(Update, reset_update_map.after(GameSystemSet::Draw))
+            .add_systems(
+                Update,
+                update_animation.run_if(bevy::time::common_conditions::on_timer(
+                    std::time::Duration::from_secs(1),
+                )),
+            );
     }
 }
 
@@ -103,7 +117,7 @@ fn spawn_map_textures(
     ltm: Res<LayeredTexMap>,
     params: Res<Params>,
     biome_textures: Res<BiomeTextures>,
-    texture_atlas_layouts: Res<TextureAtlasLayouts>,
+    texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
@@ -162,7 +176,7 @@ fn spawn_map_textures(
                         },
                         TextureAtlas {
                             index,
-                            layout: texture_atlas_layouts.biomes[tile_idx].clone(),
+                            layout: texture_handles.biome_layouts[tile_idx].clone(),
                         },
                     ))
                     .id();
@@ -177,7 +191,7 @@ fn spawn_structure_textures(
     update_map: Res<UpdateMap>,
     params: Res<Params>,
     structure_textures: Res<StructureTextures>,
-    texture_atlas_layouts: Res<TextureAtlasLayouts>,
+    texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
     current_layer: Res<OverlayLayerKind>,
@@ -225,12 +239,69 @@ fn spawn_structure_textures(
                     },
                     TextureAtlas {
                         index,
-                        layout: texture_atlas_layouts.structures[&kind].clone(),
+                        layout: texture_handles.structure_layouts[&kind].clone(),
                     },
                 ))
                 .id();
             tex_entities.push(id);
         }
+    }
+}
+
+fn spawn_animal_textures(
+    mut commands: Commands,
+    update_map: Res<UpdateMap>,
+    texture_handles: Res<TextureHandles>,
+    in_screen_tile_range: Res<InScreenTileRange>,
+    planet: Res<Planet>,
+    current_layer: Res<OverlayLayerKind>,
+    mut tex_entities: Local<Vec<Entity>>,
+) {
+    if !update_map.need_update {
+        return;
+    }
+    for entity in tex_entities.iter() {
+        commands.entity(*entity).despawn();
+    }
+    tex_entities.clear();
+
+    let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
+
+    for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
+        let p = coord_rotation_x(planet.map.size(), p_screen);
+
+        // Select the largest animal at this tile
+        let animal = match planet.map[p].animal {
+            [_, _, Some(ref animal)] => animal,
+            [_, Some(ref animal), None] => animal,
+            [Some(ref animal), None, None] => animal,
+            _ => continue,
+        };
+
+        let index = 0;
+        let index = if monochrome { index + 2 } else { index };
+
+        let t = &texture_handles.animals[&animal.id];
+
+        let x = (p_screen.0 as f32 + 0.5) * TILE_SIZE;
+        let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
+        let id = commands
+            .spawn((
+                SpriteBundle {
+                    texture: t.image.clone(),
+                    sprite: Sprite::default(),
+                    transform: Transform::from_xyz(x, y, 400.0),
+                    visibility: Visibility::Inherited,
+                    ..default()
+                },
+                TextureAtlas {
+                    index,
+                    layout: t.layout.clone(),
+                },
+                AnimatedTexture,
+            ))
+            .id();
+        tex_entities.push(id);
     }
 }
 
@@ -282,6 +353,21 @@ fn spawn_overlay_meshes(
             })
             .id();
         mesh_entities.push(id);
+    }
+}
+
+fn update_animation(
+    mut counter: ResMut<AnimationCounter>,
+    current_layer: Res<OverlayLayerKind>,
+    mut query: Query<(&mut AnimatedTexture, &mut TextureAtlas)>,
+) {
+    let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
+    counter.0 ^= 1;
+
+    let new_index = counter.0 + if monochrome { 2 } else { 0 };
+
+    for (_a, mut atlas) in &mut query {
+        atlas.index = new_index;
     }
 }
 

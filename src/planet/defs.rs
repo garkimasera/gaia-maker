@@ -233,6 +233,10 @@ pub enum AnimalSize {
 
 impl AnimalSize {
     pub const LEN: usize = AnimalSize::Large as usize + 1;
+
+    pub fn _iter() -> [Self; Self::LEN] {
+        [Self::Small, Self::Middle, Self::Large]
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
@@ -245,8 +249,8 @@ pub enum AnimalHabitat {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Animal {
-    id: CompactString,
-    n: f32,
+    pub id: CompactString,
+    pub n: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
