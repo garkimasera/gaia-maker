@@ -1,4 +1,5 @@
 mod action;
+mod animal;
 mod atmo;
 mod biome;
 mod buildings;
@@ -213,6 +214,7 @@ impl Planet {
         self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
+        self::animal::sim_animal(self, sim, params);
         self::event::advance(self, sim, params);
         self::stat::record_stats(self, params);
         self::monitoring::monitor(self, params);

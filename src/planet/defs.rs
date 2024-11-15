@@ -215,11 +215,16 @@ pub enum StructureBuildingState {
     Disabled,
 }
 
+#[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimalAttr {
     pub size: AnimalSize,
+    pub cost: f32,
     pub habitat: AnimalHabitat,
     pub growth_speed: f32,
+    /// Liveable temperature range
+    #[serde_as(as = "(Celsius, Celsius)")]
+    pub temp: (f32, f32),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
