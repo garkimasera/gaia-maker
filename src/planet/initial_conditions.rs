@@ -1,6 +1,9 @@
 use rand::Rng;
 
-use super::{misc::SymmetricalLinearDist, Biome, InitialCondition, Params, Planet, Sim};
+use super::{
+    misc::{get_rng, SymmetricalLinearDist},
+    Biome, InitialCondition, Params, Planet, Sim,
+};
 
 pub fn apply_initial_condition(
     planet: &mut Planet,
@@ -8,7 +11,7 @@ pub fn apply_initial_condition(
     initial_condition: InitialCondition,
     _params: &Params,
 ) {
-    let mut rng = rand::thread_rng();
+    let mut rng = get_rng();
 
     match initial_condition {
         InitialCondition::Snowball { thickness } => {

@@ -29,9 +29,10 @@ pub use self::resources::*;
 pub use self::sim::Sim;
 pub use self::stat::{Record, Stat};
 pub use self::water::*;
+
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
-use misc::SymmetricalLinearDist;
+use misc::{get_rng, SymmetricalLinearDist};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -258,7 +259,7 @@ impl Planet {
 }
 
 pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
-    let mut rng = rand::thread_rng();
+    let mut rng = get_rng();
 
     let start_planet = params
         .start_planets

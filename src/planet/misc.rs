@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     assert!(table.len() > 2);
@@ -42,6 +42,11 @@ impl From<(f32, f32)> for SymmetricalLinearDist {
     fn from(a: (f32, f32)) -> Self {
         Self::new(a.0, a.1)
     }
+}
+
+pub fn get_rng() -> impl rand::Rng {
+    let mut thread_rng = rand::thread_rng();
+    rand::rngs::SmallRng::from_rng(&mut thread_rng).unwrap()
 }
 
 impl rand::distributions::Distribution<f32> for SymmetricalLinearDist {

@@ -1,6 +1,11 @@
-use super::{debug_log::tile_log, misc::linear_interpolation, *};
 use geom::{CDistRangeIter, CyclicMode, Direction};
-use rand::{thread_rng, Rng};
+use rand::Rng;
+
+use super::{
+    debug_log::tile_log,
+    misc::{get_rng, linear_interpolation},
+    *,
+};
 
 const FERTILITY_MAX: f32 = 100.0;
 const FERTILITY_MIN: f32 = 0.0;
@@ -148,6 +153,8 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let mut rng = get_rng();
+
     for p in planet.map.iter_idx() {
         let tile = &planet.map[p];
         let current_biome = tile.biome;
@@ -170,7 +177,7 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
                 } else {
                     1.0 / params.biomes[&next_biome].mean_transition_time
                 };
-                if thread_rng().gen_bool(transition_probability as f64) {
+                if rng.gen_bool(transition_probability as f64) {
                     planet.map[p].biome = next_biome;
                 }
             }
@@ -206,7 +213,7 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
         } else {
             1.0 / params.biomes[&next_biome].mean_transition_time
         };
-        if thread_rng().gen_bool(transition_probability as f64) {
+        if rng.gen_bool(transition_probability as f64) {
             planet.map[p].biome = next_biome;
         }
     }
