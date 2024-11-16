@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use geom::Coords;
 
-use crate::audio::{AudioPlayer, ResAudioPlayer};
+use crate::audio::AudioPlayer;
 use crate::draw::UpdateMap;
 use crate::planet::*;
 use crate::screen::CursorMode;
@@ -30,7 +30,7 @@ fn cursor_action(
     mut sim: ResMut<Sim>,
     params: Res<Params>,
     mut planet: ResMut<Planet>,
-    audio_player: ResAudioPlayer,
+    audio_player: AudioPlayer,
 ) {
     for e in er.read() {
         let CursorAction { coords, .. } = *e;

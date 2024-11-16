@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
 
 use crate::assets::AudioSources;
@@ -11,20 +11,20 @@ pub struct SEChannel;
 
 pub type AudioChannelSE = AudioChannel<SEChannel>;
 
-pub type ResAudioPlayer<'a> = (Res<'a, AudioSources>, Res<'a, AudioChannelSE>);
-
-pub trait AudioPlayer {
-    fn play_se(&self, s: &str);
+#[derive(SystemParam)]
+pub struct AudioPlayer<'w> {
+    sources: Res<'w, AudioSources>,
+    channel_se: Res<'w, AudioChannelSE>,
 }
 
-impl<'a> AudioPlayer for ResAudioPlayer<'a> {
-    fn play_se(&self, s: &str) {
+impl<'w> AudioPlayer<'w> {
+    pub fn play_se(&self, s: &str) {
         let path = compact_str::format_compact!("se/{}.ogg", s);
-        let Some(audio_source) = self.0.sound_effects.get(path.as_str()) else {
+        let Some(audio_source) = self.sources.sound_effects.get(path.as_str()) else {
             log::warn!("unknown sound effect {}", path);
             return;
         };
-        self.1.play(audio_source.clone());
+        self.channel_se.play(audio_source.clone());
     }
 }
 
