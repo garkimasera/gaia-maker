@@ -5,8 +5,7 @@ use bevy_egui::{egui, EguiContexts};
 use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
-use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
-use crate::conf::Conf;
+use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
@@ -22,7 +21,6 @@ pub fn stat_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    conf: Res<Conf>,
     planet: Res<Planet>,
     params: Res<Params>,
     mut current_panel: Local<Panel>,
@@ -52,9 +50,7 @@ pub fn stat_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    occupied_screen_space.push_egui_window_rect(rect);
 }
 
 fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {

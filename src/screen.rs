@@ -43,7 +43,10 @@ impl Plugin for ScreenPlugin {
             .init_resource::<CursorMode>()
             .add_systems(OnEnter(GameState::MainMenu), main_menu_background)
             .add_systems(OnExit(GameState::MainMenu), main_menu_background_exit)
-            .add_systems(OnEnter(GameState::Running), setup_cursor)
+            .add_systems(
+                OnEnter(GameState::Running),
+                (setup_cursor, set_scale_factor_to_occupied_screen_space),
+            )
             .add_systems(
                 Update,
                 on_enter_running
@@ -114,6 +117,13 @@ pub fn setup_cursor(
         })
         .insert(HoverTile(None));
     *setup = true;
+}
+
+fn set_scale_factor_to_occupied_screen_space(
+    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    conf: Res<Conf>,
+) {
+    occupied_screen_space.scale_factor = conf.ui.scale_factor;
 }
 
 fn on_enter_running(
@@ -361,6 +371,7 @@ pub struct OccupiedScreenSpace {
     pub occupied_left: f32,
     pub occupied_right: f32,
     pub window_rects: Vec<Rect>,
+    scale_factor: f32,
 }
 
 impl OccupiedScreenSpace {
@@ -383,6 +394,20 @@ impl OccupiedScreenSpace {
         }
 
         true
+    }
+
+    pub fn push_egui_window_rect(&mut self, rect: bevy_egui::egui::Rect) {
+        let rect = Rect {
+            min: Vec2::new(
+                rect.left() * self.scale_factor,
+                rect.top() * self.scale_factor,
+            ),
+            max: Vec2::new(
+                rect.right() * self.scale_factor,
+                rect.bottom() * self.scale_factor,
+            ),
+        };
+        self.window_rects.push(rect);
     }
 }
 

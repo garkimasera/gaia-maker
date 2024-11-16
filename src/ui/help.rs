@@ -2,8 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::{convert_rect, WindowsOpenState};
-use crate::conf::Conf;
+use super::WindowsOpenState;
 use crate::planet::{BuildingAttrs, BuildingEffect, Params, SpaceBuildingKind, StructureKind};
 use crate::screen::OccupiedScreenSpace;
 use crate::text::WithUnitDisplay;
@@ -95,7 +94,6 @@ pub fn help_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    conf: Res<Conf>,
     params: Res<Params>,
     mut current_item: Local<HelpItem>,
 ) {
@@ -139,9 +137,7 @@ pub fn help_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    occupied_screen_space.push_egui_window_rect(rect);
 }
 
 impl HelpItem {

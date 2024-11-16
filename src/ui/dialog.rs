@@ -8,7 +8,7 @@ use crate::{
     sim::StartEvent,
 };
 
-use super::{convert_rect, Dialog, WindowsOpenState};
+use super::{Dialog, WindowsOpenState};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct MsgDialog {
@@ -74,7 +74,6 @@ pub fn dialogs(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut ew_start_event: EventWriter<StartEvent>,
-    conf: Res<Conf>,
 ) {
     let mut close_dialogs = Vec::new();
     for (i, dialog) in wos.dialogs.iter_mut().enumerate() {
@@ -96,9 +95,7 @@ pub fn dialogs(
                 }),
         };
         let rect = dialog.unwrap().response.rect;
-        occupied_screen_space
-            .window_rects
-            .push(convert_rect(rect, conf.ui.scale_factor));
+        occupied_screen_space.push_egui_window_rect(rect);
         if !open || close {
             close_dialogs.push(i);
         }

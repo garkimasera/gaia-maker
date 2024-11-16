@@ -2,8 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
-use super::{convert_rect, help::HelpItem, OccupiedScreenSpace, WindowsOpenState};
-use crate::conf::Conf;
+use super::{help::HelpItem, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::*;
 
 pub fn space_buildings_window(
@@ -12,7 +11,6 @@ pub fn space_buildings_window(
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
     mut sim: ResMut<Sim>,
-    conf: Res<Conf>,
     params: Res<Params>,
 ) {
     if !wos.space_building {
@@ -40,9 +38,7 @@ pub fn space_buildings_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    occupied_screen_space.push_egui_window_rect(rect);
 }
 
 pub fn buildng_row(

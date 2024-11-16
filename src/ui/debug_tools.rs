@@ -1,6 +1,6 @@
-use super::{convert_rect, CursorMode, OccupiedScreenSpace, WindowsOpenState};
+use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::*;
-use crate::{conf::Conf, sim::DebugTools};
+use crate::sim::DebugTools;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
@@ -24,7 +24,6 @@ pub fn debug_tools_window(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut debug_tools: ResMut<DebugTools>,
-    conf: Res<Conf>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,
 ) {
@@ -55,9 +54,7 @@ pub fn debug_tools_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    occupied_screen_space.push_egui_window_rect(rect);
 }
 
 fn info_ui(ui: &mut egui::Ui) {

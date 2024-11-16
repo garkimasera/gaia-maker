@@ -1,3 +1,4 @@
+mod animals;
 mod debug_tools;
 mod dialog;
 mod help;
@@ -8,7 +9,7 @@ mod panels;
 mod space_buildings;
 mod stat;
 
-use bevy::{math::Rect, prelude::*};
+use bevy::prelude::*;
 use bevy_egui::{
     egui::{self, load::SizedTexture, FontData, FontDefinitions, FontFamily},
     EguiContexts, EguiPlugin, EguiSettings,
@@ -34,6 +35,7 @@ pub struct UiPlugin;
 #[derive(Clone, Default, Debug, Resource)]
 pub struct WindowsOpenState {
     pub space_building: bool,
+    pub animals: bool,
     pub map: bool,
     pub layers: bool,
     pub stat: bool,
@@ -53,7 +55,10 @@ pub struct EguiTextures(HashMap<String, SizedTexture>);
 
 impl EguiTextures {
     fn get(&self, path: &str) -> SizedTexture {
-        *self.0.get(path).unwrap()
+        *self
+            .0
+            .get(path)
+            .unwrap_or_else(|| panic!("cannot get ui texture {}", path))
     }
 }
 
@@ -86,6 +91,7 @@ impl Plugin for UiPlugin {
                 Update,
                 (
                     space_buildings::space_buildings_window,
+                    animals::animals_window,
                     map::map_window,
                     stat::stat_window,
                     layers_window,
@@ -211,7 +217,6 @@ fn layers_window(
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
     mut update_map: ResMut<UpdateMap>,
-    conf: Res<Conf>,
 ) {
     if !wos.layers {
         return;
@@ -226,9 +231,7 @@ fn layers_window(
         .unwrap()
         .response
         .rect;
-    occupied_screen_space
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    occupied_screen_space.push_egui_window_rect(rect);
 }
 
 fn layers_menu(
@@ -248,12 +251,5 @@ fn layers_menu(
     if new_layer != *current_layer {
         *current_layer = new_layer;
         update_map.update();
-    }
-}
-
-fn convert_rect(rect: bevy_egui::egui::Rect, scale_factor: f32) -> Rect {
-    Rect {
-        min: Vec2::new(rect.left() * scale_factor, rect.top() * scale_factor),
-        max: Vec2::new(rect.right() * scale_factor, rect.bottom() * scale_factor),
     }
 }

@@ -3,8 +3,7 @@ use bevy_egui::{egui, EguiContexts};
 use geom::RectIter;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
-use super::{convert_rect, OccupiedScreenSpace, WindowsOpenState};
-use crate::conf::Conf;
+use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::{Centering, InScreenTileRange};
@@ -29,7 +28,6 @@ pub fn map_window(
     mut wos: ResMut<WindowsOpenState>,
     mut ew_centering: EventWriter<Centering>,
     mut need_update: ResMut<NeedUpdate>,
-    conf: Res<Conf>,
     planet: Res<Planet>,
     params: Res<Params>,
     color_materials: Res<ColorMaterials>,
@@ -100,10 +98,7 @@ pub fn map_window(
         .unwrap()
         .response
         .rect;
-    screen
-        .1
-        .window_rects
-        .push(convert_rect(rect, conf.ui.scale_factor));
+    screen.1.push_egui_window_rect(rect);
 }
 
 pub fn update(mut need_update: ResMut<NeedUpdate>) {

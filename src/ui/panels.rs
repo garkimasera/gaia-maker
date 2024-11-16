@@ -117,6 +117,10 @@ fn toolbar(
         wos.space_building = !wos.space_building;
     }
 
+    if button(ui, "ui/icon-animal", "animal") {
+        wos.animals = !wos.animals;
+    }
+
     if button(ui, "ui/icon-map", "map") {
         wos.map = !wos.map;
     }
