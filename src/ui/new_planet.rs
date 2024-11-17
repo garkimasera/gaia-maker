@@ -58,6 +58,7 @@ pub fn new_planet(
                 // Planet select panel
                 ui.horizontal(|ui| {
                     ui.vertical(|ui| {
+                        ui.set_min_height(200.0);
                         for planet in &params.start_planets {
                             ui.selectable_value(
                                 &mut state.new_planet.planet,
