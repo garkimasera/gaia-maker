@@ -1,6 +1,7 @@
 {
     // UI
     "air-temperature": "気温",
+    "animal": "動物",
     "argon": "アルゴン",
     "atmosphere": "大気",
     "atmosphere-pressure": "気圧",
@@ -32,6 +33,7 @@
     "energy": "エネルギー",
     "exit": "終了",
     "fertility": "肥沃度",
+    "gene-point": "遺伝子ポイント",
     "height": "高さ",
     "help": "ヘルプ",
     "history": "歴史",

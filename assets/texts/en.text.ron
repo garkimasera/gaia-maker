@@ -1,6 +1,7 @@
 {
     // UI
     "air-temperature": "Temperature",
+    "animal": "Animal",
     "argon": "Argon",
     "atmosphere": "Atmosphere",
     "atmosphere-pressure": "Atmospheric Pressure",
@@ -32,6 +33,7 @@
     "energy": "Energy",
     "exit": "Exit",
     "fertility": "Fertility",
+    "gene-point": "Gene Point",
     "height": "Height",
     "help": "Help",
     "history": "History",
