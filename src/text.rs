@@ -45,7 +45,7 @@ impl Lang {
 
 macro_rules! t {
     ($s:expr) => {
-        $crate::text::get_text($s, std::collections::HashMap::default())
+        $crate::text::get_text(&$s, std::collections::HashMap::default())
     };
     ($s:expr; $($name:ident = $value:expr),*) => {{
         let mut map = std::collections::HashMap::default();
@@ -54,7 +54,7 @@ macro_rules! t {
             map.insert(stringify!($name).into(), $value.to_string());
         )*
 
-        $crate::text::get_text($s, map)
+        $crate::text::get_text(&$s, map)
     }};
 }
 

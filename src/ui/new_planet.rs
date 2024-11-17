@@ -63,7 +63,7 @@ pub fn new_planet(
                             ui.selectable_value(
                                 &mut state.new_planet.planet,
                                 NewPlanetKind::Id(planet.id.clone()),
-                                t!(&planet.id),
+                                t!(planet.id),
                             );
                         }
                         ui.selectable_value(

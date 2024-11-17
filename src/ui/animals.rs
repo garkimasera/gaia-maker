@@ -51,7 +51,7 @@ fn contents(ui: &mut egui::Ui, state: &State, _params: &Params, textures: &EguiT
             egui::Image::new(textures.get(format_compact!("animals/{}", state.current)))
                 .shrink_to_fit(),
         );
-        ui.heading(t!(&state.current));
+        ui.heading(t!(state.current));
     });
 }
 
@@ -63,7 +63,7 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State) {
             ui.set_min_height(200.0);
             ui.vertical(|ui| {
                 for id in &state.ordered_ids {
-                    ui.selectable_value(&mut state.current, id.clone(), t!(&id));
+                    ui.selectable_value(&mut state.current, id.clone(), t!(id));
                 }
             });
         });
