@@ -54,11 +54,11 @@ pub enum Dialog {
 pub struct EguiTextures(HashMap<String, SizedTexture>);
 
 impl EguiTextures {
-    fn get(&self, path: &str) -> SizedTexture {
+    fn get(&self, path: impl AsRef<str>) -> SizedTexture {
         *self
             .0
-            .get(path)
-            .unwrap_or_else(|| panic!("cannot get ui texture {}", path))
+            .get(path.as_ref())
+            .unwrap_or_else(|| panic!("cannot get ui texture {}", path.as_ref()))
     }
 }
 
@@ -153,11 +153,18 @@ fn load_textures(
             None
         }
     });
+    let animal_imgs = ui_assets.animal_imgs.iter().filter_map(|(path, handle)| {
+        if let Ok(handle) = handle.clone().try_typed::<Image>() {
+            Some((path.clone(), handle))
+        } else {
+            None
+        }
+    });
     let other_imgs = ui_assets
         .other_imgs
         .iter()
         .map(|(path, handle)| (path.clone(), handle.clone()));
-    let textures = ui.chain(start_planets).chain(other_imgs);
+    let textures = ui.chain(start_planets).chain(animal_imgs).chain(other_imgs);
 
     let mut egui_textures = HashMap::new();
     for (path, handle) in textures {
@@ -193,6 +200,12 @@ fn bevy_image_to_egui_texture(
         .into_rgba8();
     let w = image.width();
     let h = image.height();
+
+    let (w, h) = if name.starts_with("animals/") {
+        (w / 2, h / 2)
+    } else {
+        (w, h)
+    };
 
     let mut pixels = Vec::new();
     for y in 0..h {

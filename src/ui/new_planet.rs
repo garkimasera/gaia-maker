@@ -143,7 +143,7 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiText
     };
 
     ui.horizontal(|ui| {
-        ui.image(textures.get(&format!("start_planets/{}", id)));
+        ui.image(textures.get(format!("start_planets/{}", id)));
         ui.heading(t!(id));
     });
 

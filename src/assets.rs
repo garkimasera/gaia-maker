@@ -33,7 +33,7 @@ impl Plugin for AssetsPlugin {
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
                     .load_collection::<TranslationTexts>()
-                    .load_collection::<ParamsAssetCollection>()
+                    .load_collection::<PlanetAssetCollection>()
                     .load_collection::<UiAssets>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
@@ -61,6 +61,8 @@ pub struct UiAssets {
     pub ui_imgs: HashMap<String, Handle<Image>>,
     #[asset(path = "start_planets", collection(mapped))]
     pub start_planet: HashMap<String, UntypedHandle>,
+    #[asset(path = "animals", collection(mapped))]
+    pub animal_imgs: HashMap<String, UntypedHandle>,
     #[asset(paths("logo.png"), collection(mapped, typed))]
     pub other_imgs: HashMap<String, Handle<Image>>,
     #[asset(path = "ui/tile-colored.png")]
@@ -103,7 +105,7 @@ pub struct LoadedTexture {
 }
 
 #[derive(Debug, Resource, AssetCollection)]
-pub struct ParamsAssetCollection {
+pub struct PlanetAssetCollection {
     #[asset(path = "planet.params.ron")]
     params: Handle<ParamsAsset>,
     #[asset(path = "biomes/list.biomes.ron")]
@@ -141,7 +143,7 @@ pub struct AudioSources {
 fn create_assets_list(
     mut command: Commands,
     images: Res<Assets<Image>>,
-    params_asset_collection: Res<ParamsAssetCollection>,
+    planet_asset_collection: Res<PlanetAssetCollection>,
     (params_asset, biome_asset_list, structure_asset_list, start_planet_assets, animal_assets): (
         Res<Assets<ParamsAsset>>,
         Res<Assets<BiomeAssetList>>,
@@ -153,7 +155,7 @@ fn create_assets_list(
 ) {
     // Biomes
     let biome_asset_list = biome_asset_list
-        .get(&params_asset_collection.biomes)
+        .get(&planet_asset_collection.biomes)
         .unwrap();
     let mut biome_texture_rects = HashMap::new();
     for j in 0..4 {
@@ -217,7 +219,7 @@ fn create_assets_list(
 
     // Structures
     let structure_asset_list = structure_asset_list
-        .get(&params_asset_collection.structures)
+        .get(&planet_asset_collection.structures)
         .unwrap();
     let structures = StructureKind::iter()
         .filter(|structure| !matches!(structure, StructureKind::None | StructureKind::Occupied))
@@ -236,7 +238,7 @@ fn create_assets_list(
         .collect();
 
     let mut params = params_asset
-        .get(&params_asset_collection.params)
+        .get(&planet_asset_collection.params)
         .unwrap()
         .clone()
         .0;
@@ -244,7 +246,7 @@ fn create_assets_list(
     params.structures = structure_asset_list.0.clone();
 
     // Start planets
-    for handle in params_asset_collection.start_planet_handles.values() {
+    for handle in planet_asset_collection.start_planet_handles.values() {
         if let Ok(handle) = handle.clone().try_typed::<StartPlanetAsset>() {
             let start_planet = start_planet_assets.get(&handle).cloned().unwrap().0;
             params.start_planets.push(start_planet);
@@ -259,7 +261,7 @@ fn create_assets_list(
 
     // Animals
     let mut animals = HashMap::default();
-    for (path, handle) in &params_asset_collection.animal_handles {
+    for (path, handle) in &planet_asset_collection.animal_handles {
         let animal_id: CompactString = path
             .strip_prefix("animals/")
             .and_then(|s| s.split_once('.'))
