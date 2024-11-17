@@ -1,23 +1,14 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Resources {
     pub energy: f32,
     pub used_energy: f32,
     pub material: f32,
     pub diff_material: f32,
-}
-
-impl Default for Resources {
-    fn default() -> Self {
-        Resources {
-            energy: 0.0,
-            used_energy: 0.0,
-            material: 0.0,
-            diff_material: 0.0,
-        }
-    }
+    pub gene_point: f32,
+    pub diff_gene_point: f32,
 }
 
 impl Resources {
@@ -36,5 +27,7 @@ impl Resources {
         self.energy = 0.0;
         self.used_energy = 0.0;
         self.diff_material = 0.0;
+        self.gene_point = 0.0;
+        self.diff_gene_point = 0.0;
     }
 }

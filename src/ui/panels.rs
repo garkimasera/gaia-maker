@@ -193,7 +193,6 @@ fn sidebar(
             planet.res.used_energy, planet.res.energy
         ));
     });
-
     // Material
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-material");
@@ -206,6 +205,13 @@ fn sidebar(
             ))
             .small(),
         );
+    });
+    // Gene point
+    ui.horizontal(|ui| {
+        let texture = textures.get("ui/icon-gene");
+        ui.image(texture).on_hover_text(t!("gene-point"));
+        ui.label(WithUnitDisplay::GenePoint(planet.res.gene_point).to_string());
+        ui.label(egui::RichText::new(format!("({:+.1})", planet.res.diff_gene_point)).small());
     });
     ui.separator();
 

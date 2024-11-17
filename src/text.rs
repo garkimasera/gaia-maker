@@ -123,6 +123,7 @@ pub fn replace(s: &str, map: HashMap<String, String>) -> String {
 pub enum WithUnitDisplay {
     Energy(f32),
     Material(f32),
+    GenePoint(f32),
 }
 
 impl std::fmt::Display for WithUnitDisplay {
@@ -139,6 +140,9 @@ impl std::fmt::Display for WithUnitDisplay {
                 } else {
                     write!(f, "{:.0}Gt", value / 1000.0)
                 }
+            }
+            WithUnitDisplay::GenePoint(value) => {
+                write!(f, "{:.0}", value)
             }
         }
     }
