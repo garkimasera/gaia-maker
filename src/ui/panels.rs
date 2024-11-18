@@ -216,27 +216,37 @@ fn sidebar(
     ui.separator();
 
     // Information about selected tool
-    ui.label(t!("selected-tool"));
-    match cursor_mode {
-        CursorMode::Normal => {
-            ui.label(t!("none"));
+    ui.vertical(|ui| {
+        ui.set_height(75.0);
+        let bg_color = egui::lerp(
+            egui::Rgba::from(egui::Color32::DARK_GRAY)
+                ..=egui::Rgba::from(ui.visuals().window_fill()),
+            0.9,
+        );
+        ui.painter()
+            .rect_filled(ui.available_rect_before_wrap(), 6.0, bg_color);
+        ui.label(t!("selected-tool"));
+        match cursor_mode {
+            CursorMode::Normal => {
+                ui.label(t!("none"));
+            }
+            CursorMode::Build(kind) => {
+                ui.label(t!(kind.as_ref()));
+            }
+            CursorMode::Demolition => {
+                ui.label(t!("demolition"));
+            }
+            CursorMode::EditBiome(biome) => {
+                ui.label(format!("biome editing: {}", biome.as_ref()));
+            }
+            CursorMode::PlaceSettlement(settlement) => {
+                ui.label(format!("settlement: {}", settlement.age.as_ref()));
+            }
+            CursorMode::SpawnAnimal(ref animal_id) => {
+                ui.label(format!("{} {}", t!("animal"), t!(animal_id)));
+            }
         }
-        CursorMode::Build(kind) => {
-            ui.label(t!(kind.as_ref()));
-        }
-        CursorMode::Demolition => {
-            ui.label(t!("demolition"));
-        }
-        CursorMode::EditBiome(biome) => {
-            ui.label(format!("biome editing: {}", biome.as_ref()));
-        }
-        CursorMode::PlaceSettlement(settlement) => {
-            ui.label(format!("settlement: {}", settlement.age.as_ref()));
-        }
-        CursorMode::SpawnAnimal(ref animal_id) => {
-            ui.label(format!("{} {}", t!("animal"), t!(animal_id)));
-        }
-    }
+    });
 
     ui.separator();
 
