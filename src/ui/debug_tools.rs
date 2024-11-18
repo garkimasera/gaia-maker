@@ -44,7 +44,7 @@ pub fn debug_tools_window(
 
             match *current_panel {
                 Panel::TileInfo => info_ui(ui),
-                Panel::Sim => sim_ui(ui, &mut debug_tools),
+                Panel::Sim => sim_ui(ui, &mut planet, &mut debug_tools),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmosphere => atmo_ui(ui, &mut planet),
@@ -71,8 +71,12 @@ fn info_ui(ui: &mut egui::Ui) {
         });
 }
 
-fn sim_ui(ui: &mut egui::Ui, debug_tools: &mut DebugTools) {
+fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet, debug_tools: &mut DebugTools) {
     ui.checkbox(&mut debug_tools.sim_every_frame, "sim every frame");
+
+    if ui.button("max resources").clicked() {
+        planet.res.debug_max();
+    }
 }
 
 #[derive(Default, Debug)]

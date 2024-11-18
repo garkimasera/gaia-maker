@@ -26,16 +26,20 @@ impl Resources {
         self.energy - self.used_energy
     }
 
-    pub fn reset_before_reset(&mut self) {
+    pub fn reset_before_update(&mut self) {
         self.energy = 0.0;
         self.used_energy = 0.0;
         self.diff_material = 0.0;
-        self.gene_point = 0.0;
         self.diff_gene_point = 0.0;
     }
 
     pub fn apply_diff(&mut self) {
         self.material = (self.material + self.diff_material).min(MATERIAL_MAX);
         self.gene_point = (self.gene_point + self.diff_gene_point).min(GENE_POINT_MAX);
+    }
+
+    pub fn debug_max(&mut self) {
+        self.material = MATERIAL_MAX;
+        self.gene_point = GENE_POINT_MAX;
     }
 }

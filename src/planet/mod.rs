@@ -225,7 +225,7 @@ impl Planet {
     /// Update after user action without advance the cycle
     pub fn update(&mut self, sim: &mut Sim, params: &Params) {
         // Variables need to initialize before simulation
-        self.res.reset_before_reset();
+        self.res.reset_before_update();
         self.state.solar_power_multiplier = 1.0;
 
         self::buildings::update(self, sim, params);
