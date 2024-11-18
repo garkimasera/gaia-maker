@@ -209,6 +209,7 @@ impl Planet {
     pub fn advance(&mut self, sim: &mut Sim, params: &Params) {
         self.update(sim, params);
         self.cycles += 1;
+        self.res.apply_diff();
 
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);

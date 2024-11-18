@@ -233,6 +233,9 @@ fn sidebar(
         CursorMode::PlaceSettlement(settlement) => {
             ui.label(format!("settlement: {}", settlement.age.as_ref()));
         }
+        CursorMode::SpawnAnimal(ref animal_id) => {
+            ui.label(format!("{} {}", t!("animal"), t!(animal_id)));
+        }
     }
 
     ui.separator();

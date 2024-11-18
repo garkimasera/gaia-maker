@@ -10,6 +10,7 @@ use bevy::{
     math::{Rect, Vec3Swizzles},
     prelude::*,
 };
+use compact_str::CompactString;
 use geom::Coords;
 
 #[derive(Clone, Copy, Debug)]
@@ -25,6 +26,7 @@ pub enum CursorMode {
     Build(StructureKind),
     EditBiome(Biome),
     PlaceSettlement(Settlement),
+    SpawnAnimal(CompactString),
 }
 
 impl Default for CursorMode {

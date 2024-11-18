@@ -1,5 +1,5 @@
 use super::{EguiTextures, OccupiedScreenSpace, WindowsOpenState};
-use crate::planet::*;
+use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use compact_str::{format_compact, CompactString};
@@ -15,6 +15,7 @@ pub fn animals_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut _planet: ResMut<Planet>,
+    mut cursor_mode: ResMut<CursorMode>,
     params: Res<Params>,
     textures: Res<EguiTextures>,
     mut state: Local<Option<State>>,
@@ -35,7 +36,7 @@ pub fn animals_window(
                 select_panel(ui, state);
                 ui.separator();
                 ui.vertical(|ui| {
-                    contents(ui, state, &params, &textures);
+                    contents(ui, state, &params, &textures, &mut cursor_mode);
                 });
             });
         })
@@ -45,7 +46,13 @@ pub fn animals_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn contents(ui: &mut egui::Ui, state: &State, _params: &Params, textures: &EguiTextures) {
+fn contents(
+    ui: &mut egui::Ui,
+    state: &State,
+    params: &Params,
+    textures: &EguiTextures,
+    cursor_mode: &mut CursorMode,
+) {
     ui.horizontal(|ui| {
         ui.add(
             egui::Image::new(textures.get(format_compact!("animals/{}", state.current)))
@@ -53,6 +60,21 @@ fn contents(ui: &mut egui::Ui, state: &State, _params: &Params, textures: &EguiT
         );
         ui.heading(t!(state.current));
     });
+
+    let attr = params.animals.get(&state.current).unwrap();
+
+    ui.horizontal(|ui| {
+        ui.label(format!(
+            "{}: {} {}",
+            t!("cost"),
+            t!("gene-point"),
+            WithUnitDisplay::GenePoint(attr.cost),
+        ));
+    });
+
+    if ui.button(t!("spawn")).clicked() {
+        *cursor_mode = CursorMode::SpawnAnimal(state.current.clone());
+    }
 }
 
 fn select_panel(ui: &mut egui::Ui, state: &mut State) {

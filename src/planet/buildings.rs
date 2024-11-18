@@ -68,9 +68,6 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         };
         match effect {
-            BuildingEffect::ProduceMaterial { mass } => {
-                planet.res.material += mass * n as f32;
-            }
             BuildingEffect::RemoveAtmo {
                 mass,
                 efficiency_table,
