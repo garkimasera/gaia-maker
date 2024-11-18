@@ -255,6 +255,7 @@ fn spawn_animal_textures(
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
     current_layer: Res<OverlayLayerKind>,
+    counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
     if !update_map.need_update {
@@ -278,7 +279,7 @@ fn spawn_animal_textures(
             _ => continue,
         };
 
-        let index = 0;
+        let index = counter.0;
         let index = if monochrome { index + 2 } else { index };
 
         let t = &texture_handles.animals[&animal.id];
