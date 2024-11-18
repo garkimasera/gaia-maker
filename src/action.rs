@@ -62,8 +62,11 @@ fn cursor_action(
                 update_map.update();
                 planet.place_settlement(coords, settlement);
             }
-            CursorMode::SpawnAnimal(ref _animal_id) => {
-                todo!()
+            CursorMode::SpawnAnimal(ref animal_id) => {
+                if planet.animal_spawnable(coords, animal_id, &params) {
+                    update_map.update();
+                    planet.spawn_animal(coords, animal_id, &params);
+                }
             }
         }
     }
