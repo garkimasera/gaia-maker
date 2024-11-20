@@ -92,8 +92,9 @@ impl Planet {
     }
 
     pub fn spawn_animal(&mut self, p: Coords, animal_id: &CompactString, params: &Params) {
-        let attr = &params.animals[animal_id];
+        assert!(self.animal_spawnable(p, animal_id, params));
 
+        let attr = &params.animals[animal_id];
         self.res.gene_point -= attr.cost;
         self.map[p].animal[attr.size as usize] = Some(Animal {
             id: animal_id.clone(),

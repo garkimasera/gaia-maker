@@ -239,7 +239,7 @@ pub enum AnimalSize {
 impl AnimalSize {
     pub const LEN: usize = AnimalSize::Large as usize + 1;
 
-    pub fn _iter() -> [Self; Self::LEN] {
+    pub fn iter() -> [Self; Self::LEN] {
         [Self::Small, Self::Middle, Self::Large]
     }
 }
@@ -567,6 +567,18 @@ pub struct SimParams {
     pub fallen_snow_factor: f32,
     /// Biome transition probability before start simulation
     pub before_start_biome_transition_probability: f32,
+    /// Animal simulation interval cycles
+    pub animal_sim_interval: u32,
+    /// Animal extinction threshold.
+    pub animal_extinction_threshold: f32,
+    /// Basic animal growth speed.
+    pub animal_growth_speed: f32,
+    /// Maximum animal growth speed.
+    pub animal_growth_speed_max: f32,
+    /// Animal capacity effect by biomass.
+    pub animal_cap_max_biomass: f32,
+    /// Probability of animal moving.
+    pub animal_move_weight: f64,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
     /// The max number of civilizations
