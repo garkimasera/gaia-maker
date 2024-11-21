@@ -43,7 +43,7 @@ pub fn debug_tools_window(
             ui.separator();
 
             match *current_panel {
-                Panel::TileInfo => info_ui(ui),
+                Panel::TileInfo => info_ui(ui, &planet),
                 Panel::Sim => sim_ui(ui, &mut planet, &mut debug_tools),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
@@ -57,17 +57,31 @@ pub fn debug_tools_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn info_ui(ui: &mut egui::Ui) {
+fn info_ui(ui: &mut egui::Ui, planet: &Planet) {
+    let p = crate::planet::debug_log::tile_pos();
     let tile_logs = crate::planet::debug_log::tile_logs();
 
-    egui::Grid::new("star_system_buildings")
+    egui::Grid::new("tile_info_grid")
         .striped(true)
         .show(ui, |ui| {
+            let Some(p) = p else {
+                return;
+            };
             for (name, data) in tile_logs.iter() {
                 ui.label(*name);
                 ui.label(data);
                 ui.end_row();
             }
+            // Animals
+            ui.label("animal0");
+            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[0]));
+            ui.end_row();
+            ui.label("animal1");
+            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[1]));
+            ui.end_row();
+            ui.label("animal2");
+            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[2]));
+            ui.end_row();
         });
 }
 
@@ -144,4 +158,12 @@ fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
 
 fn water_ui(ui: &mut egui::Ui, planet: &mut Planet) {
     ui.add(egui::Slider::new(&mut planet.water.water_volume, 0.0..=1.0e+18).text("water volume"));
+}
+
+fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
+    let Some(animal) = animal else {
+        return "Empty".into();
+    };
+
+    format!("{}(n={})", animal.id, animal.n)
 }

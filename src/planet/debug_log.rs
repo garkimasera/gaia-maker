@@ -10,6 +10,10 @@ pub fn clear_logs(p: Option<Coords>) {
     TILE_LOGS.write().unwrap().clear();
 }
 
+pub fn tile_pos() -> Option<Coords> {
+    *POS_FOR_LOG.read().unwrap()
+}
+
 pub fn tile_logs() -> impl std::ops::Deref<Target = BTreeMap<&'static str, String>> {
     TILE_LOGS.read().unwrap()
 }
