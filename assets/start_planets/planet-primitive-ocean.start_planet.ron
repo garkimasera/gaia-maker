@@ -1,6 +1,7 @@
 (
     id: "planet-primitive-ocean",
     difficulty: very_easy,
+    radius: (6200, 300),
     solar_constant: (1350, 120),
     elevation: (7000.0, 1000.0),
     water_volume: (2.0e+17, 0.2e+17),

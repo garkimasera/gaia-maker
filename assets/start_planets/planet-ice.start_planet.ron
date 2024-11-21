@@ -1,6 +1,7 @@
 (
     id: "planet-ice",
     difficulty: easy,
+    radius: (6200, 300),
     solar_constant: (400, 100),
     elevation: (7000.0, 1000.0),
     water_volume: (1.6e+17, 0.2e+17),

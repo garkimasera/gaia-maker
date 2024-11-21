@@ -279,11 +279,14 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
 
     StartParams {
         basics: Basics {
+            radius: floor(
+                10.0,
+                rng.sample(SymmetricalLinearDist::from(start_planet.radius)),
+            ) * 1000.0,
             solar_constant: floor(
                 10.0,
                 rng.sample(SymmetricalLinearDist::from(start_planet.solar_constant)),
             ),
-            ..params.default_start_params.clone().basics
         },
         difference_in_elevation: rng.sample(SymmetricalLinearDist::from(start_planet.elevation)),
         water_volume: rng.sample(SymmetricalLinearDist::from(start_planet.water_volume)),

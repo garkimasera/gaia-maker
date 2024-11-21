@@ -615,6 +615,8 @@ pub struct HistoryParams {
 pub struct StartPlanet {
     pub id: String,
     pub difficulty: PlanetDifficulty,
+    /// Planet radius [km]
+    pub radius: (f32, f32),
     pub solar_constant: (f32, f32),
     pub elevation: (f32, f32),
     pub water_volume: (f32, f32),

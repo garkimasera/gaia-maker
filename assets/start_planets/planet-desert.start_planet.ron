@@ -1,6 +1,7 @@
 (
     id: "planet-desert",
     difficulty: normal,
+    radius: (6000, 300),
     solar_constant: (1200, 200),
     elevation: (7000.0, 1000.0),
     water_volume: (0.0, 0.0),
