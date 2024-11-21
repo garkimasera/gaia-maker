@@ -173,7 +173,6 @@
     default_start_params: (
         basics: (
             radius: 6300000,
-            density: 5500,
             solar_constant: 1400,
         ),
         size: (128, 64),

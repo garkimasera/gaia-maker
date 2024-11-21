@@ -60,9 +60,6 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
             ui.label(t!("radius"));
             ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
             ui.end_row();
-            ui.label(t!("density"));
-            ui.label(format!("{:.1} g/cm³", planet.basics.density / 1000.0));
-            ui.end_row();
             ui.label(t!("solar-constant"));
             ui.label(format!(
                 "{:.0} W/m² ({:+.0}%)",

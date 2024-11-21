@@ -17,8 +17,6 @@ pub const RAINFALL_DURATION: f32 = 360.0;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Basics {
-    /// Planet density [kg/m^3]
-    pub density: f32,
     /// Planet radius [m]
     pub radius: f32,
     /// Solar constant at the planet [W/m^2]
