@@ -223,6 +223,7 @@ pub struct AnimalAttr {
     /// Liveable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
     pub temp: (f32, f32),
+    pub civilize_cost: Option<f32>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
