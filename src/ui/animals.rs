@@ -30,7 +30,6 @@ pub fn animals_window(
 
     let rect = egui::Window::new(t!("animal"))
         .open(&mut wos.animals)
-        .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 select_panel(ui, state);
@@ -80,6 +79,7 @@ fn contents(
         ui.end_row();
     });
 
+    ui.separator();
     if ui.button(t!("spawn")).clicked() {
         *cursor_mode = CursorMode::SpawnAnimal(state.current.clone());
     }
@@ -90,7 +90,7 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State) {
         .min_scrolled_height(200.0)
         .show(ui, |ui| {
             ui.set_min_width(80.0);
-            ui.set_min_height(200.0);
+            ui.set_min_height(180.0);
             ui.vertical(|ui| {
                 for id in &state.ordered_ids {
                     ui.selectable_value(&mut state.current, id.clone(), t!(id));
