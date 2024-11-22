@@ -25,6 +25,28 @@ pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     panic!("invalid input for interpolation: {}", x)
 }
 
+pub fn range_to_livability_trapezoid((min, max): (f32, f32), a: f32, x: f32) -> f32 {
+    assert!(min <= max);
+
+    let l = max - min;
+    let b = l / a;
+
+    let result = if x <= min - b {
+        0.0
+    } else if x <= min + b {
+        x / (2.0 * b) - min / (2.0 * b) + 0.5
+    } else if x <= max - b {
+        1.0
+    } else if x <= max + b {
+        -x / (2.0 * b) + max / (2.0 * b) + 0.5
+    } else {
+        0.0
+    };
+
+    debug_assert!((0.0..=1.0).contains(&result));
+    result
+}
+
 /// Random sampling [mean - d, mean + d] with linear distribution.
 #[derive(Clone, Copy, Debug)]
 pub struct SymmetricalLinearDist {

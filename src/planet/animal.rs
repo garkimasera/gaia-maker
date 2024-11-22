@@ -1,4 +1,5 @@
 use geom::{CyclicMode, Direction};
+use misc::range_to_livability_trapezoid;
 use rand::{seq::SliceRandom, Rng};
 
 use super::*;
@@ -74,7 +75,7 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
     }
 
     let cap_biomass = (tile.biomass / params.sim.animal_cap_max_biomass).clamp(0.0, 1.0);
-    let cap_temp = 1.0;
+    let cap_temp = range_to_livability_trapezoid(attr.temp, 5.0, tile.temp);
 
     cap_biomass * cap_temp
 }
