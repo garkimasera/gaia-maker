@@ -63,13 +63,21 @@ fn contents(
 
     let attr = params.animals.get(&state.current).unwrap();
 
-    ui.horizontal(|ui| {
+    egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
+        ui.label(t!("cost"));
+        ui.horizontal(|ui| {
+            ui.label(WithUnitDisplay::GenePoint(attr.cost).to_string());
+            ui.add(egui::Image::new(textures.get("ui/icon-gene")).shrink_to_fit());
+        });
+        ui.end_row();
+
+        ui.label(t!("livable-temperature"));
         ui.label(format!(
-            "{}: {} {}",
-            t!("cost"),
-            t!("gene-point"),
-            WithUnitDisplay::GenePoint(attr.cost),
+            "{}°C - {}°C",
+            attr.temp.0 - KELVIN_CELSIUS,
+            attr.temp.1 - KELVIN_CELSIUS
         ));
+        ui.end_row();
     });
 
     if ui.button(t!("spawn")).clicked() {
