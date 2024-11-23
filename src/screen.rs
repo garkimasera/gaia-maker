@@ -337,9 +337,10 @@ fn update_hover_tile(
     }
 
     let size = match &*cursor_mode {
-        CursorMode::Demolition => StructureSize::Small,
+        CursorMode::Demolition | CursorMode::EditBiome(_) | CursorMode::SpawnAnimal(_) => {
+            StructureSize::Small
+        }
         CursorMode::Build(kind) => params.structures[kind].size,
-        CursorMode::EditBiome(_) => StructureSize::Small,
         _ => {
             return;
         }
