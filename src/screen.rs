@@ -3,7 +3,7 @@ use crate::assets::UiAssets;
 use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::ui::WindowsOpenState;
-use crate::{planet::*, GameState, GameSystemSet};
+use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
@@ -437,12 +437,31 @@ fn keyboard_input(
     keys: Res<ButtonInput<KeyCode>>,
     mut ew_centering: EventWriter<Centering>,
     mut wos: ResMut<WindowsOpenState>,
+    mut speed: ResMut<GameSpeed>,
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     screen: Res<OccupiedScreenSpace>,
     egui_settings: ResMut<bevy_egui::EguiSettings>,
     conf: Res<Conf>,
+    mut old_gamespeed: Local<GameSpeed>,
 ) {
     // Shortcut keys
+
+    // Pause by space
+    if keys.just_pressed(KeyCode::Space) {
+        match *speed {
+            GameSpeed::Paused => {
+                if *old_gamespeed == GameSpeed::Paused {
+                    *old_gamespeed = GameSpeed::Normal;
+                }
+                std::mem::swap(&mut *speed, &mut *old_gamespeed);
+            }
+            _ => {
+                *old_gamespeed = *speed;
+                *speed = GameSpeed::Paused;
+            }
+        }
+    }
+    // Debug by Alt+F12
     if keys.just_pressed(KeyCode::F12)
         && (keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight))
     {
