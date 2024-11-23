@@ -15,12 +15,20 @@ pub struct MsgHolder {
 pub struct Msg {
     pub cycles: u64,
     pub kind: MsgKind,
+    pub span: Option<u64>,
 }
 
 impl MsgHolder {
-    pub fn append(&mut self, cycles: u64, kind: MsgKind) {
+    pub fn append(&mut self, cycles: u64, kind: MsgKind, span: impl Into<Option<u64>>) {
         self.count = Reverse(self.count.0.wrapping_add(1));
-        self.msgs.insert(self.count, Msg { cycles, kind });
+        self.msgs.insert(
+            self.count,
+            Msg {
+                cycles,
+                kind,
+                span: span.into(),
+            },
+        );
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Msg> {
@@ -45,6 +53,16 @@ impl MsgHolder {
     pub fn remove_temp(&mut self, target: &MsgKind) {
         self.temp_msgs
             .retain(|msg| discriminant(&msg.kind) != discriminant(target));
+    }
+
+    pub fn remove_outdated(&mut self, cycles: u64) {
+        self.msgs.retain(|_, msg| {
+            if let Some(span) = msg.span {
+                msg.cycles + span > cycles
+            } else {
+                true
+            }
+        });
     }
 }
 
@@ -74,7 +92,6 @@ impl<'a> Iterator for MsgIter<'a> {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum MsgKind {
-    Welcome,
     WarnHighTemp,
     WarnLowTemp,
     EventStart,

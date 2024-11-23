@@ -86,6 +86,7 @@ fn info_ui(ui: &mut egui::Ui, planet: &Planet) {
 }
 
 fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet, debug_tools: &mut DebugTools) {
+    ui.label(format!("{} cycles", planet.cycles));
     ui.checkbox(&mut debug_tools.sim_every_frame, "sim every frame");
 
     if ui.button("max resources").clicked() {

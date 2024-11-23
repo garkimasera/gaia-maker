@@ -135,7 +135,7 @@ impl Planet {
         }
 
         let mut msgs = MsgHolder::default();
-        msgs.append(0, MsgKind::EventStart);
+        msgs.append(0, MsgKind::EventStart, 10000);
 
         let mut planet = Planet {
             cycles: 0,

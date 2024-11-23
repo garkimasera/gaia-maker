@@ -152,7 +152,6 @@ impl Msg {
     pub fn text(&self) -> (MsgStyle, String) {
         use MsgStyle::*;
         match &self.kind {
-            MsgKind::Welcome => (Notice, t!("msg/welcome"; app_name=crate::APP_NAME)),
             MsgKind::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
             MsgKind::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
             MsgKind::EventStart => (Notice, t!("event/start")),
