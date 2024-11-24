@@ -5,7 +5,7 @@ use crate::audio::AudioPlayer;
 use crate::draw::UpdateMap;
 use crate::planet::*;
 use crate::screen::CursorMode;
-use crate::GameState;
+use crate::{GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
 pub struct ActionPlugin;
@@ -18,8 +18,12 @@ pub struct CursorAction {
 
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<CursorAction>()
-            .add_systems(Update, cursor_action.run_if(in_state(GameState::Running)));
+        app.add_event::<CursorAction>().add_systems(
+            Update,
+            cursor_action
+                .run_if(in_state(GameState::Running))
+                .before(GameSystemSet::Draw),
+        );
     }
 }
 
