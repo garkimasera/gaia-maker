@@ -63,6 +63,9 @@ fn contents(
     let attr = params.animals.get(&state.current).unwrap();
 
     egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
+        ui.label(t!("size"));
+        ui.label(t!(attr.size.as_ref()));
+        ui.end_row();
         ui.label(t!("cost"));
         ui.horizontal(|ui| {
             ui.label(WithUnitDisplay::GenePoint(attr.cost).to_string());
@@ -74,7 +77,7 @@ fn contents(
         ui.label(format!(
             "{}°C - {}°C",
             attr.temp.0 - KELVIN_CELSIUS,
-            attr.temp.1 - KELVIN_CELSIUS
+            attr.temp.1 - KELVIN_CELSIUS,
         ));
         ui.end_row();
     });

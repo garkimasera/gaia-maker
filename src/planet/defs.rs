@@ -226,8 +226,9 @@ pub struct AnimalAttr {
     pub civilize_cost: Option<f32>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr)]
 #[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum AnimalSize {
     Small = 0,
@@ -578,6 +579,10 @@ pub struct SimParams {
     pub animal_cap_max_biomass: f32,
     /// Probability of animal moving.
     pub animal_move_weight: f64,
+    /// Coefficent to calculate animal fission probability
+    pub coef_animal_fisson_a: f32,
+    /// Coefficent to calculate animal fission probability
+    pub coef_animal_fisson_b: f32,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
     /// The max number of civilizations

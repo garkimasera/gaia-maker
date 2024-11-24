@@ -160,6 +160,8 @@
         animal_growth_speed_max: 0.2,
         animal_cap_max_biomass: 12.5,
         animal_move_weight: 0.2,
+        coef_animal_fisson_a: 1.0,
+        coef_animal_fisson_b: 1.0,
         event_duration: {civilize: 1000},
         max_civs: 5,
     ),

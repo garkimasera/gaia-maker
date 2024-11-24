@@ -1,3 +1,4 @@
+use geom::{Coords, CyclicMode};
 use rand::{Rng, SeedableRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
@@ -45,6 +46,37 @@ pub fn range_to_livability_trapezoid((min, max): (f32, f32), a: f32, x: f32) -> 
 
     debug_assert!((0.0..=1.0).contains(&result));
     result
+}
+
+#[rustfmt::skip]
+const CALC_CONGESTION_TARGET_TILES: &[((i32, i32), u32)] = &[
+    ((-2, -2), 1), ((-1, -2), 1), ((0, -2), 1), ((1, -2), 1), ((2, -2), 1),
+    ((-2, -1), 1), ((-1, -1), 2), ((0, -1), 2), ((1, -1), 2), ((2, -1), 1),
+    ((-2,  0), 1), ((-1,  0), 2),               ((1,  0), 2), ((2,  0), 1),
+    ((-2,  1), 1), ((-1,  1), 2), ((0,  1), 2), ((1,  1), 2), ((2,  1), 1),
+    ((-2,  2), 1), ((-1,  2), 1), ((0,  2), 1), ((1,  2), 1), ((2,  2), 1),
+];
+
+pub fn calc_congestion_rate<F: FnMut(Coords) -> bool>(
+    p: Coords,
+    size: (u32, u32),
+    mut f: F,
+) -> f32 {
+    let mut sum = 0;
+    let mut crowded = 0;
+
+    for &(dp, a) in CALC_CONGESTION_TARGET_TILES {
+        let Some(p) = CyclicMode::X.convert_coords(size, p + dp) else {
+            continue;
+        };
+
+        if f(p) {
+            crowded += a;
+        }
+        sum += a;
+    }
+
+    crowded as f32 / sum as f32
 }
 
 /// Random sampling [mean - d, mean + d] with linear distribution.

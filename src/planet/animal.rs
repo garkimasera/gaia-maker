@@ -1,5 +1,6 @@
+use arrayvec::ArrayVec;
 use geom::{CyclicMode, Direction};
-use misc::range_to_livability_trapezoid;
+use misc::{calc_congestion_rate, range_to_livability_trapezoid};
 use rand::{seq::SliceRandom, Rng};
 
 use super::*;
@@ -30,6 +31,7 @@ fn process_each_animal(
     } else {
         return;
     };
+    let planet_size = planet.map.size();
 
     // Animal growth
     let growth_speed = params.sim.animal_growth_speed;
@@ -48,6 +50,28 @@ fn process_each_animal(
     }
 
     planet.map[p].animal[size as usize].as_mut().unwrap().n = new_n;
+
+    // Fission
+    let cr = calc_congestion_rate(p, planet_size, |p| {
+        planet.map[p].animal[size as usize].is_some()
+    });
+    let prob = (params.sim.coef_animal_fisson_a * (params.sim.coef_animal_fisson_b * new_n - cr))
+        .clamp(0.0, 1.0);
+    if rng.gen_bool(prob.into()) {
+        let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
+        for d in Direction::EIGHT_DIRS {
+            if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + d.as_coords()) {
+                if planet.map[p_next].animal[size as usize].is_none() {
+                    target_tiles.push(p_next);
+                }
+            }
+        }
+        if let Some(p_target) = target_tiles.choose(rng) {
+            let mut animal = planet.map[p].animal[size as usize].clone().take().unwrap();
+            animal.n /= 2.0;
+            planet.map[*p_target].animal[size as usize] = Some(animal);
+        }
+    }
 
     // Random walk
     if rng.gen_bool(params.sim.animal_move_weight) {
