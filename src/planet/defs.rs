@@ -4,7 +4,7 @@ use compact_str::CompactString;
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
+use serde_with::{serde_as, Same};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
 use super::serde_with_types::*;
@@ -516,12 +516,12 @@ pub struct SimParams {
     /// The ratio of vapor loss
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table
-    #[serde_as(as = "Vec<(Celsius, Celsius)>")]
+    #[serde_as(as = "Vec<(Celsius, Same)>")]
     pub ocean_vaporization_table: Vec<(f32, f32)>,
     /// Humidity calculation factors (humidity = rainfall - factors.0 * (temperature + factors.1))
     pub humidity_factors: (f32, f32),
     /// Max fertility table by temperature
-    #[serde_as(as = "Vec<(Celsius, Celsius)>")]
+    #[serde_as(as = "Vec<(Celsius, Same)>")]
     pub temperature_fertility_table: Vec<(f32, f32)>,
     /// Max fertility table by humidity
     pub humidity_fertility_table: Vec<(f32, f32)>,
