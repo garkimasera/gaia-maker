@@ -220,7 +220,7 @@ pub struct AnimalAttr {
     pub cost: f32,
     pub habitat: AnimalHabitat,
     pub growth_speed: f32,
-    /// Liveable temperature range
+    /// Livable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
     pub temp: (f32, f32),
     pub civilize_cost: Option<f32>,
@@ -569,20 +569,22 @@ pub struct SimParams {
     pub before_start_biome_transition_probability: f32,
     /// Animal simulation interval cycles
     pub animal_sim_interval: u32,
-    /// Animal extinction threshold.
+    /// Animal extinction threshold
     pub animal_extinction_threshold: f32,
-    /// Basic animal growth speed.
+    /// Basic animal growth speed
     pub animal_growth_speed: f32,
-    /// Maximum animal growth speed.
+    /// Maximum animal growth speed
     pub animal_growth_speed_max: f32,
-    /// Animal capacity effect by biomass.
+    /// Animal capacity effect by biomass
     pub animal_cap_max_biomass: f32,
-    /// Probability of animal moving.
+    /// Probability of animal moving
     pub animal_move_weight: f64,
     /// Coefficent to calculate animal fission probability
     pub coef_animal_fisson_a: f32,
     /// Coefficent to calculate animal fission probability
     pub coef_animal_fisson_b: f32,
+    /// Animal livable oxygen range by size
+    pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
     /// The max number of civilizations

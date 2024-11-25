@@ -61,15 +61,18 @@ fn process_each_animal(
         let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
         for d in Direction::EIGHT_DIRS {
             if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + d.as_coords()) {
-                if planet.map[p_next].animal[size as usize].is_none() {
+                if planet.map[p_next].animal[size as usize].is_none()
+                    && calc_cap(planet, p_next, attr, params)
+                        > params.sim.animal_extinction_threshold
+                {
                     target_tiles.push(p_next);
                 }
             }
         }
         if let Some(p_target) = target_tiles.choose(rng) {
-            let mut animal = planet.map[p].animal[size as usize].clone().take().unwrap();
+            let animal = planet.map[p].animal[size as usize].as_mut().unwrap();
             animal.n /= 2.0;
-            planet.map[*p_target].animal[size as usize] = Some(animal);
+            planet.map[*p_target].animal[size as usize] = Some(animal.clone());
         }
     }
 
@@ -100,8 +103,13 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
 
     let cap_biomass = (tile.biomass / params.sim.animal_cap_max_biomass).clamp(0.0, 1.0);
     let cap_temp = range_to_livability_trapezoid(attr.temp, 5.0, tile.temp);
+    let cap_oxygen = range_to_livability_trapezoid(
+        params.sim.livable_oxygen_range[attr.size as usize],
+        5.0,
+        planet.atmo.partial_pressure(GasKind::Oxygen),
+    );
 
-    cap_biomass * cap_temp
+    cap_biomass * cap_temp * cap_oxygen
 }
 
 impl AnimalHabitat {
