@@ -76,6 +76,14 @@ fn process_each_animal(
         }
     }
 
+    // Random kill by congestion
+    let prob = (params.sim.coef_animal_kill_by_congestion_a
+        * (cr - params.sim.coef_animal_kill_by_congestion_b))
+        .clamp(0.0, 1.0);
+    if rng.gen_bool(prob.into()) {
+        planet.map[p].animal[size as usize] = None;
+    }
+
     // Random walk
     if rng.gen_bool(params.sim.animal_move_weight) {
         let dir = *Direction::EIGHT_DIRS.choose(rng).unwrap();

@@ -583,6 +583,10 @@ pub struct SimParams {
     pub coef_animal_fisson_a: f32,
     /// Coefficent to calculate animal fission probability
     pub coef_animal_fisson_b: f32,
+    /// Coefficent to calculate animal random kill probability by congestion rate
+    pub coef_animal_kill_by_congestion_a: f32,
+    /// Coefficent to calculate animal random kill probability by congestion rate
+    pub coef_animal_kill_by_congestion_b: f32,
     /// Animal livable oxygen range by size
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
     /// Duration of events
