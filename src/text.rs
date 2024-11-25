@@ -154,6 +154,7 @@ impl Msg {
         match &self.kind {
             MsgKind::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
             MsgKind::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
+            MsgKind::WarnLowOxygen => (Warn, t!("msg/warn-low-oxygen")),
             MsgKind::EventStart => (Notice, t!("event/start")),
         }
     }

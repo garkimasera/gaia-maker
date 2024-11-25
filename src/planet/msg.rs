@@ -8,7 +8,7 @@ use std::mem::discriminant;
 pub struct MsgHolder {
     count: Reverse<u64>,
     msgs: BTreeMap<Reverse<u64>, Msg>,
-    temp_msgs: Vec<Msg>,
+    persistent_warns: Vec<Msg>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -34,24 +34,24 @@ impl MsgHolder {
     pub fn iter(&self) -> impl Iterator<Item = &Msg> {
         MsgIter {
             msgs: self.msgs.values().peekable(),
-            temp_msgs: self.temp_msgs.iter().peekable(),
+            temp_msgs: self.persistent_warns.iter().peekable(),
         }
     }
 
-    pub fn append_temp(&mut self, new_msg: Msg) {
+    pub fn append_persitent_warn(&mut self, new_msg: Msg) {
         if let Some(msg) = self
-            .temp_msgs
+            .persistent_warns
             .iter_mut()
             .find(|msg| msg.kind == new_msg.kind)
         {
             *msg = new_msg
         } else {
-            self.temp_msgs.push(new_msg);
+            self.persistent_warns.push(new_msg);
         }
     }
 
-    pub fn remove_temp(&mut self, target: &MsgKind) {
-        self.temp_msgs
+    pub fn remove_persitent_warn(&mut self, target: &MsgKind) {
+        self.persistent_warns
             .retain(|msg| discriminant(&msg.kind) != discriminant(target));
     }
 
@@ -94,5 +94,6 @@ impl<'a> Iterator for MsgIter<'a> {
 pub enum MsgKind {
     WarnHighTemp,
     WarnLowTemp,
+    WarnLowOxygen,
     EventStart,
 }

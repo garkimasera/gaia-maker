@@ -655,6 +655,7 @@ pub struct MonitoringParams {
     pub interval_cycles: u64,
     pub warn_high_temp_threshold: f32,
     pub warn_low_temp_threshold: f32,
+    pub warn_low_oxygen_threshold: f32,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

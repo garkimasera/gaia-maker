@@ -249,5 +249,6 @@
         interval_cycles: 100,
         warn_high_temp_threshold: 313.15,
         warn_low_temp_threshold: 273.15,
+        warn_low_oxygen_threshold: 0.15,
     ),
 )
