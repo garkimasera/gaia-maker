@@ -159,6 +159,7 @@
         animal_growth_speed: 0.01,
         animal_growth_speed_max: 0.2,
         animal_cap_max_biomass: 12.5,
+        animal_cap_max_fertility: 30.0,
         animal_move_weight: 0.2,
         coef_animal_fisson_a: 0.7,
         coef_animal_fisson_b: 0.6,

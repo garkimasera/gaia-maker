@@ -109,7 +109,12 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
         return 0.0;
     }
 
-    let cap_biomass = (tile.biomass / params.sim.animal_cap_max_biomass).clamp(0.0, 1.0);
+    let cap_biomass_or_fertility = if attr.habitat != AnimalHabitat::Sea {
+        (tile.biomass / params.sim.animal_cap_max_biomass).clamp(0.0, 1.0)
+    } else {
+        tile.fertility.min(params.sim.animal_cap_max_fertility)
+            / params.sim.animal_cap_max_fertility
+    };
     let cap_temp = range_to_livability_trapezoid(attr.temp, 5.0, tile.temp);
     let cap_oxygen = range_to_livability_trapezoid(
         params.sim.livable_oxygen_range[attr.size as usize],
@@ -117,7 +122,7 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
         planet.atmo.partial_pressure(GasKind::Oxygen),
     );
 
-    cap_biomass * cap_temp * cap_oxygen
+    cap_biomass_or_fertility * cap_temp * cap_oxygen
 }
 
 impl AnimalHabitat {

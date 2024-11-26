@@ -577,6 +577,8 @@ pub struct SimParams {
     pub animal_growth_speed_max: f32,
     /// Animal capacity effect by biomass
     pub animal_cap_max_biomass: f32,
+    /// Animal capacity effect by fertility in sea tiles
+    pub animal_cap_max_fertility: f32,
     /// Probability of animal moving
     pub animal_move_weight: f64,
     /// Coefficent to calculate animal fission probability
