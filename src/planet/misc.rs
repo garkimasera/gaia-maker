@@ -57,26 +57,20 @@ const CALC_CONGESTION_TARGET_TILES: &[((i32, i32), u32)] = &[
     ((-2,  2), 1), ((-1,  2), 1), ((0,  2), 1), ((1,  2), 1), ((2,  2), 1),
 ];
 
-pub fn calc_congestion_rate<F: FnMut(Coords) -> bool>(
-    p: Coords,
-    size: (u32, u32),
-    mut f: F,
-) -> f32 {
+pub fn calc_congestion_rate<F: FnMut(Coords) -> f32>(p: Coords, size: (u32, u32), mut f: F) -> f32 {
     let mut sum = 0;
-    let mut crowded = 0;
+    let mut crowded = 0.0;
 
     for &(dp, a) in CALC_CONGESTION_TARGET_TILES {
         let Some(p) = CyclicMode::X.convert_coords(size, p + dp) else {
             continue;
         };
 
-        if f(p) {
-            crowded += a;
-        }
+        crowded += f(p) * a as f32;
         sum += a;
     }
 
-    crowded as f32 / sum as f32
+    crowded / sum as f32
 }
 
 /// Random sampling [mean - d, mean + d] with linear distribution.

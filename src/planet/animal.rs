@@ -26,8 +26,8 @@ fn process_each_animal(
     params: &Params,
     rng: &mut impl Rng,
 ) {
-    let (attr, n) = if let Some(ref mut animal) = planet.map[p].animal[size as usize] {
-        (&params.animals[&animal.id], animal.n)
+    let (animal_id, attr, n) = if let Some(ref mut animal) = planet.map[p].animal[size as usize] {
+        (animal.id.clone(), &params.animals[&animal.id], animal.n)
     } else {
         return;
     };
@@ -53,7 +53,23 @@ fn process_each_animal(
 
     // Fission
     let cr = calc_congestion_rate(p, planet_size, |p| {
-        planet.map[p].animal[size as usize].is_some()
+        if let Some(other_animal) = &planet.map[p].animal[size as usize] {
+            if animal_id == other_animal.id {
+                1.0
+            } else {
+                let other_attr = &params.animals[&other_animal.id];
+                if attr
+                    .habitat
+                    .compete_at_biome(&other_attr.habitat, planet.map[p].biome)
+                {
+                    0.8
+                } else {
+                    0.0
+                }
+            }
+        } else {
+            0.0
+        }
     });
     let prob = (params.sim.coef_animal_fisson_a * (params.sim.coef_animal_fisson_b * new_n - cr))
         .clamp(0.0, 1.0);
@@ -82,6 +98,7 @@ fn process_each_animal(
         .clamp(0.0, 1.0);
     if rng.gen_bool(prob.into()) {
         planet.map[p].animal[size as usize] = None;
+        return;
     }
 
     // Random walk
@@ -132,5 +149,9 @@ impl AnimalHabitat {
             Self::Sea => biome.is_sea(),
             Self::Biomes(biomes) => biomes.contains(&biome),
         }
+    }
+
+    pub fn compete_at_biome(&self, other: &Self, biome: Biome) -> bool {
+        self.match_biome(biome) && other.match_biome(biome)
     }
 }
