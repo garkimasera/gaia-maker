@@ -93,3 +93,34 @@ fn new_structure(kind: StructureKind) -> Structure {
         _ => unreachable!(),
     }
 }
+
+pub fn cursor_mode_warn(
+    planet: &Planet,
+    params: &Params,
+    cursor_mode: &CursorMode,
+) -> Option<String> {
+    match cursor_mode {
+        CursorMode::Build(kind) => {
+            if let Some(attr) = params.structures.get(kind).map(|a| &a.building) {
+                if attr.cost > planet.res.material {
+                    t!("msg/lack-of-material").into()
+                } else if attr.energy < 0.0 && -attr.energy > planet.res.surplus_energy() {
+                    t!("msg/lack-of-energy").into()
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }
+        CursorMode::SpawnAnimal(ref animal_id) => {
+            let attr = &params.animals[animal_id];
+            if attr.cost <= planet.res.gene_point {
+                None
+            } else {
+                t!("msg/lack-of-gene-point").into()
+            }
+        }
+        _ => None,
+    }
+}

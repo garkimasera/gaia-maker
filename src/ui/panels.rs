@@ -42,6 +42,7 @@ pub fn panels(
                 &mut wos,
                 &cursor_mode,
                 &planet,
+                &params,
                 hover_tile.single(),
                 &textures,
                 &conf,
@@ -179,6 +180,7 @@ fn sidebar(
     wos: &mut WindowsOpenState,
     cursor_mode: &CursorMode,
     planet: &Planet,
+    params: &Params,
     hover_tile: &HoverTile,
     textures: &EguiTextures,
     conf: &Conf,
@@ -217,34 +219,40 @@ fn sidebar(
 
     // Information about selected tool
     ui.vertical(|ui| {
-        ui.set_height(75.0);
+        ui.set_height(50.0);
+        let warn = crate::action::cursor_mode_warn(planet, params, cursor_mode);
+        let bg_color = if warn.is_none() {
+            egui::Color32::DARK_GRAY
+        } else {
+            egui::Color32::DARK_RED
+        };
         let bg_color = egui::lerp(
-            egui::Rgba::from(egui::Color32::DARK_GRAY)
-                ..=egui::Rgba::from(ui.visuals().window_fill()),
+            egui::Rgba::from(bg_color)..=egui::Rgba::from(ui.visuals().window_fill()),
             0.9,
         );
         ui.painter()
             .rect_filled(ui.available_rect_before_wrap(), 6.0, bg_color);
-        ui.label(t!("selected-tool"));
-        match cursor_mode {
-            CursorMode::Normal => {
-                ui.label(t!("none"));
-            }
+        let text = match cursor_mode {
+            CursorMode::Normal => "".into(),
             CursorMode::Build(kind) => {
-                ui.label(t!(kind.as_ref()));
+                t!(kind.as_ref())
             }
             CursorMode::Demolition => {
-                ui.label(t!("demolition"));
+                t!("demolition")
             }
             CursorMode::EditBiome(biome) => {
-                ui.label(format!("biome editing: {}", biome.as_ref()));
+                format!("biome editing: {}", biome.as_ref())
             }
             CursorMode::PlaceSettlement(settlement) => {
-                ui.label(format!("settlement: {}", settlement.age.as_ref()));
+                format!("settlement: {}", settlement.age.as_ref())
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
-                ui.label(format!("{} {}", t!("animal"), t!(animal_id)));
+                format!("{} {}", t!("animal"), t!(animal_id))
             }
+        };
+        ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));
+        if let Some(warn) = warn {
+            ui.label(egui::RichText::new(warn).color(egui::Color32::RED));
         }
     });
 
