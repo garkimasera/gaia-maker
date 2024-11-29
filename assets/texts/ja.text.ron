@@ -39,6 +39,7 @@
     "history": "歴史",
     "latitude": "緯度",
     "layers": "レイヤー",
+    "livable-temperature": "生存可能温度",
     "load": "ロード",
     "longitude": "経度",
     "main-menu": "メインメニュー",
@@ -58,8 +59,9 @@
     "rainfall": "降水量",
     "save": "セーブ",
     "search-new-planet": "新しい惑星",
-    "selected-tool": "選択中のツール",
+    "size": "サイズ",
     "solar-constant": "太陽定数",
+    "spawn": "配置",
     "speed-fast": "高速",
     "speed-normal": "通常速度",
     "speed-paused": "停止",
@@ -116,9 +118,12 @@
     "desc/planet-desert": "水がほとんど存在しない惑星で、その表面は乾燥した砂漠です。水を供給しなければ生命は存在し得ないでしょう。",
 
     // Messages
-    "msg/warn-high-temp": "高すぎる気温\n気温が高すぎます。気温を下げるには、軌道上建造物であるソーラーシールドを稼働させ、地表に届く太陽光を遮蔽することが効果的です。",
+    "msg/warn-high-temp": "高すぎる気温\n気温が高すぎます。気温を下げるには、軌道上建造物である軌道ミラーを稼働させ、地表に届く太陽光を遮蔽することが効果的です。",
+    "msg/warn-low-oxygen": "酸素が少ない\n大気中に十分な酸素がありません。酸素発生機を設置するか、植物の光合成により酸素を生みだす必要があります。",
     "msg/warn-low-temp": "低すぎる気温\n気温が低すぎます。気温を上げるには、軌道上建造物である軌道ミラーを稼働させ、地表に届く太陽光を増やすことが効果的です。",
-    "msg/welcome": "{$app_name} へようこそ",
+    "msg/lack-of-energy": "エネルギーが不足",
+    "msg/lack-of-gene-point": "遺伝子ポイントが不足",
+    "msg/lack-of-material": "素材が不足",
     "msg/loading-failed": "ロード失敗",
     "msg/loading-failed-description": "ロードに失敗しました。セーブデータが存在していないか、バージョンの異なるセーブデータである可能性があります。",
 
