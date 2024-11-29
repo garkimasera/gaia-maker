@@ -1,11 +1,8 @@
 use geom::{CDistRangeIter, CyclicMode, Direction};
 use rand::Rng;
 
-use super::{
-    debug_log::tile_log,
-    misc::{get_rng, linear_interpolation},
-    *,
-};
+use super::misc::{get_rng, linear_interpolation};
+use super::*;
 
 const FERTILITY_MAX: f32 = 100.0;
 const FERTILITY_MIN: f32 = 0.0;
@@ -142,11 +139,6 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
     }
     planet.stat.sum_biomass = sum_biomass as f32 * density_to_mass;
-
-    // Ice
-    for p in map_iter_idx {
-        tile_log(p, "ice", |p| planet.map[p].ice);
-    }
 
     // Biome transistion
     process_biome_transition(planet, sim, params);

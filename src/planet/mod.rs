@@ -18,7 +18,7 @@ mod sim;
 mod stat;
 mod water;
 
-pub mod debug_log;
+pub mod debug;
 
 pub use self::atmo::Atmosphere;
 use self::civ::Civs;

@@ -1,5 +1,5 @@
+use super::misc::linear_interpolation;
 use super::*;
-use super::{debug_log::tile_log, misc::linear_interpolation};
 use geom::{CyclicMode, Direction};
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
@@ -28,7 +28,6 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     // Calculate albedo of tiles
     for p in map_iter_idx {
         sim.albedo[p] = params.biomes[&planet.map[p].biome].albedo;
-        tile_log(p, "albedo", |p| sim.albedo[p]);
     }
 
     let greenhouse_effect = greenhouse_effect(planet, params);
@@ -143,8 +142,6 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         planet.map[p].sea_temp = sea_temp;
         sum_sea_temp += sea_temp as f64;
         n_sea_tile += 1;
-
-        tile_log(p, "sea_temp", |p| planet.map[p].sea_temp);
     }
 
     // Set calculated new temperature

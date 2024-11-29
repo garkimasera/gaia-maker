@@ -1,8 +1,9 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
-use crate::planet::*;
 use crate::sim::DebugTools;
+use crate::{planet::*, screen::HoverTile};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
+use geom::Coords;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
@@ -24,12 +25,24 @@ pub fn debug_tools_window(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut debug_tools: ResMut<DebugTools>,
+    sim: Res<Sim>,
+    hover_tile: Query<&HoverTile>,
     mut current_panel: Local<Panel>,
     mut map_panel: Local<MapPanel>,
+    mut last_hover_tile: Local<Option<Coords>>,
 ) {
     if !wos.debug_tools {
         return;
     }
+
+    // Information about the hovered tile
+    let hover_tile = hover_tile.single();
+    last_hover_tile.get_or_insert(Coords(0, 0));
+    if hover_tile.0.is_some() {
+        *last_hover_tile = hover_tile.0;
+    }
+
+    let p = hover_tile.0.unwrap_or(last_hover_tile.unwrap());
 
     let rect = egui::Window::new("Debug Tools")
         .open(&mut wos.debug_tools)
@@ -43,7 +56,7 @@ pub fn debug_tools_window(
             ui.separator();
 
             match *current_panel {
-                Panel::TileInfo => info_ui(ui, &planet),
+                Panel::TileInfo => info_ui(ui, &planet, &sim, p),
                 Panel::Sim => sim_ui(ui, &mut planet, &mut debug_tools),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode),
                 Panel::Planet => planet_ui(ui, &mut planet),
@@ -57,31 +70,26 @@ pub fn debug_tools_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn info_ui(ui: &mut egui::Ui, planet: &Planet) {
-    let p = crate::planet::debug_log::tile_pos();
-    let tile_logs = crate::planet::debug_log::tile_logs();
+fn info_ui(ui: &mut egui::Ui, planet: &Planet, sim: &Sim, p: Coords) {
+    let tile_debug_info = crate::planet::debug::tile_debug_info(planet, sim, p);
+    let tile_logs = crate::planet::debug::tile_logs();
 
     egui::Grid::new("tile_info_grid")
         .striped(true)
         .show(ui, |ui| {
-            let Some(p) = p else {
-                return;
-            };
+            for (name, data) in tile_debug_info.iter() {
+                ui.label(*name);
+                ui.label(data);
+                ui.end_row();
+            }
+            ui.separator();
+            ui.separator();
+            ui.end_row();
             for (name, data) in tile_logs.iter() {
                 ui.label(*name);
                 ui.label(data);
                 ui.end_row();
             }
-            // Animals
-            ui.label("animal0");
-            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[0]));
-            ui.end_row();
-            ui.label("animal1");
-            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[1]));
-            ui.end_row();
-            ui.label("animal2");
-            ui.label(animals_debug_text_in_tile(&planet.map[p].animal[2]));
-            ui.end_row();
         });
 }
 
@@ -159,12 +167,4 @@ fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
 
 fn water_ui(ui: &mut egui::Ui, planet: &mut Planet) {
     ui.add(egui::Slider::new(&mut planet.water.water_volume, 0.0..=1.0e+18).text("water volume"));
-}
-
-fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
-    let Some(animal) = animal else {
-        return "Empty".into();
-    };
-
-    format!("{}(n={})", animal.id, animal.n)
 }

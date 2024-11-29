@@ -84,7 +84,7 @@ fn update(
         }
     }
     *last_update = Some(*count_frame);
-    crate::planet::debug_log::clear_logs(
+    crate::planet::debug::clear_logs(
         hover_tile
             .get_single()
             .ok()
