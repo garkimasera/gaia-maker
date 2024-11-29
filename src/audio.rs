@@ -17,7 +17,7 @@ pub struct AudioPlayer<'w> {
     channel_se: Res<'w, AudioChannelSE>,
 }
 
-impl<'w> AudioPlayer<'w> {
+impl AudioPlayer<'_> {
     pub fn play_se(&self, s: &str) {
         let path = compact_str::format_compact!("se/{}.ogg", s);
         let Some(audio_source) = self.sources.sound_effects.get(path.as_str()) else {
