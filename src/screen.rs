@@ -283,13 +283,13 @@ fn update_hover_tile(
         (&mut HoverTile, &mut Transform, &mut Visibility),
         Without<OrthographicProjection>,
     >,
+    occupied_screen_space: Res<OccupiedScreenSpace>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     cursor_mode: Res<CursorMode>,
     ui_assets: Res<UiAssets>,
     params: Res<Params>,
     mut color_entities: Local<Vec<Entity>>,
 ) {
-    let mut hover_tile = hover_tile.get_single_mut().unwrap();
     let Ok(window) = window.get_single() else {
         return;
     };
@@ -298,6 +298,13 @@ fn update_hover_tile(
     } else {
         return;
     };
+
+    // Check covered by ui or not
+    if !occupied_screen_space.check(window.width(), window.height(), cursor_pos) {
+        return;
+    }
+
+    let mut hover_tile = hover_tile.get_single_mut().unwrap();
 
     let camera_pos = camera_query.get_single().unwrap().1.translation.xy();
 
@@ -391,7 +398,7 @@ impl OccupiedScreenSpace {
         let y = h - p.y;
 
         for rect in &self.window_rects {
-            if rect.min.x <= x && x <= rect.max.x && rect.min.y <= y && y <= rect.max.y {
+            if rect.contains(Vec2::new(x, y)) {
                 return false;
             }
         }
