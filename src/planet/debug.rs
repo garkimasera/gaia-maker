@@ -40,6 +40,10 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> BTreeMap<&'stat
     );
     map.insert("ice", format!("{}", planet.map[p].ice));
     map.insert(
+        "buried carbon",
+        format!("{:.2e}", planet.map[p].buried_carbon),
+    );
+    map.insert(
         "animal0",
         animals_debug_text_in_tile(&planet.map[p].animal[0]),
     );
