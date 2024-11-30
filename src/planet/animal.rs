@@ -108,9 +108,8 @@ fn process_each_animal(
             // If the destination is empty
             if planet.map[p_dest].animal[size as usize].is_none() {
                 let cap_dest = calc_cap(planet, p_dest, attr, params);
-                let move_probability = cap_dest / (cap + 0.001);
-                if (0.0..=1.0).contains(&move_probability) && rng.gen_bool(move_probability.into())
-                {
+                let move_probability = (cap_dest / (cap + 0.001)).clamp(0.0, 1.0);
+                if rng.gen_bool(move_probability.into()) {
                     planet.map[p_dest].animal[size as usize] =
                         planet.map[p].animal[size as usize].take();
                 }
