@@ -1,7 +1,7 @@
 use geom::{CDistRangeIter, CyclicMode, Direction};
 use rand::Rng;
 
-use super::misc::{get_rng, linear_interpolation};
+use super::misc::linear_interpolation;
 use super::*;
 
 const FERTILITY_MAX: f32 = 100.0;
@@ -145,7 +145,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    let mut rng = get_rng();
+    let rng = &mut sim.rng;
 
     for p in planet.map.iter_idx() {
         let tile = &planet.map[p];

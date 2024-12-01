@@ -32,7 +32,7 @@ pub use self::water::*;
 
 use fnv::FnvHashMap;
 use geom::{Array2d, Coords};
-use misc::{get_rng, SymmetricalLinearDist};
+use misc::SymmetricalLinearDist;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -264,7 +264,7 @@ impl Planet {
 }
 
 pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
-    let mut rng = get_rng();
+    let mut rng = misc::get_rng();
 
     let start_planet = params
         .start_planets

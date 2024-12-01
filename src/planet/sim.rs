@@ -58,7 +58,7 @@ impl Sim {
         }
 
         Sim {
-            rng: get_rng(),
+            rng: misc::get_rng(),
             before_start: false,
             _n_tile: size.0 * size.1,
             tile_area,

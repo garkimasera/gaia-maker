@@ -5,16 +5,14 @@ use rand::{seq::SliceRandom, Rng};
 
 use super::*;
 
-pub fn sim_animal(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
+pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     if planet.cycles % params.sim.animal_sim_interval as u64 != 0 {
         return;
     }
 
-    let mut rng = get_rng();
-
     for p in planet.map.iter_idx() {
         for size in AnimalSize::iter() {
-            process_each_animal(planet, p, size, params, &mut rng);
+            process_each_animal(planet, p, size, params, &mut sim.rng);
         }
     }
 }
