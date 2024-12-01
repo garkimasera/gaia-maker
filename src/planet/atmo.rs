@@ -2,8 +2,8 @@ use super::*;
 use fnv::FnvHashMap;
 use serde::{Deserialize, Serialize};
 
-const CO2_CARBON_WEIGHT_RATIO: f32 = 44.0 / 12.0;
-const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
+pub const CO2_CARBON_WEIGHT_RATIO: f32 = 44.0 / 12.0;
+pub const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Atmosphere {

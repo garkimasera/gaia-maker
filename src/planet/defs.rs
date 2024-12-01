@@ -152,10 +152,7 @@ impl Structure {
 
 impl StructureKind {
     pub fn buildable_by_player(self) -> bool {
-        matches!(
-            self,
-            Self::OxygenGenerator | Self::Rainmaker | Self::FertilizationPlant | Self::Heater
-        )
+        !matches!(self, Self::Settlement)
     }
 }
 
@@ -364,6 +361,9 @@ pub enum BuildingEffect {
         increment: f32,
         max: f32,
         range: u32,
+    },
+    CaptureCarbonDioxide {
+        mass: f32,
     },
 }
 

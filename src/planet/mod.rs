@@ -46,11 +46,15 @@ pub struct Tile {
     pub animal: [Option<Animal>; AnimalSize::LEN],
     pub height: f32,
     pub biomass: f32,
+    /// Tile fertility [%]
     pub fertility: f32,
+    /// Air temperature [K]
     pub temp: f32,
+    /// Sea temperature [K]
     pub sea_temp: f32,
     pub rainfall: f32,
     pub vapor: f32,
+    /// Buried carbon mass [Mt]
     pub buried_carbon: f32,
     pub ice: f32,
 }

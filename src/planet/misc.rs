@@ -1,5 +1,5 @@
 use geom::{Coords, CyclicMode};
-use rand::{Rng, SeedableRng};
+use rand::{rngs::SmallRng, Rng, SeedableRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     assert!(table.len() > 2);
@@ -92,7 +92,7 @@ impl From<(f32, f32)> for SymmetricalLinearDist {
     }
 }
 
-pub fn get_rng() -> impl rand::Rng {
+pub fn get_rng() -> SmallRng {
     let mut thread_rng = rand::thread_rng();
     rand::rngs::SmallRng::from_rng(&mut thread_rng).unwrap()
 }

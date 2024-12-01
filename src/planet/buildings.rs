@@ -1,4 +1,4 @@
-use super::{misc::linear_interpolation, *};
+use super::{atmo::CO2_CARBON_WEIGHT_RATIO, misc::linear_interpolation, *};
 use fnv::FnvHashMap;
 
 impl Planet {
@@ -81,6 +81,39 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 planet.atmo.add(*kind, mass * n as f32);
             }
             _ => (),
+        }
+    }
+
+    for p in planet.map.iter_idx() {
+        process_building_on_tile(planet, p, sim, params);
+    }
+}
+
+fn process_building_on_tile(planet: &mut Planet, p: Coords, sim: &mut Sim, params: &Params) {
+    let Some(effect) = planet.map[p]
+        .structure
+        .as_ref()
+        .map(|structure| structure.kind())
+        .and_then(|kind| params.building_attrs(kind).effect.as_ref())
+    else {
+        return;
+    };
+
+    if let BuildingEffect::CaptureCarbonDioxide { mass } = effect {
+        // Remove co2 from atmosphere, and add buried carbon to one near tile.
+        let co2_mass_to_remove =
+            (planet.atmo.mass(GasKind::CarbonDioxide) / planet.atmo.total_mass()) * mass;
+        let carbon_mass = co2_mass_to_remove / CO2_CARBON_WEIGHT_RATIO;
+        planet.atmo.remove_carbon(carbon_mass);
+        planet
+            .atmo
+            .add(GasKind::Oxygen, co2_mass_to_remove - carbon_mass);
+        loop {
+            let p_target = p + (sim.rng.gen_range(-3..=3), sim.rng.gen_range(-3..=3));
+            if planet.map.in_range(p_target) {
+                planet.map[p_target].buried_carbon += carbon_mass;
+                break;
+            }
         }
     }
 }

@@ -1,9 +1,13 @@
+use rand::rngs::SmallRng;
+
 use super::*;
 use std::collections::HashMap;
 use std::f32::consts::PI;
 
 /// Holds data for simulation
 pub struct Sim {
+    /// Fast rng for simulation
+    pub rng: SmallRng,
     /// Before start simulation or not
     pub before_start: bool,
     /// The number of tiles
@@ -54,6 +58,7 @@ impl Sim {
         }
 
         Sim {
+            rng: get_rng(),
             before_start: false,
             _n_tile: size.0 * size.1,
             tile_area,

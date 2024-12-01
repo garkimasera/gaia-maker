@@ -1,18 +1,13 @@
 use rand::Rng;
 
-use super::{
-    misc::{get_rng, SymmetricalLinearDist},
-    Biome, InitialCondition, Params, Planet, Sim,
-};
+use super::{misc::SymmetricalLinearDist, Biome, InitialCondition, Params, Planet, Sim};
 
 pub fn apply_initial_condition(
     planet: &mut Planet,
-    _sim: &mut Sim,
+    sim: &mut Sim,
     initial_condition: InitialCondition,
     _params: &Params,
 ) {
-    let mut rng = get_rng();
-
     match initial_condition {
         InitialCondition::Snowball { thickness } => {
             for p in planet.map.iter_idx() {
@@ -24,7 +19,7 @@ pub fn apply_initial_condition(
                     tile.biome = Biome::SeaIce;
                     tile.sea_temp = t;
                 }
-                tile.ice = rng.sample(SymmetricalLinearDist::from(thickness));
+                tile.ice = sim.rng.sample(SymmetricalLinearDist::from(thickness));
                 tile.temp = t;
                 tile.vapor = 0.0;
             }
