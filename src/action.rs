@@ -45,19 +45,15 @@ fn cursor_action(
                 update_map.update();
                 planet.demolition(coords, &mut sim, &params);
             }
-            CursorMode::Build(kind) => match kind {
-                StructureKind::None => (),
-                _ => {
-                    if planet.buildable(params.structures[&kind].as_ref(), 1) {
-                        update_map.update();
-                        let size = params.structures[&kind].size;
-                        if planet.placeable(coords, size) {
-                            planet.place(coords, size, new_structure(kind), &mut sim, &params);
-                            audio_player.play_se("build");
-                        }
+            CursorMode::Build(kind) => {
+                if planet.buildable(params.structures[&kind].as_ref(), 1) {
+                    update_map.update();
+                    if planet.placeable(coords) {
+                        planet.place(coords, new_structure(kind), &mut sim, &params);
+                        audio_player.play_se("build");
                     }
                 }
-            },
+            }
             CursorMode::EditBiome(biome) => {
                 update_map.update();
                 planet.edit_biome(coords, biome);
@@ -78,18 +74,11 @@ fn cursor_action(
 
 fn new_structure(kind: StructureKind) -> Structure {
     match kind {
-        StructureKind::OxygenGenerator => Structure::OxygenGenerator {
-            state: StructureBuildingState::Working,
-        },
-        StructureKind::Rainmaker => Structure::Rainmaker {
-            state: StructureBuildingState::Working,
-        },
-        StructureKind::FertilizationPlant => Structure::FertilizationPlant {
-            state: StructureBuildingState::Working,
-        },
-        StructureKind::Heater => Structure::Heater {
-            state: StructureBuildingState::Working,
-        },
+        StructureKind::OxygenGenerator => Structure::OxygenGenerator,
+        StructureKind::Rainmaker => Structure::Rainmaker,
+        StructureKind::FertilizationPlant => Structure::FertilizationPlant,
+        StructureKind::Heater => Structure::Heater,
+        StructureKind::CarbonCapturer => Structure::CarbonCapturer,
         _ => unreachable!(),
     }
 }

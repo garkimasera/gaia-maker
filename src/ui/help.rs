@@ -69,10 +69,7 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
         ItemGroup::Structures,
         StructureKind::iter()
             .filter_map(|structure_kind| {
-                if matches!(
-                    structure_kind,
-                    StructureKind::None | StructureKind::Occupied
-                ) {
+                if matches!(structure_kind, StructureKind::Settlement) {
                     None
                 } else {
                     Some(HelpItem::Structures(structure_kind))

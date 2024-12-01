@@ -209,42 +209,42 @@ fn spawn_structure_textures(
 
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
-        let structure = &planet.map[p].structure;
+        let Some(structure) = &planet.map[p].structure else {
+            continue;
+        };
 
-        if !matches!(structure, Structure::None | Structure::Occupied { .. }) {
-            let kind: StructureKind = structure.into();
-            let attrs = &params.structures[&kind];
+        let kind: StructureKind = structure.into();
+        let attrs = &params.structures[&kind];
 
-            let index = if let Structure::Settlement { settlement } = structure {
-                settlement.age as usize
-            } else {
-                0
-            };
-            let index = if monochrome {
-                index + attrs.columns
-            } else {
-                index
-            };
+        let index = if let Structure::Settlement { settlement } = structure {
+            settlement.age as usize
+        } else {
+            0
+        };
+        let index = if monochrome {
+            index + attrs.columns
+        } else {
+            index
+        };
 
-            let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
-            let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
-            let id = commands
-                .spawn((
-                    SpriteBundle {
-                        texture: structure_textures.get(kind),
-                        sprite: Sprite::default(),
-                        transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
-                        visibility: Visibility::Inherited,
-                        ..default()
-                    },
-                    TextureAtlas {
-                        index,
-                        layout: texture_handles.structure_layouts[&kind].clone(),
-                    },
-                ))
-                .id();
-            tex_entities.push(id);
-        }
+        let x = p_screen.0 as f32 * TILE_SIZE + attrs.width as f32 / 2.0;
+        let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
+        let id = commands
+            .spawn((
+                SpriteBundle {
+                    texture: structure_textures.get(kind),
+                    sprite: Sprite::default(),
+                    transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
+                    visibility: Visibility::Inherited,
+                    ..default()
+                },
+                TextureAtlas {
+                    index,
+                    layout: texture_handles.structure_layouts[&kind].clone(),
+                },
+            ))
+            .id();
+        tex_entities.push(id);
     }
 }
 

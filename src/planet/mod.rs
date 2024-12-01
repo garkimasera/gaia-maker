@@ -42,7 +42,7 @@ use strum::IntoEnumIterator;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tile {
     pub biome: Biome,
-    pub structure: Structure,
+    pub structure: Option<Structure>,
     pub animal: [Option<Animal>; AnimalSize::LEN],
     pub height: f32,
     pub biomass: f32,
@@ -64,7 +64,7 @@ impl Default for Tile {
     fn default() -> Self {
         Self {
             biome: Biome::Rock,
-            structure: Structure::None,
+            structure: None,
             animal: [None, None, None],
             height: 0.0,
             biomass: 0.0,

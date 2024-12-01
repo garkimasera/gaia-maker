@@ -6,7 +6,7 @@ use crate::{
     conf::Conf,
     draw::UpdateMap,
     overlay::OverlayLayerKind,
-    planet::{Params, Planet, Structure, KELVIN_CELSIUS},
+    planet::{Params, Planet, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::ManagePlanet,
     text::WithUnitDisplay,
@@ -323,14 +323,8 @@ fn sidebar(
 
     ui.label(t!(tile.biome.as_ref()));
 
-    let s = match &tile.structure {
-        Structure::None => None,
-        Structure::Occupied { by } => Some(crate::info::structure_info(&planet.map[*by].structure)),
-        other => Some(crate::info::structure_info(other)),
-    };
-
-    if let Some(s) = s {
-        ui.label(s);
+    if let Some(structure) = &tile.structure {
+        ui.label(crate::info::structure_info(structure));
     } else {
         ui.label("");
     }

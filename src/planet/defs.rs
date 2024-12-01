@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use compact_str::CompactString;
 use fnv::FnvHashMap;
-use geom::Coords;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, Same};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
@@ -109,8 +108,6 @@ pub struct BiomeRequirements {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StructureAttrs {
-    #[serde(default)]
-    pub size: StructureSize,
     pub width: u32,
     pub height: u32,
     pub columns: usize,
@@ -121,29 +118,6 @@ pub struct StructureAttrs {
 impl AsRef<BuildingAttrs> for StructureAttrs {
     fn as_ref(&self) -> &BuildingAttrs {
         &self.building
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum StructureSize {
-    Small,
-    Middle,
-}
-
-impl StructureSize {
-    /// Additional occupiied tiles by a structure
-    pub fn occupied_tiles(&self) -> Vec<Coords> {
-        match self {
-            StructureSize::Small => vec![],
-            StructureSize::Middle => vec![Coords(1, 0), Coords(1, 1), Coords(0, 1)],
-        }
-    }
-}
-
-impl Default for StructureSize {
-    fn default() -> Self {
-        Self::Small
     }
 }
 
@@ -162,12 +136,11 @@ impl Default for StructureSize {
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum Structure {
-    None,
-    Occupied { by: Coords },
-    OxygenGenerator { state: StructureBuildingState },
-    Rainmaker { state: StructureBuildingState },
-    FertilizationPlant { state: StructureBuildingState },
-    Heater { state: StructureBuildingState },
+    OxygenGenerator,
+    Rainmaker,
+    FertilizationPlant,
+    Heater,
+    CarbonCapturer,
     Settlement { settlement: Settlement },
 }
 
@@ -175,26 +148,6 @@ impl Structure {
     pub fn kind(&self) -> StructureKind {
         self.into()
     }
-
-    pub fn building_state(&self) -> Option<&StructureBuildingState> {
-        match self {
-            Self::OxygenGenerator { state } => Some(state),
-            Self::Rainmaker { state } => Some(state),
-            Self::FertilizationPlant { state } => Some(state),
-            Self::Heater { state } => Some(state),
-            _ => None,
-        }
-    }
-
-    // pub fn building_state_mut(&mut self) -> Option<&mut StructureBuildingState> {
-    //     match self {
-    //         Self::OxygenGenerator { state } => Some(state),
-    //         Self::Rainmaker { state } => Some(state),
-    //         Self::FertilizationPlant { state } => Some(state),
-    //         Self::Heater { state } => Some(state),
-    //         _ => None,
-    //     }
-    // }
 }
 
 impl StructureKind {

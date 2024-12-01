@@ -222,7 +222,6 @@ fn create_assets_list(
         .get(&planet_asset_collection.structures)
         .unwrap();
     let structures = StructureKind::iter()
-        .filter(|structure| !matches!(structure, StructureKind::None | StructureKind::Occupied))
         .map(|structure| {
             let attrs = &structure_asset_list.0[&structure];
             let texture_atlas = TextureAtlasLayout::from_grid(

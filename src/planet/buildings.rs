@@ -15,10 +15,10 @@ impl Planet {
         p: Coords,
         params: &'a Params,
     ) -> Option<&'a BuildingEffect> {
-        if self.map[p].structure.building_state() == Some(&StructureBuildingState::Working) {
+        if let Some(structure) = &self.map[p].structure {
             params
                 .structures
-                .get(&self.map[p].structure.kind())
+                .get(&structure.kind())
                 .and_then(|s| s.building.effect.as_ref())
         } else {
             None
@@ -97,15 +97,13 @@ fn update_working_buildings(
     }
 
     for p in planet.map.iter_idx() {
-        let structure = &planet.map[p].structure;
-        let kind = BuildingKind::Structure(structure.kind());
-        let Some(building_state) = structure.building_state() else {
-            continue;
-        };
-        if *building_state == StructureBuildingState::Disabled {
-            continue;
+        if let Some(structure) = &planet.map[p].structure {
+            let kind = structure.kind();
+            if kind != StructureKind::Settlement {
+                *working_buildings
+                    .entry(BuildingKind::Structure(kind))
+                    .or_insert(0) += 1;
+            }
         }
-
-        *working_buildings.entry(kind).or_insert(0) += 1;
     }
 }

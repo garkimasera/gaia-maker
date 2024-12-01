@@ -287,7 +287,6 @@ fn update_hover_tile(
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     cursor_mode: Res<CursorMode>,
     ui_assets: Res<UiAssets>,
-    params: Res<Params>,
     mut color_entities: Local<Vec<Entity>>,
 ) {
     let Ok(window) = window.get_single() else {
@@ -342,36 +341,24 @@ fn update_hover_tile(
     if *hover_tile.2 == Visibility::Hidden {
         return;
     }
-
-    let size = match &*cursor_mode {
-        CursorMode::Demolition | CursorMode::EditBiome(_) | CursorMode::SpawnAnimal(_) => {
-            StructureSize::Small
-        }
-        CursorMode::Build(kind) => params.structures[kind].size,
-        _ => {
-            return;
-        }
-    };
-
-    for p in [Coords(tile_i, tile_j)]
-        .into_iter()
-        .chain(size.occupied_tiles().iter().map(|p| *p + (tile_i, tile_j)))
-    {
-        let mut transform = Transform { ..default() };
-        transform.translation.x = p.0 as f32 * TILE_SIZE + TILE_SIZE / 2.0;
-        transform.translation.y = p.1 as f32 * TILE_SIZE + TILE_SIZE / 2.0;
-        transform.translation.z = 920.0;
-
-        let id = commands
-            .spawn(SpriteBundle {
-                texture: ui_assets.tile_colored.clone(),
-                visibility: Visibility::Inherited,
-                transform,
-                ..default()
-            })
-            .id();
-        color_entities.push(id);
+    if matches!(*cursor_mode, CursorMode::Normal) {
+        return;
     }
+
+    let mut transform = Transform { ..default() };
+    transform.translation.x = tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0;
+    transform.translation.y = tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0;
+    transform.translation.z = 920.0;
+
+    let id = commands
+        .spawn(SpriteBundle {
+            texture: ui_assets.tile_colored.clone(),
+            visibility: Visibility::Inherited,
+            transform,
+            ..default()
+        })
+        .id();
+    color_entities.push(id);
 }
 
 #[derive(Clone, Default, Debug, Resource)]

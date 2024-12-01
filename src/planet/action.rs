@@ -13,46 +13,25 @@ impl Planet {
         true
     }
 
-    pub fn placeable(&self, p: Coords, size: StructureSize) -> bool {
+    pub fn placeable(&self, p: Coords) -> bool {
         if !self.map.in_range(p) {
             return false;
         }
-
-        for p in size.occupied_tiles().into_iter() {
-            if let Some(tile) = self.map.get(p) {
-                if !matches!(tile.structure, Structure::None) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        true
+        self.map[p].structure.is_none()
     }
 
-    pub fn place(
-        &mut self,
-        p: Coords,
-        size: StructureSize,
-        structure: Structure,
-        sim: &mut Sim,
-        params: &Params,
-    ) {
-        assert!(self.placeable(p, size));
+    pub fn place(&mut self, p: Coords, structure: Structure, sim: &mut Sim, params: &Params) {
+        assert!(self.placeable(p));
 
         let kind = structure.kind();
-        self.map[p].structure = structure;
-
-        for p_rel in size.occupied_tiles().into_iter() {
-            self.map[p + p_rel].structure = Structure::Occupied { by: p };
-        }
+        self.map[p].structure = Some(structure);
 
         self.res.material -= params.structures[&kind].building.cost;
         self.update(sim, params);
     }
 
     pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
-        self.map[p].structure = Structure::None;
+        self.map[p].structure = None;
         self.update(sim, params);
     }
 
@@ -107,6 +86,6 @@ impl Planet {
     }
 
     pub fn place_settlement(&mut self, coords: Coords, settlement: Settlement) {
-        self.map[coords].structure = Structure::Settlement { settlement };
+        self.map[coords].structure = Some(Structure::Settlement { settlement });
     }
 }
