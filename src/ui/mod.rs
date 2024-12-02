@@ -107,13 +107,13 @@ impl Plugin for UiPlugin {
 
 fn setup_fonts(
     mut egui_ctxs: EguiContexts,
-    mut egui_settings: ResMut<EguiSettings>,
+    mut egui_settings: Query<&mut EguiSettings, With<bevy::window::PrimaryWindow>>,
     conf: Res<Assets<Conf>>,
     ui_assets: Res<UiAssets>,
     gunzip_bin: Res<Assets<GunzipBin>>,
 ) {
     let conf = conf.get(&ui_assets.default_conf).unwrap().clone();
-    egui_settings.scale_factor = conf.ui.scale_factor;
+    egui_settings.single_mut().scale_factor = conf.ui.scale_factor;
 
     let font_data = gunzip_bin.get(&ui_assets.font).unwrap().clone();
     let mut fonts = FontDefinitions::default();

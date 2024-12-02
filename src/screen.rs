@@ -4,7 +4,6 @@ use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
-use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
@@ -99,8 +98,7 @@ impl Default for InScreenTileRange {
 }
 
 pub fn setup(mut commands: Commands) {
-    let camera = Camera2dBundle::default();
-    commands.spawn(camera);
+    commands.spawn(Camera2d);
 }
 
 pub fn setup_cursor(
@@ -112,11 +110,10 @@ pub fn setup_cursor(
         return;
     }
     commands
-        .spawn(SpriteBundle {
-            texture: asset_server.get_handle("ui/tile-cursor.png").unwrap(),
-            visibility: Visibility::Hidden,
-            ..default()
-        })
+        .spawn((
+            Sprite::from_image(asset_server.get_handle("ui/tile-cursor.png").unwrap()),
+            Visibility::Hidden,
+        ))
         .insert(HoverTile(None));
     *setup = true;
 }
@@ -225,18 +222,18 @@ fn centering(
     mut er_centering: EventReader<Centering>,
     mut update_map: ResMut<UpdateMap>,
     screen: Res<OccupiedScreenSpace>,
-    window: Query<&Window, With<PrimaryWindow>>,
-    egui_settings: ResMut<bevy_egui::EguiSettings>,
+    window: Query<(&Window, &bevy_egui::EguiSettings), With<PrimaryWindow>>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
     planet: Res<Planet>,
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
 ) {
+    let Ok((window, egui_settings)) = window.get_single() else {
+        return;
+    };
+
     for e in er_centering.read() {
         update_map.update();
         let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
-        let Ok(window) = window.get_single() else {
-            return;
-        };
 
         let center = &e.0;
 
@@ -345,18 +342,16 @@ fn update_hover_tile(
         return;
     }
 
-    let mut transform = Transform { ..default() };
-    transform.translation.x = tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0;
-    transform.translation.y = tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0;
-    transform.translation.z = 920.0;
-
     let id = commands
-        .spawn(SpriteBundle {
-            texture: ui_assets.tile_colored.clone(),
-            visibility: Visibility::Inherited,
-            transform,
-            ..default()
-        })
+        .spawn((
+            Sprite::from_image(ui_assets.tile_colored.clone()),
+            Visibility::Inherited,
+            Transform::from_xyz(
+                tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0,
+                tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0,
+                920.0,
+            ),
+        ))
         .id();
     color_entities.push(id);
 }
@@ -413,8 +408,10 @@ fn on_resize(
     mut ew_centering: EventWriter<Centering>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     screen: Res<OccupiedScreenSpace>,
-    egui_settings: ResMut<bevy_egui::EguiSettings>,
+    egui_settings: Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
 ) {
+    let egui_settings = egui_settings.single();
+
     for _ in er.read() {
         let transform = camera_query.get_single().unwrap().1;
         let mut translation = transform.translation.xy();
@@ -435,10 +432,12 @@ fn keyboard_input(
     mut speed: ResMut<GameSpeed>,
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     screen: Res<OccupiedScreenSpace>,
-    egui_settings: ResMut<bevy_egui::EguiSettings>,
+    egui_settings: Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
     conf: Res<Conf>,
     mut old_gamespeed: Local<GameSpeed>,
 ) {
+    let egui_settings = egui_settings.single();
+
     // Shortcut keys
 
     // Pause by space
@@ -509,16 +508,15 @@ fn setup_main_menu_background(
             alpha: 1.0,
         }
         .into(),
-        texture: None,
+        ..default()
     });
     let bg_mesh = meshes.add(Mesh::from(Rectangle::new(100000.0, 100000.0)));
     commands
-        .spawn(MaterialMesh2dBundle {
-            mesh: bg_mesh.into(),
-            transform: Transform::from_xyz(0.0, 0.0, 998.0),
-            material: bg_material,
-            ..default()
-        })
+        .spawn((
+            Mesh2d(bg_mesh),
+            MeshMaterial2d(bg_material),
+            Transform::from_xyz(0.0, 0.0, 998.0),
+        ))
         .insert(MainMenuBackground);
 }
 

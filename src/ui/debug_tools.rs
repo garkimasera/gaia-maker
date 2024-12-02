@@ -111,7 +111,7 @@ pub struct MapPanel {
 impl MapPanel {
     fn ui(&mut self, ui: &mut egui::Ui, cursor_mode: &mut CursorMode) {
         ui.horizontal(|ui| {
-            egui::ComboBox::from_id_source(Biome::Ocean)
+            egui::ComboBox::from_id_salt(Biome::Ocean)
                 .selected_text(AsRef::<str>::as_ref(&self.biome))
                 .show_ui(ui, |ui| {
                     for b in Biome::iter() {
@@ -124,7 +124,7 @@ impl MapPanel {
             }
         });
         ui.horizontal(|ui| {
-            egui::ComboBox::from_id_source(CivilizationAge::default())
+            egui::ComboBox::from_id_salt(CivilizationAge::default())
                 .selected_text(AsRef::<str>::as_ref(&self.settlement_age))
                 .show_ui(ui, |ui| {
                     for age in CivilizationAge::iter() {

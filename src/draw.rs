@@ -3,7 +3,7 @@ use crate::screen::InScreenTileRange;
 use crate::{assets::*, GameState};
 use crate::{planet::*, GameSystemSet};
 use arrayvec::ArrayVec;
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 use geom::{Array2d, Coords, Direction, RectIter};
 
 #[derive(Clone, Copy, Debug)]
@@ -167,17 +167,14 @@ fn spawn_map_textures(
                 let tile_asset = &params.biomes[tile_idx];
                 let id = commands
                     .spawn((
-                        SpriteBundle {
-                            texture: biome_textures.get(*tile_idx),
-                            sprite: Sprite::default(),
-                            transform: Transform::from_xyz(x, y, tile_asset.z / 10.0),
-                            visibility: Visibility::Visible,
-                            ..default()
-                        },
-                        TextureAtlas {
-                            index,
-                            layout: texture_handles.biome_layouts[tile_idx].clone(),
-                        },
+                        Sprite::from_atlas_image(
+                            biome_textures.get(*tile_idx),
+                            TextureAtlas {
+                                index,
+                                layout: texture_handles.biome_layouts[tile_idx].clone(),
+                            },
+                        ),
+                        Transform::from_xyz(x, y, tile_asset.z / 10.0),
                     ))
                     .id();
                 tex_entities.push(id);
@@ -231,17 +228,14 @@ fn spawn_structure_textures(
         let y = p_screen.1 as f32 * TILE_SIZE + attrs.height as f32 / 2.0;
         let id = commands
             .spawn((
-                SpriteBundle {
-                    texture: structure_textures.get(kind),
-                    sprite: Sprite::default(),
-                    transform: Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
-                    visibility: Visibility::Inherited,
-                    ..default()
-                },
-                TextureAtlas {
-                    index,
-                    layout: texture_handles.structure_layouts[&kind].clone(),
-                },
+                Sprite::from_atlas_image(
+                    structure_textures.get(kind),
+                    TextureAtlas {
+                        index,
+                        layout: texture_handles.structure_layouts[&kind].clone(),
+                    },
+                ),
+                Transform::from_xyz(x, y, 300.0 - p.1 as f32 / 256.0),
             ))
             .id();
         tex_entities.push(id);
@@ -288,17 +282,15 @@ fn spawn_animal_textures(
         let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
         let id = commands
             .spawn((
-                SpriteBundle {
-                    texture: t.image.clone(),
-                    sprite: Sprite::default(),
-                    transform: Transform::from_xyz(x, y, 400.0),
-                    visibility: Visibility::Inherited,
+                Sprite {
+                    image: t.image.clone(),
+                    texture_atlas: Some(TextureAtlas {
+                        index,
+                        layout: t.layout.clone(),
+                    }),
                     ..default()
                 },
-                TextureAtlas {
-                    index,
-                    layout: t.layout.clone(),
-                },
+                Transform::from_xyz(x, y, 400.0),
                 AnimatedTexture,
             ))
             .id();
@@ -346,12 +338,11 @@ fn spawn_overlay_meshes(
         let y = p_screen.1 as f32 * TILE_SIZE + TILE_SIZE / 2.0;
 
         let id = commands
-            .spawn(MaterialMesh2dBundle {
-                mesh: tile_mesh.clone().into(),
-                transform: Transform::from_xyz(x, y, 800.0),
-                material: color_materials.get_handle(&planet, p, *current_layer),
-                ..default()
-            })
+            .spawn((
+                Mesh2d(tile_mesh.clone()),
+                MeshMaterial2d(color_materials.get_handle(&planet, p, *current_layer)),
+                Transform::from_xyz(x, y, 800.0),
+            ))
             .id();
         mesh_entities.push(id);
     }
@@ -360,15 +351,15 @@ fn spawn_overlay_meshes(
 fn update_animation(
     mut counter: ResMut<AnimationCounter>,
     current_layer: Res<OverlayLayerKind>,
-    mut query: Query<(&mut AnimatedTexture, &mut TextureAtlas)>,
+    mut query: Query<(&mut AnimatedTexture, &mut Sprite)>,
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
     counter.0 ^= 1;
 
     let new_index = counter.0 + if monochrome { 2 } else { 0 };
 
-    for (_a, mut atlas) in &mut query {
-        atlas.index = new_index;
+    for (_a, mut sprite) in &mut query {
+        sprite.texture_atlas.as_mut().unwrap().index = new_index;
     }
 }
 

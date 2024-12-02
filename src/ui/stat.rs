@@ -103,7 +103,7 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
 }
 
 fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params: &Params) {
-    egui::ComboBox::from_id_source("graph-items")
+    egui::ComboBox::from_id_salt("graph-items")
         .selected_text(t!(item.as_ref()))
         .show_ui(ui, |ui| {
             for graph_item in GraphItem::iter() {

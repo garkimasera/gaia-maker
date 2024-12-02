@@ -34,7 +34,7 @@ pub fn map_window(
     mut screen: (
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
-        Res<bevy_egui::EguiSettings>,
+        Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
     ),
     (mut map_tex_handle, mut image_update_counter, mut map_layer, mut before_map_layer): (
         Local<Option<egui::TextureHandle>>,
@@ -74,7 +74,7 @@ pub fn map_window(
         .resizable(false)
         .show(ctx, |ui| {
             ui.vertical(|ui| {
-                egui::ComboBox::from_id_source("map-layer-items")
+                egui::ComboBox::from_id_salt("map-layer-items")
                     .selected_text(t!(map_layer.as_ref()))
                     .show_ui(ui, |ui| {
                         for l in MapLayer::iter() {
@@ -111,10 +111,11 @@ fn map_ui(
     (in_screen_tile_range, occupied_screen_space, egui_settings): &(
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
-        Res<bevy_egui::EguiSettings>,
+        Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
     ),
     scale: f32,
 ) -> egui::Response {
+    let egui_settings = egui_settings.single();
     let [w, h] = map_tex_handle.size();
     let size = egui::vec2(w as _, h as _);
     let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());

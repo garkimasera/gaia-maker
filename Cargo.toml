@@ -9,17 +9,18 @@ license = "GPL-3.0"
 anyhow = "1"
 arrayvec = "0.7"
 base64 = "0.22"
-bevy = { version = "0.14", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_winit", "png", "x11", "webgl2"] }
-bevy_asset_loader = "0.21"
-bevy_common_assets = { version = "0.11", features = ["ron"] }
-bevy_egui = "0.29"
-bevy_kira_audio = "0.20"
+bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "png", "x11", "webgl2"] }
+bevy_asset_loader = "0.22"
+bevy_common_assets = { version = "0.12", features = ["ron"] }
+bevy_egui = "0.31"
+bevy_kira_audio = "0.21"
 bincode = "1"
 clap = { version = "4", features = ["derive"] }
+compact_str = { version = "0.8.0", features = ["serde"] }
 crossbeam = "0.8"
 dirs = "5"
-egui_extras = "0.28"
-egui_plot = "0.28"
+egui_extras = "0.29"
+egui_plot = "0.29"
 flate2 = "1"
 fnv = "1"
 log = "0.4"
@@ -33,7 +34,6 @@ strum = { version = "0.26", features = ["derive"] }
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git" }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
-compact_str = { version = "0.8.0", features = ["serde"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

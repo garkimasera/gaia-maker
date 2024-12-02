@@ -133,10 +133,7 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 .into()
             };
 
-            let handle = materials.add(ColorMaterial {
-                color,
-                texture: None,
-            });
+            let handle = materials.add(ColorMaterial::from_color(color));
             (color, handle)
         })
         .collect::<Vec<_>>();
@@ -151,10 +148,7 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 alpha: 0.4,
             }
             .into();
-            let handle = materials.add(ColorMaterial {
-                color,
-                texture: None,
-            });
+            let handle = materials.add(ColorMaterial::from_color(color));
             (color, handle)
         })
         .collect::<Vec<_>>();
@@ -169,10 +163,7 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
                 alpha: 0.4,
             }
             .into();
-            let handle = materials.add(ColorMaterial {
-                color,
-                texture: None,
-            });
+            let handle = materials.add(ColorMaterial::from_color(color));
             (color, handle)
         })
         .collect::<Vec<_>>();
