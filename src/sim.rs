@@ -37,7 +37,7 @@ impl Plugin for SimPlugin {
                 start_sim.in_set(GameSystemSet::StartSim),
             )
             .add_systems(
-                Update,
+                FixedUpdate,
                 (update, start_event).run_if(in_state(GameState::Running)),
             )
             .add_systems(Update, manage_planet.before(GameSystemSet::Draw));
