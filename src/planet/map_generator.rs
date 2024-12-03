@@ -15,7 +15,7 @@ pub fn generate(conf: GenConf) -> Array2d<f32> {
     let noise_fn = ScalePoint::new(Perlin::new(rand::random())).set_scale(2.0);
     let map_builder = SphereMapBuilder::new(noise_fn)
         .set_size(conf.w as _, conf.h as _)
-        .set_bounds(-90.0, 90.0, -180.0, 180.0)
+        .set_bounds(-80.0, 80.0, -180.0, 180.0)
         .build();
 
     Array2d::from_fn(conf.w, conf.h, |(x, y)| {
