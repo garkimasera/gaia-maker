@@ -57,7 +57,7 @@
             (20.0, 1.0),
             (25.0, 0.9),
             (30.0, 0.8),
-            (40.0, 0.5),
+            (40.0, 0.3),
             (50.0, 0.0),
         ],
         humidity_fertility_table: [
@@ -89,7 +89,7 @@
         ],
         fertility_base_decrement: 0.02,
         fertility_adjacent_factor: 0.01,
-        sea_fertility_attenuation_factor: 0.01,
+        sea_fertility_attenuation_factor: 0.004,
         change_from_ocean_fertility_factor: 0.2,
         soil_nitrogen: 4e-11,
         fertility_increase_factor_from_nitrogen_table: [
@@ -229,13 +229,13 @@
         nitrogen_sprayer: (
             energy: -50,
             cost: 100,
-            effect: SprayToAtmo( kind: nitrogen, mass: 200 ),
+            effect: SprayToAtmo( kind: nitrogen, mass: 200, limit_atm: 1.0 ),
             control: enabled_number,
         ),
         carbon_dioxide_sprayer: (
             energy: -10,
             cost: 100,
-            effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3 ),
+            effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3, limit_atm: 0.1 ),
             control: enabled_number,
         ),
         ion_irradiator: (

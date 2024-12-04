@@ -7,7 +7,7 @@
         building: (
             energy: -100,
             cost: 200,
-            effect: SprayToAtmo( kind: oxygen, mass: 500 ),
+            effect: SprayToAtmo( kind: oxygen, mass: 500, limit_atm: 0.25 ),
         ),
     ),
     rainmaker: (
@@ -51,7 +51,7 @@
         building: (
             energy: -550,
             cost: 200,
-            effect: CaptureCarbonDioxide ( mass: 2.0e+4 ),
+            effect: CaptureCarbonDioxide ( mass: 2.0e+4, limit_atm: 0.3 ),
         ),
     ),
     settlement: (

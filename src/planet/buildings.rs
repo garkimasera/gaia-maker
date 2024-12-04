@@ -77,8 +77,14 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     .atmo
                     .remove_atmo(*mass as f64 * n as f64 * efficiency as f64);
             }
-            BuildingEffect::SprayToAtmo { kind, mass } => {
-                planet.atmo.add(*kind, mass * n as f32);
+            BuildingEffect::SprayToAtmo {
+                kind,
+                mass,
+                limit_atm,
+            } => {
+                if planet.atmo.partial_pressure(GasKind::Oxygen) < *limit_atm {
+                    planet.atmo.add(*kind, mass * n as f32);
+                }
             }
             _ => (),
         }
@@ -99,15 +105,19 @@ fn process_building_on_tile(planet: &mut Planet, p: Coords, sim: &mut Sim, param
         return;
     };
 
-    if let BuildingEffect::CaptureCarbonDioxide { mass } = effect {
+    if let BuildingEffect::CaptureCarbonDioxide { mass, limit_atm } = effect {
         // Remove co2 from atmosphere, and add buried carbon to one near tile.
         let co2_mass_to_remove =
             (planet.atmo.mass(GasKind::CarbonDioxide) / planet.atmo.total_mass()) * mass;
         let carbon_mass = co2_mass_to_remove / CO2_CARBON_WEIGHT_RATIO;
         planet.atmo.remove_carbon(carbon_mass);
-        planet
-            .atmo
-            .add(GasKind::Oxygen, co2_mass_to_remove - carbon_mass);
+
+        if planet.atmo.partial_pressure(GasKind::Oxygen) < *limit_atm {
+            planet
+                .atmo
+                .add(GasKind::Oxygen, co2_mass_to_remove - carbon_mass);
+        }
+
         loop {
             let p_target = p + (sim.rng.gen_range(-3..=3), sim.rng.gen_range(-3..=3));
             if planet.map.in_range(p_target) {

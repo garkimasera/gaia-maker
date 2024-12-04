@@ -349,6 +349,7 @@ pub enum BuildingEffect {
     SprayToAtmo {
         kind: GasKind,
         mass: f32,
+        limit_atm: f32,
     },
     Vapor {
         value: f32,
@@ -364,6 +365,7 @@ pub enum BuildingEffect {
     },
     CaptureCarbonDioxide {
         mass: f32,
+        limit_atm: f32,
     },
 }
 
