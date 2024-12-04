@@ -235,6 +235,10 @@ impl Planet {
         self::buildings::update(self, sim, params);
 
         self.state.solar_power = self.basics.solar_constant * self.state.solar_power_multiplier;
+
+        // Add gene point based on planet biomass
+        self.res.diff_gene_point =
+            (self.stat.sum_biomass / params.sim.coef_gene_point_income).sqrt();
     }
 
     pub fn start_event(&mut self, event: PlanetEvent, sim: &mut Sim, params: &Params) {

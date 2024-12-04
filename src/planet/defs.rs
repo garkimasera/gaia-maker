@@ -546,6 +546,8 @@ pub struct SimParams {
     pub coef_animal_kill_by_congestion_b: f32,
     /// Animal livable oxygen range by size
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
+    /// Coefficent to calulate gene point income.
+    pub coef_gene_point_income: f32,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
     /// The max number of civilizations

@@ -166,6 +166,7 @@
         coef_animal_kill_by_congestion_a: 0.02,
         coef_animal_kill_by_congestion_b: 0.65,
         livable_oxygen_range: ((0.05, 0.50), (0.14, 0.45), (0.16, 0.45)),
+        coef_gene_point_income: 3000000.0,
         event_duration: {civilize: 1000},
         max_civs: 5,
     ),
