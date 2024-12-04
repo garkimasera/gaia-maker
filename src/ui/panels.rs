@@ -211,7 +211,7 @@ fn sidebar(
     // Gene point
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-gene");
-        ui.image(texture).on_hover_text(t!("gene-point"));
+        ui.image(texture).on_hover_text(t!("gene-points"));
         ui.label(WithUnitDisplay::GenePoint(planet.res.gene_point).to_string());
         ui.label(egui::RichText::new(format!("({:+.2})", planet.res.diff_gene_point)).small());
     });

@@ -107,7 +107,7 @@ pub fn cursor_mode_warn(
             if attr.cost <= planet.res.gene_point {
                 None
             } else {
-                t!("msg/lack-of-gene-point").into()
+                t!("msg/lack-of-gene-points").into()
             }
         }
         _ => None,

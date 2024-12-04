@@ -33,7 +33,7 @@
     "energy": "Energy",
     "exit": "Exit",
     "fertility": "Fertility",
-    "gene-point": "Gene Point",
+    "gene-points": "Gene Points",
     "height": "Height",
     "help": "Help",
     "history": "History",
@@ -89,6 +89,7 @@
     "rainmaker": "Rainmaker",
     "fertilization-plant": "Fertilization Plant",
     "heater": "Heater",
+    "carbon-capturer": "Carbon Capturer",
     "settlement": "Settlement",
 
     // Civilization Ages
@@ -123,7 +124,7 @@
     "msg/warn-low-oxygen": "Too low oxygen\nThere is not enough oxygen in the air. It is necessary to install an oxygen generator or to produce oxygen through photosynthesis by plants.",
     "msg/warn-low-temp": "Too low temperature\nAn effective way to raise the temperature is to operate the orbital mirrors, to increase the amount of sunlight reaching the surface.",
     "msg/lack-of-energy": "Lack of Energy",
-    "msg/lack-of-gene-point": "Lack of Gene Point",
+    "msg/lack-of-gene-points": "Lack of Gene Points",
     "msg/lack-of-material": "Lack of Material",
     "msg/loading-failed": "Loading failed",
     "msg/loading-failed-description": "Load failed. The saved data may not exist or may be a different version or corrupt.",
@@ -145,6 +146,7 @@
     "help/rainmaker": "Rainmakers convert ice into water vapor and release it into the atmosphere. In addition to increasing surrounding rainfall, it also slightly raises sea level of the planet.",
     "help/fertilization-plant": "Fertilization Plants slowly transform the surrounding area into soil suitable for plant growth. Plant growth requires soil with sufficient nutrients, and Fertilization Plant promotes their formation by deploying fertilizers and soil improvement drones.",
     "help/heater": "Heaters emit energy into the atmosphere as heat, raising the surrounding temperature.",
+    "help/carbon-capturer": "Carbon Capturers collect and reduce carbon dioxide from the atmosphere. The carbon obtained through reduction is stored underground, and the oxygen is released into the atmosphere.",
 
     "help/fusion-reactor": "Fusion reactors provide the energy needed to operate facilities. Fusion is a highly efficient energy source essential to space civilization, but if more energy is needed, it will require the use of giant fusion reactors, stars.",
     "help/orbital-mirror": "The orbital mirror reflects the stellar light and increases or decreases the amount of light energy that reaches the surface of the planet. The ratio can be adjusted.",
