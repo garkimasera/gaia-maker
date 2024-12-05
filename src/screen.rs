@@ -64,7 +64,8 @@ impl Plugin for ScreenPlugin {
                 Update,
                 update_hover_tile
                     .run_if(in_state(GameState::Running))
-                    .in_set(GameSystemSet::UpdateHoverTile),
+                    .in_set(GameSystemSet::UpdateHoverTile)
+                    .after(crate::ui::UiWindowsSystemSet), // Because occupied_screen_space.rects is set
             )
             .add_systems(
                 Update,
@@ -295,12 +296,14 @@ fn update_hover_tile(
         return;
     };
 
+    let mut hover_tile = hover_tile.get_single_mut().unwrap();
+
     // Check covered by ui or not
     if !occupied_screen_space.check(window.width(), window.height(), cursor_pos) {
+        hover_tile.0 .0 = None;
+        *hover_tile.2 = Visibility::Hidden;
         return;
     }
-
-    let mut hover_tile = hover_tile.get_single_mut().unwrap();
 
     let camera_pos = camera_query.get_single().unwrap().1.translation.xy();
 
