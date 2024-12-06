@@ -34,6 +34,7 @@
     "exit": "終了",
     "fertility": "肥沃度",
     "gene-point": "遺伝子ポイント",
+    "habitat": "生息環境",
     "height": "高さ",
     "help": "ヘルプ",
     "history": "歴史",
@@ -73,6 +74,8 @@
     "water": "水",
 
     // Biomes
+    "land": "陸",
+    "sea": "海",
     "rock": "岩石",
     "ocean": "海",
     "sea-ice": "海氷",

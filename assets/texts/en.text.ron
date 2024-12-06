@@ -34,6 +34,7 @@
     "exit": "Exit",
     "fertility": "Fertility",
     "gene-points": "Gene Points",
+    "habitat": "Habitat",
     "height": "Height",
     "help": "Help",
     "history": "History",
@@ -73,6 +74,8 @@
     "water": "Water",
 
     // Biomes
+    "land": "Land",
+    "sea": "Sea",
     "rock": "Rock",
     "ocean": "Ocean",
     "sea-ice": "Sea Ice",

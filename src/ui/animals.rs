@@ -65,6 +65,7 @@ fn contents(
         ui.label(t!("size"));
         ui.label(t!(attr.size.as_ref()));
         ui.end_row();
+
         ui.label(t!("cost"));
         label_with_icon(
             ui,
@@ -72,6 +73,21 @@ fn contents(
             "ui/icon-gene",
             WithUnitDisplay::GenePoint(attr.cost).to_string(),
         );
+        ui.end_row();
+
+        ui.label(t!("habitat"));
+        let s = match &attr.habitat {
+            AnimalHabitat::Land => t!("land"),
+            AnimalHabitat::Sea => t!("sea"),
+            AnimalHabitat::Biomes(biomes) => biomes.iter().fold(String::new(), |s, biome| {
+                if s.is_empty() {
+                    t!(biome.as_ref())
+                } else {
+                    format!("{}, {}", s, t!(biome.as_ref()))
+                }
+            }),
+        };
+        ui.label(s);
         ui.end_row();
 
         ui.label(t!("livable-temperature"));
