@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::WindowsOpenState;
+use super::{label_with_icon, EguiTextures, WindowsOpenState};
 use crate::planet::{BuildingAttrs, BuildingEffect, Params, SpaceBuildingKind, StructureKind};
 use crate::screen::OccupiedScreenSpace;
 use crate::text::WithUnitDisplay;
@@ -91,6 +91,7 @@ pub fn help_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
+    textures: Res<EguiTextures>,
     params: Res<Params>,
     mut current_item: Local<HelpItem>,
 ) {
@@ -127,7 +128,7 @@ pub fn help_window(
                     ui.set_min_height(300.0);
                     ui.heading(t!(current_item.as_ref()));
                     ui.separator();
-                    current_item.ui(ui, &params);
+                    current_item.ui(ui, &textures, &params);
                 });
             });
         })
@@ -138,58 +139,56 @@ pub fn help_window(
 }
 
 impl HelpItem {
-    pub fn ui(&self, ui: &mut egui::Ui, params: &Params) {
+    pub fn ui(&self, ui: &mut egui::Ui, textures: &EguiTextures, params: &Params) {
         if let Some(building_attrs) = match self {
             HelpItem::Structures(kind) => Some(&params.structures[kind].building),
             HelpItem::SpaceBuildings(kind) => Some(&params.space_buildings[kind]),
             _ => None,
         } {
-            ui_building_attr(ui, building_attrs);
+            ui_building_attr(ui, textures, building_attrs);
             ui.separator();
         }
         ui.label(t!(format!("help/{}", self.as_ref())));
     }
 }
 
-fn ui_building_attr(ui: &mut egui::Ui, attrs: &BuildingAttrs) {
+fn ui_building_attr(ui: &mut egui::Ui, textures: &EguiTextures, attrs: &BuildingAttrs) {
     // Cost
     if attrs.cost > 0.0 {
         ui.label(egui::RichText::new(t!("cost")).strong());
-        let s = format!(
-            "{}: {}",
-            t!("material"),
-            WithUnitDisplay::Material(attrs.cost),
+        label_with_icon(
+            ui,
+            textures,
+            "ui/icon-material",
+            WithUnitDisplay::Material(attrs.cost).to_string(),
         );
-        ui.label(s);
     }
     // Upkeep
     if attrs.energy < 0.0 {
         ui.label(egui::RichText::new(t!("upkeep")).strong());
-        let s = format!(
-            "{}: {}",
-            t!("energy"),
-            WithUnitDisplay::Energy(-attrs.energy),
+        label_with_icon(
+            ui,
+            textures,
+            "ui/icon-energy",
+            WithUnitDisplay::Energy(-attrs.energy).to_string(),
         );
-        ui.label(s);
     }
     // Produce
-    let s = if attrs.energy > 0.0 {
-        Some(format!(
-            "{}: {}",
-            t!("energy"),
-            WithUnitDisplay::Energy(attrs.energy),
-        ))
-    } else if let Some(BuildingEffect::ProduceMaterial { mass }) = &attrs.effect {
-        Some(format!(
-            "{}: {}",
-            t!("material"),
-            WithUnitDisplay::Material(*mass),
-        ))
-    } else {
-        None
-    };
-    if let Some(s) = s {
+    if attrs.energy > 0.0 {
         ui.label(egui::RichText::new(t!("produce")).strong());
-        ui.label(s);
-    };
+        label_with_icon(
+            ui,
+            textures,
+            "ui/icon-energy",
+            WithUnitDisplay::Energy(attrs.energy).to_string(),
+        );
+    } else if let Some(BuildingEffect::ProduceMaterial { mass }) = &attrs.effect {
+        ui.label(egui::RichText::new(t!("produce")).strong());
+        label_with_icon(
+            ui,
+            textures,
+            "ui/icon-material",
+            WithUnitDisplay::Material(*mass).to_string(),
+        );
+    }
 }

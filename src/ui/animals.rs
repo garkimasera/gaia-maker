@@ -1,4 +1,4 @@
-use super::{EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
@@ -53,10 +53,9 @@ fn contents(
     cursor_mode: &mut CursorMode,
 ) {
     ui.horizontal(|ui| {
-        ui.add(
-            egui::Image::new(textures.get(format_compact!("animals/{}", state.current)))
-                .shrink_to_fit(),
-        );
+        ui.add(egui::Image::new(
+            textures.get(format_compact!("animals/{}", state.current)),
+        ));
         ui.heading(t!(state.current));
     });
 
@@ -67,10 +66,12 @@ fn contents(
         ui.label(t!(attr.size.as_ref()));
         ui.end_row();
         ui.label(t!("cost"));
-        ui.horizontal(|ui| {
-            ui.label(WithUnitDisplay::GenePoint(attr.cost).to_string());
-            ui.add(egui::Image::new(textures.get("ui/icon-gene")).shrink_to_fit());
-        });
+        label_with_icon(
+            ui,
+            textures,
+            "ui/icon-gene",
+            WithUnitDisplay::GenePoint(attr.cost).to_string(),
+        );
         ui.end_row();
 
         ui.label(t!("livable-temperature"));

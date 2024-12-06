@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::IntoEnumIterator;
 
-use super::{help::HelpItem, OccupiedScreenSpace, WindowsOpenState};
+use super::{help::HelpItem, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::*;
 
 pub fn space_buildings_window(
@@ -11,6 +11,7 @@ pub fn space_buildings_window(
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
     mut sim: ResMut<Sim>,
+    textures: Res<EguiTextures>,
     params: Res<Params>,
 ) {
     if !wos.space_building {
@@ -28,6 +29,7 @@ pub fn space_buildings_window(
                         kind,
                         &mut planet,
                         &mut sim,
+                        &textures,
                         &params,
                         params.building_attrs(kind),
                     );
@@ -46,6 +48,7 @@ pub fn buildng_row(
     kind: SpaceBuildingKind,
     planet: &mut Planet,
     sim: &mut Sim,
+    textures: &EguiTextures,
     params: &Params,
     attrs: &BuildingAttrs,
 ) {
@@ -65,7 +68,8 @@ pub fn buildng_row(
         let building_text = format!("{} x{}\t", t!(kind.as_ref()), building.n);
         ui.add(egui::Label::new(building_text).extend());
         let help_item = HelpItem::SpaceBuildings(kind);
-        ui.label("?").on_hover_ui(|ui| help_item.ui(ui, params));
+        ui.label("?")
+            .on_hover_ui(|ui| help_item.ui(ui, textures, params));
     });
 
     ui.horizontal(|ui| {

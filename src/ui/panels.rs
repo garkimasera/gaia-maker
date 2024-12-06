@@ -107,7 +107,7 @@ fn toolbar(
     };
 
     ui.menu_image_button(textures.get("ui/icon-build"), |ui| {
-        build_menu(ui, cursor_mode, planet, params);
+        build_menu(ui, cursor_mode, textures, planet, params);
     });
 
     ui.menu_image_button(textures.get("ui/icon-action"), |ui| {
@@ -334,7 +334,13 @@ fn sidebar(
     super::dialog::msg_list(ui, wos, planet, conf);
 }
 
-fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, params: &Params) {
+fn build_menu(
+    ui: &mut egui::Ui,
+    cursor_mode: &mut CursorMode,
+    textures: &EguiTextures,
+    planet: &Planet,
+    params: &Params,
+) {
     if ui.button(t!("demolition")).clicked() {
         *cursor_mode = CursorMode::Demolition;
         ui.close_menu();
@@ -348,7 +354,7 @@ fn build_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, planet: &Planet, 
                 ui.close_menu();
             }
             ui.label("?")
-                .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, params));
+                .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, textures, params));
             ui.end_row();
         }
     });
