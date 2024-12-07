@@ -5,6 +5,10 @@ edition = "2021"
 authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
 license = "GPL-3.0"
 
+[features]
+default = []
+asset_tar = ["dep:bevy_asset_tar"]
+
 [dependencies]
 anyhow = "1"
 arrayvec = "0.7"
@@ -32,7 +36,7 @@ serde = { version = "1", features = ["derive"] }
 serde_with = "3"
 strum = { version = "0.26", features = ["derive"] }
 
-bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git" }
+bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

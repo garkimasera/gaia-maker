@@ -3,5 +3,5 @@
     cost: 2,
     habitat: land,
     growth_speed: 1.0,
-    temp: (10, 40),
+    temp: (5, 50),
 )

@@ -95,9 +95,11 @@ pub enum GameSystemSet {
 struct AssetPlugin;
 
 impl Plugin for AssetPlugin {
+    #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
-        if cfg!(target_arch = "wasm32") {
-            app.add_plugins(bevy_asset_tar::AssetTarPlugin::default());
-        }
+        app.add_plugins(bevy_asset_tar::AssetTarPlugin::default());
     }
+
+    #[cfg(not(feature = "asset_tar"))]
+    fn build(&self, _app: &mut App) {}
 }
