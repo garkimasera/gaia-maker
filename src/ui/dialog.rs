@@ -1,12 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use crate::{
-    conf::Conf,
-    planet::{Params, Planet, PlanetEvent},
-    screen::OccupiedScreenSpace,
-    sim::StartEvent,
-};
+use crate::{conf::Conf, planet::Planet, screen::OccupiedScreenSpace, sim::StartEvent};
 
 use super::{Dialog, WindowsOpenState};
 
@@ -73,12 +68,12 @@ pub fn dialogs(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    mut ew_start_event: EventWriter<StartEvent>,
+    mut _ew_start_event: EventWriter<StartEvent>,
 ) {
     let mut close_dialogs = Vec::new();
     for (i, dialog) in wos.dialogs.iter_mut().enumerate() {
         let mut open = true;
-        let mut close = false;
+        let close = false;
 
         let dialog = match dialog {
             Dialog::Msg(msg_dialog) => egui::Window::new(&msg_dialog.head)
@@ -87,12 +82,7 @@ pub fn dialogs(
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.label(&msg_dialog.body);
                 }),
-            Dialog::Civilize(dialog) => egui::Window::new(t!("civilize-new"))
-                .open(&mut open)
-                .vscroll(true)
-                .show(egui_ctxs.ctx_mut(), |ui| {
-                    close = dialog.ui(ui, &mut ew_start_event);
-                }),
+            _ => unreachable!(),
         };
         let rect = dialog.unwrap().response.rect;
         occupied_screen_space.push_egui_window_rect(rect);
@@ -103,22 +93,5 @@ pub fn dialogs(
 
     for &i in close_dialogs.iter().rev() {
         wos.dialogs.remove(i);
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct CivilizeDialog {}
-
-impl CivilizeDialog {
-    pub fn new(_params: &Params) -> Self {
-        Self {}
-    }
-
-    fn ui(&mut self, ui: &mut egui::Ui, ew_start_event: &mut EventWriter<StartEvent>) -> bool {
-        if ui.button(t!("start")).clicked() {
-            ew_start_event.send(StartEvent(PlanetEvent::Civilize { target: 0 }));
-            return true;
-        }
-        false
     }
 }

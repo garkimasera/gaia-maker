@@ -13,7 +13,7 @@ use crate::{
     GameSpeed, GameState,
 };
 
-use super::{dialog::CivilizeDialog, help::HelpItem, Dialog, EguiTextures, WindowsOpenState};
+use super::{help::HelpItem, EguiTextures, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -111,7 +111,7 @@ fn toolbar(
     });
 
     ui.menu_image_button(textures.get("ui/icon-action"), |ui| {
-        action_menu(ui, wos, cursor_mode, planet, params);
+        action_menu(ui, cursor_mode, planet, params);
     });
 
     if button(ui, "ui/icon-space-buildings", "space-buildings") {
@@ -362,22 +362,10 @@ fn build_menu(
 
 fn action_menu(
     ui: &mut egui::Ui,
-    wos: &mut WindowsOpenState,
     _cursor_mode: &mut CursorMode,
-    planet: &Planet,
-    params: &Params,
+    _planet: &Planet,
+    _params: &Params,
 ) {
-    ui.menu_button(t!("project"), |_ui| {});
-    ui.menu_button(t!("civilization"), |ui| {
-        for _civ in planet.civs.values() {}
-        if planet.civs.len() < params.sim.max_civs as usize
-            && ui.button(t!("civilize-new")).clicked()
-        {
-            wos.dialogs
-                .push(Dialog::Civilize(CivilizeDialog::new(params)));
-            ui.close_menu();
-        }
-    });
     ui.end_row();
 }
 

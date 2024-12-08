@@ -27,7 +27,7 @@ use crate::{
     GameState,
 };
 
-use self::dialog::{CivilizeDialog, MsgDialog};
+use self::dialog::MsgDialog;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
@@ -47,7 +47,7 @@ pub struct WindowsOpenState {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Dialog {
     Msg(MsgDialog),
-    Civilize(CivilizeDialog),
+    _Dummy,
 }
 
 #[derive(Clone, Default, Resource)]

@@ -163,6 +163,16 @@ pub enum StructureBuildingState {
     Disabled,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[strum_discriminants(name(TileEventKind))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize, AsRefStr, Display))]
+#[strum_discriminants(serde(rename_all = "snake_case"))]
+#[strum_discriminants(strum(serialize_all = "kebab-case"))]
+pub enum TileEvent {
+    Fire,
+    Plague,
+}
+
 #[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimalAttr {

@@ -57,6 +57,7 @@ pub struct Tile {
     /// Buried carbon mass [Mt]
     pub buried_carbon: f32,
     pub ice: f32,
+    pub event: Option<Box<TileEvent>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -79,6 +80,7 @@ impl Default for Tile {
             vapor: 0.0,
             buried_carbon: 0.0,
             ice: 0.0,
+            event: None,
         }
     }
 }
