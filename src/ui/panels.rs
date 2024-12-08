@@ -111,7 +111,7 @@ fn toolbar(
     });
 
     ui.menu_image_button(textures.get("ui/icon-action"), |ui| {
-        action_menu(ui, cursor_mode, planet, params);
+        action_menu(ui, cursor_mode, params);
     });
 
     if button(ui, "ui/icon-space-buildings", "space-buildings") {
@@ -234,20 +234,23 @@ fn sidebar(
             .rect_filled(ui.available_rect_before_wrap(), 6.0, bg_color);
         let text = match cursor_mode {
             CursorMode::Normal => "".into(),
+            CursorMode::Demolition => {
+                t!("demolition")
+            }
             CursorMode::Build(kind) => {
                 t!(kind.as_ref())
             }
-            CursorMode::Demolition => {
-                t!("demolition")
+            CursorMode::TileEvent(kind) => {
+                t!(kind.as_ref())
+            }
+            CursorMode::SpawnAnimal(ref animal_id) => {
+                format!("{} {}", t!("animal"), t!(animal_id))
             }
             CursorMode::EditBiome(biome) => {
                 format!("biome editing: {}", biome.as_ref())
             }
             CursorMode::PlaceSettlement(settlement) => {
                 format!("settlement: {}", settlement.age.as_ref())
-            }
-            CursorMode::SpawnAnimal(ref animal_id) => {
-                format!("{} {}", t!("animal"), t!(animal_id))
             }
         };
         ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));
@@ -360,13 +363,14 @@ fn build_menu(
     });
 }
 
-fn action_menu(
-    ui: &mut egui::Ui,
-    _cursor_mode: &mut CursorMode,
-    _planet: &Planet,
-    _params: &Params,
-) {
-    ui.end_row();
+fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
+    for &kind in params.event.tile_event_costs.keys() {
+        if ui.button(t!(kind.as_ref())).clicked() {
+            *cursor_mode = CursorMode::TileEvent(kind);
+            ui.close_menu();
+        }
+        ui.end_row();
+    }
 }
 
 fn game_menu(

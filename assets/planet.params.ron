@@ -170,6 +170,12 @@
         event_duration: {civilize: 1000},
         max_civs: 5,
     ),
+    event: (
+        tile_event_costs: {
+            fire: Material(1.0),
+            plague: GenePoint(1.0),
+        },
+    ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
         difference_in_elevation: (min: 1000, max: 15000, default: 7000),

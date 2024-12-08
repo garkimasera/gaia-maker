@@ -406,6 +406,7 @@ impl PlanetEvent {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
     pub sim: SimParams,
+    pub event: EventParams,
     pub custom_planet: CustomPlanetParams,
     pub default_start_params: StartParams,
     pub history: HistoryParams,
@@ -562,6 +563,19 @@ pub struct SimParams {
     pub event_duration: HashMap<PlanetEventKind, u64>,
     /// The max number of civilizations
     pub max_civs: u8,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct EventParams {
+    /// Resource cost for tile event
+    pub tile_event_costs: HashMap<TileEventKind, Cost>,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
+pub enum Cost {
+    Energy(f32),
+    Material(f32),
+    GenePoint(f32),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

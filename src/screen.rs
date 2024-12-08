@@ -23,9 +23,10 @@ pub enum CursorMode {
     Normal,
     Demolition,
     Build(StructureKind),
+    TileEvent(TileEventKind),
+    SpawnAnimal(CompactString),
     EditBiome(Biome),
     PlaceSettlement(Settlement),
-    SpawnAnimal(CompactString),
 }
 
 impl Default for CursorMode {
