@@ -42,4 +42,26 @@ impl Resources {
         self.material = MATERIAL_MAX;
         self.gene_point = GENE_POINT_MAX;
     }
+
+    pub fn consume(&mut self, cost: Cost) {
+        match cost {
+            Cost::Energy(_, _) => todo!(),
+            Cost::Material(value) => {
+                assert!(self.material >= value);
+                self.material -= value;
+            }
+            Cost::GenePoint(value) => {
+                assert!(self.gene_point >= value);
+                self.gene_point -= value;
+            }
+        }
+    }
+
+    pub fn enough_to_consume(&self, cost: Cost) -> bool {
+        match cost {
+            Cost::Energy(value, _) => self.surplus_energy() > value,
+            Cost::Material(value) => self.material >= value,
+            Cost::GenePoint(value) => self.gene_point >= value,
+        }
+    }
 }

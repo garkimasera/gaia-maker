@@ -575,7 +575,8 @@ pub struct EventParams {
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Cost {
-    Energy(f32),
+    /// Needed surplus energy and cycles
+    Energy(f32, u32),
     Material(f32),
     GenePoint(f32),
 }

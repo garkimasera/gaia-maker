@@ -64,6 +64,21 @@ impl Planet {
         self.update(sim, params);
     }
 
+    pub fn cause_tile_event(
+        &mut self,
+        p: Coords,
+        kind: TileEventKind,
+        sim: &mut Sim,
+        params: &Params,
+    ) {
+        let cost = params.event.tile_event_costs[&kind];
+        if self.res.enough_to_consume(cost) {
+            self.res.consume(cost);
+            super::tile_event::cause_tile_event(self, p, kind, sim, params);
+            self.update(sim, params);
+        }
+    }
+
     pub fn animal_spawnable(&self, p: Coords, animal_id: &CompactString, params: &Params) -> bool {
         let attr = &params.animals[animal_id];
 

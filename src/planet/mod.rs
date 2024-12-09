@@ -16,6 +16,7 @@ mod resources;
 mod serde_with_types;
 mod sim;
 mod stat;
+mod tile_event;
 mod water;
 
 pub mod debug;
@@ -217,6 +218,7 @@ impl Planet {
         self.cycles += 1;
         self.res.apply_diff();
 
+        self::tile_event::advance(self, sim, params);
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);
         self::atmo::sim_atmosphere(self, params);

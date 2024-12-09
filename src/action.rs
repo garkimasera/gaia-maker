@@ -54,8 +54,9 @@ fn cursor_action(
                     }
                 }
             }
-            CursorMode::TileEvent(_kind) => {
-                todo!()
+            CursorMode::TileEvent(kind) => {
+                planet.cause_tile_event(coords, kind, &mut sim, &params);
+                update_map.update();
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
                 if planet.animal_spawnable(coords, animal_id, &params) {
