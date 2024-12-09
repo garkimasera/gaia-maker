@@ -484,8 +484,8 @@ pub struct SimParams {
     /// Vaporizaion from ocean tile - °C table
     #[serde_as(as = "Vec<(Celsius, Same)>")]
     pub ocean_vaporization_table: Vec<(f32, f32)>,
-    /// Humidity calculation factors (humidity = rainfall - factors.0 * (temperature + factors.1))
-    pub humidity_factors: (f32, f32),
+    /// Drying factors for humidity calculation (humidity = rainfall - factors.0 * (temperature + factors.1))
+    pub drying_factors: (f32, f32),
     /// Max fertility table by temperature
     #[serde_as(as = "Vec<(Celsius, Same)>")]
     pub temperature_fertility_table: Vec<(f32, f32)>,
@@ -507,6 +507,8 @@ pub struct SimParams {
     pub soil_nitrogen: f32,
     /// Max biomass by fertility
     pub max_biomass_fertility_table: Vec<(f32, f32)>,
+    /// Max biomass by humidity
+    pub max_biomass_humidity_table: Vec<(f32, f32)>,
     /// Max biomass by O2
     pub max_biomass_factor_o2_table: Vec<(f32, f32)>,
     /// Base biomass increase speed

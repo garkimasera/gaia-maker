@@ -113,8 +113,13 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let max_biomass_density_planet_factor = calc_max_biomass_density_planet_factor(planet, params);
 
     for p in map_iter_idx {
-        let max =
-            calc_tile_max_biomass_density(planet, params, p, max_biomass_density_planet_factor);
+        let max = calc_tile_max_biomass_density(
+            planet,
+            sim,
+            params,
+            p,
+            max_biomass_density_planet_factor,
+        );
         let biomass = &mut planet.map[p].biomass;
         let diff = max - *biomass;
         let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
@@ -230,18 +235,24 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
 
 fn calc_tile_max_biomass_density(
     planet: &Planet,
+    sim: &Sim,
     params: &Params,
     p: Coords,
     planet_factor: f32,
 ) -> f32 {
-    linear_interpolation(
+    let max_by_fertility = linear_interpolation(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,
-    ) * if planet.map[p].biome.is_land() {
+    );
+    let max_by_humidity =
+        linear_interpolation(&params.sim.max_biomass_humidity_table, sim.humidity[p]);
+    let land_or_sea_factor = if planet.map[p].biome.is_land() {
         1.0
     } else {
         params.sim.sea_biomass_factor
-    } * planet_factor
+    };
+
+    (max_by_fertility * planet_factor * land_or_sea_factor).min(max_by_humidity)
 }
 
 fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f32 {

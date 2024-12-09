@@ -33,6 +33,8 @@ pub(super) fn tile_log<F: FnOnce(Coords) -> T, T: ToString>(
 pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> BTreeMap<&'static str, String> {
     let mut map = BTreeMap::default();
 
+    map.insert("height", format!("{:.1}", planet.map[p].height));
+    map.insert("humidity", format!("{:.1}", sim.humidity[p]));
     map.insert("albedo", format!("{}", sim.albedo[p]));
     map.insert(
         "sea_temp",
