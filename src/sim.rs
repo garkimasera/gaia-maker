@@ -105,8 +105,11 @@ fn start_event(
     }
 }
 
-#[derive(Debug, Event)]
-pub struct ManagePlanetError(pub String);
+#[derive(Clone, Debug, Event)]
+pub enum ManagePlanetError {
+    Decode,
+    Other,
+}
 
 fn manage_planet(
     mut command: Commands,
@@ -138,8 +141,13 @@ fn manage_planet(
         ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
             Ok(planet) => Some(planet),
             Err(e) => {
-                ew_manage_planet_eror.send(ManagePlanetError(e.to_string()));
                 log::warn!("cannot load: {:?}", e);
+                let e = if e.is::<bincode::Error>() {
+                    ManagePlanetError::Decode
+                } else {
+                    ManagePlanetError::Other
+                };
+                ew_manage_planet_eror.send(e);
                 None
             }
         },

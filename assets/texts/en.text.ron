@@ -130,7 +130,8 @@
     "msg/lack-of-gene-points": "Lack of Gene Points",
     "msg/lack-of-material": "Lack of Material",
     "msg/loading-failed": "Loading failed",
-    "msg/loading-failed-description": "Load failed. The saved data may not exist or may be a different version or corrupt.",
+    "msg/loading-failed-desc-decode-error": "Loading failed. The save data was created with an incompatible version or is corrupted.",
+    "msg/loading-failed-desc-not-found": "Loading failed. Cannot find saved data.",
 
     // Help
     "basics": "Basics",

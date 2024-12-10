@@ -23,7 +23,7 @@ pub enum MainMenuMode {
 pub struct MainMenuState {
     pub mode: MainMenuMode,
     pub new_planet: NewPlanetState,
-    pub error: String,
+    pub error: Option<ManagePlanetError>,
 }
 
 impl MainMenuState {
@@ -31,7 +31,7 @@ impl MainMenuState {
         MainMenuState {
             mode: MainMenuMode::Menu,
             new_planet: NewPlanetState::new(params),
-            error: "".into(),
+            error: None,
         }
     }
 }
@@ -46,14 +46,14 @@ pub fn main_menu(
     params: Res<Params>,
     mut conf: ResMut<Conf>,
     mut ew_conf_change: EventWriter<ConfChange>,
-    mut ew_manage_planet_eror: EventReader<ManagePlanetError>,
+    mut ew_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
     textures: Res<EguiTextures>,
 ) {
-    if let Some(e) = ew_manage_planet_eror.read().next() {
+    if let Some(e) = ew_manage_planet_error.read().next() {
         state.mode = MainMenuMode::Error;
-        state.error = e.0.clone();
+        state.error = Some(e.clone());
     }
 
     match state.mode {
@@ -103,10 +103,11 @@ pub fn main_menu(
                 .collapsible(false)
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                 .show(egui_ctxs.ctx_mut(), |ui| {
-                    ui.label(t!("msg/loading-failed-description"));
-                    ui.collapsing(t!("details"), |ui| {
-                        ui.label(&state.error);
-                    });
+                    if matches!(state.error, Some(ManagePlanetError::Decode)) {
+                        ui.label(t!("msg/loading-failed-desc-decode-error"));
+                    } else {
+                        ui.label(t!("msg/loading-failed-desc-not-found"));
+                    }
                     ui.vertical_centered(|ui| {
                         if ui.button(t!("close")).clicked() {
                             state.mode = MainMenuMode::Menu;

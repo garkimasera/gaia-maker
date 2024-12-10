@@ -129,7 +129,8 @@
     "msg/lack-of-gene-points": "遺伝子ポイントが不足",
     "msg/lack-of-material": "素材が不足",
     "msg/loading-failed": "ロード失敗",
-    "msg/loading-failed-description": "ロードに失敗しました。セーブデータが存在していないか、バージョンの異なるセーブデータである可能性があります。",
+    "msg/loading-failed-desc-decode-error": "ロードに失敗しました。セーブデータが互換のないバージョンで作成されたか、破損しています。",
+    "msg/loading-failed-desc-not-found": "ロードに失敗しました。セーブデータを見つけられません。",
 
     // Help
     "basics": "基本",
