@@ -560,7 +560,7 @@ fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
         .inner_width()
         .ok()
         .and_then(|width| width.as_f64())
-        .map(|width| width as f32)
+        .map(|width| width as u32)
     else {
         return;
     };
@@ -568,13 +568,19 @@ fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
         .inner_height()
         .ok()
         .and_then(|height| height.as_f64())
-        .map(|height| height as f32)
+        .map(|height| height as u32)
     else {
         return;
     };
 
-    if window.width() != width as f32 || window.height() != height as f32 {
-        window.resolution.set(width, height);
+    // Adjust target size to prevent pixel blurring
+    let target_width = width - width % 2;
+    let target_height = height - height % 2;
+
+    if window.width() as u32 != target_width || window.height() as u32 != target_height {
+        window
+            .resolution
+            .set(target_width as f32, target_height as f32);
     }
 }
 
