@@ -94,6 +94,7 @@ pub struct TextureHandles {
     pub biome_layouts: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
     pub structure_layouts: FnvHashMap<StructureKind, Handle<TextureAtlasLayout>>,
     pub animals: HashMap<CompactString, LoadedTexture>,
+    pub tile_animations: HashMap<CompactString, LoadedTexture>,
 }
 
 #[derive(Clone, Debug)]
@@ -116,6 +117,8 @@ pub struct PlanetAssetCollection {
     start_planet_handles: HashMap<String, UntypedHandle>,
     #[asset(path = "animals", collection(mapped))]
     animal_handles: HashMap<String, UntypedHandle>,
+    #[asset(path = "tile_animations", collection(mapped, typed))]
+    tile_animation_handles: HashMap<String, Handle<Image>>,
 }
 
 define_asset_list_from_enum! {
@@ -295,10 +298,41 @@ fn create_assets_list(
         }
     }
 
+    // Tile animations
+    let tile_animation_layout = texture_atlas_assets.add(TextureAtlasLayout::from_grid(
+        UVec2::new(TILE_SIZE as u32, TILE_SIZE as u32),
+        2,
+        2,
+        None,
+        None,
+    ));
+    let tile_animations: HashMap<_, _> = planet_asset_collection
+        .tile_animation_handles
+        .iter()
+        .map(|(path, handle)| {
+            let tile_animation_id: CompactString = path
+                .strip_prefix("tile_animations/")
+                .and_then(|s| s.split_once('.'))
+                .expect("unexpected tile animation asset path")
+                .0
+                .into();
+            (
+                tile_animation_id,
+                LoadedTexture {
+                    layout: tile_animation_layout.clone(),
+                    image: handle.clone(),
+                    _width: TILE_SIZE as u32,
+                    _height: TILE_SIZE as u32,
+                },
+            )
+        })
+        .collect();
+
     command.insert_resource(params);
     command.insert_resource(TextureHandles {
         biome_layouts: biomes,
         structure_layouts: structures,
         animals,
+        tile_animations,
     });
 }

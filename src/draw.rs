@@ -21,10 +21,16 @@ impl UpdateMap {
 }
 
 #[derive(Debug, Component)]
-pub struct AnimatedTexture;
+pub struct FastAnimatedTexture;
+
+#[derive(Debug, Component)]
+pub struct SlowAnimatedTexture;
 
 #[derive(Debug, Default, Resource)]
-pub struct AnimationCounter(usize);
+pub struct AnimationCounter {
+    fast: usize,
+    slow: usize,
+}
 
 const CORNERS: [Coords; 4] = [Coords(-1, -1), Coords(-1, 1), Coords(1, 1), Coords(1, -1)];
 
@@ -42,6 +48,7 @@ impl Plugin for DrawPlugin {
                     update_layered_tex_map.pipe(spawn_map_textures),
                     spawn_structure_textures,
                     spawn_animal_textures,
+                    spawn_tile_animation_textures,
                     spawn_overlay_meshes,
                 )
                     .in_set(GameSystemSet::Draw)
@@ -51,7 +58,7 @@ impl Plugin for DrawPlugin {
             .add_systems(
                 Update,
                 update_animation.run_if(bevy::time::common_conditions::on_timer(
-                    std::time::Duration::from_secs(1),
+                    std::time::Duration::from_millis(500),
                 )),
             );
     }
@@ -273,7 +280,7 @@ fn spawn_animal_textures(
             _ => continue,
         };
 
-        let index = counter.0;
+        let index = counter.slow;
         let index = if monochrome { index + 2 } else { index };
 
         let t = &texture_handles.animals[&animal.id];
@@ -291,7 +298,61 @@ fn spawn_animal_textures(
                     ..default()
                 },
                 Transform::from_xyz(x, y, 400.0),
-                AnimatedTexture,
+                SlowAnimatedTexture,
+            ))
+            .id();
+        tex_entities.push(id);
+    }
+}
+
+fn spawn_tile_animation_textures(
+    mut commands: Commands,
+    update_map: Res<UpdateMap>,
+    texture_handles: Res<TextureHandles>,
+    in_screen_tile_range: Res<InScreenTileRange>,
+    planet: Res<Planet>,
+    current_layer: Res<OverlayLayerKind>,
+    counter: Res<AnimationCounter>,
+    mut tex_entities: Local<Vec<Entity>>,
+) {
+    if !update_map.need_update {
+        return;
+    }
+    for entity in tex_entities.iter() {
+        commands.entity(*entity).despawn();
+    }
+    tex_entities.clear();
+
+    let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
+
+    for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
+        let p = coord_rotation_x(planet.map.size(), p_screen);
+
+        let Some(kind) = planet.map[p].event.as_ref().map(|event| event.kind()) else {
+            continue;
+        };
+
+        let index = counter.fast;
+        let index = if monochrome { index + 2 } else { index };
+
+        let Some(t) = texture_handles.tile_animations.get(kind.as_ref()) else {
+            continue;
+        };
+
+        let x = (p_screen.0 as f32 + 0.5) * TILE_SIZE;
+        let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
+        let id = commands
+            .spawn((
+                Sprite {
+                    image: t.image.clone(),
+                    texture_atlas: Some(TextureAtlas {
+                        index,
+                        layout: t.layout.clone(),
+                    }),
+                    ..default()
+                },
+                Transform::from_xyz(x, y, 500.0),
+                FastAnimatedTexture,
             ))
             .id();
         tex_entities.push(id);
@@ -351,14 +412,28 @@ fn spawn_overlay_meshes(
 fn update_animation(
     mut counter: ResMut<AnimationCounter>,
     current_layer: Res<OverlayLayerKind>,
-    mut query: Query<(&mut AnimatedTexture, &mut Sprite)>,
+    mut query_fast: Query<(&mut FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
+    mut query_slow: Query<(&mut SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
-    counter.0 ^= 1;
 
-    let new_index = counter.0 + if monochrome { 2 } else { 0 };
+    counter.fast ^= 1;
 
-    for (_a, mut sprite) in &mut query {
+    let new_index = counter.fast + if monochrome { 2 } else { 0 };
+
+    for (_a, mut sprite) in &mut query_fast {
+        sprite.texture_atlas.as_mut().unwrap().index = new_index;
+    }
+
+    if counter.fast == 1 {
+        return;
+    }
+
+    counter.slow ^= 1;
+
+    let new_index = counter.slow + if monochrome { 2 } else { 0 };
+
+    for (_a, mut sprite) in &mut query_slow {
         sprite.texture_atlas.as_mut().unwrap().index = new_index;
     }
 }

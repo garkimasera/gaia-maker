@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use compact_str::CompactString;
 use fnv::FnvHashMap;
@@ -171,6 +171,12 @@ pub enum StructureBuildingState {
 pub enum TileEvent {
     Fire,
     Plague,
+}
+
+impl TileEvent {
+    pub fn kind(&self) -> TileEventKind {
+        self.into()
+    }
 }
 
 #[serde_as]
@@ -570,7 +576,7 @@ pub struct SimParams {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EventParams {
     /// Resource cost for tile event
-    pub tile_event_costs: HashMap<TileEventKind, Cost>,
+    pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
