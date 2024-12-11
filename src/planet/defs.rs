@@ -577,6 +577,10 @@ pub struct SimParams {
 pub struct EventParams {
     /// Resource cost for tile event
     pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
+    /// The ratio of biomass burn at one cycle
+    pub fire_burn_ratio: f32,
+    /// Biomass at fire extinction [kg/m2]
+    pub biomass_at_fire_extinction_range: (f32, f32),
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

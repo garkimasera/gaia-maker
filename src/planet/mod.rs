@@ -46,6 +46,7 @@ pub struct Tile {
     pub structure: Option<Structure>,
     pub animal: [Option<Animal>; AnimalSize::LEN],
     pub height: f32,
+    /// Biomass density [kg/m2]
     pub biomass: f32,
     /// Tile fertility [%]
     pub fertility: f32,

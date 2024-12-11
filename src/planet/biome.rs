@@ -93,7 +93,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Biomass
     let mut sum_biomass = 0.0;
-    let density_to_mass = sim.tile_area * 1.0e-9;
+    let density_to_mass = sim.biomass_density_to_mass();
     let speed_factor_by_atmo = linear_interpolation(
         &params.sim.biomass_growth_speed_atm_table,
         planet.atmo.atm(),
@@ -205,7 +205,9 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             continue;
         };
 
-        let transition_probability = if sim.before_start {
+        let transition_probability = if planet.map[p].event.is_some() {
+            1.0
+        } else if sim.before_start {
             params.sim.before_start_biome_transition_probability
         } else {
             1.0 / params.biomes[&next_biome].mean_transition_time

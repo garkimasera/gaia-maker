@@ -73,6 +73,31 @@ pub fn calc_congestion_rate<F: FnMut(Coords) -> f32>(p: Coords, size: (u32, u32)
     crowded / sum as f32
 }
 
+/// Random sampling [mean - d, mean + d] with constant distribution.
+#[derive(Clone, Copy, Debug)]
+pub struct ConstantDist {
+    mean: f32,
+    d: f32,
+}
+
+impl rand::distributions::Distribution<f32> for ConstantDist {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> f32 {
+        rng.gen_range((self.mean - self.d)..=(self.mean - self.d))
+    }
+}
+
+impl ConstantDist {
+    pub fn new(mean: f32, d: f32) -> Self {
+        Self { mean, d }
+    }
+}
+
+impl From<(f32, f32)> for ConstantDist {
+    fn from(a: (f32, f32)) -> Self {
+        Self::new(a.0, a.1)
+    }
+}
+
 /// Random sampling [mean - d, mean + d] with linear distribution.
 #[derive(Clone, Copy, Debug)]
 pub struct SymmetricalLinearDist {

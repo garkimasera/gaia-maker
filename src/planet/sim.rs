@@ -77,4 +77,9 @@ impl Sim {
             working_buildings: HashMap::default(),
         }
     }
+
+    /// Return the factor to calculate tile biomass [Mt] from density.
+    pub fn biomass_density_to_mass(&self) -> f32 {
+        self.tile_area * 1.0e-9
+    }
 }
