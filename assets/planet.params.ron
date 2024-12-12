@@ -160,6 +160,7 @@
         ice_thickness_of_ice_field: 2.0,
         ice_melting_temp: 260.0,
         ice_melting_height_per_temp: 0.8,
+        ice_thickness_limit_table: [(0, 20), (50, 400), (100, 1000), (1000, 2000)],
         fallen_snow_factor: 0.015,
         before_start_biome_transition_probability: 0.5,
         animal_sim_interval: 5,
@@ -180,7 +181,7 @@
     ),
     event: (
         tile_event_costs: {
-            fire: Material(1.0),
+            fire: Material(1000.0),
             plague: GenePoint(1.0),
         },
         fire_burn_ratio: 0.2,

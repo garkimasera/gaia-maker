@@ -164,7 +164,15 @@ pub fn snow_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 }
             }
         } else {
-            tile.ice += tile.rainfall * params.sim.fallen_snow_factor;
+            let a = tile.rainfall + 0.1 * -(t - KELVIN_CELSIUS);
+            debug_assert!(a >= 0.0);
+            let ice_limit = linear_interpolation(&params.sim.ice_thickness_limit_table, a);
+            let mass = tile.rainfall * params.sim.fallen_snow_factor;
+            if ice_limit > tile.ice + mass {
+                tile.ice += mass;
+            } else if ice_limit > tile.ice {
+                tile.ice = ice_limit;
+            }
         }
 
         ice_height_sum += tile.ice as f64;

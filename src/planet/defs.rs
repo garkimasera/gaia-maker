@@ -537,6 +537,8 @@ pub struct SimParams {
     pub ice_melting_temp: f32,
     /// Ice melting speed [m/K]
     pub ice_melting_height_per_temp: f32,
+    /// Table to calculate (rainfall - 0.1 * temp[°C]) -> ice thickness limit [m]
+    pub ice_thickness_limit_table: Vec<(f32, f32)>,
     /// Factor for adding ice height from rainfall [m/(rainfall)mm]
     pub fallen_snow_factor: f32,
     /// Biome transition probability before start simulation
