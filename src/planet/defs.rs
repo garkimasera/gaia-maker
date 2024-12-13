@@ -477,8 +477,12 @@ pub struct SimParams {
     pub sea_diffusion_factor: f32,
     /// The number of loop of atmosphere heat transfer calculation
     pub n_loop_atmo_heat_calc: usize,
+    /// Albedo by cloud table
+    pub cloud_albedo_table: Vec<(f32, f32)>,
     /// Greeh house effect table of CO2
     pub co2_green_house_effect_table: Vec<(f32, f32)>,
+    /// Greeh house effect table of cloud
+    pub cloud_green_house_effect_table: Vec<(f32, f32)>,
     /// Greeh house effect decrease by height at 1atm
     pub green_house_effect_height_decrease: f32,
     /// The number of loop of vapor transfer calculation

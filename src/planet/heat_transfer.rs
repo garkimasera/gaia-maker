@@ -26,8 +26,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Calculate albedo of tiles
+    let cloud_albedo =
+        linear_interpolation(&params.sim.cloud_albedo_table, planet.atmo.cloud_amount);
     for p in map_iter_idx {
-        sim.albedo[p] = params.biomes[&planet.map[p].biome].albedo;
+        let tile_albedo = params.biomes[&planet.map[p].biome].albedo;
+        sim.albedo[p] = (tile_albedo * tile_albedo + cloud_albedo * cloud_albedo).sqrt();
     }
 
     let greenhouse_effect = greenhouse_effect(planet, params);
@@ -167,10 +170,14 @@ fn deep_sea_layer_thickness(p: Coords, planet: &Planet, params: &Params) -> f32 
 }
 
 fn greenhouse_effect(planet: &Planet, params: &Params) -> f32 {
-    linear_interpolation(
+    (linear_interpolation(
         &params.sim.co2_green_house_effect_table,
         planet.atmo.partial_pressure(GasKind::CarbonDioxide),
-    )
+    ) + linear_interpolation(
+        &params.sim.cloud_green_house_effect_table,
+        planet.atmo.cloud_amount,
+    ))
+    .clamp(0.0, 1.0)
 }
 
 fn calc_insolation(planet: &Planet, sim: &mut Sim, params: &Params) {

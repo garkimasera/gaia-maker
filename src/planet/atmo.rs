@@ -10,6 +10,8 @@ pub struct Atmosphere {
     atm: f32,
     /// Gases mass [Mt]
     mass: FnvHashMap<GasKind, f64>,
+    /// Cloud amount [%]. The average is 50%.
+    pub cloud_amount: f32,
 }
 
 impl Atmosphere {
@@ -20,7 +22,11 @@ impl Atmosphere {
             .map(|(gas_kind, atm)| (*gas_kind, atm * params.sim.total_mass_per_atm as f64))
             .collect();
 
-        Atmosphere { atm: 0.0, mass }
+        Atmosphere {
+            atm: 0.0,
+            mass,
+            cloud_amount: 50.0,
+        }
     }
 
     pub fn total_mass(&self) -> f32 {
