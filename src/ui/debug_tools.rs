@@ -163,6 +163,8 @@ fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
         );
         planet.atmo.set_mass(gas_kind, value);
     }
+    ui.label(format!("cloud {:.2}", planet.atmo.cloud_amount));
+    ui.add(egui::Slider::new(&mut planet.atmo.aerosol, 0.0..=100.0).text("aerosol"));
 }
 
 fn water_ui(ui: &mut egui::Ui, planet: &mut Planet) {

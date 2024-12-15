@@ -479,6 +479,10 @@ pub struct SimParams {
     pub n_loop_atmo_heat_calc: usize,
     /// Albedo by cloud table
     pub cloud_albedo_table: Vec<(f32, f32)>,
+    /// Aerosol remaining rate per one cycle
+    pub aerosol_remaining_rate: f32,
+    /// Aerosol to cloud table
+    pub aerosol_cloud_table: Vec<(f32, f32)>,
     /// Greeh house effect table of CO2
     pub co2_green_house_effect_table: Vec<(f32, f32)>,
     /// Greeh house effect table of cloud

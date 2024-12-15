@@ -31,6 +31,15 @@
             (100.0, 0.80),
             (1000.0, 0.92),
         ],
+        aerosol_remaining_rate: 0.996,
+        aerosol_equilibrium_target: 1.0,
+        aerosol_cloud_table: [
+            (0.0, 10.0),
+            (1.0, 50.0),
+            (2.0, 70.0),
+            (4.0, 80.0),
+            (8.0, 100.0),
+        ],
         co2_green_house_effect_table: [
             (0.0, 0.0),
             (0.0001, 0.20),

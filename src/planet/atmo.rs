@@ -1,17 +1,23 @@
-use super::*;
 use fnv::FnvHashMap;
 use serde::{Deserialize, Serialize};
 
+use super::misc::linear_interpolation;
+use super::*;
+
 pub const CO2_CARBON_WEIGHT_RATIO: f32 = 44.0 / 12.0;
 pub const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
+
+const AEROSOL_EQUILIBRIUM_TARGET: f32 = 1.0;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Atmosphere {
     atm: f32,
     /// Gases mass [Mt]
     mass: FnvHashMap<GasKind, f64>,
-    /// Cloud amount [%]. The average is 50%.
+    /// Cloud amount [%]. The average is 50%
     pub cloud_amount: f32,
+    /// Aerosol amount
+    pub aerosol: f32,
 }
 
 impl Atmosphere {
@@ -26,6 +32,7 @@ impl Atmosphere {
             atm: 0.0,
             mass,
             cloud_amount: 50.0,
+            aerosol: AEROSOL_EQUILIBRIUM_TARGET,
         }
     }
 
@@ -85,4 +92,11 @@ impl Atmosphere {
 
 pub fn sim_atmosphere(planet: &mut Planet, params: &Params) {
     planet.atmo.atm = planet.atmo.total_mass() / params.sim.total_mass_per_atm;
+
+    let base_supply = (1.0 - params.sim.aerosol_remaining_rate) * AEROSOL_EQUILIBRIUM_TARGET;
+    planet.atmo.aerosol += base_supply;
+    planet.atmo.aerosol *= params.sim.aerosol_remaining_rate;
+
+    planet.atmo.cloud_amount =
+        linear_interpolation(&params.sim.aerosol_cloud_table, planet.atmo.aerosol);
 }
