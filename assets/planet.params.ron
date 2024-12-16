@@ -207,6 +207,7 @@
         },
         fire_burn_ratio: 0.2,
         biomass_at_fire_extinction_range: (0.25, 0.1),
+        fire_aerosol: 0.003,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

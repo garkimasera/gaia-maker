@@ -21,6 +21,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     planet.map[p].event = None;
                     planet.atmo.release_carbon(burned_biomass);
                 }
+                planet.atmo.aerosol += params.event.fire_aerosol;
             }
             TileEvent::Plague => todo!(),
         }

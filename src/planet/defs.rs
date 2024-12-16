@@ -591,6 +591,8 @@ pub struct EventParams {
     pub fire_burn_ratio: f32,
     /// Biomass at fire extinction [kg/m2]
     pub biomass_at_fire_extinction_range: (f32, f32),
+    /// Aerosol supply by fire
+    pub fire_aerosol: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
