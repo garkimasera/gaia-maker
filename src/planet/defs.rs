@@ -170,6 +170,7 @@ pub enum StructureBuildingState {
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum TileEvent {
     Fire,
+    BlackDust { remaining_cycles: u32 },
     Plague,
 }
 
@@ -593,6 +594,12 @@ pub struct EventParams {
     pub biomass_at_fire_extinction_range: (f32, f32),
     /// Aerosol supply by fire
     pub fire_aerosol: f32,
+    /// Black dust albedo
+    pub black_dust_albedo: f32,
+    /// Black dust cycles
+    pub black_dust_cycles: u32,
+    /// Additional decrease of black dust cycles by rainfall
+    pub black_dust_decrease_by_rainfall: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

@@ -29,8 +29,17 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let cloud_albedo =
         linear_interpolation(&params.sim.cloud_albedo_table, planet.atmo.cloud_amount);
     for p in map_iter_idx {
-        let tile_albedo = params.biomes[&planet.map[p].biome].albedo;
-        sim.albedo[p] = (tile_albedo * tile_albedo + cloud_albedo * cloud_albedo).sqrt();
+        if planet.map[p]
+            .event
+            .as_ref()
+            .map(|event| event.kind() == TileEventKind::BlackDust)
+            .unwrap_or_default()
+        {
+            sim.albedo[p] = params.event.black_dust_albedo;
+        } else {
+            let tile_albedo = params.biomes[&planet.map[p].biome].albedo;
+            sim.albedo[p] = (tile_albedo * tile_albedo + cloud_albedo * cloud_albedo).sqrt();
+        }
     }
 
     let greenhouse_effect = greenhouse_effect(planet, params);

@@ -203,11 +203,15 @@
     event: (
         tile_event_costs: {
             fire: Material(1000.0),
+            black_dust: Material(1000.0),
             plague: GenePoint(1.0),
         },
         fire_burn_ratio: 0.2,
         biomass_at_fire_extinction_range: (0.25, 0.1),
         fire_aerosol: 0.003,
+        black_dust_albedo: 0.05,
+        black_dust_cycles: 1000,
+        black_dust_decrease_by_rainfall: 200,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

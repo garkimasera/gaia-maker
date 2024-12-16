@@ -21,7 +21,7 @@ struct GzLoader;
 impl AssetLoader for GzLoader {
     type Asset = GunzipBin;
     type Settings = ();
-    type Error = Box<dyn std::error::Error + Send + Sync>;
+    type Error = anyhow::Error;
 
     async fn load(
         &self,
