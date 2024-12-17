@@ -1,9 +1,14 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{
+    egui::{self, epaint, load::SizedTexture},
+    EguiContexts,
+};
 use strum::IntoEnumIterator;
 
 use super::{help::HelpItem, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::*;
+
+const BUILDING_BACKGROUND_SIZE: (u32, u32) = (336, 48);
 
 pub fn space_buildings_window(
     mut egui_ctxs: EguiContexts,
@@ -22,7 +27,10 @@ pub fn space_buildings_window(
         .open(&mut wos.space_building)
         .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
-            for kind in SpaceBuildingKind::iter() {
+            for (i, kind) in SpaceBuildingKind::iter().enumerate() {
+                if i != 0 {
+                    ui.separator();
+                }
                 ui.vertical(|ui| {
                     buildng_row(
                         ui,
@@ -34,7 +42,6 @@ pub fn space_buildings_window(
                         params.building_attrs(kind),
                     );
                 });
-                ui.separator();
             }
         })
         .unwrap()
@@ -67,10 +74,19 @@ pub fn buildng_row(
     ui.horizontal(|ui| {
         let building_text = format!("{} x{}\t", t!(kind.as_ref()), building.n);
         ui.add(egui::Label::new(building_text).extend());
-        let help_item = HelpItem::SpaceBuildings(kind);
-        ui.label("?")
-            .on_hover_ui(|ui| help_item.ui(ui, textures, params));
     });
+
+    let response = ui.add(BuildingImage::new(kind, building.n, textures));
+    if response.hovered() {
+        let help_item = HelpItem::SpaceBuildings(kind);
+        egui::containers::show_tooltip_at(
+            &response.ctx,
+            response.layer_id,
+            response.id,
+            response.rect.right_top(),
+            |ui| help_item.ui(ui, textures, params),
+        );
+    }
 
     ui.horizontal(|ui| {
         if ui.add_enabled(buildable, egui::Button::new("+1")).clicked() {
@@ -95,5 +111,62 @@ pub fn buildng_row(
         BuildingControlValue::IncreaseRate(rate) => {
             ui.add(egui::Slider::new(rate, -100..=100));
         }
+    }
+}
+
+struct BuildingImage {
+    background: SizedTexture,
+    background_star: Option<SizedTexture>,
+    _n: u32,
+}
+
+impl BuildingImage {
+    fn new(kind: SpaceBuildingKind, n: u32, textures: &EguiTextures) -> Self {
+        let background_star = match kind {
+            SpaceBuildingKind::DysonSwarmUnit => Some(textures.get("ui/background-building-star")),
+            _ => None,
+        };
+        Self {
+            background: textures.get("ui/background-building-space"),
+            background_star,
+            _n: n,
+        }
+    }
+}
+
+impl egui::Widget for BuildingImage {
+    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        let size = egui::Vec2::new(
+            BUILDING_BACKGROUND_SIZE.0 as _,
+            BUILDING_BACKGROUND_SIZE.1 as _,
+        );
+        let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
+        let uv = egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0));
+
+        if ui.is_rect_visible(response.rect) {
+            let painter = ui.painter();
+            painter.add(epaint::RectShape {
+                rect,
+                rounding: egui::Rounding::ZERO,
+                fill: egui::Color32::WHITE,
+                stroke: egui::Stroke::NONE,
+                blur_width: 0.0,
+                fill_texture_id: self.background.id,
+                uv,
+            });
+
+            if let Some(background_star) = &self.background_star {
+                painter.add(epaint::RectShape {
+                    rect: egui::Rect::from_min_size(rect.min, background_star.size),
+                    rounding: egui::Rounding::ZERO,
+                    fill: egui::Color32::WHITE,
+                    stroke: egui::Stroke::NONE,
+                    blur_width: 0.0,
+                    fill_texture_id: background_star.id,
+                    uv,
+                });
+            }
+        }
+        response
     }
 }
