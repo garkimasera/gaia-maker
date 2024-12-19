@@ -1,5 +1,5 @@
 (
-    id: "planet-primitive-ocean",
+    id: "primitive-ocean",
     difficulty: very_easy,
     radius: (6200, 300),
     solar_constant: (1350, 120),

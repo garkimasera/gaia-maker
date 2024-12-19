@@ -5,7 +5,7 @@ extern crate tile_geom as geom;
 #[macro_use]
 mod tools;
 #[macro_use]
-mod text;
+mod text_assets;
 
 mod action;
 mod assets;
@@ -19,6 +19,7 @@ mod planet;
 mod saveload;
 mod screen;
 mod sim;
+mod text;
 mod ui;
 
 use bevy::{
@@ -52,9 +53,9 @@ fn main() {
             }),
             ..default()
         }))
-        .init_state::<GameState>()
         .add_plugins(gz::GzPlugin)
-        .add_plugins(text::TextPlugin)
+        .add_plugins(text_assets::TextAssetsPlugin)
+        .init_state::<GameState>()
         .add_plugins(conf::ConfPlugin)
         .add_plugins(assets::AssetsPlugin)
         .add_plugins(overlay::OverlayPlugin)

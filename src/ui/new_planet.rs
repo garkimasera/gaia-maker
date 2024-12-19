@@ -63,13 +63,13 @@ pub fn new_planet(
                             ui.selectable_value(
                                 &mut state.new_planet.planet,
                                 NewPlanetKind::Id(planet.id.clone()),
-                                t!(planet.id),
+                                t!(format!("planet/{}", planet.id)),
                             );
                         }
                         ui.selectable_value(
                             &mut state.new_planet.planet,
                             NewPlanetKind::Custom,
-                            t!("planet-custom"),
+                            t!("planet/custom"),
                         );
                     });
 
@@ -144,7 +144,7 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiText
 
     ui.horizontal(|ui| {
         ui.image(textures.get(format!("start_planets/{}", id)));
-        ui.heading(t!(id));
+        ui.heading(t!(format!("planet/{}", id)));
     });
 
     ui.horizontal(|ui| {
@@ -159,7 +159,7 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiText
         );
     });
 
-    ui.label(t!(format!("desc/{}", id)));
+    ui.label(t!(format!("planet/desc/{}", id)));
 }
 
 fn custom(ui: &mut egui::Ui, params: &Params, state: &mut MainMenuState) {

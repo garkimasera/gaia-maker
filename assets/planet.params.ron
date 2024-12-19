@@ -202,8 +202,8 @@
     ),
     event: (
         tile_event_costs: {
-            fire: Material(1000.0),
-            black_dust: Material(1000.0),
+            fire: Material(100.0),
+            black_dust: Material(50.0),
             plague: GenePoint(1.0),
         },
         fire_burn_ratio: 0.2,

@@ -1,5 +1,5 @@
 (
-    id: "planet-desert",
+    id: "desert",
     difficulty: normal,
     radius: (6000, 300),
     solar_constant: (1200, 200),

@@ -1,0 +1,28 @@
+basics = "Basics"
+concept = "Concept"
+administrator = "Administrator"
+terraforming = "Terraforming"
+space-buildings = "Buildings"
+
+[help]
+concept = "In Gaia Maker, players assume the role of administrator of an undeveloped planet and the star system that contains it, and are responsible for terraforming and operating the facility. Terraforming is the process of improving a barren planet into a habitable environment. Terraforming is essential for humans to establish large settlements outside of Earth. Various types of facilities are constructed to adjust the atmosphere, temperature, and vegetation on the planet. In this way, we can create an ideal environment for life."
+administrator = "The player, the administrator, has come a long way over the years in an interstellar spacecraft to this star system containing a terraforming candidate planet. The administrator possesses technology equivalent to a Type II civilization and also possesses terraforming technology for an Earth-like planet. They have also brought genetic data of various plants and animals from their home planet for terraforming.\n\nA Type II civilization is a civilization that, on the Kardashev scale, has the technological level to harness the entire energy of a given star system. They collect stellar energy through the Dyson Sphere and use this abundant energy for interstellar travel and terraforming."
+terraforming = "The basis of terraforming is to control the temperature, precipitation, and soil on the planet to allow plants to grow. The following facilities can help with this.\n\nOrbital Mirror\nThis facility, which can be built in planetary orbits, increases or decreases the amount of stellar light reaching the surface and alter the temperature.\n\nRainmaker\nIf the planet has an ocean, there will be rainfall around it, otherwise this facility will generate rainfall.\n\nFertilization Plant\nIncreases the fertility of the surrounding area and grows plants."
+
+oxygen-generator = "Oxygen generators isolate oxygen from oxides in the planet's crust. The process requires a large amount of energy."
+nitrogen-sprayer = "Nitrogen spreaders spray nitrogen into the atmosphere. Since nitrogen is essentially almost nonexistent in the planet's crust, it must be transported from other celestial bodies that have ammonia as their atmosphere."
+carbon-dioxide-sprayer = "Carbon dioxide sprayers release carbon dioxide into the atmosphere. Carbon is required for operation."
+rainmaker = "Rainmakers convert ice into water vapor and release it into the atmosphere. In addition to increasing surrounding rainfall, it also slightly raises sea level of the planet."
+fertilization-plant = "Fertilization Plants slowly transform the surrounding area into soil suitable for plant growth. Plant growth requires soil with sufficient nutrients, and Fertilization Plant promotes their formation by deploying fertilizers and soil improvement drones."
+heater = "Heaters emit energy into the atmosphere as heat, raising the surrounding temperature."
+carbon-capturer = "Carbon Capturers collect and reduce carbon dioxide from the atmosphere. The carbon obtained through reduction is stored underground, and the oxygen is released into the atmosphere."
+
+fusion-reactor = "Fusion reactors provide the energy needed to operate facilities. Fusion is a highly efficient energy source essential to space civilization, but if more energy is needed, it will require the use of giant fusion reactors, stars."
+orbital-mirror = "The orbital mirror reflects the stellar light and increases or decreases the amount of light energy that reaches the surface of the planet. The ratio can be adjusted."
+ion-irradiator = "Ion radiators collide accelerated ions with the planet's atmosphere, which bounce the molecules off into space. The effect is to reduce atmospheric pressure by reducing the mass of the planet's atmosphere."
+
+dyson-swarm-unit = "The Dyson Swarm is one form of the Dyson Sphere, a megastructure designed to harness the full energy emitted by a star. Each unit is merely a giant mirror that reflects light and delivers it to the demand location, but in sufficient numbers, they provide enough energy for terraforming."
+asteroid-mining-station = "Asteroid mining stations mine ore from asteroids and process it into materials that can be used for construction and other purposes."
+ice-mining-station = "Ice mining stations mine ice from ice-rich celestial bodies."
+methane-extractor = "Methane extractors extract carbon from celestial bodies containing methane in gaseous or solid form."
+ammonia-extractor = "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in gaseous or solid form."

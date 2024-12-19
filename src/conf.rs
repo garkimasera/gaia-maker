@@ -1,5 +1,5 @@
 use crate::GameState;
-use crate::{assets::UiAssets, text::Lang};
+use crate::{assets::UiAssets, text_assets::Lang};
 use anyhow::{anyhow, Result};
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
@@ -54,7 +54,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
             conf.get(&ui_assets.default_conf).unwrap().clone()
         }
     };
-    crate::text::set_lang(conf.lang);
+    crate::text_assets::set_lang(conf.lang);
     command.insert_resource(conf);
 }
 

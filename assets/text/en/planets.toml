@@ -1,0 +1,10 @@
+[planet]
+custom = "Custom"
+primitive-ocean = "Primitive Ocean Planet"
+ice = "Ice Planet"
+desert = "Desert Planet"
+
+[planet.desc]
+primitive-ocean = "A planet with a primitive ocean that is not inhabited by life. Although oxygen does not exist, life is easily maintained by the ocean. This is the celestial body most suited to terraforming."
+ice = "This is a planet covered in ice. Due to its low temperature, no life exists there, but if the temperature could be raised somehow, water, which is essential for life, could be obtained."
+desert = "This is a planet with almost no water, and its surface is covered in dry desert. Without supplying water, life would not be possible."

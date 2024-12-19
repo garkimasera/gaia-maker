@@ -1,5 +1,5 @@
 (
-    id: "planet-ice",
+    id: "ice",
     difficulty: easy,
     radius: (6200, 300),
     solar_constant: (400, 100),

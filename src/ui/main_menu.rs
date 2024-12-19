@@ -5,7 +5,7 @@ use bevy_egui::{egui, EguiContexts};
 use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
 use crate::sim::{ManagePlanet, ManagePlanetError};
-use crate::text::Lang;
+use crate::text_assets::Lang;
 use strum::IntoEnumIterator;
 
 use super::new_planet::NewPlanetState;
@@ -80,9 +80,9 @@ pub fn main_menu(
 
                         ui.separator();
 
-                        if let Some(lang) = language_selector(ui, crate::text::get_lang()) {
+                        if let Some(lang) = language_selector(ui, crate::text_assets::get_lang()) {
                             conf.lang = lang;
-                            crate::text::set_lang(lang);
+                            crate::text_assets::set_lang(lang);
                             ew_conf_change.send_default();
                         }
                     });
