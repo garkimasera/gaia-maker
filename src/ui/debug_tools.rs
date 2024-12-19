@@ -158,7 +158,7 @@ fn atmo_ui(ui: &mut egui::Ui, planet: &mut Planet) {
         let mut value = planet.atmo.mass(gas_kind);
         ui.add(
             egui::Slider::new(&mut value, 1.0e+5..=1.0e+11)
-                .text(t!(gas_kind.as_ref()))
+                .text(t!(gas_kind))
                 .logarithmic(true),
         );
         planet.atmo.set_mass(gas_kind, value);

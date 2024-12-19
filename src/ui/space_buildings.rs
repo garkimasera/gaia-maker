@@ -72,7 +72,7 @@ pub fn buildng_row(
     let building = planet.space_building_mut(kind);
 
     ui.horizontal(|ui| {
-        let building_text = format!("{} x{}\t", t!(kind.as_ref()), building.n);
+        let building_text = format!("{} x{}\t", t!(kind), building.n);
         ui.add(egui::Label::new(building_text).extend());
     });
 

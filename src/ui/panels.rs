@@ -238,10 +238,10 @@ fn sidebar(
                 t!("demolition")
             }
             CursorMode::Build(kind) => {
-                t!(kind.as_ref())
+                t!(kind)
             }
             CursorMode::TileEvent(kind) => {
-                t!(kind.as_ref())
+                t!(kind)
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
                 format!("{} {}", t!("animal"), t!(animal_id))
@@ -324,7 +324,7 @@ fn sidebar(
 
     ui.separator();
 
-    ui.label(t!(tile.biome.as_ref()));
+    ui.label(t!(tile.biome));
 
     if let Some(structure) = &tile.structure {
         ui.label(crate::info::structure_info(structure));
@@ -351,8 +351,7 @@ fn build_menu(
     ui.separator();
     egui::Grid::new("build_menu").striped(true).show(ui, |ui| {
         for kind in &planet.player.buildable_structures {
-            let s: &str = kind.as_ref();
-            if ui.button(t!(s)).clicked() {
+            if ui.button(t!(kind)).clicked() {
                 *cursor_mode = CursorMode::Build(*kind);
                 ui.close_menu();
             }
@@ -365,7 +364,7 @@ fn build_menu(
 
 fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
     for &kind in params.event.tile_event_costs.keys() {
-        if ui.button(t!(kind.as_ref())).clicked() {
+        if ui.button(t!(kind)).clicked() {
             *cursor_mode = CursorMode::TileEvent(kind);
             ui.close_menu();
         }

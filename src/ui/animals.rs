@@ -63,7 +63,7 @@ fn contents(
 
     egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
         ui.label(t!("size"));
-        ui.label(t!(attr.size.as_ref()));
+        ui.label(t!(attr.size));
         ui.end_row();
 
         ui.label(t!("cost"));
@@ -81,9 +81,9 @@ fn contents(
             AnimalHabitat::Sea => t!("sea"),
             AnimalHabitat::Biomes(biomes) => biomes.iter().fold(String::new(), |s, biome| {
                 if s.is_empty() {
-                    t!(biome.as_ref())
+                    t!(biome)
                 } else {
-                    format!("{}, {}", s, t!(biome.as_ref()))
+                    format!("{}, {}", s, t!(biome))
                 }
             }),
         };

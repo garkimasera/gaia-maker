@@ -75,10 +75,10 @@ pub fn map_window(
         .show(ctx, |ui| {
             ui.vertical(|ui| {
                 egui::ComboBox::from_id_salt("map-layer-items")
-                    .selected_text(t!(map_layer.as_ref()))
+                    .selected_text(t!(*map_layer))
                     .show_ui(ui, |ui| {
                         for l in MapLayer::iter() {
-                            ui.selectable_value(&mut *map_layer, l, t!(l.as_ref()));
+                            ui.selectable_value(&mut *map_layer, l, t!(l));
                         }
                     });
                 ui.separator();

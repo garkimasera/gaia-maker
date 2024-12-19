@@ -36,7 +36,7 @@ pub fn stat_window(
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
-                    ui.selectable_value(&mut *current_panel, panel, t!(panel.as_ref()));
+                    ui.selectable_value(&mut *current_panel, panel, t!(panel));
                 }
             });
             ui.separator();
@@ -92,7 +92,7 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
 
     egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
         for gas_kind in GasKind::iter() {
-            ui.label(t!(gas_kind.as_ref()));
+            ui.label(t!(gas_kind));
             ui.label(format!(
                 "{:.2}%",
                 planet.atmo.mass(gas_kind) / total_mass * 100.0
@@ -104,10 +104,10 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
 
 fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params: &Params) {
     egui::ComboBox::from_id_salt("graph-items")
-        .selected_text(t!(item.as_ref()))
+        .selected_text(t!(item))
         .show_ui(ui, |ui| {
             for graph_item in GraphItem::iter() {
-                ui.selectable_value(item, graph_item, t!(graph_item.as_ref()));
+                ui.selectable_value(item, graph_item, t!(graph_item));
             }
         });
 

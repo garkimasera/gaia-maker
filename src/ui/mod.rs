@@ -258,10 +258,7 @@ fn layers_menu(
 ) {
     let mut new_layer = *current_layer;
     for kind in OverlayLayerKind::iter() {
-        if ui
-            .radio_value(&mut new_layer, kind, t!(kind.as_ref()))
-            .clicked()
-        {
+        if ui.radio_value(&mut new_layer, kind, t!(kind)).clicked() {
             ui.close_menu();
         }
     }

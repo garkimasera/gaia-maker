@@ -50,6 +50,22 @@ macro_rules! t {
 
         $crate::text_assets::get_text(&$s, map)
     }};
+    ($prefix:expr, $s:expr) => {{
+        let s: &str = $s.as_ref();
+        let s = compact_str::format_compact!("{}/{}", $prefix, s);
+        $crate::text_assets::get_text(&s, std::collections::HashMap::default())
+    }};
+    ($prefix:expr, $s:expr; $($name:ident = $value:expr),*) => {{
+        let s: &str = $s.as_ref();
+        let s = compact_str::format_compact!("{}/{}", $prefix, $s);
+        let mut map = std::collections::HashMap::default();
+
+        $(
+            map.insert(stringify!($name).into(), $value.to_string());
+        )*
+
+        $crate::text_assets::get_text(&s, map)
+    }};
 }
 
 static LANG: AtomicCell<Lang> = AtomicCell::new(Lang::English);

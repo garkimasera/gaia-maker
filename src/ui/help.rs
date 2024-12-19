@@ -110,13 +110,9 @@ pub fn help_window(
                         ui.set_min_height(300.0);
                         ui.vertical(|ui| {
                             for item_group in ItemGroup::iter() {
-                                ui.collapsing(t!(item_group.as_ref()), |ui| {
+                                ui.collapsing(t!(item_group), |ui| {
                                     for item in &ITEM_LIST[&item_group] {
-                                        ui.selectable_value(
-                                            &mut *current_item,
-                                            *item,
-                                            t!(item.as_ref()),
-                                        );
+                                        ui.selectable_value(&mut *current_item, *item, t!(item));
                                     }
                                 });
                             }
@@ -126,7 +122,7 @@ pub fn help_window(
                 ui.vertical(|ui| {
                     ui.set_min_width(300.0);
                     ui.set_min_height(300.0);
-                    ui.heading(t!(current_item.as_ref()));
+                    ui.heading(t!(*current_item));
                     ui.separator();
                     current_item.ui(ui, &textures, &params);
                 });
@@ -148,7 +144,7 @@ impl HelpItem {
             ui_building_attr(ui, textures, building_attrs);
             ui.separator();
         }
-        ui.label(t!(format!("help/{}", self.as_ref())));
+        ui.label(t!("help", self));
     }
 }
 
