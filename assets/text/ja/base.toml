@@ -107,8 +107,8 @@ fusion-reactor = "核融合炉"
 asteroid-mining-station = "小惑星採掘ステーション"
 dyson-swarm-unit = "ダイソンスウォームユニット"
 orbital-mirror = "軌道ミラー"
-nitrogen-sprayer = "窒素散布機"
-carbon-dioxide-sprayer = "二酸化炭素散布機"
+nitrogen-importer = "窒素輸送機"
+carbon-importer = "炭素輸送機"
 ion-irradiator = "イオン放射機"
 
 # Messages

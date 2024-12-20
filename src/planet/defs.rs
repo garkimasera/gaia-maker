@@ -329,8 +329,8 @@ pub enum SpaceBuildingKind {
     AsteroidMiningStation,
     DysonSwarmUnit,
     OrbitalMirror,
-    NitrogenSprayer,
-    CarbonDioxideSprayer,
+    NitrogenImporter,
+    CarbonImporter,
     IonIrradiator,
 }
 

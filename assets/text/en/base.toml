@@ -108,8 +108,8 @@ asteroid-mining-station = "Asteroid Mining Station"
 dyson-swarm-unit = "Dyson Swarm Unit"
 orbital-mirror = "Orbital Mirror"
 solar-shield = "Solar Shield"
-nitrogen-sprayer = "Nitrogen Sprayer"
-carbon-dioxide-sprayer = "Carbon Dioxide Sprayer"
+nitrogen-importer = "Nitrogen Importer"
+carbon-importer = "Carbon Importer"
 ion-irradiator = "Ion Irradiator"
 
 # Messages
