@@ -3,6 +3,7 @@ use bevy_egui::{
     egui::{self, epaint, load::SizedTexture},
     EguiContexts,
 };
+use compact_str::format_compact;
 use strum::IntoEnumIterator;
 
 use super::{help::HelpItem, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
@@ -115,21 +116,37 @@ pub fn buildng_row(
 }
 
 struct BuildingImage {
+    building: SizedTexture,
     background: SizedTexture,
     background_star: Option<SizedTexture>,
-    _n: u32,
+    left_padding: f32,
+    n: u32,
 }
 
 impl BuildingImage {
     fn new(kind: SpaceBuildingKind, n: u32, textures: &EguiTextures) -> Self {
-        let background_star = match kind {
-            SpaceBuildingKind::DysonSwarmUnit => Some(textures.get("ui/background-building-star")),
-            _ => None,
+        let (background_star, left_padding) = match kind {
+            SpaceBuildingKind::DysonSwarmUnit => {
+                let t = textures.get("ui/background-building-star");
+                let left_padding = t.size.x;
+                (Some(t), left_padding)
+            }
+            SpaceBuildingKind::OrbitalMirror => {
+                (Some(textures.get("ui/background-building-planet")), 0.0)
+            }
+            SpaceBuildingKind::IonIrradiator => {
+                let t = textures.get("ui/background-building-planet-left");
+                let left_padding = t.size.x;
+                (Some(t), left_padding)
+            }
+            _ => (None, 0.0),
         };
         Self {
+            building: textures.get(format_compact!("ui/building-{}", kind.as_ref())),
             background: textures.get("ui/background-building-space"),
             background_star,
-            _n: n,
+            left_padding,
+            n,
         }
     }
 }
@@ -163,6 +180,26 @@ impl egui::Widget for BuildingImage {
                     stroke: egui::Stroke::NONE,
                     blur_width: 0.0,
                     fill_texture_id: background_star.id,
+                    uv,
+                });
+            }
+
+            let n = std::cmp::min(
+                self.n,
+                (rect.width() - self.left_padding) as u32 / self.building.size.x as u32,
+            );
+            for i in 0..n {
+                let v = egui::Vec2::new(
+                    self.building.size.x * i as f32 + self.left_padding,
+                    0.5 * (rect.height() - self.building.size.y),
+                );
+                painter.add(epaint::RectShape {
+                    rect: egui::Rect::from_min_size(rect.min + v, self.building.size),
+                    rounding: egui::Rounding::ZERO,
+                    fill: egui::Color32::WHITE,
+                    stroke: egui::Stroke::NONE,
+                    blur_width: 0.0,
+                    fill_texture_id: self.building.id,
                     uv,
                 });
             }
