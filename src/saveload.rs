@@ -1,20 +1,75 @@
+use std::io::Read;
+
 use anyhow::{anyhow, Result};
+use byteorder::ReadBytesExt;
+use bytes::BufMut;
 
 use crate::planet::Planet;
 
-pub fn save_to(file_name: &str, planet: &Planet) -> Result<()> {
-    let planet_data = bincode::serialize(planet)?;
+#[cfg(not(target_arch = "wasm32"))]
+pub const N_SAVE_FILES: usize = 99;
+#[cfg(target_arch = "wasm32")]
+pub const N_SAVE_FILES: usize = 1;
 
-    log::info!("save to {}", file_name);
-    write(file_name, &planet_data)?;
+pub const SAVE_FILE_EXTENSION: &str = "planet";
+
+const GAME_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+pub struct SaveFileList(Vec<Option<SaveFile>>);
+
+impl SaveFileList {
+    pub fn saved_time(&self, i: usize) -> Option<&str> {
+        self.0[i].as_ref().map(|save_file| save_file.time.as_ref())
+    }
+}
+
+pub fn save_to(slot: usize, planet: &Planet) -> Result<()> {
+    let planet_data = rmp_serde::to_vec(planet)?;
+
+    log::info!("save to slot {}", slot);
+
+    let bytes = SaveFile::new(planet_data).to_bytes();
+    write(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION), &bytes)?;
 
     Ok(())
 }
 
-pub fn load_from(file_name: &str) -> Result<Planet> {
-    log::info!("load from {}", file_name);
-    let planet_data = read(file_name)?;
-    Ok(bincode::deserialize(&planet_data)?)
+pub fn load_from(slot: usize) -> Result<Planet> {
+    let data = SaveFile::from_bytes(&read(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION))?)?;
+    log::info!(
+        "load save from slot {} version={} time=\"{}\"",
+        slot,
+        data.version,
+        data.time
+    );
+    Ok(rmp_serde::from_slice(&data.planet_data)?)
+}
+
+pub fn load_save_file_list() -> SaveFileList {
+    SaveFileList(
+        (0..=N_SAVE_FILES)
+            .map(
+                |i| match read(&format!("{:02}.{}", i, SAVE_FILE_EXTENSION)) {
+                    Ok(data) => match SaveFile::from_bytes(&data) {
+                        Ok(save_file) => Some(save_file),
+                        Err(e) => {
+                            log::warn!("slot {} save data broken: {}", i, e);
+                            None
+                        }
+                    },
+                    Err(e) => {
+                        if let Some(e) = e.downcast_ref::<std::io::Error>() {
+                            if e.kind() == std::io::ErrorKind::NotFound {
+                                return None;
+                            }
+                        }
+                        log::warn!("{}", e);
+                        None
+                    }
+                },
+            )
+            .collect(),
+    )
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -71,4 +126,67 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
     let mut data = Vec::new();
     decoder.read_to_end(&mut data)?;
     Ok(data)
+}
+
+struct SaveFile {
+    version: String,
+    time: String,
+    metadata: Vec<u8>,
+    planet_data: Vec<u8>,
+}
+
+impl SaveFile {
+    fn new(planet_data: Vec<u8>) -> Self {
+        let time = chrono::Local::now().to_string();
+        let time = time.split_once('.').unwrap().0.into(); // Get "YYYY-MM-DD hh:mm:ss"
+        let metadata = Vec::new();
+        Self {
+            version: GAME_VERSION.into(),
+            time,
+            metadata,
+            planet_data,
+        }
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+
+        buf.put_u8(self.version.len().try_into().unwrap());
+        buf.put(self.version.as_bytes());
+        buf.put_u8(self.time.len().try_into().unwrap());
+        buf.put(self.time.as_bytes());
+        buf.put_u16(self.metadata.len().try_into().unwrap());
+        buf.put(&self.metadata[..]);
+        buf.put(&self.planet_data[..]);
+
+        buf
+    }
+
+    fn from_bytes(data: &[u8]) -> Result<Self> {
+        let mut data = std::io::Cursor::new(data);
+
+        let len = data.read_u8()?;
+        let mut version = vec![0; len as usize];
+        data.read_exact(&mut version)?;
+        let version = String::from_utf8(version)?;
+
+        let len = data.read_u8()?;
+        let mut time = vec![0; len as usize];
+        data.read_exact(&mut time)?;
+        let time = String::from_utf8(time)?;
+
+        let len = data.read_u16::<byteorder::BigEndian>()?;
+        let mut metadata = vec![0; len as usize];
+        data.read_exact(&mut metadata)?;
+
+        let mut planet_data = Vec::new();
+        data.read_to_end(&mut planet_data)?;
+
+        Ok(Self {
+            version,
+            time,
+            metadata,
+            planet_data,
+        })
+    }
 }

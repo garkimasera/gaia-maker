@@ -16,6 +16,7 @@ pub enum MainMenuMode {
     #[default]
     Menu,
     NewPlanet,
+    Load,
     Error,
 }
 
@@ -71,7 +72,7 @@ pub fn main_menu(
                             state.mode = MainMenuMode::NewPlanet;
                         }
                         if ui.button(t!("load")).clicked() {
-                            ew_manage_planet.send(ManagePlanet::Load("main.planet".into()));
+                            state.mode = MainMenuMode::Load;
                         }
                         if ui.button(t!("exit")).clicked() {
                             app_exit_events.send(bevy::app::AppExit::Success);
@@ -97,6 +98,19 @@ pub fn main_menu(
                 &mut state,
                 &textures,
             );
+        }
+        MainMenuMode::Load => {
+            let mut open_state = true;
+            super::saveload::show_saveload_window(
+                egui_ctxs.ctx_mut(),
+                &mut ew_manage_planet,
+                &mut open_state,
+                None,
+                true,
+            );
+            if !open_state {
+                state.mode = MainMenuMode::Menu;
+            }
         }
         MainMenuMode::Error => {
             egui::Window::new(t!("msg/loading-failed"))

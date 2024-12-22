@@ -367,11 +367,16 @@ pub struct OccupiedScreenSpace {
     pub occupied_left: f32,
     pub occupied_right: f32,
     pub window_rects: Vec<Rect>,
+    pub opening_modal: bool,
     scale_factor: f32,
 }
 
 impl OccupiedScreenSpace {
     fn check(&self, w: f32, h: f32, p: Vec2) -> bool {
+        if self.opening_modal {
+            return false;
+        }
+
         if p.x < self.occupied_left
             || p.x > w - self.occupied_right
             || p.y < self.occupied_buttom
@@ -404,6 +409,11 @@ impl OccupiedScreenSpace {
             ),
         };
         self.window_rects.push(rect);
+    }
+
+    pub fn reset(&mut self) {
+        self.window_rects.clear();
+        self.opening_modal = false;
     }
 }
 

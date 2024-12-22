@@ -10,8 +10,8 @@ pub struct SimPlugin;
 #[derive(Clone, Debug, Event)]
 pub enum ManagePlanet {
     New(StartParams),
-    Save(String),
-    Load(String),
+    Save(usize),
+    Load(usize),
 }
 
 #[derive(Clone, Debug, Event)]
@@ -21,6 +21,9 @@ pub struct StartEvent(pub PlanetEvent);
 pub struct DebugTools {
     pub sim_every_frame: bool,
 }
+
+#[derive(Clone, Copy, Default, Debug, Resource)]
+pub struct SaveSlot(pub Option<usize>);
 
 impl Resource for Planet {}
 impl Resource for Params {}
@@ -32,6 +35,7 @@ impl Plugin for SimPlugin {
             .add_event::<ManagePlanetError>()
             .add_event::<StartEvent>()
             .init_resource::<DebugTools>()
+            .init_resource::<SaveSlot>()
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
@@ -118,6 +122,7 @@ fn manage_planet(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
+    mut save_slot: ResMut<SaveSlot>,
     params: Option<Res<Params>>,
 ) {
     let Some(params) = params else {
@@ -132,17 +137,22 @@ fn manage_planet(
             let planet = Planet::new(start_params, &params);
             Some(planet)
         }
-        ManagePlanet::Save(path) => {
-            if let Err(e) = crate::saveload::save_to(path, planet.as_ref().unwrap()) {
+        ManagePlanet::Save(slot) => {
+            if let Err(e) = crate::saveload::save_to(*slot, planet.as_ref().unwrap()) {
                 log::warn!("cannot save: {:?}", e);
             }
             None
         }
-        ManagePlanet::Load(path) => match crate::saveload::load_from(path) {
-            Ok(planet) => Some(planet),
+        ManagePlanet::Load(slot) => match crate::saveload::load_from(*slot) {
+            Ok(planet) => {
+                if *slot != 0 {
+                    *save_slot = SaveSlot(Some(*slot));
+                }
+                Some(planet)
+            }
             Err(e) => {
                 log::warn!("cannot load: {:?}", e);
-                let e = if e.is::<bincode::Error>() {
+                let e = if e.is::<rmp_serde::decode::Error>() {
                     ManagePlanetError::Decode
                 } else {
                     ManagePlanetError::Other

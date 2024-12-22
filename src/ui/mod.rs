@@ -6,6 +6,7 @@ mod main_menu;
 mod map;
 mod new_planet;
 mod panels;
+mod saveload;
 mod space_buildings;
 mod stat;
 
@@ -41,6 +42,8 @@ pub struct WindowsOpenState {
     pub stat: bool,
     pub dialogs: Vec<Dialog>,
     pub help: bool,
+    pub save: bool,
+    pub load: bool,
     pub debug_tools: bool,
 }
 
@@ -98,6 +101,7 @@ impl Plugin for UiPlugin {
                     dialog::dialogs,
                     help::help_window,
                     debug_tools::debug_tools_window,
+                    saveload::saveload_window,
                 )
                     .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),

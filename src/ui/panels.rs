@@ -4,11 +4,9 @@ use geom::Coords;
 
 use crate::{
     conf::Conf,
-    draw::UpdateMap,
-    overlay::OverlayLayerKind,
     planet::{Params, Planet, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    sim::ManagePlanet,
+    sim::{ManagePlanet, SaveSlot},
     text::WithUnitDisplay,
     GameSpeed, GameState,
 };
@@ -22,16 +20,21 @@ pub fn panels(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
-    (mut current_layer, mut update_map): (ResMut<OverlayLayerKind>, ResMut<UpdateMap>),
     (mut app_exit_events, mut ew_manage_planet, mut next_game_state): (
         EventWriter<AppExit>,
         EventWriter<ManagePlanet>,
         ResMut<NextState<GameState>>,
     ),
-    (planet, textures, params, conf): (Res<Planet>, Res<EguiTextures>, Res<Params>, Res<Conf>),
+    (planet, textures, params, save_slot, conf): (
+        Res<Planet>,
+        Res<EguiTextures>,
+        Res<Params>,
+        Res<SaveSlot>,
+        Res<Conf>,
+    ),
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
-    occupied_screen_space.window_rects.clear();
+    occupied_screen_space.reset();
 
     occupied_screen_space.occupied_left = egui::SidePanel::left("left_panel")
         .resizable(true)
@@ -64,7 +67,7 @@ pub fn panels(
                     &mut cursor_mode,
                     &mut wos,
                     &mut speed,
-                    (&mut current_layer, &mut update_map),
+                    *save_slot,
                     (
                         &mut app_exit_events,
                         &mut ew_manage_planet,
@@ -73,7 +76,6 @@ pub fn panels(
                     &textures,
                     &planet,
                     &params,
-                    &conf,
                 );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
@@ -89,7 +91,7 @@ fn toolbar(
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
-    (_current_layer, _update_map): (&mut OverlayLayerKind, &mut UpdateMap),
+    save_slot: SaveSlot,
     (app_exit_events, ew_manage_planet, next_game_state): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
@@ -98,7 +100,6 @@ fn toolbar(
     textures: &EguiTextures,
     planet: &Planet,
     params: &Params,
-    _conf: &Conf,
 ) {
     let button = |ui: &mut egui::Ui, path: &str, s: &str| {
         ui.add(egui::ImageButton::new(textures.get(path)))
@@ -167,7 +168,14 @@ fn toolbar(
 
     let image = textures.get("ui/icon-game-menu");
     ui.menu_image_button(image, |ui| {
-        game_menu(ui, app_exit_events, ew_manage_planet, next_game_state);
+        game_menu(
+            ui,
+            wos,
+            save_slot,
+            app_exit_events,
+            ew_manage_planet,
+            next_game_state,
+        );
     });
 
     if button(ui, "ui/icon-help", "help") {
@@ -374,16 +382,29 @@ fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params)
 
 fn game_menu(
     ui: &mut egui::Ui,
+    wos: &mut WindowsOpenState,
+    save_slot: SaveSlot,
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     next_game_state: &mut NextState<GameState>,
 ) {
-    if ui.button(t!("save")).clicked() {
-        ew_manage_planet.send(ManagePlanet::Save("main.planet".into()));
+    ui.scope(|ui| {
+        if let Some(slot) = save_slot.0 {
+            if ui.button(t!("save-to-slot")).clicked() {
+                ew_manage_planet.send(ManagePlanet::Save(slot));
+                ui.close_menu();
+            }
+        } else {
+            ui.disable();
+            let _ = ui.button(t!("save-to-slot-disabled"));
+        }
+    });
+    if ui.button(format!("{}...", t!("save-as"))).clicked() {
+        wos.save = true;
         ui.close_menu();
     }
-    if ui.button(t!("load")).clicked() {
-        ew_manage_planet.send(ManagePlanet::Load("main.planet".into()));
+    if ui.button(format!("{}...", t!("load"))).clicked() {
+        wos.load = true;
         ui.close_menu();
     }
     ui.separator();
