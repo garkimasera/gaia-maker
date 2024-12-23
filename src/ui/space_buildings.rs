@@ -60,20 +60,13 @@ pub fn buildng_row(
     params: &Params,
     attrs: &BuildingAttrs,
 ) {
-    let buildable = planet.buildable(attrs, 1)
-        && attrs
-            .build_max
-            .map(|build_max| build_max > planet.space_building(kind).n)
-            .unwrap_or(true);
-    let buildable10 = planet.buildable(attrs, 10)
-        && attrs
-            .build_max
-            .map(|build_max| build_max >= planet.space_building(kind).n + 10)
-            .unwrap_or(true);
+    let build_max = attrs.build_max.unwrap();
+    let buildable = planet.buildable(attrs, 1) && build_max > planet.space_building(kind).n;
+    let buildable5 = planet.buildable(attrs, 5) && build_max >= planet.space_building(kind).n + 5;
     let building = planet.space_building_mut(kind);
 
     ui.horizontal(|ui| {
-        let building_text = format!("{} x{}\t", t!(kind), building.n);
+        let building_text = format!("{} ({}/{})", t!(kind), building.n, build_max);
         ui.add(egui::Label::new(building_text).extend());
     });
 
@@ -93,13 +86,17 @@ pub fn buildng_row(
         if ui.add_enabled(buildable, egui::Button::new("+1")).clicked() {
             planet.build_space_building(kind, sim, params);
         }
-        if ui
-            .add_enabled(buildable10, egui::Button::new("+10"))
-            .clicked()
-        {
-            for _ in 0..10 {
-                planet.build_space_building(kind, sim, params);
+        if build_max >= 5 {
+            if ui
+                .add_enabled(buildable5, egui::Button::new("+5"))
+                .clicked()
+            {
+                for _ in 0..5 {
+                    planet.build_space_building(kind, sim, params);
+                }
             }
+        } else {
+            ui.add_visible(false, egui::Button::new("+5"));
         }
     });
 

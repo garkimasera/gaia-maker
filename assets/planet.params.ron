@@ -236,8 +236,8 @@
         },
         water_volume: 5.0e+17,
         space_buildings: {
-            fusion_reactor: 3,
-            asteroid_mining_station: 2,
+            fusion_reactor: 1,
+            asteroid_mining_station: 1,
         },
         cycles_before_start: 100,
         initial_conditions: [],
@@ -248,20 +248,20 @@
     ),
     space_buildings: {
         fusion_reactor: (
-            energy: 10,
-            cost: 500,
-            build_max: 100,
+            energy: 30,
+            cost: 1500,
+            build_max: 20,
         ),
         asteroid_mining_station: (
-            energy: -1,
-            cost: 200.0,
-            effect: ProduceMaterial( mass: 10 ),
-            build_max: 100,
+            energy: -2,
+            cost: 400.0,
+            effect: ProduceMaterial( mass: 20 ),
+            build_max: 20,
         ),
         dyson_swarm_unit: (
             energy: 500,
             cost: 100000,
-            build_max: 1000,
+            build_max: 100,
         ),
         orbital_mirror: (
             energy: -0.1,
@@ -273,19 +273,21 @@
         nitrogen_importer: (
             energy: -50,
             cost: 100,
+            build_max: 10,
             effect: SprayToAtmo( kind: nitrogen, mass: 200, limit_atm: 1.0 ),
             control: enabled_number,
         ),
         carbon_importer: (
             energy: -10,
             cost: 100,
+            build_max: 10,
             effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3, limit_atm: 0.1 ),
             control: enabled_number,
         ),
         ion_irradiator: (
             energy: -4000,
             cost: 1000,
-            build_max: 100,
+            build_max: 10,
             effect: RemoveAtmo( mass: 5000, efficiency_table: [(0.0, 0.0), (0.1, 1.0), (500, 1.0)] ),
             control: enabled_number,
         ),
