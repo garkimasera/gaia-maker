@@ -59,6 +59,7 @@ pub fn show_saveload_window(
     egui::Window::new(action_name.clone())
         .open(open_state)
         .vscroll(false)
+        .collapsible(false)
         .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
         .default_height(240.0)
         .show(ctx, |ui| {
@@ -97,9 +98,7 @@ pub fn show_saveload_window(
                             row.col(|ui| {
                                 if let Some(time) = time {
                                     ui.label(time);
-                                } else {
-                                    ui.label(t!("empty"));
-                                };
+                                }
                             });
                             row.col(|ui| {
                                 if (!load || time.is_some())

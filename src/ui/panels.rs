@@ -390,7 +390,7 @@ fn game_menu(
 ) {
     ui.scope(|ui| {
         if let Some(slot) = save_slot.0 {
-            if ui.button(t!("save-to-slot")).clicked() {
+            if ui.button(t!("save-to-slot"; slot=slot)).clicked() {
                 ew_manage_planet.send(ManagePlanet::Save(slot));
                 ui.close_menu();
             }
@@ -399,7 +399,7 @@ fn game_menu(
             let _ = ui.button(t!("save-to-slot-disabled"));
         }
     });
-    if ui.button(format!("{}...", t!("save-as"))).clicked() {
+    if ui.button(format!("{}...", t!("save"))).clicked() {
         wos.save = true;
         ui.close_menu();
     }

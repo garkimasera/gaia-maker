@@ -135,6 +135,7 @@ fn manage_planet(
     let new_planet = match e {
         ManagePlanet::New(start_params) => {
             let planet = Planet::new(start_params, &params);
+            *save_slot = SaveSlot(None);
             Some(planet)
         }
         ManagePlanet::Save(slot) => {
