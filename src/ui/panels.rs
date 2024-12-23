@@ -106,14 +106,31 @@ fn toolbar(
             .on_hover_text(t!(s))
             .clicked()
     };
+    let menu_button =
+        |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
 
-    ui.menu_image_button(textures.get("ui/icon-build"), |ui| {
+    egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
+        game_menu(
+            ui,
+            wos,
+            save_slot,
+            app_exit_events,
+            ew_manage_planet,
+            next_game_state,
+        );
+    });
+
+    ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+    egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
         build_menu(ui, cursor_mode, textures, planet, params);
     });
 
-    ui.menu_image_button(textures.get("ui/icon-action"), |ui| {
+    egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
         action_menu(ui, cursor_mode, params);
     });
+
+    ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     if button(ui, "ui/icon-space-buildings", "space-buildings") {
         wos.space_building = !wos.space_building;
@@ -165,18 +182,6 @@ fn toolbar(
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    let image = textures.get("ui/icon-game-menu");
-    ui.menu_image_button(image, |ui| {
-        game_menu(
-            ui,
-            wos,
-            save_slot,
-            app_exit_events,
-            ew_manage_planet,
-            next_game_state,
-        );
-    });
 
     if button(ui, "ui/icon-help", "help") {
         wos.help = !wos.help;
