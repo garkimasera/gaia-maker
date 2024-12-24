@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::draw::UpdateMap;
 use crate::screen::{Centering, HoverTile};
+use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
@@ -60,9 +61,14 @@ fn update(
     speed: Res<GameSpeed>,
     debug_tools: Res<DebugTools>,
     hover_tile: Query<&HoverTile>,
+    wos: Res<WindowsOpenState>,
     mut count_frame: Local<u64>,
     mut last_update: Local<Option<u64>>,
 ) {
+    if wos.save || wos.load {
+        return;
+    }
+
     *count_frame += 1;
 
     match (*speed, debug_tools.sim_every_frame) {
