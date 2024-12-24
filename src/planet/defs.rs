@@ -171,6 +171,7 @@ pub enum StructureBuildingState {
 pub enum TileEvent {
     Fire,
     BlackDust { remaining_cycles: u32 },
+    AerosolInjection { remaining_cycles: u32 },
     Plague,
 }
 
@@ -600,6 +601,10 @@ pub struct EventParams {
     pub black_dust_cycles: u32,
     /// Additional decrease of black dust cycles by rainfall
     pub black_dust_decrease_by_rainfall: f32,
+    /// Aerosol injection cycles
+    pub aerosol_injection_cycles: u32,
+    /// Aerosol injection amount
+    pub aerosol_injection_amount: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

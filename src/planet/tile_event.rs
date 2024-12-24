@@ -39,6 +39,19 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     *remaining_cycles -= remaining_cycles_decrease;
                 }
             }
+            TileEventKind::AerosolInjection => {
+                let TileEvent::AerosolInjection {
+                    ref mut remaining_cycles,
+                } = &mut **planet.map[p].event.as_mut().unwrap()
+                else {
+                    unreachable!()
+                };
+                *remaining_cycles -= 1;
+                if *remaining_cycles == 0 {
+                    planet.map[p].event = None;
+                }
+                planet.atmo.aerosol += params.event.aerosol_injection_amount;
+            }
             TileEventKind::Plague => todo!(),
         }
     }
@@ -55,6 +68,9 @@ pub fn cause_tile_event(
         TileEventKind::Fire => TileEvent::Fire,
         TileEventKind::BlackDust => TileEvent::BlackDust {
             remaining_cycles: params.event.black_dust_cycles,
+        },
+        TileEventKind::AerosolInjection => TileEvent::AerosolInjection {
+            remaining_cycles: params.event.aerosol_injection_cycles,
         },
         TileEventKind::Plague => todo!(),
     };

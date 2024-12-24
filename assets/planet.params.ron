@@ -31,7 +31,7 @@
             (100.0, 0.80),
             (1000.0, 0.92),
         ],
-        aerosol_remaining_rate: 0.996,
+        aerosol_remaining_rate: 0.9992,
         aerosol_equilibrium_target: 1.0,
         aerosol_cloud_table: [
             (0.0, 10.0),
@@ -204,14 +204,17 @@
         tile_event_costs: {
             fire: Material(100.0),
             black_dust: Material(50.0),
+            aerosol_injection: Material(5.0),
             plague: GenePoint(1.0),
         },
         fire_burn_ratio: 0.2,
         biomass_at_fire_extinction_range: (0.25, 0.1),
-        fire_aerosol: 0.003,
+        fire_aerosol: 0.002,
         black_dust_albedo: 0.05,
         black_dust_cycles: 1000,
         black_dust_decrease_by_rainfall: 200,
+        aerosol_injection_cycles: 40,
+        aerosol_injection_amount: 0.002,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),
