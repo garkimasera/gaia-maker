@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::screen::{Centering, HoverTile};
 use crate::ui::WindowsOpenState;
@@ -57,11 +58,13 @@ fn update(
     mut planet: ResMut<Planet>,
     mut update_map: ResMut<UpdateMap>,
     mut sim: ResMut<Sim>,
+    mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
     speed: Res<GameSpeed>,
     debug_tools: Res<DebugTools>,
     hover_tile: Query<&HoverTile>,
     wos: Res<WindowsOpenState>,
+    conf: Res<Conf>,
     mut count_frame: Local<u64>,
     mut last_update: Local<Option<u64>>,
 ) {
@@ -102,6 +105,12 @@ fn update(
     );
     update_map.update();
     planet.advance(&mut sim, &params);
+
+    if let Some(autosave_cycle_duration) = conf.autosave_cycle_duration {
+        if planet.cycles % autosave_cycle_duration == 0 {
+            ew_manage_planet.send(ManagePlanet::Save(0));
+        }
+    }
 }
 
 fn start_event(

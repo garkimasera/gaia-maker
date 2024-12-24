@@ -63,6 +63,8 @@ pub struct Conf {
     pub lang: Lang,
     pub camera_move_speed: f32,
     pub ui: UiConf,
+    #[serde(with = "serde_with::rust::unwrap_or_skip")]
+    pub autosave_cycle_duration: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
