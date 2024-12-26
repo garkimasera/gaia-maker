@@ -51,6 +51,7 @@ pub fn show_saveload_window(
         (1, t!("save"))
     };
     let mut selected = None;
+    let mut canceled = false;
     let mut save_file_list = SAVE_FILE_LIST.lock().unwrap();
     if save_file_list.is_none() {
         *save_file_list = Some(load_save_file_list());
@@ -60,8 +61,9 @@ pub fn show_saveload_window(
         .open(open_state)
         .vscroll(false)
         .collapsible(false)
+        .resizable([false, false])
+        .default_width(100.0)
         .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
-        .default_height(240.0)
         .show(ctx, |ui| {
             let row_height = egui::TextStyle::Body.resolve(ui.style()).size * 1.2;
             let table = egui_extras::TableBuilder::new(ui)
@@ -75,6 +77,7 @@ pub fn show_saveload_window(
                 .min_scrolled_height(0.0);
 
             table
+                .max_scroll_height(220.0)
                 .header(row_height, |mut header| {
                     header.col(|ui| {
                         ui.strong("#");
@@ -110,9 +113,18 @@ pub fn show_saveload_window(
                         });
                     }
                 });
+            ui.add(egui::Separator::default().spacing(2.0).horizontal());
+            ui.vertical_centered(|ui| {
+                if ui.button(t!("cancel")).clicked() {
+                    canceled = true;
+                }
+            });
         })
         .unwrap();
 
+    if canceled {
+        *open_state = false;
+    }
     if let Some(selected) = selected {
         if load {
             ew_manage_planet.send(ManagePlanet::Load(selected));
