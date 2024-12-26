@@ -85,25 +85,9 @@ pub struct TranslationText(HashMap<String, String>);
 
 #[derive(Debug, Resource, AssetCollection)]
 pub struct TranslationTexts {
-    #[asset(
-        paths(
-            "text/en/base.toml",
-            "text/en/help.toml",
-            "text/en/planets.toml",
-            "text/en/animals.toml",
-        ),
-        collection(typed)
-    )]
+    #[asset(path = "text/en", collection(typed))]
     en: Vec<Handle<TranslationText>>,
-    #[asset(
-        paths(
-            "text/ja/base.toml",
-            "text/ja/help.toml",
-            "text/ja/planets.toml",
-            "text/ja/animals.toml",
-        ),
-        collection(typed)
-    )]
+    #[asset(path = "text/ja", collection(typed))]
     ja: Vec<Handle<TranslationText>>,
 }
 
