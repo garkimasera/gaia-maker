@@ -517,8 +517,9 @@ dependencies = [
 [[package]]
 name = "bevy_asset_tar"
 version = "0.1.0"
-source = "git+https://github.com/garkimasera/bevy_asset_tar.git#d042337b458b2587db2fe2cfa9277a0da0d46832"
+source = "git+https://github.com/garkimasera/bevy_asset_tar.git#f0b72664fdc7291b423e6c29ef12d569fe4379cb"
 dependencies = [
+ "async-fs",
  "bevy",
  "flate2",
  "futures-util",
@@ -2528,7 +2529,7 @@ dependencies = [
  "log",
  "presser",
  "thiserror",
- "windows 0.58.0",
+ "windows 0.54.0",
 ]
 
 [[package]]
@@ -5105,7 +5106,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

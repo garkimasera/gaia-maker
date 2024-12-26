@@ -98,7 +98,10 @@ struct AssetPlugin;
 impl Plugin for AssetPlugin {
     #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
-        app.add_plugins(bevy_asset_tar::AssetTarPlugin::default());
+        app.add_plugins(bevy_asset_tar::AssetTarPlugin {
+            addon_directories: conf::addon_directory(),
+            ..Default::default()
+        });
     }
 
     #[cfg(not(feature = "asset_tar"))]

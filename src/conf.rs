@@ -1,9 +1,10 @@
-use crate::GameState;
-use crate::{assets::UiAssets, text_assets::Lang};
 use anyhow::{anyhow, Result};
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
+
+use crate::GameState;
+use crate::{assets::UiAssets, text_assets::Lang};
 
 const CONF_FILE_NAME: &str = "conf.ron";
 
@@ -22,6 +23,19 @@ pub fn data_dir() -> Option<&'static std::path::Path> {
 #[cfg(not(target_arch = "wasm32"))]
 fn conf_file() -> Option<std::path::PathBuf> {
     data_dir().map(|data_dir| data_dir.join(CONF_FILE_NAME))
+}
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "asset_tar"))]
+pub fn addon_directory() -> Vec<std::path::PathBuf> {
+    data_dir()
+        .map(|data_dir| data_dir.join("addons"))
+        .into_iter()
+        .collect()
+}
+
+#[cfg(all(target_arch = "wasm32", feature = "asset_tar"))]
+pub fn addon_directory() -> Vec<std::path::PathBuf> {
+    Vec::new()
 }
 
 #[derive(Clone, Copy, Debug)]
