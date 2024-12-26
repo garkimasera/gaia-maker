@@ -87,33 +87,40 @@ fn new_structure(kind: StructureKind) -> Structure {
     }
 }
 
-pub fn cursor_mode_warn(
+pub fn cursor_mode_lack_and_cost(
     planet: &Planet,
     params: &Params,
     cursor_mode: &CursorMode,
-) -> Option<String> {
+) -> Vec<(bool, Cost)> {
+    let mut cost_list = Vec::new();
+
     match cursor_mode {
         CursorMode::Build(kind) => {
             if let Some(attr) = params.structures.get(kind).map(|a| &a.building) {
-                if attr.cost > planet.res.material {
-                    t!("msg/lack-of-material").into()
-                } else if attr.energy < 0.0 && -attr.energy > planet.res.surplus_energy() {
-                    t!("msg/lack-of-energy").into()
-                } else {
-                    None
+                if attr.energy < 0.0 {
+                    cost_list.push((
+                        -attr.energy > planet.res.surplus_energy(),
+                        Cost::Energy(-attr.energy, 0),
+                    ));
                 }
-            } else {
-                None
+                if attr.cost > 0.0 {
+                    cost_list.push((attr.cost > planet.res.material, Cost::Material(attr.cost)));
+                }
             }
         }
         CursorMode::SpawnAnimal(ref animal_id) => {
             let attr = &params.animals[animal_id];
-            if attr.cost <= planet.res.gene_point {
-                None
-            } else {
-                t!("msg/lack-of-gene-points").into()
+            cost_list.push((
+                attr.cost <= planet.res.gene_point,
+                Cost::GenePoint(attr.cost),
+            ));
+        }
+        CursorMode::TileEvent(kind) => {
+            if let Some(cost) = params.event.tile_event_costs.get(kind) {
+                cost_list.push((!planet.res.enough_to_consume(*cost), *cost));
             }
         }
-        _ => None,
+        _ => (),
     }
+    cost_list
 }

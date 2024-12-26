@@ -4,14 +4,14 @@ use geom::Coords;
 
 use crate::{
     conf::Conf,
-    planet::{Params, Planet, KELVIN_CELSIUS},
+    planet::{Cost, Params, Planet, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::{ManagePlanet, SaveSlot},
     text::WithUnitDisplay,
     GameSpeed, GameState,
 };
 
-use super::{help::HelpItem, EguiTextures, WindowsOpenState};
+use super::{help::HelpItem, EguiTextures, LabelWithIcon, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -232,12 +232,13 @@ fn sidebar(
 
     // Information about selected tool
     ui.vertical(|ui| {
-        ui.set_height(50.0);
-        let warn = crate::action::cursor_mode_warn(planet, params, cursor_mode);
-        let bg_color = if warn.is_none() {
-            egui::Color32::DARK_GRAY
-        } else {
+        ui.set_height(48.0);
+        ui.add_space(3.0);
+        let cost_list = crate::action::cursor_mode_lack_and_cost(planet, params, cursor_mode);
+        let bg_color = if cost_list.iter().any(|(lack, _)| *lack) {
             egui::Color32::DARK_RED
+        } else {
+            egui::Color32::DARK_GRAY
         };
         let bg_color = egui::lerp(
             egui::Rgba::from(bg_color)..=egui::Rgba::from(ui.visuals().window_fill()),
@@ -267,9 +268,32 @@ fn sidebar(
             }
         };
         ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));
-        if let Some(warn) = warn {
-            ui.label(egui::RichText::new(warn).color(egui::Color32::RED));
-        }
+        ui.horizontal(|ui| {
+            for (lack, cost) in &cost_list {
+                let (texture, s) = match cost {
+                    Cost::Energy(value, _) => (
+                        textures.get("ui/icon-energy"),
+                        WithUnitDisplay::Energy(*value).to_string(),
+                    ),
+                    Cost::Material(value) => (
+                        textures.get("ui/icon-material"),
+                        WithUnitDisplay::Material(*value).to_string(),
+                    ),
+                    Cost::GenePoint(value) => (
+                        textures.get("ui/icon-gene"),
+                        WithUnitDisplay::GenePoint(*value).to_string(),
+                    ),
+                };
+                if *lack {
+                    ui.add(LabelWithIcon::new(
+                        texture,
+                        egui::RichText::new(s).color(egui::Color32::RED),
+                    ));
+                } else {
+                    ui.add(LabelWithIcon::new(texture, s));
+                }
+            }
+        });
     });
 
     ui.separator();
