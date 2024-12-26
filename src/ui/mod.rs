@@ -76,7 +76,7 @@ impl Plugin for UiPlugin {
             .init_resource::<map::NeedUpdate>()
             .add_systems(
                 OnExit(GameState::AssetLoading),
-                (setup_fonts, load_textures),
+                (setup_fonts, load_textures, setup_style),
             )
             .add_systems(OnEnter(GameState::MainMenu), main_menu::set_main_menu_state)
             .add_systems(OnEnter(GameState::Running), map::update)
@@ -135,6 +135,26 @@ fn setup_fonts(
         .unwrap()
         .push("m+_font".to_owned());
     egui_ctxs.ctx_mut().set_fonts(fonts);
+}
+
+fn setup_style(mut egui_ctxs: EguiContexts) {
+    let ctx = egui_ctxs.ctx_mut();
+    ctx.set_theme(egui::Theme::Dark);
+    let mut style = (*ctx.style()).clone();
+
+    let rounding = egui::Rounding::same(2.0);
+    style.visuals.window_rounding = rounding;
+    style.visuals.menu_rounding = rounding;
+    style.visuals.widgets.noninteractive.rounding = rounding;
+    style.visuals.widgets.inactive.rounding = rounding;
+    style.visuals.widgets.hovered.rounding = rounding;
+    style.visuals.widgets.active.rounding = rounding;
+    style.visuals.widgets.open.rounding = rounding;
+    style.visuals.widgets.noninteractive.fg_stroke.color = egui::Color32::from_rgb(180, 180, 180);
+    style.spacing.scroll = egui::style::ScrollStyle::solid();
+    style.interaction.tooltip_delay = 0.2;
+
+    ctx.set_style(style);
 }
 
 fn load_textures(
