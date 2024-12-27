@@ -111,7 +111,7 @@ pub fn cursor_mode_lack_and_cost(
         CursorMode::SpawnAnimal(ref animal_id) => {
             let attr = &params.animals[animal_id];
             cost_list.push((
-                attr.cost <= planet.res.gene_point,
+                attr.cost > planet.res.gene_point,
                 Cost::GenePoint(attr.cost),
             ));
         }
