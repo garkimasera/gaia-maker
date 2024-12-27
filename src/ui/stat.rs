@@ -134,7 +134,13 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
     let item_copy = *item;
     let label_formatter = move |_s: &str, value: &plot::PlotPoint| item_copy.format_value(value.y);
     let x_axis_formatter = move |_, _range: &RangeInclusive<f64>| "".to_string();
-    let bound_margin = (max - min) * 0.08 + 1.0e-5;
+    let min_bound_margin = match item {
+        GraphItem::AverageAirTemperature | GraphItem::AverageSeaTemperature => 1.0e-1,
+        GraphItem::AverageRainfall => 1.0e+0,
+        GraphItem::Biomass => 1.0e-2,
+        GraphItem::Oxygen | GraphItem::Nitrogen | GraphItem::CarbonDioxide => 1.0e-5,
+    };
+    let bound_margin = (max - min) * 0.08 + min_bound_margin;
 
     plot::Plot::new("history")
         .allow_drag(false)
