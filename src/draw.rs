@@ -272,6 +272,10 @@ fn spawn_animal_textures(
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
+        if planet.map[p].structure.is_some() {
+            continue;
+        }
+
         // Select the largest animal at this tile
         let animal = match planet.map[p].animal {
             [_, _, Some(ref animal)] => animal,

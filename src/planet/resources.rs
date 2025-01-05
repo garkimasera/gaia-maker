@@ -1,8 +1,8 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-const MATERIAL_MAX: f32 = 0.999999e+6;
-const GENE_POINT_MAX: f32 = 1000.0;
+const MATERIAL_MAX: f32 = 0.999e+6;
+const GENE_POINT_MAX: f32 = 999.0;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Resources {
