@@ -13,7 +13,7 @@ asset_tar = ["dep:bevy_asset_tar"]
 anyhow = "1"
 arrayvec = "0.7"
 base64 = "0.22"
-bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "png", "x11", "webgl2"] }
+bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "x11", "webgl2"] }
 bevy_asset_loader = "0.22"
 bevy_common_assets = { version = "0.12", features = ["ron"] }
 bevy_egui = "0.31"
@@ -29,6 +29,7 @@ egui_extras = "0.29"
 egui_plot = "0.29"
 flate2 = "1"
 fnv = "1"
+image = { version = "0.25.5", default-features = false, features = ["png", "rayon"] }
 log = "0.4"
 noise = "0.9"
 rand = { version = "0.8", features = ["small_rng"] }

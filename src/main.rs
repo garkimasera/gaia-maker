@@ -13,6 +13,7 @@ mod audio;
 mod conf;
 mod draw;
 mod gz;
+mod image_assets;
 mod info;
 mod overlay;
 mod planet;
@@ -55,6 +56,7 @@ fn main() {
         }))
         .add_plugins(gz::GzPlugin)
         .add_plugins(text_assets::TextAssetsPlugin)
+        .add_plugins(image_assets::ImageAssetsPlugin)
         .init_state::<GameState>()
         .add_plugins(conf::ConfPlugin)
         .add_plugins(assets::AssetsPlugin)
