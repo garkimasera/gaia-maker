@@ -9,33 +9,8 @@ use crate::{assets::UiAssets, text_assets::Lang};
 const CONF_FILE_NAME: &str = "conf.ron";
 
 #[cfg(not(target_arch = "wasm32"))]
-use std::sync::LazyLock;
-
-#[cfg(not(target_arch = "wasm32"))]
-static DATA_DIR: LazyLock<Option<std::path::PathBuf>> =
-    LazyLock::new(|| dirs::data_dir().map(|path| path.join(env!("CARGO_PKG_NAME"))));
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn data_dir() -> Option<&'static std::path::Path> {
-    DATA_DIR.as_ref().map(|path| path.as_ref())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
 fn conf_file() -> Option<std::path::PathBuf> {
-    data_dir().map(|data_dir| data_dir.join(CONF_FILE_NAME))
-}
-
-#[cfg(all(not(target_arch = "wasm32"), feature = "asset_tar"))]
-pub fn addon_directory() -> Vec<std::path::PathBuf> {
-    data_dir()
-        .map(|data_dir| data_dir.join("addons"))
-        .into_iter()
-        .collect()
-}
-
-#[cfg(all(target_arch = "wasm32", feature = "asset_tar"))]
-pub fn addon_directory() -> Vec<std::path::PathBuf> {
-    Vec::new()
+    crate::platform::data_dir().map(|data_dir| data_dir.join(CONF_FILE_NAME))
 }
 
 #[derive(Clone, Copy, Debug)]

@@ -17,6 +17,7 @@ mod image_assets;
 mod info;
 mod overlay;
 mod planet;
+mod platform;
 mod saveload;
 mod screen;
 mod sim;
@@ -101,7 +102,7 @@ impl Plugin for AssetPlugin {
     #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
-            addon_directories: conf::addon_directory(),
+            addon_directories: platform::addon_directory(),
             ..Default::default()
         });
     }

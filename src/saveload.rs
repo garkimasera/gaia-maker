@@ -75,7 +75,7 @@ pub fn load_save_file_list() -> SaveFileList {
 #[cfg(not(target_arch = "wasm32"))]
 fn write(file_name: &str, data: &[u8]) -> Result<()> {
     let data_dir =
-        crate::conf::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     std::fs::create_dir_all(&save_dir_path)?;
     std::fs::write(save_dir_path.join(file_name), data)?;
@@ -85,7 +85,7 @@ fn write(file_name: &str, data: &[u8]) -> Result<()> {
 #[cfg(not(target_arch = "wasm32"))]
 fn read(file_name: &str) -> Result<Vec<u8>> {
     let data_dir =
-        crate::conf::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("save");
     Ok(std::fs::read(save_dir_path.join(file_name))?)
 }
