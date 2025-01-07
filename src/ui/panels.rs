@@ -401,7 +401,7 @@ fn build_menu(
 
 fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
     for &kind in params.event.tile_event_costs.keys() {
-        if ui.button(t!(kind)).clicked() {
+        if ui.button(t!("tile_event", kind)).clicked() {
             *cursor_mode = CursorMode::TileEvent(kind);
             ui.close_menu();
         }
