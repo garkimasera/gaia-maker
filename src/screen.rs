@@ -554,7 +554,23 @@ fn main_menu_background_exit(mut bg_meshes: Query<&mut Visibility, With<MainMenu
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn window_resize() {}
+fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
+    let Ok(mut window) = window.get_single_mut() else {
+        return;
+    };
+    let width = window.width() as u32;
+    let height = window.height() as u32;
+
+    // Adjust target size to prevent pixel blurring
+    let target_width = width - width % 2;
+    let target_height = height - height % 2;
+
+    if window.width() as u32 != target_width || window.height() as u32 != target_height {
+        window
+            .resolution
+            .set(target_width as f32, target_height as f32);
+    }
+}
 
 #[cfg(target_arch = "wasm32")]
 fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
