@@ -133,7 +133,7 @@ pub enum ManagePlanetError {
 fn manage_planet(
     mut command: Commands,
     mut er_manage_planet: EventReader<ManagePlanet>,
-    mut ew_manage_planet_eror: EventWriter<ManagePlanetError>,
+    mut ew_manage_planet_error: EventWriter<ManagePlanetError>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
@@ -173,7 +173,7 @@ fn manage_planet(
                 } else {
                     ManagePlanetError::Other
                 };
-                ew_manage_planet_eror.send(e);
+                ew_manage_planet_error.send(e);
                 None
             }
         },

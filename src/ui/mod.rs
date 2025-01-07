@@ -1,6 +1,7 @@
 mod animals;
 mod debug_tools;
 mod dialog;
+mod error_popup;
 mod help;
 mod main_menu;
 mod map;
@@ -25,6 +26,7 @@ use crate::{
     gz::GunzipBin,
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
+    sim::ManagePlanetError,
     GameState,
 };
 
@@ -44,6 +46,7 @@ pub struct WindowsOpenState {
     pub help: bool,
     pub save: bool,
     pub load: bool,
+    pub error_popup: Option<ManagePlanetError>,
     pub debug_tools: bool,
 }
 
@@ -100,8 +103,9 @@ impl Plugin for UiPlugin {
                     layers_window,
                     dialog::dialogs,
                     help::help_window,
-                    debug_tools::debug_tools_window,
                     saveload::saveload_window,
+                    error_popup::error_popup,
+                    debug_tools::debug_tools_window,
                 )
                     .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),

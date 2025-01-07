@@ -47,12 +47,12 @@ pub fn main_menu(
     params: Res<Params>,
     mut conf: ResMut<Conf>,
     mut ew_conf_change: EventWriter<ConfChange>,
-    mut ew_manage_planet_error: EventReader<ManagePlanetError>,
+    mut er_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
     textures: Res<EguiTextures>,
 ) {
-    if let Some(e) = ew_manage_planet_error.read().next() {
+    if let Some(e) = er_manage_planet_error.read().next() {
         state.mode = MainMenuMode::Error;
         state.error = Some(e.clone());
     }
@@ -117,11 +117,10 @@ pub fn main_menu(
                 .collapsible(false)
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                 .show(egui_ctxs.ctx_mut(), |ui| {
-                    if matches!(state.error, Some(ManagePlanetError::Decode)) {
-                        ui.label(t!("msg/loading-failed-desc-decode-error"));
-                    } else {
-                        ui.label(t!("msg/loading-failed-desc-not-found"));
-                    }
+                    super::error_popup::ui_management_planet_error(
+                        ui,
+                        state.error.as_ref().unwrap(),
+                    );
                     ui.vertical_centered(|ui| {
                         if ui.button(t!("close")).clicked() {
                             state.mode = MainMenuMode::Menu;
