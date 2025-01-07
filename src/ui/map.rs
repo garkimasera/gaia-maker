@@ -34,7 +34,7 @@ pub fn map_window(
     mut screen: (
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
-        Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
+        Query<&bevy_egui::EguiContextSettings, With<bevy::window::PrimaryWindow>>,
     ),
     (mut map_tex_handle, mut image_update_counter, mut map_layer, mut before_map_layer): (
         Local<Option<egui::TextureHandle>>,
@@ -111,7 +111,7 @@ fn map_ui(
     (in_screen_tile_range, occupied_screen_space, egui_settings): &(
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
-        Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
+        Query<&bevy_egui::EguiContextSettings, With<bevy::window::PrimaryWindow>>,
     ),
     scale: f32,
 ) -> egui::Response {

@@ -13,7 +13,7 @@ mod stat;
 use bevy::prelude::*;
 use bevy_egui::{
     egui::{self, epaint, load::SizedTexture, FontData, FontDefinitions, FontFamily},
-    EguiContexts, EguiPlugin, EguiSettings,
+    EguiContextSettings, EguiContexts, EguiPlugin,
 };
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
@@ -111,7 +111,7 @@ impl Plugin for UiPlugin {
 
 fn setup_fonts(
     mut egui_ctxs: EguiContexts,
-    mut egui_settings: Query<&mut EguiSettings, With<bevy::window::PrimaryWindow>>,
+    mut egui_settings: Query<&mut EguiContextSettings, With<bevy::window::PrimaryWindow>>,
     conf: Res<Assets<Conf>>,
     ui_assets: Res<UiAssets>,
     gunzip_bin: Res<Assets<GunzipBin>>,
@@ -123,7 +123,9 @@ fn setup_fonts(
     let mut fonts = FontDefinitions::default();
     let mut font_data = FontData::from_owned(font_data.0);
     font_data.tweak.scale = conf.ui.font_scale;
-    fonts.font_data.insert("m+_font".to_owned(), font_data);
+    fonts
+        .font_data
+        .insert("m+_font".to_owned(), font_data.into());
     fonts
         .families
         .get_mut(&FontFamily::Proportional)

@@ -16,8 +16,8 @@ base64 = "0.22"
 bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "x11", "webgl2"] }
 bevy_asset_loader = "0.22"
 bevy_common_assets = { version = "0.12", features = ["ron"] }
-bevy_egui = "0.31"
-bevy_kira_audio = "0.21"
+bevy_egui = "0.32"
+bevy_kira_audio = "0.22"
 byteorder = "1.5.0"
 bytes = "1.9.0"
 chrono = "0.4.39"
@@ -25,8 +25,8 @@ clap = { version = "4", features = ["derive"] }
 compact_str = { version = "0.8.0", features = ["serde"] }
 crossbeam = "0.8"
 dirs = "5"
-egui_extras = "0.29"
-egui_plot = "0.29"
+egui_extras = "0.30"
+egui_plot = "0.30"
 flate2 = "1"
 fnv = "1"
 image = { version = "0.25.5", default-features = false, features = ["png", "rayon"] }

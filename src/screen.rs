@@ -224,7 +224,7 @@ fn centering(
     mut er_centering: EventReader<Centering>,
     mut update_map: ResMut<UpdateMap>,
     screen: Res<OccupiedScreenSpace>,
-    window: Query<(&Window, &bevy_egui::EguiSettings), With<PrimaryWindow>>,
+    window: Query<(&Window, &bevy_egui::EguiContextSettings), With<PrimaryWindow>>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
     planet: Res<Planet>,
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
@@ -422,7 +422,7 @@ fn on_resize(
     mut ew_centering: EventWriter<Centering>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     screen: Res<OccupiedScreenSpace>,
-    egui_settings: Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
+    egui_settings: Query<&bevy_egui::EguiContextSettings, With<bevy::window::PrimaryWindow>>,
 ) {
     let egui_settings = egui_settings.single();
 
@@ -446,7 +446,7 @@ fn keyboard_input(
     mut speed: ResMut<GameSpeed>,
     camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     screen: Res<OccupiedScreenSpace>,
-    egui_settings: Query<&bevy_egui::EguiSettings, With<bevy::window::PrimaryWindow>>,
+    egui_settings: Query<&bevy_egui::EguiContextSettings, With<bevy::window::PrimaryWindow>>,
     conf: Res<Conf>,
     mut old_gamespeed: Local<GameSpeed>,
 ) {
