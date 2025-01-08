@@ -1,6 +1,5 @@
 use std::collections::{BTreeMap, HashMap};
 
-use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, Same};
@@ -13,6 +12,8 @@ pub const PIECE_SIZE: f32 = TILE_SIZE / 2.0;
 
 pub const KELVIN_CELSIUS: f32 = 273.15;
 pub const RAINFALL_DURATION: f32 = 360.0;
+
+pub type AnimalId = arrayvec::ArrayString<20>;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Basics {
@@ -191,7 +192,13 @@ pub struct AnimalAttr {
     /// Livable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
     pub temp: (f32, f32),
-    pub civilize_cost: Option<f32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub civ: Option<AnimalCivParams>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AnimalCivParams {
+    pub civilize_cost: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr)]
@@ -222,18 +229,13 @@ pub enum AnimalHabitat {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Animal {
-    pub id: CompactString,
+    pub id: AnimalId,
     pub n: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Race {
-    pub name: CompactString,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Civilization {
-    pub race: Race,
+    pub species: AnimalId,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
@@ -426,7 +428,7 @@ pub struct Params {
     #[serde(skip)]
     pub start_planets: Vec<StartPlanet>,
     #[serde(skip)]
-    pub animals: HashMap<CompactString, AnimalAttr>,
+    pub animals: HashMap<AnimalId, AnimalAttr>,
     pub monitoring: MonitoringParams,
 }
 

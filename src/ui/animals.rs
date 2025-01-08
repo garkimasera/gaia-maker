@@ -2,12 +2,12 @@ use super::{label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use compact_str::{format_compact, CompactString};
+use compact_str::format_compact;
 
 #[derive(Debug)]
 pub struct State {
-    ordered_ids: Vec<CompactString>,
-    current: CompactString,
+    ordered_ids: Vec<AnimalId>,
+    current: AnimalId,
 }
 
 pub fn animals_window(
@@ -101,7 +101,7 @@ fn contents(
 
     ui.separator();
     if ui.button(t!("spawn")).clicked() {
-        *cursor_mode = CursorMode::SpawnAnimal(state.current.clone());
+        *cursor_mode = CursorMode::SpawnAnimal(state.current);
     }
 }
 
@@ -113,7 +113,7 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State) {
             ui.set_min_height(180.0);
             ui.vertical(|ui| {
                 for id in &state.ordered_ids {
-                    ui.selectable_value(&mut state.current, id.clone(), t!(id));
+                    ui.selectable_value(&mut state.current, *id, t!(id));
                 }
             });
         });
@@ -123,7 +123,7 @@ impl State {
     fn new(params: &Params) -> Self {
         let mut ids: Vec<_> = params.animals.keys().cloned().collect();
         ids.sort_unstable();
-        let current = ids[0].clone();
+        let current = ids[0];
         Self {
             ordered_ids: ids,
             current,

@@ -1,5 +1,3 @@
-use compact_str::CompactString;
-
 use super::*;
 
 impl Planet {
@@ -79,19 +77,19 @@ impl Planet {
         }
     }
 
-    pub fn animal_spawnable(&self, p: Coords, animal_id: &CompactString, params: &Params) -> bool {
-        let attr = &params.animals[animal_id];
+    pub fn animal_spawnable(&self, p: Coords, animal_id: AnimalId, params: &Params) -> bool {
+        let attr = &params.animals[&animal_id];
 
         self.map[p].animal[attr.size as usize].is_none() && attr.cost <= self.res.gene_point
     }
 
-    pub fn spawn_animal(&mut self, p: Coords, animal_id: &CompactString, params: &Params) {
+    pub fn spawn_animal(&mut self, p: Coords, animal_id: AnimalId, params: &Params) {
         assert!(self.animal_spawnable(p, animal_id, params));
 
-        let attr = &params.animals[animal_id];
+        let attr = &params.animals[&animal_id];
         self.res.gene_point -= attr.cost;
         self.map[p].animal[attr.size as usize] = Some(Animal {
-            id: animal_id.clone(),
+            id: animal_id,
             n: 0.1,
         });
     }

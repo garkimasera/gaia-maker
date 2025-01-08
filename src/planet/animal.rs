@@ -25,7 +25,7 @@ fn process_each_animal(
     rng: &mut impl Rng,
 ) {
     let (animal_id, attr, n) = if let Some(ref mut animal) = planet.map[p].animal[size as usize] {
-        (animal.id.clone(), &params.animals[&animal.id], animal.n)
+        (animal.id, &params.animals[&animal.id], animal.n)
     } else {
         return;
     };

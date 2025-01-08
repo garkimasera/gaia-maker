@@ -87,7 +87,7 @@ pub struct AnimalAsset(AnimalAttr);
 pub struct TextureHandles {
     pub biome_layouts: FnvHashMap<Biome, Handle<TextureAtlasLayout>>,
     pub structure_layouts: FnvHashMap<StructureKind, Handle<TextureAtlasLayout>>,
-    pub animals: HashMap<CompactString, LoadedTexture>,
+    pub animals: HashMap<AnimalId, LoadedTexture>,
     pub tile_animations: HashMap<CompactString, LoadedTexture>,
 }
 
@@ -258,12 +258,19 @@ fn create_assets_list(
     // Animals
     let mut animals = HashMap::default();
     for (path, handle) in &planet_asset_collection.animal_handles {
-        let animal_id: CompactString = path
+        let animal_id = path
             .strip_prefix("animals/")
             .and_then(|s| s.split_once('.'))
             .expect("unexpected animal asset path")
-            .0
-            .into();
+            .0;
+        let animal_id = match AnimalId::from(animal_id) {
+            Ok(animal_id) => animal_id,
+            Err(e) => {
+                log::warn!("invalid string \"{}\" for animal id: {}", animal_id, e);
+                continue;
+            }
+        };
+
         if let Ok(handle) = handle.clone().try_typed::<AnimalAsset>() {
             let animal = animal_assets.get(&handle).cloned().unwrap().0;
             params.animals.insert(animal_id, animal);

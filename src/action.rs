@@ -58,7 +58,7 @@ fn cursor_action(
                 planet.cause_tile_event(coords, kind, &mut sim, &params);
                 update_map.update();
             }
-            CursorMode::SpawnAnimal(ref animal_id) => {
+            CursorMode::SpawnAnimal(animal_id) => {
                 if planet.animal_spawnable(coords, animal_id, &params) {
                     update_map.update();
                     planet.spawn_animal(coords, animal_id, &params);
@@ -108,7 +108,7 @@ pub fn cursor_mode_lack_and_cost(
                 }
             }
         }
-        CursorMode::SpawnAnimal(ref animal_id) => {
+        CursorMode::SpawnAnimal(animal_id) => {
             let attr = &params.animals[animal_id];
             cost_list.push((
                 attr.cost > planet.res.gene_point,
