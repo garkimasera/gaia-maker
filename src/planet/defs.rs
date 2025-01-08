@@ -207,7 +207,7 @@ pub struct AnimalCivParams {
 #[repr(u8)]
 pub enum AnimalSize {
     Small = 0,
-    Middle = 1,
+    Medium = 1,
     Large = 2,
 }
 
@@ -215,7 +215,7 @@ impl AnimalSize {
     pub const LEN: usize = AnimalSize::Large as usize + 1;
 
     pub fn iter() -> [Self; Self::LEN] {
-        [Self::Small, Self::Middle, Self::Large]
+        [Self::Small, Self::Medium, Self::Large]
     }
 }
 

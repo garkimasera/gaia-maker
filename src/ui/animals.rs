@@ -14,8 +14,8 @@ pub fn animals_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    mut _planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
+    mut planet: ResMut<Planet>,
     params: Res<Params>,
     textures: Res<EguiTextures>,
     mut state: Local<Option<State>>,
@@ -35,7 +35,7 @@ pub fn animals_window(
                 select_panel(ui, state);
                 ui.separator();
                 ui.vertical(|ui| {
-                    contents(ui, state, &params, &textures, &mut cursor_mode);
+                    contents(ui, state, &mut planet, &params, &textures, &mut cursor_mode);
                 });
             });
         })
@@ -48,6 +48,7 @@ pub fn animals_window(
 fn contents(
     ui: &mut egui::Ui,
     state: &State,
+    planet: &mut Planet,
     params: &Params,
     textures: &EguiTextures,
     cursor_mode: &mut CursorMode,
@@ -56,7 +57,7 @@ fn contents(
         ui.add(egui::Image::new(
             textures.get(format_compact!("animals/{}", state.current)),
         ));
-        ui.heading(t!(state.current));
+        ui.heading(t!("animal", state.current));
     });
 
     let attr = params.animals.get(&state.current).unwrap();
@@ -100,9 +101,23 @@ fn contents(
     });
 
     ui.separator();
-    if ui.button(t!("spawn")).clicked() {
-        *cursor_mode = CursorMode::SpawnAnimal(state.current);
-    }
+    ui.horizontal(|ui| {
+        if ui.button(t!("spawn")).clicked() {
+            *cursor_mode = CursorMode::SpawnAnimal(state.current);
+        }
+
+        if let Some(c) = &attr.civ {
+            ui.scope(|ui| {
+                if !planet
+                    .res
+                    .enough_to_consume(Cost::GenePoint(c.civilize_cost))
+                {
+                    ui.disable();
+                }
+                if ui.button(t!("civilize")).clicked() {}
+            });
+        }
+    });
 }
 
 fn select_panel(ui: &mut egui::Ui, state: &mut State) {
@@ -113,7 +128,7 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State) {
             ui.set_min_height(180.0);
             ui.vertical(|ui| {
                 for id in &state.ordered_ids {
-                    ui.selectable_value(&mut state.current, *id, t!(id));
+                    ui.selectable_value(&mut state.current, *id, t!("animal", id));
                 }
             });
         });

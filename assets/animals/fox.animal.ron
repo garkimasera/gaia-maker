@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 20,
+    habitat: land,
+    growth_speed: 1.0,
+    temp: (10, 28),
+    civ: (
+        civilize_cost: 100.0,
+    ),
+)
