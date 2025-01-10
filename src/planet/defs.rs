@@ -234,13 +234,13 @@ pub struct Animal {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Civilization {
-    pub species: AnimalId,
-}
+pub struct Civilization {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Settlement {
+    pub id: AnimalId,
     pub age: CivilizationAge,
+    pub pop: f32,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -258,6 +258,10 @@ pub enum CivilizationAge {
     IndustrialAge,
     AtomicAge,
     EarlySpaceAge,
+}
+
+impl CivilizationAge {
+    pub const LEN: usize = Self::EarlySpaceAge as usize + 1;
 }
 
 #[derive(
@@ -389,7 +393,7 @@ pub enum BuildingEffect {
     },
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(PlanetEventKind))]
 #[strum_discriminants(derive(
     PartialOrd,
@@ -404,7 +408,7 @@ pub enum BuildingEffect {
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum PlanetEvent {
-    Civilize { target: u8 },
+    Civilize { target: AnimalId },
 }
 
 impl PlanetEvent {
@@ -581,10 +585,10 @@ pub struct SimParams {
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
     /// Coefficent to calulate gene point income.
     pub coef_gene_point_income: f32,
+    /// Initial population of settlements
+    pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
-    /// The max number of civilizations
-    pub max_civs: u8,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

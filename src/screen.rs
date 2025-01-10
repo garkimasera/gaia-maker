@@ -25,7 +25,7 @@ pub enum CursorMode {
     TileEvent(TileEventKind),
     SpawnAnimal(AnimalId),
     EditBiome(Biome),
-    PlaceSettlement(Settlement),
+    PlaceSettlement(AnimalId, CivilizationAge),
 }
 
 impl Default for CursorMode {

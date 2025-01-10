@@ -25,6 +25,7 @@ pub fn debug_tools_window(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut debug_tools: ResMut<DebugTools>,
+    params: Res<Params>,
     sim: Res<Sim>,
     hover_tile: Query<&HoverTile>,
     mut current_panel: Local<Panel>,
@@ -58,7 +59,7 @@ pub fn debug_tools_window(
             match *current_panel {
                 Panel::TileInfo => info_ui(ui, &planet, &sim, p),
                 Panel::Sim => sim_ui(ui, &mut planet, &mut debug_tools),
-                Panel::Map => map_panel.ui(ui, &mut cursor_mode),
+                Panel::Map => map_panel.ui(ui, &mut cursor_mode, &params),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmosphere => atmo_ui(ui, &mut planet),
                 Panel::Water => water_ui(ui, &mut planet),
@@ -106,10 +107,21 @@ fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet, debug_tools: &mut DebugTools) 
 pub struct MapPanel {
     biome: Biome,
     settlement_age: CivilizationAge,
+    animal_id: Option<AnimalId>,
 }
 
 impl MapPanel {
-    fn ui(&mut self, ui: &mut egui::Ui, cursor_mode: &mut CursorMode) {
+    fn ui(&mut self, ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
+        let default_civ_animal = *params
+            .animals
+            .iter()
+            .find(|(_, attr)| attr.civ.is_some())
+            .unwrap()
+            .0;
+        if self.animal_id.is_none() {
+            self.animal_id = Some(default_civ_animal);
+        }
+
         ui.horizontal(|ui| {
             egui::ComboBox::from_id_salt(Biome::Ocean)
                 .selected_text(AsRef::<str>::as_ref(&self.biome))
@@ -135,12 +147,26 @@ impl MapPanel {
                         );
                     }
                 });
-            if ui.button("Place settlement").clicked()
-                || matches!(*cursor_mode, CursorMode::PlaceSettlement(_))
-            {
-                *cursor_mode = CursorMode::PlaceSettlement(Settlement {
-                    age: self.settlement_age,
+            egui::ComboBox::from_id_salt(default_civ_animal)
+                .selected_text(&*self.animal_id.unwrap())
+                .show_ui(ui, |ui| {
+                    for animal_id in params
+                        .animals
+                        .iter()
+                        .filter_map(|(id, attr)| attr.civ.as_ref().map(|_| id))
+                    {
+                        ui.selectable_value(
+                            self.animal_id.as_mut().unwrap(),
+                            *animal_id,
+                            AsRef::<str>::as_ref(&animal_id),
+                        );
+                    }
                 });
+            if ui.button("Place settlement").clicked()
+                || matches!(*cursor_mode, CursorMode::PlaceSettlement(_, _))
+            {
+                *cursor_mode =
+                    CursorMode::PlaceSettlement(self.animal_id.unwrap(), self.settlement_age);
             }
         });
     }

@@ -263,8 +263,8 @@ fn sidebar(
             CursorMode::EditBiome(biome) => {
                 format!("biome editing: {}", biome.as_ref())
             }
-            CursorMode::PlaceSettlement(settlement) => {
-                format!("settlement: {}", settlement.age.as_ref())
+            CursorMode::PlaceSettlement(id, age) => {
+                format!("settlement: {} {:?}", id, t!(age))
             }
         };
         ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));

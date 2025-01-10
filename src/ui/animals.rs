@@ -15,7 +15,7 @@ pub fn animals_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut cursor_mode: ResMut<CursorMode>,
-    mut planet: ResMut<Planet>,
+    (mut planet, mut sim): (ResMut<Planet>, ResMut<Sim>),
     params: Res<Params>,
     textures: Res<EguiTextures>,
     mut state: Local<Option<State>>,
@@ -35,7 +35,15 @@ pub fn animals_window(
                 select_panel(ui, state);
                 ui.separator();
                 ui.vertical(|ui| {
-                    contents(ui, state, &mut planet, &params, &textures, &mut cursor_mode);
+                    contents(
+                        ui,
+                        state,
+                        &mut planet,
+                        &mut sim,
+                        &params,
+                        &textures,
+                        &mut cursor_mode,
+                    );
                 });
             });
         })
@@ -49,6 +57,7 @@ fn contents(
     ui: &mut egui::Ui,
     state: &State,
     planet: &mut Planet,
+    sim: &mut Sim,
     params: &Params,
     textures: &EguiTextures,
     cursor_mode: &mut CursorMode,
@@ -108,13 +117,25 @@ fn contents(
 
         if let Some(c) = &attr.civ {
             ui.scope(|ui| {
-                if !planet
-                    .res
-                    .enough_to_consume(Cost::GenePoint(c.civilize_cost))
-                {
+                let event = PlanetEvent::Civilize {
+                    target: state.current,
+                };
+                if planet.events.in_progress(&event) {
                     ui.disable();
+                    let _ = ui.button(t!("civilizing-in-progress"));
+                } else if planet.civs.contains_key(&state.current) {
+                    ui.disable();
+                    let _ = ui.button(t!("civilized"));
+                } else {
+                    let cost = Cost::GenePoint(c.civilize_cost);
+                    if !planet.res.enough_to_consume(cost) {
+                        ui.disable();
+                    }
+                    if ui.button(t!("civilize")).clicked() {
+                        planet.res.consume(cost);
+                        planet.start_event(event, sim, params);
+                    }
                 }
-                if ui.button(t!("civilize")).clicked() {}
             });
         }
     });

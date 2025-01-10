@@ -68,9 +68,16 @@ fn cursor_action(
                 update_map.update();
                 planet.edit_biome(coords, biome);
             }
-            CursorMode::PlaceSettlement(settlement) => {
+            CursorMode::PlaceSettlement(id, age) => {
                 update_map.update();
-                planet.place_settlement(coords, settlement);
+                planet.place_settlement(
+                    coords,
+                    Settlement {
+                        id,
+                        age,
+                        pop: params.sim.settlement_init_pop[age as usize],
+                    },
+                );
             }
         }
     }

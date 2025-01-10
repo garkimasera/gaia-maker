@@ -4751,7 +4751,7 @@ dependencies = [
 [[package]]
 name = "tile-geom"
 version = "0.1.0"
-source = "git+https://github.com/garkimasera/tile-geom.git#7a42e1d521df8ef2d72f34c6b86a814ab42b1706"
+source = "git+https://github.com/garkimasera/tile-geom.git#f40494aedd5eb727bed8fcb53fb5584e0705e799"
 dependencies = [
  "serde",
  "thiserror 1.0.69",

@@ -2,7 +2,7 @@ use geom::Coords;
 use std::sync::LazyLock;
 use std::{collections::BTreeMap, sync::RwLock};
 
-use super::{Animal, Planet, Sim, KELVIN_CELSIUS};
+use crate::planet::{Animal, Planet, Sim, Structure, KELVIN_CELSIUS};
 
 static POS_FOR_LOG: LazyLock<RwLock<Option<Coords>>> = LazyLock::new(RwLock::default);
 static TILE_LOGS: LazyLock<RwLock<BTreeMap<&'static str, String>>> = LazyLock::new(RwLock::default);
@@ -30,35 +30,44 @@ pub(super) fn tile_log<F: FnOnce(Coords) -> T, T: ToString>(
     }
 }
 
-pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> BTreeMap<&'static str, String> {
-    let mut map = BTreeMap::default();
+pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static str, String)> {
+    let mut v = Vec::new();
 
-    map.insert("height", format!("{:.1}", planet.map[p].height));
-    map.insert("humidity", format!("{:.1}", sim.humidity[p]));
-    map.insert("albedo", format!("{}", sim.albedo[p]));
-    map.insert(
+    v.push(("height", format!("{:.1}", planet.map[p].height)));
+    v.push(("humidity", format!("{:.1}", sim.humidity[p])));
+    v.push(("albedo", format!("{}", sim.albedo[p])));
+    v.push((
         "sea_temp",
         format!("{:.1}", planet.map[p].sea_temp - KELVIN_CELSIUS),
-    );
-    map.insert("ice", format!("{}", planet.map[p].ice));
-    map.insert(
+    ));
+    v.push(("ice", format!("{}", planet.map[p].ice)));
+    v.push((
         "buried carbon",
         format!("{:.2e}", planet.map[p].buried_carbon),
-    );
-    map.insert(
+    ));
+    v.push((
         "animal0",
         animals_debug_text_in_tile(&planet.map[p].animal[0]),
-    );
-    map.insert(
+    ));
+    v.push((
         "animal1",
         animals_debug_text_in_tile(&planet.map[p].animal[1]),
-    );
-    map.insert(
+    ));
+    v.push((
         "animal2",
         animals_debug_text_in_tile(&planet.map[p].animal[2]),
-    );
+    ));
+    v.push((
+        "pop",
+        match &planet.map[p].structure {
+            Some(Structure::Settlement { settlement }) => {
+                format!("{}: {:.1}", settlement.id, settlement.pop)
+            }
+            _ => "0".into(),
+        },
+    ));
 
-    map
+    v
 }
 
 fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
