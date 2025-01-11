@@ -116,6 +116,24 @@ fn process_each_animal(
     }
 }
 
+pub fn calc_cap_without_biomass(
+    planet: &Planet,
+    p: Coords,
+    attr: &AnimalAttr,
+    params: &Params,
+) -> f32 {
+    let tile = &planet.map[p];
+
+    let cap_temp = range_to_livability_trapezoid(attr.temp, 5.0, tile.temp);
+    let cap_oxygen = range_to_livability_trapezoid(
+        params.sim.livable_oxygen_range[attr.size as usize],
+        5.0,
+        planet.atmo.partial_pressure(GasKind::Oxygen),
+    );
+
+    cap_temp * cap_oxygen
+}
+
 fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f32 {
     let tile = &planet.map[p];
 
@@ -129,14 +147,8 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
         tile.fertility.min(params.sim.animal_cap_max_fertility)
             / params.sim.animal_cap_max_fertility
     };
-    let cap_temp = range_to_livability_trapezoid(attr.temp, 5.0, tile.temp);
-    let cap_oxygen = range_to_livability_trapezoid(
-        params.sim.livable_oxygen_range[attr.size as usize],
-        5.0,
-        planet.atmo.partial_pressure(GasKind::Oxygen),
-    );
 
-    cap_biomass_or_fertility * cap_temp * cap_oxygen
+    cap_biomass_or_fertility * calc_cap_without_biomass(planet, p, attr, params)
 }
 
 impl AnimalHabitat {

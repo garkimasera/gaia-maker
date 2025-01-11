@@ -76,6 +76,7 @@ fn cursor_action(
                         id,
                         age,
                         pop: params.sim.settlement_init_pop[age as usize],
+                        tech_exp: 0.0,
                     },
                 );
             }

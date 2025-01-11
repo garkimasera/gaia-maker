@@ -236,11 +236,12 @@ pub struct Animal {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Civilization {}
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Settlement {
     pub id: AnimalId,
     pub age: CivilizationAge,
     pub pop: f32,
+    pub tech_exp: f32,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -587,6 +588,10 @@ pub struct SimParams {
     pub coef_gene_point_income: f32,
     /// Initial population of settlements
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
+    /// Max population of settlements
+    pub settlement_max_pop: [f32; CivilizationAge::LEN],
+    /// Base population growth speed
+    pub base_pop_growth_speed: f32,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
