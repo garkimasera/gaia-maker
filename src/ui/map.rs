@@ -18,6 +18,7 @@ pub enum MapLayer {
     Rainfall,
     Fertility,
     Biomass,
+    Cities,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Resource)]
@@ -213,6 +214,19 @@ fn map_img(
                 MapLayer::Biomass => {
                     color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Biomass)
                 }
+                MapLayer::Cities => {
+                    if let Some(Structure::Settlement { settlement }) =
+                        &planet.map[(x, y)].structure
+                    {
+                        CITY_COLORS[settlement.age as usize]
+                    } else {
+                        if planet.map[(x, y)].biome.is_land() {
+                            params.biomes[&Biome::Rock].color
+                        } else {
+                            params.biomes[&Biome::Ocean].color
+                        }
+                    }
+                }
             };
             egui::Color32::from_rgba_unmultiplied(color[0], color[1], color[2], 255)
         })
@@ -223,3 +237,12 @@ fn map_img(
         pixels,
     }
 }
+
+const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
+    [255, 0, 0],
+    [255, 92, 0],
+    [255, 240, 0],
+    [0, 145, 0],
+    [0, 204, 255],
+    [190, 0, 255],
+];
