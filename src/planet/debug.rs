@@ -60,7 +60,7 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
     v.push((
         "pop",
         match &planet.map[p].structure {
-            Some(Structure::Settlement { settlement }) => {
+            Some(Structure::Settlement(settlement)) => {
                 format!("{}: {:.2}", settlement.id, settlement.pop)
             }
             _ => "0".into(),

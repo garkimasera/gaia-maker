@@ -220,7 +220,7 @@ fn spawn_structure_textures(
         let kind: StructureKind = structure.into();
         let attrs = &params.structures[&kind];
 
-        let index = if let Structure::Settlement { settlement } = structure {
+        let index = if let Structure::Settlement(settlement) = structure {
             settlement.age as usize
         } else {
             0

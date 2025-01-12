@@ -215,16 +215,12 @@ fn map_img(
                     color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Biomass)
                 }
                 MapLayer::Cities => {
-                    if let Some(Structure::Settlement { settlement }) =
-                        &planet.map[(x, y)].structure
-                    {
+                    if let Some(Structure::Settlement(settlement)) = &planet.map[(x, y)].structure {
                         CITY_COLORS[settlement.age as usize]
+                    } else if planet.map[(x, y)].biome.is_land() {
+                        params.biomes[&Biome::Rock].color
                     } else {
-                        if planet.map[(x, y)].biome.is_land() {
-                            params.biomes[&Biome::Rock].color
-                        } else {
-                            params.biomes[&Biome::Ocean].color
-                        }
+                        params.biomes[&Biome::Ocean].color
                     }
                 }
             };

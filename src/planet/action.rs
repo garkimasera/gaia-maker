@@ -99,6 +99,6 @@ impl Planet {
     }
 
     pub fn place_settlement(&mut self, coords: Coords, settlement: Settlement) {
-        self.map[coords].structure = Some(Structure::Settlement { settlement });
+        self.map[coords].structure = Some(Structure::Settlement(settlement));
     }
 }

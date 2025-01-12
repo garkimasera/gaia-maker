@@ -1,12 +1,17 @@
-use rand::seq::SliceRandom;
+use arrayvec::ArrayVec;
+use geom::{Coords, CyclicMode};
+use rand::{seq::SliceRandom, Rng};
 
-use super::{defs::*, Planet, Sim};
+use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
-pub fn sim_civs(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
+pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let planet_size = planet.map.size();
+    let rng = &mut sim.rng;
+
     for p in planet.map.iter_idx() {
-        let Some(Structure::Settlement { mut settlement }) = planet.map[p].structure else {
+        let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;
         };
         let animal_attr = &params.animals[&settlement.id];
@@ -19,7 +24,39 @@ pub fn sim_civs(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
         let dn = growth_speed * ratio * (-ratio + 1.0);
         settlement.pop += dn;
 
-        planet.map[p].structure = Some(Structure::Settlement { settlement });
+        planet.map[p].structure = Some(Structure::Settlement(settlement));
+
+        // Settlement spreading
+        let cr = calc_congestion_rate(p, planet_size, |p| {
+            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
+                1.0
+            } else {
+                0.0
+            }
+        });
+        let normalized_pop =
+            settlement.pop / params.sim.settlement_max_pop[settlement.age as usize];
+        let prob = (params.sim.coef_settlement_spreading_a
+            * (params.sim.coef_settlement_spreading_b * normalized_pop - cr))
+            .clamp(0.0, 1.0);
+        if rng.gen_bool(prob.into()) {
+            let mut target_tiles: ArrayVec<Coords, 16> = ArrayVec::new();
+            for d in geom::CHEBYSHEV_DISTANCE_2_COORDS {
+                if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + *d) {
+                    if animal_attr.habitat.match_biome(planet.map[p_next].biome)
+                        && planet.map[p_next].structure.is_none()
+                    {
+                        target_tiles.push(p_next);
+                    }
+                }
+            }
+            if let Some(p_target) = target_tiles.choose(rng) {
+                planet.map[*p_target].structure = Some(Structure::Settlement(Settlement {
+                    pop: params.sim.settlement_init_pop[settlement.age as usize],
+                    ..settlement
+                }));
+            }
+        }
     }
 }
 
@@ -49,7 +86,7 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
         let mut p_settlement = None;
         for p in tile_geom::SpiralIter::new(p).take(0xFF) {
             if planet.map.in_range(p) && planet.map[p].structure.is_none() {
-                planet.map[p].structure = Some(Structure::Settlement { settlement });
+                planet.map[p].structure = Some(Structure::Settlement(settlement));
                 p_settlement = Some(p);
                 break;
             }
@@ -66,7 +103,7 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
                         .habitat
                         .match_biome(planet.map[p].biome)
                 {
-                    planet.map[p].structure = Some(Structure::Settlement { settlement });
+                    planet.map[p].structure = Some(Structure::Settlement(settlement));
                 }
             }
         }

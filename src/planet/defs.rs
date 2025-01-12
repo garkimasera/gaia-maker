@@ -142,7 +142,7 @@ pub enum Structure {
     FertilizationPlant,
     Heater,
     CarbonCapturer,
-    Settlement { settlement: Settlement },
+    Settlement(Settlement),
 }
 
 impl Structure {
@@ -592,6 +592,10 @@ pub struct SimParams {
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
     pub base_pop_growth_speed: f32,
+    /// Coefficent to calculate settlement spreading probability
+    pub coef_settlement_spreading_a: f32,
+    /// Coefficent to calculate animal fission probability
+    pub coef_settlement_spreading_b: f32,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
