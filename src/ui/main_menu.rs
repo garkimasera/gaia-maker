@@ -66,8 +66,6 @@ pub fn main_menu(
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                        ui.image(textures.get("logo"));
-
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
                         }

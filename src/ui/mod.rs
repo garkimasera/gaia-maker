@@ -190,11 +190,7 @@ fn load_textures(
             None
         }
     });
-    let other_imgs = ui_assets
-        .other_imgs
-        .iter()
-        .map(|(path, handle)| (path.clone(), handle.clone()));
-    let textures = ui.chain(start_planets).chain(animal_imgs).chain(other_imgs);
+    let textures = ui.chain(start_planets).chain(animal_imgs);
 
     let mut egui_textures = HashMap::new();
     for (path, handle) in textures {

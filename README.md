@@ -1,4 +1,4 @@
-# ![Gaia Maker](assets/logo.png)
+# ![Gaia Maker](https://garkimasera.github.io/games/images/gaia-maker-logo2.png)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/garkimasera/gaia-maker/blob/main/LICENSE)
 [![CI](https://github.com/garkimasera/gaia-maker/actions/workflows/ci.yml/badge.svg)](https://github.com/garkimasera/gaia-maker/actions/workflows/ci.yml)
