@@ -301,6 +301,10 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
                 10.0,
                 rng.sample(SymmetricalLinearDist::from(start_planet.solar_constant)),
             ),
+            geothermal_power: start_planet
+                .geothermal_power
+                .map(|geothermal_power| rng.sample(SymmetricalLinearDist::from(geothermal_power)))
+                .unwrap_or(params.default_start_params.basics.geothermal_power),
         },
         difference_in_elevation: rng.sample(SymmetricalLinearDist::from(start_planet.elevation)),
         water_volume: rng.sample(SymmetricalLinearDist::from(start_planet.water_volume)),

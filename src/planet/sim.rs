@@ -14,6 +14,8 @@ pub struct Sim {
     pub _n_tile: u32,
     /// Tile area [m^2]
     pub tile_area: f32,
+    /// Geothermal power per tile [W]
+    pub geothermal_power_per_tile: f32,
     /// Tile insolation [J/m^2]
     pub insolation: Array2d<f32>,
     /// Solar constant at last insolation calculation
@@ -45,6 +47,7 @@ pub struct Sim {
 impl Sim {
     pub fn new(planet: &Planet) -> Self {
         let size = planet.map.size();
+        let n_tile = size.0 * size.1;
         let map_iter_idx = planet.map.iter_idx();
         let tile_area = 4.0 * PI * planet.basics.radius * planet.basics.radius
             / (size.0 as f32 * size.1 as f32);
@@ -60,8 +63,9 @@ impl Sim {
         Sim {
             rng: misc::get_rng(),
             before_start: false,
-            _n_tile: size.0 * size.1,
+            _n_tile: n_tile,
             tile_area,
+            geothermal_power_per_tile: planet.basics.geothermal_power / n_tile as f32,
             insolation: Array2d::new(size.0, size.1, 0.0),
             solar_constant_before: 0.0,
             atemp,

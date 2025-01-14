@@ -232,6 +232,7 @@
         basics: (
             radius: 6300000,
             solar_constant: 1400,
+            geothermal_power: 3.0e+13,
         ),
         size: (128, 64),
         difference_in_elevation: 7000.0,

@@ -60,7 +60,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                         * planet.atmo.atm())
                 .max(0.0);
 
-            let inflow = insolation * sim.tile_area;
+            let inflow = insolation * sim.tile_area + sim.geothermal_power_per_tile;
 
             let outflow = STEFAN_BOLTZMANN_CONSTANT
                 * sim.atemp[p].powi(4)

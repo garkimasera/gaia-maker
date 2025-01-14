@@ -21,6 +21,8 @@ pub struct Basics {
     pub radius: f32,
     /// Solar constant at the planet [W/m^2]
     pub solar_constant: f32,
+    /// Geothermal power from the planet core [W]
+    pub geothermal_power: f32,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -667,6 +669,8 @@ pub struct StartPlanet {
     /// Planet radius [km]
     pub radius: (f32, f32),
     pub solar_constant: (f32, f32),
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub geothermal_power: Option<(f32, f32)>,
     pub elevation: (f32, f32),
     pub water_volume: (f32, f32),
     pub nitrogen: (f32, f32),
