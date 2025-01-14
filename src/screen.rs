@@ -38,12 +38,9 @@ impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Centering>()
             .add_systems(Startup, setup)
-            .add_systems(Startup, setup_main_menu_background)
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
-            .add_systems(OnEnter(GameState::MainMenu), main_menu_background)
-            .add_systems(OnExit(GameState::MainMenu), main_menu_background_exit)
             .add_systems(
                 OnEnter(GameState::Running),
                 (setup_cursor, set_scale_factor_to_occupied_screen_space),
@@ -502,53 +499,6 @@ fn keyboard_input(
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
-    }
-}
-
-#[derive(Component)]
-struct MainMenuBackground;
-
-fn setup_main_menu_background(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let bg_material = materials.add(ColorMaterial {
-        color: Srgba {
-            red: 0.5,
-            green: 0.5,
-            blue: 0.5,
-            alpha: 1.0,
-        }
-        .into(),
-        ..default()
-    });
-    let bg_mesh = meshes.add(Mesh::from(Rectangle::new(100000.0, 100000.0)));
-    commands
-        .spawn((
-            Mesh2d(bg_mesh),
-            MeshMaterial2d(bg_material),
-            Transform::from_xyz(0.0, 0.0, 998.0),
-        ))
-        .insert(MainMenuBackground);
-}
-
-fn main_menu_background(
-    mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
-    mut bg_meshes: Query<&mut Visibility, With<MainMenuBackground>>,
-) {
-    let translation = &mut camera_query.get_single_mut().unwrap().1.translation;
-    translation.x = 0.0;
-    translation.y = 0.0;
-
-    for mut bg in bg_meshes.iter_mut() {
-        *bg = Visibility::Visible;
-    }
-}
-
-fn main_menu_background_exit(mut bg_meshes: Query<&mut Visibility, With<MainMenuBackground>>) {
-    for mut bg in bg_meshes.iter_mut() {
-        *bg = Visibility::Hidden;
     }
 }
 

@@ -50,18 +50,22 @@ pub fn main_menu(
     mut er_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
+    mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     textures: Res<EguiTextures>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
         state.mode = MainMenuMode::Error;
         state.error = Some(e.clone());
     }
+    let mut logo_visibility = logo_visibility.get_single_mut().unwrap();
+    *logo_visibility = Visibility::Hidden;
 
     match state.mode {
         MainMenuMode::Menu => {
+            *logo_visibility = Visibility::Visible;
             egui::Window::new(t!("menu"))
                 .title_bar(false)
-                .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
+                .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 127.0))
                 .default_width(0.0)
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {

@@ -22,6 +22,7 @@ mod saveload;
 mod screen;
 mod sim;
 mod text;
+mod title_screen;
 mod ui;
 
 use bevy::{
@@ -65,6 +66,7 @@ fn main() {
         .add_plugins(screen::ScreenPlugin)
         .add_plugins(ui::UiPlugin)
         .add_plugins(audio::GameAudioPlugin)
+        .add_plugins(title_screen::TitleScreenPlugin)
         .add_plugins(draw::DrawPlugin)
         .add_plugins(action::ActionPlugin)
         .add_plugins(sim::SimPlugin)
