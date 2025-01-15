@@ -26,6 +26,29 @@ pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     panic!("invalid input for interpolation: {}", x)
 }
 
+pub fn bisection<F: FnMut(f32) -> f32>(
+    mut f: F,
+    mut a: f32,
+    mut b: f32,
+    n_max: usize,
+    target_diff: f32,
+) -> f32 {
+    let mut c = (a + b) / 2.0;
+
+    for _ in 0..n_max {
+        if f(c) < 0.0 {
+            a = c;
+        } else {
+            b = c;
+        }
+        c = (a + b) / 2.0;
+        if (b - a) < target_diff * 2.0 {
+            return c;
+        }
+    }
+    c
+}
+
 pub fn range_to_livability_trapezoid((min, max): (f32, f32), a: f32, x: f32) -> f32 {
     assert!(min <= max);
 

@@ -250,6 +250,7 @@
         },
         cycles_before_start: 100,
         initial_conditions: [],
+        height_table: [],
     ),
     history: (
         max_record: 101,

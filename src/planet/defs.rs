@@ -459,6 +459,8 @@ pub struct StartParams {
     pub space_buildings: FnvHashMap<SpaceBuildingKind, u32>,
     pub cycles_before_start: u32,
     pub initial_conditions: Vec<InitialCondition>,
+    pub height_table: Vec<(f32, f32)>,
+    pub target_sea_level: Option<f32>,
 }
 
 #[serde_as]
@@ -676,6 +678,10 @@ pub struct StartPlanet {
     pub nitrogen: (f32, f32),
     pub carbon_dioxide: (f32, f32),
     pub initial_conditions: Vec<InitialCondition>,
+    #[serde(default)]
+    pub height_table: Vec<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub target_sea_level: Option<f32>,
 }
 
 #[derive(
