@@ -39,7 +39,6 @@ jobs:
           args: --release --target wasm32-unknown-unknown --features asset_tar
       - run: |
           wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/gaia-maker.wasm
-          mv index.html favicon.ico -t ./out/
           tar czf ./assets.tar.gz -C ./assets .
           mv assets.tar.gz -t ./out/
       - name: Upload artifact
