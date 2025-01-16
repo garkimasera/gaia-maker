@@ -506,6 +506,8 @@ pub struct SimParams {
     pub n_loop_vapor_calc: usize,
     /// The ratio of tile vapor diffusion
     pub vapor_diffusion_factor: f32,
+    /// Coefficent to adjust vapor diffusion by height difference
+    pub coeff_vapor_diffusion_adjust_by_h_diff: f32,
     /// The ratio of vapor loss
     pub vapor_loss_ratio: f32,
     /// Vaporizaion from ocean tile - °C table

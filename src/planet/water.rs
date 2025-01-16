@@ -92,8 +92,14 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
                         if let Some(adjacent_tile) =
                             CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
                         {
-                            let delta_vapor = sim.vapor[adjacent_tile] - sim.vapor[p];
-                            0.5 * params.sim.vapor_diffusion_factor * delta_vapor
+                            let diff_height =
+                                (planet.map[adjacent_tile].height - planet.map[p].height).max(0.0);
+                            let d = params.sim.vapor_diffusion_factor
+                                / (1.0
+                                    + diff_height
+                                        * params.sim.coeff_vapor_diffusion_adjust_by_h_diff);
+                            let delta_vapor = (sim.vapor[adjacent_tile] - sim.vapor[p]).max(0.0);
+                            0.5 * d * delta_vapor
                         } else {
                             0.0
                         }
