@@ -86,7 +86,7 @@ fn process_each_animal(
         if let Some(p_target) = target_tiles.choose(rng) {
             let animal = planet.map[p].animal[size as usize].as_mut().unwrap();
             animal.n /= 2.0;
-            planet.map[*p_target].animal[size as usize] = Some(animal.clone());
+            planet.map[*p_target].animal[size as usize] = Some(*animal);
         }
     }
 

@@ -22,6 +22,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     planet.atmo.release_carbon(burned_biomass);
                 }
                 planet.atmo.aerosol += params.event.fire_aerosol;
+
+                if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
+                    planet.map[p].structure = None;
+                }
+                planet.map[p].animal = [None; AnimalSize::LEN];
             }
             TileEventKind::BlackDust => {
                 let rainfall = planet.map[p].rainfall;

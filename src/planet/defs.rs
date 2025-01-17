@@ -229,7 +229,7 @@ pub enum AnimalHabitat {
     Biomes(Vec<Biome>),
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Animal {
     pub id: AnimalId,
     pub n: f32,
