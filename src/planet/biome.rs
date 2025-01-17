@@ -1,4 +1,4 @@
-use geom::{CDistRangeIter, CyclicMode, Direction};
+use geom::{CDistRangeIter, Direction};
 use rand::Rng;
 
 use super::misc::linear_interpolation;
@@ -49,8 +49,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let fertility_from_adjacent_tiles = Direction::FOUR_DIRS
                 .iter()
                 .filter_map(|dir| {
-                    let p_adj =
-                        CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords());
+                    let p_adj = sim.convert_p_cyclic(p + dir.as_coords());
                     if let Some(p_adj) = p_adj {
                         if planet.map.in_range(p_adj) {
                             Some((planet.map[p_adj].fertility - fertility).max(0.0))

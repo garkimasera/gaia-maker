@@ -1,5 +1,5 @@
 use arrayvec::ArrayVec;
-use geom::{Coords, CyclicMode};
+use geom::Coords;
 use rand::{seq::SliceRandom, Rng};
 
 use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
@@ -45,7 +45,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if sim.rng.gen_bool(prob.into()) {
             let mut target_tiles: ArrayVec<Coords, 16> = ArrayVec::new();
             for d in geom::CHEBYSHEV_DISTANCE_2_COORDS {
-                if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + *d) {
+                if let Some(p_next) = sim.convert_p_cyclic(p + *d) {
                     if animal_attr.habitat.match_biome(planet.map[p_next].biome)
                         && planet.map[p_next].structure.is_none()
                     {

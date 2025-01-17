@@ -1,6 +1,6 @@
 use super::misc::{bisection, linear_interpolation};
 use super::*;
-use geom::{CyclicMode, Direction};
+use geom::Direction;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -89,9 +89,7 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
                 let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                     .into_iter()
                     .map(|dir| {
-                        if let Some(adjacent_tile) =
-                            CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
-                        {
+                        if let Some(adjacent_tile) = sim.convert_p_cyclic(p + dir.as_coords()) {
                             let diff_height =
                                 (planet.map[adjacent_tile].height - planet.map[p].height).max(0.0);
                             let d = params.sim.vapor_diffusion_factor

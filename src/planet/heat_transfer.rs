@@ -1,6 +1,6 @@
 use super::misc::linear_interpolation;
 use super::*;
-use geom::{CyclicMode, Direction};
+use geom::Direction;
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
 pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.670E-8;
@@ -70,9 +70,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                 .into_iter()
                 .map(|dir| {
-                    if let Some(adjacent_tile) =
-                        CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
-                    {
+                    if let Some(adjacent_tile) = sim.convert_p_cyclic(p + dir.as_coords()) {
                         let delta_temp = sim.atemp[adjacent_tile] - sim.atemp[p];
                         0.5 * params.sim.air_diffusion_factor * air_heat_cap_per_tile * delta_temp
                     } else {
@@ -111,9 +109,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
             .into_iter()
             .map(|dir| {
-                if let Some(adjacent_tile) =
-                    CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords())
-                {
+                if let Some(adjacent_tile) = sim.convert_p_cyclic(p + dir.as_coords()) {
                     if sim.sea_heat_cap[adjacent_tile] == 0.0 {
                         0.0
                     } else {

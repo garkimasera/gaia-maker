@@ -1,5 +1,5 @@
 use arrayvec::ArrayVec;
-use geom::{CyclicMode, Direction};
+use geom::Direction;
 use misc::{calc_congestion_rate, range_to_livability_trapezoid};
 use rand::{seq::SliceRandom, Rng};
 
@@ -12,17 +12,17 @@ pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     for p in planet.map.iter_idx() {
         for size in AnimalSize::iter() {
-            process_each_animal(planet, p, size, params, &mut sim.rng);
+            process_each_animal(planet, sim, p, size, params);
         }
     }
 }
 
 fn process_each_animal(
     planet: &mut Planet,
+    sim: &mut Sim,
     p: Coords,
     size: AnimalSize,
     params: &Params,
-    rng: &mut impl Rng,
 ) {
     let (animal_id, attr, n) = if let Some(ref mut animal) = planet.map[p].animal[size as usize] {
         (animal.id, &params.animals[&animal.id], animal.n)
@@ -71,10 +71,10 @@ fn process_each_animal(
     });
     let prob = (params.sim.coef_animal_fisson_a * (params.sim.coef_animal_fisson_b * new_n - cr))
         .clamp(0.0, 1.0);
-    if rng.gen_bool(prob.into()) {
+    if sim.rng.gen_bool(prob.into()) {
         let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
         for d in Direction::EIGHT_DIRS {
-            if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + d.as_coords()) {
+            if let Some(p_next) = sim.convert_p_cyclic(p + d.as_coords()) {
                 if planet.map[p_next].animal[size as usize].is_none()
                     && calc_cap(planet, p_next, attr, params)
                         > params.sim.animal_extinction_threshold
@@ -83,7 +83,7 @@ fn process_each_animal(
                 }
             }
         }
-        if let Some(p_target) = target_tiles.choose(rng) {
+        if let Some(p_target) = target_tiles.choose(&mut sim.rng) {
             let animal = planet.map[p].animal[size as usize].as_mut().unwrap();
             animal.n /= 2.0;
             planet.map[*p_target].animal[size as usize] = Some(*animal);
@@ -94,20 +94,20 @@ fn process_each_animal(
     let prob = (params.sim.coef_animal_kill_by_congestion_a
         * (cr - params.sim.coef_animal_kill_by_congestion_b))
         .clamp(0.0, 1.0);
-    if rng.gen_bool(prob.into()) {
+    if sim.rng.gen_bool(prob.into()) {
         planet.map[p].animal[size as usize] = None;
         return;
     }
 
     // Random walk
-    if rng.gen_bool(params.sim.animal_move_weight) {
-        let dir = *Direction::EIGHT_DIRS.choose(rng).unwrap();
-        if let Some(p_dest) = CyclicMode::X.convert_coords(planet.map.size(), p + dir.as_coords()) {
+    if sim.rng.gen_bool(params.sim.animal_move_weight) {
+        let dir = *Direction::EIGHT_DIRS.choose(&mut sim.rng).unwrap();
+        if let Some(p_dest) = sim.convert_p_cyclic(p + dir.as_coords()) {
             // If the destination is empty
             if planet.map[p_dest].animal[size as usize].is_none() {
                 let cap_dest = calc_cap(planet, p_dest, attr, params);
                 let move_probability = (cap_dest / (cap + 0.001)).clamp(0.0, 1.0);
-                if rng.gen_bool(move_probability.into()) {
+                if sim.rng.gen_bool(move_probability.into()) {
                     planet.map[p_dest].animal[size as usize] =
                         planet.map[p].animal[size as usize].take();
                 }
