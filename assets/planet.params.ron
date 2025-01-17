@@ -204,7 +204,9 @@
         settlement_max_pop: (4.0, 20.0, 100.0, 300.0, 400.0, 500.0),
         coef_settlement_spreading_a: 0.4,
         coef_settlement_spreading_b: 0.3,
+        settlement_extinction_threshold: 0.4,
         energy_demand_per_pop: (10, 33, 66, 170, 340, 420),
+        biomass_energy_factor: 2500,
         event_duration: {civilize: 108},
     ),
     event: (

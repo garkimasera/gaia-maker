@@ -10,8 +10,8 @@ pub struct Sim {
     pub rng: SmallRng,
     /// Before start simulation or not
     pub before_start: bool,
-    /// The number of tiles
-    pub _n_tile: u32,
+    /// Planet size
+    pub size: (u32, u32),
     /// Tile area [m^2]
     pub tile_area: f32,
     /// Geothermal power per tile [W]
@@ -63,7 +63,7 @@ impl Sim {
         Sim {
             rng: misc::get_rng(),
             before_start: false,
-            _n_tile: n_tile,
+            size,
             tile_area,
             geothermal_power_per_tile: planet.basics.geothermal_power / n_tile as f32,
             insolation: Array2d::new(size.0, size.1, 0.0),
@@ -85,5 +85,9 @@ impl Sim {
     /// Return the factor to calculate tile biomass [Mt] from density.
     pub fn biomass_density_to_mass(&self) -> f32 {
         self.tile_area * 1.0e-9
+    }
+
+    pub fn convert_p_cyclic(&self, p: Coords) -> Option<Coords> {
+        geom::CyclicMode::X.convert_coords(self.size, p)
     }
 }

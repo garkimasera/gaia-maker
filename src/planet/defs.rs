@@ -602,8 +602,12 @@ pub struct SimParams {
     pub coef_settlement_spreading_a: f32,
     /// Coefficent to calculate animal fission probability
     pub coef_settlement_spreading_b: f32,
+    /// Settlement population to extinction
+    pub settlement_extinction_threshold: f32,
     /// Energy demand per pop [GJ]
     pub energy_demand_per_pop: [f32; CivilizationAge::LEN],
+    /// Consumed biomass to energy factor [GJ/Mt]
+    pub biomass_energy_factor: f32,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }

@@ -8,19 +8,22 @@ pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let planet_size = planet.map.size();
-    let rng = &mut sim.rng;
 
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;
         };
         let animal_attr = &params.animals[&settlement.id];
+
+        // Energy
+        consume_energy(planet, sim, p, &settlement, params);
+
+        // Pop growth & decline
         let cap_animal = super::animal::calc_cap_without_biomass(planet, p, animal_attr, params);
         let cap = params.sim.settlement_max_pop[settlement.age as usize] * cap_animal;
 
-        // Pop growth & decline
         let growth_speed = params.sim.base_pop_growth_speed;
-        let ratio = settlement.pop / cap;
+        let ratio = settlement.pop / cap.max(1e-10);
         let dn = growth_speed * ratio * (-ratio + 1.0);
         settlement.pop += dn;
 
@@ -39,7 +42,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let prob = (params.sim.coef_settlement_spreading_a
             * (params.sim.coef_settlement_spreading_b * normalized_pop - cr))
             .clamp(0.0, 1.0);
-        if rng.gen_bool(prob.into()) {
+        if sim.rng.gen_bool(prob.into()) {
             let mut target_tiles: ArrayVec<Coords, 16> = ArrayVec::new();
             for d in geom::CHEBYSHEV_DISTANCE_2_COORDS {
                 if let Some(p_next) = CyclicMode::X.convert_coords(planet_size, p + *d) {
@@ -50,14 +53,66 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     }
                 }
             }
-            if let Some(p_target) = target_tiles.choose(rng) {
+            if let Some(p_target) = target_tiles.choose(&mut sim.rng) {
                 planet.map[*p_target].structure = Some(Structure::Settlement(Settlement {
                     pop: params.sim.settlement_init_pop[settlement.age as usize],
                     ..settlement
                 }));
             }
         }
+
+        // Settlement extinction
+        planet.map[p].structure = if settlement.pop < params.sim.settlement_extinction_threshold {
+            None
+        } else {
+            Some(Structure::Settlement(settlement))
+        };
     }
+}
+
+fn consume_energy(
+    planet: &mut Planet,
+    sim: &mut Sim,
+    p: Coords,
+    settlement: &Settlement,
+    params: &Params,
+) -> f32 {
+    let age = settlement.age as usize;
+
+    let energy_demand = settlement.pop * params.sim.energy_demand_per_pop[age];
+    let biomass_to_consume = energy_demand / params.sim.biomass_energy_factor;
+
+    // Consume biomass from a tile that has maximum biomass
+    let mut p_max_biomass = p;
+    let mut total_biomass = planet.map[p].biomass;
+    let mut max_biomass = total_biomass;
+    for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
+            if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
+                let biomass = planet.map[p_adj].biomass;
+                if biomass > max_biomass {
+                    max_biomass = biomass;
+                    total_biomass += biomass;
+                    p_max_biomass = p_adj;
+                }
+            }
+        }
+    }
+
+    let total_biomass = total_biomass * sim.biomass_density_to_mass();
+    let max_biomass = max_biomass * sim.biomass_density_to_mass();
+    let available_biomass_ratio = if total_biomass > 0.0 {
+        biomass_to_consume / total_biomass
+    } else {
+        0.0
+    };
+
+    let new_biomass = (max_biomass - biomass_to_consume).max(0.0);
+    let diff_biomass = max_biomass - new_biomass;
+    planet.map[p_max_biomass].biomass = new_biomass / sim.biomass_density_to_mass();
+    planet.atmo.release_carbon(diff_biomass);
+
+    available_biomass_ratio
 }
 
 pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, animal_id: AnimalId) {
