@@ -246,6 +246,7 @@ fn sidebar(
         );
         ui.painter()
             .rect_filled(ui.available_rect_before_wrap(), 6.0, bg_color);
+        ui.add_space(2.0);
         let text = match cursor_mode {
             CursorMode::Normal => "".into(),
             CursorMode::Demolition => {
@@ -255,7 +256,7 @@ fn sidebar(
                 t!(kind)
             }
             CursorMode::TileEvent(kind) => {
-                t!(kind)
+                t!("tile_event", kind)
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
                 format!("{} {}", t!("animal"), t!(animal_id))
