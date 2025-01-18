@@ -1,6 +1,6 @@
 (
     id: "continental",
-    difficulty: very_easy,
+    habitability: ideal,
     radius: (6200, 300),
     solar_constant: (1350, 120),
     elevation: (7000.0, 1000.0),

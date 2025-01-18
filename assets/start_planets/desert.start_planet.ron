@@ -1,6 +1,6 @@
 (
     id: "desert",
-    difficulty: normal,
+    habitability: poor,
     radius: (6000, 300),
     solar_constant: (1200, 200),
     elevation: (7000.0, 1000.0),

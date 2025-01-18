@@ -1,6 +1,6 @@
 (
     id: "ice",
-    difficulty: easy,
+    habitability: adequate,
     radius: (6200, 300),
     solar_constant: (400, 100),
     elevation: (7000.0, 1000.0),

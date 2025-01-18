@@ -248,7 +248,7 @@ fn create_assets_list(
     }
     params
         .start_planets
-        .sort_by(|a, b| match a.difficulty.cmp(&b.difficulty) {
+        .sort_by(|a, b| match a.habitability.cmp(&b.habitability) {
             Ordering::Equal => a.id.cmp(&b.id),
             o => o,
         });

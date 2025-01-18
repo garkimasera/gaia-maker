@@ -1,3 +1,9 @@
+[habitability]
+ideal = "Ideal"
+adequate = "Adequate"
+poor = "Poor"
+hostile = "Hostile"
+
 [planet]
 custom = "Custom"
 continental = "Continental Planet"

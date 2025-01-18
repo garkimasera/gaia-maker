@@ -1,3 +1,9 @@
+[habitability]
+ideal = "理想的"
+adequate = "適切"
+poor = "貧弱"
+hostile = "過酷"
+
 [planet]
 custom = "カスタム"
 continental = "大陸惑星"

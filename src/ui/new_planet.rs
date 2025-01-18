@@ -127,19 +127,18 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
 }
 
 fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiTextures) {
-    use crate::planet::PlanetDifficulty;
+    use crate::planet::PlanetHabitability;
 
     let start_planet = params
         .start_planets
         .iter()
         .find(|start_planet| start_planet.id == id)
         .unwrap();
-    let color = match start_planet.difficulty {
-        PlanetDifficulty::VeryEasy => egui::Color32::LIGHT_BLUE,
-        PlanetDifficulty::Easy => egui::Color32::GREEN,
-        PlanetDifficulty::Normal => egui::Color32::YELLOW,
-        PlanetDifficulty::Hard => egui::Color32::RED,
-        PlanetDifficulty::VeryHard => egui::Color32::RED,
+    let color = match start_planet.habitability {
+        PlanetHabitability::Ideal => egui::Color32::from_rgb(0x46, 0xCC, 0xFF),
+        PlanetHabitability::Adequate => egui::Color32::GREEN,
+        PlanetHabitability::Poor => egui::Color32::YELLOW,
+        PlanetHabitability::Hostile => egui::Color32::RED,
     };
 
     ui.horizontal(|ui| {
@@ -148,14 +147,11 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiText
     });
 
     ui.horizontal(|ui| {
-        ui.label(format!("{}: ", t!("difficulty")));
+        ui.label(format!("{}: ", t!("habitability")));
         ui.label(
-            egui::RichText::new(t!(format!(
-                "difficulty-{}",
-                start_planet.difficulty.as_ref()
-            )))
-            .strong()
-            .color(color),
+            egui::RichText::new(t!("habitability", start_planet.habitability))
+                .strong()
+                .color(color),
         );
     });
 

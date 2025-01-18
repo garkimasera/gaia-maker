@@ -673,7 +673,7 @@ pub struct HistoryParams {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StartPlanet {
     pub id: String,
-    pub difficulty: PlanetDifficulty,
+    pub habitability: PlanetHabitability,
     /// Planet radius [km]
     pub radius: (f32, f32),
     pub solar_constant: (f32, f32),
@@ -695,12 +695,11 @@ pub struct StartPlanet {
 )]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
-pub enum PlanetDifficulty {
-    VeryEasy,
-    Easy,
-    Normal,
-    Hard,
-    VeryHard,
+pub enum PlanetHabitability {
+    Ideal,
+    Adequate,
+    Poor,
+    Hostile,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
