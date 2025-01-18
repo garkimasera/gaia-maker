@@ -39,6 +39,8 @@ jobs:
           args: --release --target wasm32-unknown-unknown --features asset_tar
       - run: |
           wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/gaia-maker.wasm
+          mv index.html -t ./out/
+          curl -o ./assets/logo.png https://garkimasera.github.io/games/images/gaia-maker-logo2.png
           tar czf ./assets.tar.gz -C ./assets .
           mv assets.tar.gz -t ./out/
       - name: Upload artifact
