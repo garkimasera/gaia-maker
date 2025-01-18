@@ -3,6 +3,7 @@ use std::io::Read;
 use anyhow::{anyhow, Result};
 use byteorder::ReadBytesExt;
 use bytes::BufMut;
+use serde::{Deserialize, Serialize};
 
 use crate::planet::Planet;
 
@@ -23,18 +24,19 @@ impl SaveFileList {
     }
 }
 
-pub fn save_to(slot: usize, planet: &Planet) -> Result<()> {
+pub fn save_to(slot: usize, planet: &Planet, manual_slot: usize) -> Result<()> {
     let planet_data = rmp_serde::to_vec(planet)?;
 
     log::info!("save to slot {}", slot);
 
-    let bytes = SaveFile::new(planet_data).to_bytes();
+    let metadata = SaveFileMetadata { manual_slot };
+    let bytes = SaveFile::new(planet_data, metadata).to_bytes();
     write(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION), &bytes)?;
 
     Ok(())
 }
 
-pub fn load_from(slot: usize) -> Result<Planet> {
+pub fn load_from(slot: usize) -> Result<(Planet, usize)> {
     let data = SaveFile::from_bytes(&read(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION))?)?;
     log::info!(
         "load save from slot {} version={} time=\"{}\"",
@@ -42,7 +44,8 @@ pub fn load_from(slot: usize) -> Result<Planet> {
         data.version,
         data.time
     );
-    Ok(rmp_serde::from_slice(&data.planet_data)?)
+    let planet = rmp_serde::from_slice(&data.planet_data)?;
+    Ok((planet, data.metadata.manual_slot))
 }
 
 pub fn load_save_file_list() -> SaveFileList {
@@ -131,15 +134,20 @@ fn read(file_name: &str) -> Result<Vec<u8>> {
 struct SaveFile {
     version: String,
     time: String,
-    metadata: Vec<u8>,
+    metadata: SaveFileMetadata,
     planet_data: Vec<u8>,
 }
 
+#[derive(Default, Debug, Serialize, Deserialize)]
+struct SaveFileMetadata {
+    #[serde(default)]
+    manual_slot: usize,
+}
+
 impl SaveFile {
-    fn new(planet_data: Vec<u8>) -> Self {
+    fn new(planet_data: Vec<u8>, metadata: SaveFileMetadata) -> Self {
         let time = chrono::Local::now().to_string();
         let time = time.split_once('.').unwrap().0.into(); // Get "YYYY-MM-DD hh:mm:ss"
-        let metadata = Vec::new();
         Self {
             version: GAME_VERSION.into(),
             time,
@@ -149,14 +157,15 @@ impl SaveFile {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
+        let metadata = rmp_serde::to_vec_named(&self.metadata).unwrap();
         let mut buf = Vec::new();
 
         buf.put_u8(self.version.len().try_into().unwrap());
         buf.put(self.version.as_bytes());
         buf.put_u8(self.time.len().try_into().unwrap());
         buf.put(self.time.as_bytes());
-        buf.put_u16(self.metadata.len().try_into().unwrap());
-        buf.put(&self.metadata[..]);
+        buf.put_u16(metadata.len().try_into().unwrap());
+        buf.put(&metadata[..]);
         buf.put(&self.planet_data[..]);
 
         buf
@@ -181,6 +190,14 @@ impl SaveFile {
 
         let mut planet_data = Vec::new();
         data.read_to_end(&mut planet_data)?;
+
+        let metadata = match rmp_serde::from_slice(&metadata) {
+            Ok(metadata) => metadata,
+            Err(e) => {
+                log::warn!("invalid meatadata {}", e);
+                SaveFileMetadata::default()
+            }
+        };
 
         Ok(Self {
             version,

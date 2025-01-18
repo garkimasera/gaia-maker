@@ -154,15 +154,19 @@ fn manage_planet(
             Some(planet)
         }
         ManagePlanet::Save(slot) => {
-            if let Err(e) = crate::saveload::save_to(*slot, planet.as_ref().unwrap()) {
+            if let Err(e) = crate::saveload::save_to(
+                *slot,
+                planet.as_ref().unwrap(),
+                save_slot.0.unwrap_or_default(),
+            ) {
                 log::warn!("cannot save: {:?}", e);
             }
             None
         }
         ManagePlanet::Load(slot) => match crate::saveload::load_from(*slot) {
-            Ok(planet) => {
-                if *slot != 0 {
-                    *save_slot = SaveSlot(Some(*slot));
+            Ok((planet, slot)) => {
+                if slot != 0 {
+                    *save_slot = SaveSlot(Some(slot));
                 }
                 Some(planet)
             }
