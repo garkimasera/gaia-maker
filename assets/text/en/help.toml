@@ -26,3 +26,7 @@ asteroid-mining-station = "Asteroid mining stations mine ore from asteroids and 
 ice-mining-station = "Ice mining stations mine ice from ice-rich celestial bodies."
 methane-extractor = "Methane extractors extract carbon from celestial bodies containing methane in gaseous or solid form."
 ammonia-extractor = "Ammonia extractors extract nitrogen from celestial bodies containing ammonia in gaseous or solid form."
+
+aerosol-injection = "Aerosols are injected into the atmosphere of the planet. This promotes cloud formation, and in many cases, the planet begins to reflect more light from the star, causing the temperature to drop. The effect of this decreases over time."
+black-dust = "Black dust is spread over the surface of the planet. The surface of the planet absorbs more of the stellar light, causing the temperature of the surrounding area to rise. This dust disappears over time."
+fire = "It will cause a fire in the specified tile. It will burn the biomass on the ground, destroying civilization and animals. It will increase carbon dioxide and aerosols."

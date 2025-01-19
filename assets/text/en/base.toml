@@ -72,6 +72,7 @@ star-system = "Star system"
 start = "Start"
 statistics = "Statistics"
 structures = "Structures"
+tile-event = "Tile Event"
 upkeep = "Upkeep"
 water = "Water"
 
@@ -114,6 +115,12 @@ solar-shield = "Solar Shield"
 nitrogen-importer = "Nitrogen Importer"
 carbon-importer = "Carbon Importer"
 ion-irradiator = "Ion Irradiator"
+
+# Tile Events
+aerosol-injection = "Aerosol Injection"
+black-dust = "Black Dust"
+fire = "Fire"
+plague = "Plague"
 
 # Messages
 [msg]

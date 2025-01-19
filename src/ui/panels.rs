@@ -127,7 +127,7 @@ fn toolbar(
     });
 
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
-        action_menu(ui, cursor_mode, params);
+        action_menu(ui, cursor_mode, textures, params);
     });
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
@@ -256,7 +256,7 @@ fn sidebar(
                 t!(kind)
             }
             CursorMode::TileEvent(kind) => {
-                t!("tile_event", kind)
+                t!(kind)
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
                 format!("{} {}", t!("animal"), t!(animal_id))
@@ -407,11 +407,27 @@ fn build_menu(
     }
 }
 
-fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
+fn action_menu(
+    ui: &mut egui::Ui,
+    cursor_mode: &mut CursorMode,
+    textures: &EguiTextures,
+    params: &Params,
+) {
+    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(8.0, 0.0);
     for &kind in params.event.tile_event_costs.keys() {
-        if ui.button(t!("tile_event", kind)).clicked() {
+        let response = ui.button(t!(kind));
+        if response.clicked() {
             *cursor_mode = CursorMode::TileEvent(kind);
             ui.close_menu();
+        }
+        if response.hovered() {
+            egui::containers::show_tooltip_at(
+                &response.ctx,
+                response.layer_id,
+                response.id,
+                pos_tooltip,
+                |ui| HelpItem::TileEvent(kind).ui(ui, textures, params),
+            );
         }
         ui.end_row();
     }

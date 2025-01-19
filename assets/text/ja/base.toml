@@ -71,6 +71,7 @@ star-system = "星系"
 start = "開始"
 statistics = "統計"
 structures = "構造物"
+tile-event = "タイルイベント"
 upkeep = "維持"
 water = "水"
 help = "ヘルプ"
@@ -113,6 +114,12 @@ orbital-mirror = "軌道ミラー"
 nitrogen-importer = "窒素輸送機"
 carbon-importer = "炭素輸送機"
 ion-irradiator = "イオン放射機"
+
+# Tile Events
+aerosol-injection = "エアロゾル注入"
+black-dust = "黒色塵"
+fire = "火災"
+plague = "疫病"
 
 # Messages
 [msg]

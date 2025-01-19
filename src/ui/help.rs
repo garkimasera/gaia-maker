@@ -3,7 +3,9 @@ use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{label_with_icon, EguiTextures, WindowsOpenState};
-use crate::planet::{BuildingAttrs, BuildingEffect, Params, SpaceBuildingKind, StructureKind};
+use crate::planet::{
+    BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
+};
 use crate::screen::OccupiedScreenSpace;
 use crate::text::WithUnitDisplay;
 
@@ -18,6 +20,7 @@ pub enum HelpItem {
     Basics(BasicsItem),
     Structures(StructureKind),
     SpaceBuildings(SpaceBuildingKind),
+    TileEvent(TileEventKind),
 }
 
 impl AsRef<str> for HelpItem {
@@ -26,6 +29,7 @@ impl AsRef<str> for HelpItem {
             HelpItem::Basics(basic_items) => basic_items.as_ref(),
             HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
             HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
+            HelpItem::TileEvent(tile_event_kind) => tile_event_kind.as_ref(),
         }
     }
 }
@@ -82,6 +86,10 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
         SpaceBuildingKind::iter()
             .map(HelpItem::SpaceBuildings)
             .collect(),
+    );
+    map.insert(
+        ItemGroup::TileEvent,
+        TileEventKind::iter().map(HelpItem::TileEvent).collect(),
     );
 
     map
@@ -143,6 +151,23 @@ impl HelpItem {
         } {
             ui_building_attr(ui, textures, building_attrs);
             ui.separator();
+        } else if let HelpItem::TileEvent(kind) = self {
+            if let Some(cost) = &params.event.tile_event_costs.get(kind) {
+                let (icon, s) = match **cost {
+                    Cost::Material(value) => (
+                        "ui/icon-material",
+                        WithUnitDisplay::Material(value).to_string(),
+                    ),
+                    Cost::GenePoint(value) => (
+                        "ui/icon-gene",
+                        WithUnitDisplay::GenePoint(value).to_string(),
+                    ),
+                    _ => todo!(),
+                };
+                ui.label(egui::RichText::new(t!("cost")).strong());
+                label_with_icon(ui, textures, icon, s);
+                ui.separator();
+            }
         }
         ui.label(t!("help", self));
     }
