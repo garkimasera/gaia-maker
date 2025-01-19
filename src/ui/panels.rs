@@ -387,17 +387,24 @@ fn build_menu(
         ui.close_menu();
     }
     ui.separator();
-    egui::Grid::new("build_menu").striped(true).show(ui, |ui| {
-        for kind in &planet.player.buildable_structures {
-            if ui.button(t!(kind)).clicked() {
-                *cursor_mode = CursorMode::Build(*kind);
-                ui.close_menu();
-            }
-            ui.label("?")
-                .on_hover_ui(|ui| HelpItem::Structures(*kind).ui(ui, textures, params));
-            ui.end_row();
+    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(8.0, 0.0);
+    for kind in &planet.player.buildable_structures {
+        let response = ui.button(t!(kind));
+        if response.clicked() {
+            *cursor_mode = CursorMode::Build(*kind);
+            ui.close_menu();
         }
-    });
+        if response.hovered() {
+            egui::containers::show_tooltip_at(
+                &response.ctx,
+                response.layer_id,
+                response.id,
+                pos_tooltip,
+                |ui| HelpItem::Structures(*kind).ui(ui, textures, params),
+            );
+        }
+        ui.end_row();
+    }
 }
 
 fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
