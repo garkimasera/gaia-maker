@@ -24,19 +24,23 @@ impl SaveFileList {
     }
 }
 
-pub fn save_to(slot: usize, planet: &Planet, manual_slot: usize) -> Result<()> {
+pub fn save_to(slot: usize, planet: &Planet, save_file_metadata: &SaveFileMetadata) -> Result<()> {
     let planet_data = rmp_serde::to_vec(planet)?;
+
+    let mut save_file_metadata = save_file_metadata.clone();
+    if slot != 0 {
+        save_file_metadata.manual_slot = None;
+    }
 
     log::info!("save to slot {}", slot);
 
-    let metadata = SaveFileMetadata { manual_slot };
-    let bytes = SaveFile::new(planet_data, metadata).to_bytes();
+    let bytes = SaveFile::new(planet_data, save_file_metadata.clone()).to_bytes();
     crate::platform::savefile_write(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION), &bytes)?;
 
     Ok(())
 }
 
-pub fn load_from(slot: usize) -> Result<(Planet, usize)> {
+pub fn load_from(slot: usize) -> Result<(Planet, SaveFileMetadata)> {
     let data = SaveFile::from_bytes(&crate::platform::savefile_read(&format!(
         "{:02}.{}",
         slot, SAVE_FILE_EXTENSION
@@ -48,7 +52,11 @@ pub fn load_from(slot: usize) -> Result<(Planet, usize)> {
         data.time
     );
     let planet = rmp_serde::from_slice(&data.planet_data)?;
-    Ok((planet, data.metadata.manual_slot))
+    let mut metadata = data.metadata;
+    if metadata.manual_slot.is_none() && slot != 0 {
+        metadata.manual_slot = Some(slot);
+    }
+    Ok((planet, metadata))
 }
 
 pub fn load_save_file_list() -> SaveFileList {
@@ -85,10 +93,12 @@ struct SaveFile {
     planet_data: Vec<u8>,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
-struct SaveFileMetadata {
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+pub struct SaveFileMetadata {
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub manual_slot: Option<usize>,
     #[serde(default)]
-    manual_slot: usize,
+    pub debug_mode_used: bool,
 }
 
 impl SaveFile {
@@ -141,7 +151,7 @@ impl SaveFile {
         let metadata = match rmp_serde::from_slice(&metadata) {
             Ok(metadata) => metadata,
             Err(e) => {
-                log::warn!("invalid meatadata {}", e);
+                log::warn!("invalid metadata: {}", e);
                 SaveFileMetadata::default()
             }
         };

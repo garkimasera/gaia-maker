@@ -6,6 +6,8 @@ use crate::screen::{Centering, HoverTile};
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
+pub use crate::saveload::SaveFileMetadata;
+
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
 
@@ -24,9 +26,7 @@ pub struct DebugTools {
     pub sim_every_frame: bool,
 }
 
-#[derive(Clone, Copy, Default, Debug, Resource)]
-pub struct SaveSlot(pub Option<usize>);
-
+impl Resource for SaveFileMetadata {}
 impl Resource for Planet {}
 impl Resource for Params {}
 impl Resource for Sim {}
@@ -37,7 +37,7 @@ impl Plugin for SimPlugin {
             .add_event::<ManagePlanetError>()
             .add_event::<StartEvent>()
             .init_resource::<DebugTools>()
-            .init_resource::<SaveSlot>()
+            .init_resource::<SaveFileMetadata>()
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
@@ -137,7 +137,7 @@ fn manage_planet(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
-    mut save_slot: ResMut<SaveSlot>,
+    mut save_file_metadata: ResMut<SaveFileMetadata>,
     params: Option<Res<Params>>,
 ) {
     let Some(params) = params else {
@@ -150,24 +150,20 @@ fn manage_planet(
     let new_planet = match e {
         ManagePlanet::New(start_params) => {
             let planet = Planet::new(start_params, &params);
-            *save_slot = SaveSlot(None);
+            *save_file_metadata = SaveFileMetadata::default();
             Some(planet)
         }
         ManagePlanet::Save(slot) => {
-            if let Err(e) = crate::saveload::save_to(
-                *slot,
-                planet.as_ref().unwrap(),
-                save_slot.0.unwrap_or_default(),
-            ) {
+            if let Err(e) =
+                crate::saveload::save_to(*slot, planet.as_ref().unwrap(), &save_file_metadata)
+            {
                 log::warn!("cannot save: {:?}", e);
             }
             None
         }
         ManagePlanet::Load(slot) => match crate::saveload::load_from(*slot) {
-            Ok((planet, slot)) => {
-                if slot != 0 {
-                    *save_slot = SaveSlot(Some(slot));
-                }
+            Ok((planet, metadata)) => {
+                *save_file_metadata = metadata;
                 Some(planet)
             }
             Err(e) => {

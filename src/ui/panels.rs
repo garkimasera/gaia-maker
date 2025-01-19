@@ -6,7 +6,7 @@ use crate::{
     conf::Conf,
     planet::{Cost, Params, Planet, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    sim::{ManagePlanet, SaveSlot},
+    sim::{ManagePlanet, SaveFileMetadata},
     text::WithUnitDisplay,
     GameSpeed, GameState,
 };
@@ -25,11 +25,11 @@ pub fn panels(
         EventWriter<ManagePlanet>,
         ResMut<NextState<GameState>>,
     ),
-    (planet, textures, params, save_slot, conf): (
+    (planet, textures, params, save_file_metadata, conf): (
         Res<Planet>,
         Res<EguiTextures>,
         Res<Params>,
-        Res<SaveSlot>,
+        Res<SaveFileMetadata>,
         Res<Conf>,
     ),
     mut last_hover_tile: Local<Option<Coords>>,
@@ -67,7 +67,7 @@ pub fn panels(
                     &mut cursor_mode,
                     &mut wos,
                     &mut speed,
-                    *save_slot,
+                    &save_file_metadata,
                     (
                         &mut app_exit_events,
                         &mut ew_manage_planet,
@@ -91,7 +91,7 @@ fn toolbar(
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
-    save_slot: SaveSlot,
+    save_file_metadata: &SaveFileMetadata,
     (app_exit_events, ew_manage_planet, next_game_state): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
@@ -113,7 +113,7 @@ fn toolbar(
         game_menu(
             ui,
             wos,
-            save_slot,
+            save_file_metadata,
             app_exit_events,
             ew_manage_planet,
             next_game_state,
@@ -413,13 +413,13 @@ fn action_menu(ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params)
 fn game_menu(
     ui: &mut egui::Ui,
     wos: &mut WindowsOpenState,
-    save_slot: SaveSlot,
+    save_file_metadata: &SaveFileMetadata,
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     next_game_state: &mut NextState<GameState>,
 ) {
     ui.scope(|ui| {
-        if let Some(slot) = save_slot.0 {
+        if let Some(slot) = save_file_metadata.manual_slot {
             if ui.button(t!("save-to-slot"; slot=slot)).clicked() {
                 ew_manage_planet.send(ManagePlanet::Save(slot));
                 ui.close_menu();

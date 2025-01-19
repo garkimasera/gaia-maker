@@ -5,7 +5,7 @@ use bevy_egui::{egui, EguiContexts};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::saveload::{load_save_file_list, SaveFileList, N_SAVE_FILES};
-use crate::sim::{ManagePlanet, SaveSlot};
+use crate::sim::{ManagePlanet, SaveFileMetadata};
 
 static SAVE_FILE_LIST: Mutex<Option<SaveFileList>> = Mutex::new(None);
 
@@ -13,7 +13,7 @@ pub fn saveload_window(
     mut egui_ctxs: EguiContexts,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut save_slot: ResMut<SaveSlot>,
+    mut save_file_metadata: ResMut<SaveFileMetadata>,
     mut wos: ResMut<WindowsOpenState>,
 ) {
     debug_assert!(!(wos.save && wos.load));
@@ -26,7 +26,7 @@ pub fn saveload_window(
         egui_ctxs.ctx_mut(),
         &mut ew_manage_planet,
         &mut open_state,
-        Some(&mut save_slot),
+        Some(&mut save_file_metadata),
         wos.load,
     );
 
@@ -42,7 +42,7 @@ pub fn show_saveload_window(
     ctx: &mut egui::Context,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     open_state: &mut bool,
-    save_slot: Option<&mut SaveSlot>,
+    save_file_metadata: Option<&mut SaveFileMetadata>,
     load: bool,
 ) {
     let (start, action_name) = if load {
@@ -120,8 +120,8 @@ pub fn show_saveload_window(
         if load {
             ew_manage_planet.send(ManagePlanet::Load(selected));
         } else {
-            if let Some(save_slot) = save_slot {
-                save_slot.0 = Some(selected);
+            if let Some(save_file_metadata) = save_file_metadata {
+                save_file_metadata.manual_slot = Some(selected);
             }
             ew_manage_planet.send(ManagePlanet::Save(selected));
         }
