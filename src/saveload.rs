@@ -95,10 +95,14 @@ struct SaveFile {
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct SaveFileMetadata {
-    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "serde_with::rust::unwrap_or_skip"
+    )]
     pub manual_slot: Option<usize>,
     #[serde(default)]
-    pub debug_mode_used: bool,
+    pub debug_mode_enabled: bool,
 }
 
 impl SaveFile {

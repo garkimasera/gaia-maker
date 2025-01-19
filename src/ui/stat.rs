@@ -6,7 +6,7 @@ use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::planet::*;
+use crate::{planet::*, sim::SaveFileMetadata};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
 #[strum(serialize_all = "kebab-case")]
@@ -23,6 +23,7 @@ pub fn stat_window(
     mut wos: ResMut<WindowsOpenState>,
     planet: Res<Planet>,
     params: Res<Params>,
+    save_file_metadata: Res<SaveFileMetadata>,
     mut current_panel: Local<Panel>,
     mut current_graph_item: Local<GraphItem>,
 ) {
@@ -42,7 +43,7 @@ pub fn stat_window(
             ui.separator();
 
             match *current_panel {
-                Panel::Planet => planet_stat(ui, &planet),
+                Panel::Planet => planet_stat(ui, &planet, save_file_metadata.debug_mode_enabled),
                 Panel::Atmosphere => atmo_stat(ui, &planet),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
@@ -53,7 +54,7 @@ pub fn stat_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
+fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
     egui::Grid::new("table_planet")
         .striped(true)
         .show(ui, |ui| {
@@ -67,6 +68,13 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet) {
                 (planet.state.solar_power_multiplier - 1.0) * 100.0
             ));
         });
+
+    if debug_mode_enabled {
+        ui.label(
+            egui::RichText::new("Debug Mode Enabled")
+                .color(egui::Color32::from_rgb(0xFF, 0x00, 0xFF)),
+        );
+    }
 }
 
 fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
