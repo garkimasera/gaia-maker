@@ -1,5 +1,6 @@
 use arrayvec::ArrayVec;
 use geom::Coords;
+use num_traits::FromPrimitive;
 use rand::{seq::SliceRandom, Rng};
 
 use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
@@ -16,11 +17,16 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let animal_attr = &params.animals[&settlement.id];
 
         // Energy
-        consume_energy(planet, sim, p, &settlement, params);
+        let resource_availability = consume_energy(planet, sim, p, &settlement, params);
+
+        // Tech exp
+        tech_exp(&mut settlement, params);
 
         // Pop growth & decline
         let cap_animal = super::animal::calc_cap_without_biomass(planet, p, animal_attr, params);
-        let cap = params.sim.settlement_max_pop[settlement.age as usize] * cap_animal;
+        let cap = params.sim.settlement_max_pop[settlement.age as usize]
+            * cap_animal
+            * resource_availability;
 
         let growth_speed = params.sim.base_pop_growth_speed;
         let ratio = settlement.pop / cap.max(1e-10);
@@ -38,7 +44,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             }
         });
         let normalized_pop =
-            settlement.pop / params.sim.settlement_max_pop[settlement.age as usize];
+            (settlement.pop / params.sim.settlement_spread_pop[settlement.age as usize]).min(2.0);
         let prob = (params.sim.coef_settlement_spreading_a
             * (params.sim.coef_settlement_spreading_b * normalized_pop - cr))
             .clamp(0.0, 1.0);
@@ -101,8 +107,8 @@ fn consume_energy(
 
     let total_biomass = total_biomass * sim.biomass_density_to_mass();
     let max_biomass = max_biomass * sim.biomass_density_to_mass();
-    let available_biomass_ratio = if total_biomass > 0.0 {
-        biomass_to_consume / total_biomass
+    let available_biomass_ratio = if biomass_to_consume > 0.0 {
+        total_biomass / biomass_to_consume
     } else {
         0.0
     };
@@ -112,7 +118,27 @@ fn consume_energy(
     planet.map[p_max_biomass].biomass = new_biomass / sim.biomass_density_to_mass();
     planet.atmo.release_carbon(diff_biomass);
 
-    available_biomass_ratio
+    let x = available_biomass_ratio * params.sim.resource_availability_factor;
+    if x < 1.0 {
+        x * x
+    } else {
+        ((x - 1.0).sqrt() + 1.0).min(2.0)
+    }
+}
+
+fn tech_exp(settlement: &mut Settlement, params: &Params) {
+    let age = settlement.age as usize;
+    let normalized_pop = settlement.pop / params.sim.settlement_init_pop[age];
+    settlement.tech_exp += (normalized_pop - 0.5) * params.sim.base_tech_exp;
+
+    if age < (CivilizationAge::LEN - 1) && settlement.tech_exp > params.sim.tech_exp_evolution[age]
+    {
+        settlement.age = CivilizationAge::from_usize(age + 1).unwrap();
+        settlement.tech_exp = 0.0;
+    } else if age > 0 && settlement.tech_exp < -100.0 {
+        settlement.age = CivilizationAge::from_usize(age - 1).unwrap();
+        settlement.tech_exp = 0.0;
+    }
 }
 
 pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, animal_id: AnimalId) {

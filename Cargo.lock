@@ -2477,6 +2477,8 @@ dependencies = [
  "image",
  "log",
  "noise",
+ "num-derive",
+ "num-traits",
  "rand",
  "regex",
  "rmp-serde",

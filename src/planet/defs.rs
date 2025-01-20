@@ -262,7 +262,18 @@ pub struct Settlement {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(
-    Clone, Copy, PartialEq, Eq, Default, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Default,
+    Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    AsRefStr,
+    EnumIter,
+    num_derive::FromPrimitive,
 )]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
@@ -610,6 +621,8 @@ pub struct SimParams {
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
+    /// Population of settlements to calulate spread probability
+    pub settlement_spread_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
     pub base_pop_growth_speed: f32,
     /// Coefficent to calculate settlement spreading probability
@@ -622,6 +635,12 @@ pub struct SimParams {
     pub energy_demand_per_pop: [f32; CivilizationAge::LEN],
     /// Consumed biomass to energy factor [GJ/Mt]
     pub biomass_energy_factor: f32,
+    /// Resource availability factor
+    pub resource_availability_factor: f32,
+    /// Base tech exp
+    pub base_tech_exp: f32,
+    /// Required tech exp to evolve the age
+    pub tech_exp_evolution: [f32; CivilizationAge::LEN - 1],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }

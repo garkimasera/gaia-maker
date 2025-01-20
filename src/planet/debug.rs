@@ -58,10 +58,13 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
         animals_debug_text_in_tile(&planet.map[p].animal[2]),
     ));
     v.push((
-        "pop",
+        "pop, tech_exp",
         match &planet.map[p].structure {
             Some(Structure::Settlement(settlement)) => {
-                format!("{}: {:.2}", settlement.id, settlement.pop)
+                format!(
+                    "{}: {:.2}, {:+.1}",
+                    settlement.id, settlement.pop, settlement.tech_exp
+                )
             }
             _ => "0".into(),
         },
