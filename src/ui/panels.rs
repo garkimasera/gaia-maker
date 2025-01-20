@@ -232,7 +232,7 @@ fn sidebar(
 
     // Information about selected tool
     ui.vertical(|ui| {
-        ui.set_height(48.0);
+        ui.set_height(50.0);
         ui.add_space(3.0);
         let cost_list = crate::action::cursor_mode_lack_and_cost(planet, params, cursor_mode);
         let bg_color = if cost_list.iter().any(|(lack, _)| *lack) {
@@ -259,7 +259,7 @@ fn sidebar(
                 t!(kind)
             }
             CursorMode::SpawnAnimal(ref animal_id) => {
-                format!("{} {}", t!("animal"), t!(animal_id))
+                format!("{} {}", t!("animal"), t!("animal", animal_id))
             }
             CursorMode::EditBiome(biome) => {
                 format!("biome editing: {}", biome.as_ref())
