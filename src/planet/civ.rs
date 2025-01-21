@@ -16,6 +16,12 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         };
         let animal_attr = &params.animals[&settlement.id];
 
+        // Delete settlement if the biome is unhabitable for the animal
+        if !animal_attr.habitat.match_biome(planet.map[p].biome) {
+            planet.map[p].structure = None;
+            continue;
+        }
+
         // Energy
         let resource_availability = consume_energy(planet, sim, p, &settlement, params);
         super::debug::tile_log(p, "ra", |_| resource_availability);
