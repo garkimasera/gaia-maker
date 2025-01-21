@@ -22,6 +22,7 @@ pub struct Record {
     pub p_o2: f32,
     pub p_n2: f32,
     pub p_co2: f32,
+    pub pop: fnv::FnvHashMap<AnimalId, f32>,
 }
 
 impl Stat {
@@ -49,6 +50,13 @@ pub fn record_stats(planet: &mut Planet, params: &Params) {
         return;
     }
 
+    let mut pop = fnv::FnvHashMap::default();
+    for p in planet.map.iter_idx() {
+        if let Some(Structure::Settlement(settlement)) = &planet.map[p].structure {
+            *pop.entry(settlement.id).or_default() += settlement.pop;
+        }
+    }
+
     let record = Record {
         average_air_temp: planet.stat.average_air_temp,
         average_sea_temp: planet.stat.average_sea_temp,
@@ -57,10 +65,21 @@ pub fn record_stats(planet: &mut Planet, params: &Params) {
         p_o2: planet.atmo.partial_pressure(GasKind::Oxygen),
         p_n2: planet.atmo.partial_pressure(GasKind::Nitrogen),
         p_co2: planet.atmo.partial_pressure(GasKind::CarbonDioxide),
+        pop,
     };
 
     planet.stat.history.push_front(record);
     if planet.stat.history.len() > params.history.max_record {
         planet.stat.history.pop_back();
+    }
+}
+
+impl Record {
+    pub fn pop(&self, animal_id: Option<AnimalId>) -> f32 {
+        if let Some(animal_id) = animal_id {
+            self.pop.get(&animal_id).copied().unwrap_or_default()
+        } else {
+            self.pop.values().sum()
+        }
     }
 }

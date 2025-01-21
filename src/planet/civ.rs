@@ -18,6 +18,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Energy
         let resource_availability = consume_energy(planet, sim, p, &settlement, params);
+        super::debug::tile_log(p, "ra", |_| resource_availability);
 
         // Tech exp
         tech_exp(&mut settlement, params);

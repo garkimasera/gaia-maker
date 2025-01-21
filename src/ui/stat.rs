@@ -147,6 +147,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
         GraphItem::AverageRainfall => 1.0e+0,
         GraphItem::Biomass => 1.0e-2,
         GraphItem::Oxygen | GraphItem::Nitrogen | GraphItem::CarbonDioxide => 1.0e-5,
+        GraphItem::Population => 1.0e+1,
     };
     let bound_margin = (max - min) * 0.08 + min_bound_margin;
 
@@ -182,6 +183,7 @@ pub enum GraphItem {
     Oxygen,
     Nitrogen,
     CarbonDioxide,
+    Population,
 }
 
 impl GraphItem {
@@ -202,6 +204,7 @@ impl GraphItem {
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),
+            Self::Population => record.map(|record| record.pop(None) as f64).unwrap_or(0.0),
         }
     }
 
@@ -214,6 +217,7 @@ impl GraphItem {
             Self::Oxygen => format!("{:.2e} atm", value),
             Self::Nitrogen => format!("{:.2e} atm", value),
             Self::CarbonDioxide => format!("{:.2e} atm", value),
+            Self::Population => format!("{:.0}", value),
         }
     }
 }
