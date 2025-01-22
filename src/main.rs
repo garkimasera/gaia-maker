@@ -103,7 +103,9 @@ struct AssetPlugin;
 impl Plugin for AssetPlugin {
     #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
+        let asset_file_path = option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz");
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
+            archive_files: vec![std::path::PathBuf::from(asset_file_path)],
             addon_directories: platform::addon_directory(),
             ..Default::default()
         });
