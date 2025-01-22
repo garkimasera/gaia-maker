@@ -41,8 +41,8 @@ struct Args {}
 fn main() {
     let _args = Args::parse();
 
-    screen::window_open();
-    let window_size = screen::preferred_window_size();
+    crate::platform::window_open();
+    let window_size = crate::platform::preferred_window_size();
 
     App::new()
         .add_plugins(AssetPlugin)

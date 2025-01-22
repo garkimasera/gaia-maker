@@ -6,11 +6,7 @@ use bytes::BufMut;
 use serde::{Deserialize, Serialize};
 
 use crate::planet::Planet;
-
-#[cfg(not(target_arch = "wasm32"))]
-pub const N_SAVE_FILES: usize = 99;
-#[cfg(target_arch = "wasm32")]
-pub const N_SAVE_FILES: usize = 1;
+pub use crate::platform::N_SAVE_FILES;
 
 pub const SAVE_FILE_EXTENSION: &str = "planet";
 

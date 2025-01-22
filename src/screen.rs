@@ -71,7 +71,7 @@ impl Plugin for ScreenPlugin {
                     .after(GameSystemSet::UpdateHoverTile),
             )
             .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)))
-            .add_systems(Update, window_resize);
+            .add_systems(Update, crate::platform::window_resize);
     }
 }
 
@@ -500,120 +500,4 @@ fn keyboard_input(
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
     }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
-    let Ok(mut window) = window.get_single_mut() else {
-        return;
-    };
-    let width = window.width() as u32;
-    let height = window.height() as u32;
-
-    // Adjust target size to prevent pixel blurring
-    let target_width = width - width % 2;
-    let target_height = height - height % 2;
-
-    if window.width() as u32 != target_width || window.height() as u32 != target_height {
-        window
-            .resolution
-            .set(target_width as f32, target_height as f32);
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-fn window_resize(mut window: Query<&mut Window, With<PrimaryWindow>>) {
-    let Ok(mut window) = window.get_single_mut() else {
-        return;
-    };
-
-    let Some(w) = web_sys::window() else {
-        return;
-    };
-
-    let Some(width) = w
-        .inner_width()
-        .ok()
-        .and_then(|width| width.as_f64())
-        .map(|width| width as u32)
-    else {
-        return;
-    };
-    let Some(height) = w
-        .inner_height()
-        .ok()
-        .and_then(|height| height.as_f64())
-        .map(|height| height as u32)
-    else {
-        return;
-    };
-
-    // Adjust target size to prevent pixel blurring
-    let target_width = width - width % 2;
-    let target_height = height - height % 2;
-
-    if window.width() as u32 != target_width || window.height() as u32 != target_height {
-        window
-            .resolution
-            .set(target_width as f32, target_height as f32);
-    }
-}
-
-const DEFAULT_WINDOW_SIZE: (u32, u32) = (1280, 720);
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn preferred_window_size() -> (u32, u32) {
-    DEFAULT_WINDOW_SIZE
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn preferred_window_size() -> (u32, u32) {
-    let Some(w) = web_sys::window() else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-
-    let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let width = width as u32;
-    let height = height as u32;
-
-    (width, height)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn window_open() {}
-
-#[cfg(target_arch = "wasm32")]
-pub fn window_open() {
-    use wasm_bindgen::JsCast;
-    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
-        return;
-    };
-    let Some(game_screen) = document.get_element_by_id("game-screen") else {
-        return;
-    };
-    let Some(game_screen) = game_screen.dyn_ref::<web_sys::HtmlElement>() else {
-        return;
-    };
-    if let Err(e) = game_screen.style().set_property("display", "block") {
-        log::warn!("{:?}", e);
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn window_close() {}
-
-#[cfg(target_arch = "wasm32")]
-pub fn window_close() {
-    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
-        return;
-    };
-    let Some(location) = document.location() else {
-        return;
-    };
-    let _ = location.reload();
 }

@@ -78,7 +78,7 @@ pub fn main_menu(
                         }
                         if ui.button(t!("exit")).clicked() {
                             app_exit_events.send(bevy::app::AppExit::Success);
-                            crate::screen::window_close();
+                            crate::platform::window_close();
                         }
 
                         ui.separator();
