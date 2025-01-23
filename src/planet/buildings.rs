@@ -2,12 +2,12 @@ use super::{atmo::CO2_CARBON_WEIGHT_RATIO, misc::linear_interpolation, *};
 use fnv::FnvHashMap;
 
 impl Planet {
-    pub fn space_building(&self, kind: impl Into<SpaceBuildingKind>) -> &Building {
-        self.space_buildings.get(&kind.into()).unwrap()
+    pub fn space_building(&self, kind: SpaceBuildingKind) -> &Building {
+        self.space_buildings.get(&kind).unwrap()
     }
 
-    pub fn space_building_mut(&mut self, kind: impl Into<SpaceBuildingKind>) -> &mut Building {
-        self.space_buildings.get_mut(&kind.into()).unwrap()
+    pub fn space_building_mut(&mut self, kind: SpaceBuildingKind) -> &mut Building {
+        self.space_buildings.get_mut(&kind).unwrap()
     }
 
     pub fn working_building_effect<'a>(

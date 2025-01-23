@@ -98,7 +98,6 @@ impl Building {
     fn enabled(&self) -> u32 {
         match self.control {
             BuildingControlValue::AlwaysEnabled => self.n,
-            BuildingControlValue::EnabledNumber(n) => n,
             BuildingControlValue::IncreaseRate(_) => self.n,
         }
     }
@@ -108,7 +107,6 @@ impl Building {
 pub enum BuildingControlValue {
     #[default]
     AlwaysEnabled,
-    EnabledNumber(u32),
     IncreaseRate(i32),
 }
 

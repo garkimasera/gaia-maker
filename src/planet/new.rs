@@ -39,9 +39,6 @@ impl Planet {
         for (&kind, &n) in &start_params.space_buildings {
             let building = planet.space_building_mut(kind);
             building.n = n;
-            if params.building_attrs(kind).control == BuildingControl::EnabledNumber {
-                building.control = BuildingControlValue::EnabledNumber(n);
-            }
         }
 
         for structure_kind in StructureKind::iter() {

@@ -1,11 +1,11 @@
 use super::*;
 
 impl Planet {
-    pub fn buildable(&self, building: &BuildingAttrs, n: u32) -> bool {
+    pub fn buildable(&self, building: &BuildingAttrs) -> bool {
         if self.res.surplus_energy() < -building.energy {
             return false;
         }
-        if building.cost * n as f32 > self.res.material {
+        if building.cost > self.res.material {
             return false;
         }
         true
@@ -45,20 +45,36 @@ impl Planet {
         let building = self.space_building_mut(kind);
         building.n += 1;
 
-        if let BuildingControlValue::EnabledNumber(enabled) = &mut building.control {
-            *enabled += 1;
-        } else if building.n == 1 {
+        if building.n == 1 {
             // Set initial control value at the first build
             match params.building_attrs(kind).control {
                 BuildingControl::AlwaysEnabled => (),
-                BuildingControl::EnabledNumber => {
-                    building.control = BuildingControlValue::EnabledNumber(1);
-                }
                 BuildingControl::IncreaseRate => {
                     building.control = BuildingControlValue::IncreaseRate(0);
                 }
             }
         }
+        self.update(sim, params);
+    }
+
+    pub fn demolish_space_building(
+        &mut self,
+        kind: SpaceBuildingKind,
+        n: u32,
+        sim: &mut Sim,
+        params: &Params,
+    ) {
+        let building = self.space_building_mut(kind);
+        if building.n > n {
+            building.n -= n;
+        } else {
+            building.n = 0;
+        }
+
+        if building.n == 0 {
+            building.control = Default::default();
+        }
+
         self.update(sim, params);
     }
 

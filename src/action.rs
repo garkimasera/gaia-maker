@@ -46,7 +46,7 @@ fn cursor_action(
                 planet.demolition(coords, &mut sim, &params);
             }
             CursorMode::Build(kind) => {
-                if planet.buildable(params.structures[&kind].as_ref(), 1) {
+                if planet.buildable(params.structures[&kind].as_ref()) {
                     update_map.update();
                     if planet.placeable(coords) {
                         planet.place(coords, new_structure(kind), &mut sim, &params);

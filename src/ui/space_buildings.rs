@@ -61,9 +61,9 @@ pub fn buildng_row(
     attrs: &BuildingAttrs,
 ) {
     let build_max = attrs.build_max.unwrap();
-    let buildable = planet.buildable(attrs, 1) && build_max > planet.space_building(kind).n;
-    let buildable5 = planet.buildable(attrs, 5) && build_max >= planet.space_building(kind).n + 5;
+    let buildable = planet.buildable(attrs) && build_max > planet.space_building(kind).n;
     let building = planet.space_building_mut(kind);
+    let n = building.n;
 
     ui.horizontal(|ui| {
         let building_text = format!("{} ({}/{})", t!(kind), building.n, build_max);
@@ -86,26 +86,36 @@ pub fn buildng_row(
         if ui.add_enabled(buildable, egui::Button::new("+1")).clicked() {
             planet.build_space_building(kind, sim, params);
         }
-        if build_max >= 5 {
-            if ui
-                .add_enabled(buildable5, egui::Button::new("+5"))
-                .clicked()
-            {
-                for _ in 0..5 {
+        if build_max >= 5 && ui.add_enabled(buildable, egui::Button::new("+5")).clicked() {
+            for _ in 0..5 {
+                if planet.buildable(attrs) && build_max > planet.space_building(kind).n {
                     planet.build_space_building(kind, sim, params);
+                } else {
+                    break;
                 }
             }
-        } else {
-            ui.add_visible(false, egui::Button::new("+5"));
+        }
+
+        if attrs.energy < 0.0 {
+            if n > 0 {
+                if ui.button("-1").clicked() {
+                    planet.demolish_space_building(kind, 1, sim, params);
+                }
+                if build_max >= 5 && ui.button("-5").clicked() {
+                    planet.demolish_space_building(kind, 5, sim, params);
+                }
+            } else {
+                ui.add_visible(false, egui::Button::new("-1"));
+                if build_max >= 5 {
+                    ui.add_visible(false, egui::Button::new("-5"));
+                }
+            }
         }
     });
 
     let building = planet.space_building_mut(kind);
     match &mut building.control {
         BuildingControlValue::AlwaysEnabled => {}
-        BuildingControlValue::EnabledNumber(enabled) => {
-            ui.add(egui::Slider::new(enabled, 0..=building.n));
-        }
         BuildingControlValue::IncreaseRate(rate) => {
             ui.add(egui::Slider::new(rate, -100..=100));
         }

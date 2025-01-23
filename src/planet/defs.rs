@@ -338,7 +338,6 @@ pub struct BuildingAttrs {
 pub enum BuildingControl {
     #[default]
     AlwaysEnabled,
-    EnabledNumber,
     IncreaseRate,
 }
 
