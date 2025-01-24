@@ -89,6 +89,7 @@ impl Plugin for UiPlugin {
                 Update,
                 main_menu::main_menu.run_if(in_state(GameState::MainMenu)),
             )
+            .add_systems(OnExit(GameState::MainMenu), reset_ime)
             .add_systems(
                 Update,
                 panels::panels
@@ -114,6 +115,10 @@ impl Plugin for UiPlugin {
                     .in_set(UiWindowsSystemSet),
             );
     }
+}
+
+fn reset_ime(mut windows: Query<&mut Window, With<bevy::window::PrimaryWindow>>) {
+    windows.single_mut().ime_enabled = false;
 }
 
 fn setup_fonts(

@@ -48,6 +48,7 @@ pub fn new_planet(
     params: &Params,
     state: &mut MainMenuState,
     textures: &EguiTextures,
+    window: &mut bevy::window::Window,
 ) {
     egui::Window::new(t!("search-new-planet"))
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
@@ -92,9 +93,15 @@ pub fn new_planet(
                 ui.vertical(|ui| {
                     ui.label(t!("planet-name"));
                     ui.horizontal(|ui| {
-                        ui.add(
+                        window.ime_enabled = false;
+                        let result = ui.add(
                             egui::TextEdit::singleline(&mut state.new_planet.name).char_limit(92),
                         );
+                        if result.has_focus() {
+                            window.ime_enabled = true;
+                            window.ime_position =
+                                bevy::math::Vec2::new(result.rect.left(), result.rect.top());
+                        }
                     });
                 });
 

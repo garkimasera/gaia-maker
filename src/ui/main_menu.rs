@@ -51,6 +51,7 @@ pub fn main_menu(
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
+    mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
     textures: Res<EguiTextures>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
@@ -99,6 +100,7 @@ pub fn main_menu(
                 &params,
                 &mut state,
                 &textures,
+                &mut window.single_mut(),
             );
         }
         MainMenuMode::Load => {
