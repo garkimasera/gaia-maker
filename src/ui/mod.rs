@@ -7,6 +7,7 @@ mod main_menu;
 mod map;
 mod new_planet;
 mod panels;
+mod preferences;
 mod saveload;
 mod space_buildings;
 mod stat;
@@ -47,6 +48,7 @@ pub struct WindowsOpenState {
     pub save: bool,
     pub load: bool,
     pub error_popup: Option<ManagePlanetError>,
+    pub preferences: bool,
     pub debug_tools: bool,
 }
 
@@ -105,6 +107,7 @@ impl Plugin for UiPlugin {
                     help::help_window,
                     saveload::saveload_window,
                     error_popup::error_popup,
+                    preferences::preferences_window,
                     debug_tools::debug_tools_window,
                 )
                     .run_if(in_state(GameState::Running))

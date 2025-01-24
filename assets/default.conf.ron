@@ -7,5 +7,6 @@
         min_sidebar_width: 200,
     ),
     camera_move_speed: 48.0,
+    autosave_enabled: true,
     autosave_cycle_duration: 1000,
 )

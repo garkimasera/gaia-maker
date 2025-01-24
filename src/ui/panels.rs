@@ -461,6 +461,11 @@ fn game_menu(
         ui.close_menu();
     }
     ui.separator();
+    if ui.button(format!("{}...", t!("preferences"))).clicked() {
+        wos.preferences = true;
+        ui.close_menu();
+    }
+    ui.separator();
     if ui.button(t!("main-menu")).clicked() {
         next_game_state.set(GameState::MainMenu);
         ui.close_menu();

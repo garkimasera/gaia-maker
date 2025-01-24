@@ -55,6 +55,7 @@ orbit = "Orbit"
 oxygen = "Oxygen"
 planet = "Planet"
 population = "Population"
+preferences = "Preferences"
 produce = "Produce"
 project = "Project"
 radius = "Radius"
@@ -123,6 +124,11 @@ aerosol-injection = "Aerosol Injection"
 black-dust = "Black Dust"
 fire = "Fire"
 plague = "Plague"
+
+# Preferences
+[preference]
+autosave-enabled = "Enable Autosave"
+max-simulation-speed = "Max simulation speed"
 
 # Messages
 [msg]

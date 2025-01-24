@@ -23,6 +23,7 @@ fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>
             if let Err(e) = crate::platform::conf_save(conf) {
                 log::error!("cannot save conf: {}", e);
             }
+            log::info!("conf saved");
         }
     }
 }
@@ -39,16 +40,18 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
     command.insert_resource(conf);
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Asset, Resource, TypePath)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Asset, Resource, TypePath)]
 pub struct Conf {
     pub lang: Lang,
     pub camera_move_speed: f32,
     pub ui: UiConf,
-    #[serde(with = "serde_with::rust::unwrap_or_skip")]
-    pub autosave_cycle_duration: Option<u64>,
+    pub autosave_enabled: bool,
+    pub autosave_cycle_duration: u64,
+    #[serde(default)]
+    pub max_simulation_speed: bool,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Reflect)]
 pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,

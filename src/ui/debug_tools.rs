@@ -1,5 +1,5 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
-use crate::sim::{DebugTools, SaveFileMetadata};
+use crate::sim::SaveFileMetadata;
 use crate::{planet::*, screen::HoverTile};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
@@ -23,7 +23,6 @@ pub fn debug_tools_window(
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
-    mut debug_tools: ResMut<DebugTools>,
     mut save_file_metadata: ResMut<SaveFileMetadata>,
     params: Res<Params>,
     sim: Res<Sim>,
@@ -73,7 +72,7 @@ pub fn debug_tools_window(
 
             match *current_panel {
                 Panel::TileInfo => info_ui(ui, &planet, &sim, p),
-                Panel::Sim => sim_ui(ui, &mut planet, &mut debug_tools),
+                Panel::Sim => sim_ui(ui, &mut planet),
                 Panel::Map => map_panel.ui(ui, &mut cursor_mode, &params),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmo => atmo_ui(ui, &mut planet),
@@ -108,9 +107,8 @@ fn info_ui(ui: &mut egui::Ui, planet: &Planet, sim: &Sim, p: Coords) {
         });
 }
 
-fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet, debug_tools: &mut DebugTools) {
+fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet) {
     ui.label(format!("{} cycles", planet.cycles));
-    ui.checkbox(&mut debug_tools.sim_every_frame, "sim every frame");
 
     if ui.button("max resources").clicked() {
         planet.res.debug_max();

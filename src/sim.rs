@@ -21,11 +21,6 @@ pub enum ManagePlanet {
 #[derive(Clone, Debug, Event)]
 pub struct StartEvent(pub PlanetEvent);
 
-#[derive(Clone, Default, Debug, Resource)]
-pub struct DebugTools {
-    pub sim_every_frame: bool,
-}
-
 impl Resource for SaveFileMetadata {}
 impl Resource for Planet {}
 impl Resource for Params {}
@@ -36,7 +31,6 @@ impl Plugin for SimPlugin {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
             .add_event::<StartEvent>()
-            .init_resource::<DebugTools>()
             .init_resource::<SaveFileMetadata>()
             .add_systems(
                 OnEnter(GameState::Running),
@@ -61,7 +55,6 @@ fn update(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
     speed: Res<GameSpeed>,
-    debug_tools: Res<DebugTools>,
     hover_tile: Query<&HoverTile>,
     wos: Res<WindowsOpenState>,
     conf: Res<Conf>,
@@ -74,11 +67,10 @@ fn update(
 
     *count_frame += 1;
 
-    match (*speed, debug_tools.sim_every_frame) {
+    match (*speed, conf.max_simulation_speed) {
         (GameSpeed::Paused, _) => {
             return;
         }
-        (_, true) => (),
         (GameSpeed::Normal, _) => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
@@ -87,6 +79,7 @@ fn update(
                 return;
             }
         }
+        (_, true) => (),
         (GameSpeed::Fast, _) => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
@@ -106,10 +99,8 @@ fn update(
     update_map.update();
     planet.advance(&mut sim, &params);
 
-    if let Some(autosave_cycle_duration) = conf.autosave_cycle_duration {
-        if planet.cycles % autosave_cycle_duration == 0 {
-            ew_manage_planet.send(ManagePlanet::Save(0));
-        }
+    if conf.autosave_enabled && planet.cycles % conf.autosave_cycle_duration == 0 {
+        ew_manage_planet.send(ManagePlanet::Save(0));
     }
 }
 

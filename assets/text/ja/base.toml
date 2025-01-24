@@ -54,6 +54,7 @@ orbit = "軌道"
 oxygen = "酸素"
 planet = "惑星"
 population = "人口"
+preferences = "設定"
 produce = "産出"
 project = "プロジェクト"
 radius = "半径"
@@ -122,6 +123,11 @@ aerosol-injection = "エアロゾル注入"
 black-dust = "黒色塵"
 fire = "火災"
 plague = "疫病"
+
+# Preferences
+[preference]
+autosave-enabled = "オートセーブ"
+max-simulation-speed = "シミュレーション速度最大化"
 
 # Messages
 [msg]
