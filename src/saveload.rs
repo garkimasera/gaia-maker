@@ -15,6 +15,10 @@ const GAME_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct SaveFileList(Vec<Option<SaveFile>>);
 
 impl SaveFileList {
+    pub fn name(&self, i: usize) -> Option<&str> {
+        self.0[i].as_ref().map(|save_file| save_file.name.as_ref())
+    }
+
     pub fn saved_time(&self, i: usize) -> Option<&str> {
         self.0[i].as_ref().map(|save_file| save_file.time.as_ref())
     }
@@ -30,7 +34,8 @@ pub fn save_to(slot: usize, planet: &Planet, save_file_metadata: &SaveFileMetada
 
     log::info!("save to slot {}", slot);
 
-    let bytes = SaveFile::new(planet_data, save_file_metadata.clone()).to_bytes();
+    let bytes =
+        SaveFile::new(planet_data, &planet.basics.name, save_file_metadata.clone()).to_bytes();
     crate::platform::savefile_write(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION), &bytes)?;
 
     Ok(())
@@ -85,6 +90,7 @@ pub fn load_save_file_list() -> SaveFileList {
 struct SaveFile {
     version: String,
     time: String,
+    name: String,
     metadata: SaveFileMetadata,
     planet_data: Vec<u8>,
 }
@@ -102,12 +108,13 @@ pub struct SaveFileMetadata {
 }
 
 impl SaveFile {
-    fn new(planet_data: Vec<u8>, metadata: SaveFileMetadata) -> Self {
+    fn new(planet_data: Vec<u8>, name: &str, metadata: SaveFileMetadata) -> Self {
         let time = chrono::Local::now().to_string();
         let time = time.split_once('.').unwrap().0.into(); // Get "YYYY-MM-DD hh:mm:ss"
         Self {
             version: GAME_VERSION.into(),
             time,
+            name: name.into(),
             metadata,
             planet_data,
         }
@@ -121,6 +128,8 @@ impl SaveFile {
         buf.put(self.version.as_bytes());
         buf.put_u8(self.time.len().try_into().unwrap());
         buf.put(self.time.as_bytes());
+        buf.put_u8(self.name.len().try_into().unwrap());
+        buf.put(self.name.as_bytes());
         buf.put_u16(metadata.len().try_into().unwrap());
         buf.put(&metadata[..]);
         buf.put(&self.planet_data[..]);
@@ -141,6 +150,11 @@ impl SaveFile {
         data.read_exact(&mut time)?;
         let time = String::from_utf8(time)?;
 
+        let len = data.read_u8()?;
+        let mut name = vec![0; len as usize];
+        data.read_exact(&mut name)?;
+        let name = String::from_utf8(name)?;
+
         let len = data.read_u16::<byteorder::BigEndian>()?;
         let mut metadata = vec![0; len as usize];
         data.read_exact(&mut metadata)?;
@@ -159,6 +173,7 @@ impl SaveFile {
         Ok(Self {
             version,
             time,
+            name,
             metadata,
             planet_data,
         })

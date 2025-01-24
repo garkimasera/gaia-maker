@@ -58,6 +58,9 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
     egui::Grid::new("table_planet")
         .striped(true)
         .show(ui, |ui| {
+            ui.label(t!("planet-name"));
+            ui.label(&planet.basics.name);
+            ui.end_row();
             ui.label(t!("radius"));
             ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
             ui.end_row();

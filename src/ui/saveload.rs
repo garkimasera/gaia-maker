@@ -65,7 +65,8 @@ pub fn show_saveload_window(
             .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
             .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
             .column(egui_extras::Column::auto().at_least(35.0))
-            .column(egui_extras::Column::auto().at_least(180.0))
+            .column(egui_extras::Column::auto().at_least(100.0))
+            .column(egui_extras::Column::auto().at_least(145.0))
             .column(egui_extras::Column::auto().at_least(50.0))
             .min_scrolled_height(0.0);
 
@@ -76,13 +77,18 @@ pub fn show_saveload_window(
                     ui.strong("#");
                 });
                 header.col(|ui| {
-                    ui.strong(t!("date"));
+                    ui.strong(t!("planet-name"));
+                });
+                header.col(|ui| {
+                    ui.strong(t!("date-saved"));
                 });
                 header.col(|_ui| {});
             })
             .body(|mut body| {
                 for i in start..=N_SAVE_FILES {
-                    let time = save_file_list.as_ref().unwrap().saved_time(i);
+                    let save_file_list = save_file_list.as_ref().unwrap();
+                    let name = save_file_list.name(i);
+                    let time = save_file_list.saved_time(i);
                     body.row(row_height, |mut row| {
                         row.col(|ui| {
                             if i == 0 {
@@ -92,8 +98,14 @@ pub fn show_saveload_window(
                             }
                         });
                         row.col(|ui| {
+                            if let Some(name) = name {
+                                ui.label(name);
+                            }
+                        });
+                        row.col(|ui| {
                             if let Some(time) = time {
-                                ui.label(time);
+                                let len = time.len();
+                                ui.label(&time[0..(len - 3)]);
                             }
                         });
                         row.col(|ui| {

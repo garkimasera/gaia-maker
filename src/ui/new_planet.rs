@@ -14,6 +14,7 @@ use super::{
 #[derive(Clone, Debug)]
 pub struct NewPlanetState {
     planet: NewPlanetKind,
+    name: String,
     solar_constant: f32,
     difference_in_elevation: f32,
     water: f32,
@@ -31,6 +32,7 @@ impl NewPlanetState {
     pub fn new(params: &Params) -> Self {
         NewPlanetState {
             planet: NewPlanetKind::Id(params.start_planets[0].id.clone()),
+            name: String::new(),
             solar_constant: params.custom_planet.solar_constant.default,
             difference_in_elevation: params.custom_planet.difference_in_elevation.default,
             water: params.custom_planet.water_volume.default_percentage,
@@ -87,6 +89,17 @@ pub fn new_planet(
 
                 ui.separator();
 
+                ui.vertical(|ui| {
+                    ui.label(t!("planet-name"));
+                    ui.horizontal(|ui| {
+                        ui.add(
+                            egui::TextEdit::singleline(&mut state.new_planet.name).char_limit(92),
+                        );
+                    });
+                });
+
+                ui.separator();
+
                 if ui.button(t!("cancel")).clicked() {
                     state.mode = MainMenuMode::Menu;
                 }
@@ -100,7 +113,7 @@ pub fn new_planet(
 }
 
 fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, state: &MainMenuState) {
-    let start_params = match &state.new_planet.planet {
+    let mut start_params = match &state.new_planet.planet {
         NewPlanetKind::Id(id) => crate::planet::start_planet_to_start_params(id, params),
         NewPlanetKind::Custom => {
             let mut atmo = params.default_start_params.atmo.clone();
@@ -113,6 +126,7 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
             StartParams {
                 basics: Basics {
                     solar_constant: state.new_planet.solar_constant,
+                    origin: "custom".into(),
                     ..params.default_start_params.clone().basics
                 },
                 difference_in_elevation: state.new_planet.difference_in_elevation,
@@ -123,6 +137,9 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
             }
         }
     };
+
+    start_params.basics.name = state.new_planet.name.clone();
+
     ew_manage_planet.send(ManagePlanet::New(start_params));
 }
 

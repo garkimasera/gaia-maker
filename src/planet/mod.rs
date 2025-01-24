@@ -210,6 +210,8 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
 
     StartParams {
         basics: Basics {
+            name: "".into(),
+            origin: id.into(),
             radius: floor(
                 10.0,
                 rng.sample(SymmetricalLinearDist::from(start_planet.radius)),

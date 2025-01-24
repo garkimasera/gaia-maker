@@ -17,6 +17,12 @@ pub type AnimalId = arrayvec::ArrayString<20>;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Basics {
+    /// Planet name
+    #[serde(default)]
+    pub name: String,
+    /// Planet origin id
+    #[serde(default)]
+    pub origin: String,
     /// Planet radius [m]
     pub radius: f32,
     /// Solar constant at the planet [W/m^2]
