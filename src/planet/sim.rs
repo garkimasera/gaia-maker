@@ -14,6 +14,8 @@ pub struct Sim {
     pub size: (u32, u32),
     /// Tile area [m^2]
     pub tile_area: f32,
+    /// The number of tiles
+    pub n_tiles: u32,
     /// Geothermal power per tile [W]
     pub geothermal_power_per_tile: f32,
     /// Tile insolation [J/m^2]
@@ -42,12 +44,16 @@ pub struct Sim {
     pub fertility_effect: Array2d<f32>,
     /// The number of working buildings
     pub working_buildings: fnv::FnvHashMap<BuildingKind, u32>,
+    /// Hydro and geothermal energy source [GJ]
+    pub energy_hydro_geothermal: Array2d<f32>,
+    /// Wind and solar energy source [GJ]
+    pub energy_wind_solar: f32,
 }
 
 impl Sim {
     pub fn new(planet: &Planet) -> Self {
         let size = planet.map.size();
-        let n_tile = size.0 * size.1;
+        let n_tiles = size.0 * size.1;
         let map_iter_idx = planet.map.iter_idx();
         let tile_area = 4.0 * PI * planet.basics.radius * planet.basics.radius
             / (size.0 as f32 * size.1 as f32);
@@ -65,7 +71,8 @@ impl Sim {
             before_start: false,
             size,
             tile_area,
-            geothermal_power_per_tile: planet.basics.geothermal_power / n_tile as f32,
+            n_tiles,
+            geothermal_power_per_tile: planet.basics.geothermal_power / n_tiles as f32,
             insolation: Array2d::new(size.0, size.1, 0.0),
             solar_constant_before: 0.0,
             atemp,
@@ -79,6 +86,8 @@ impl Sim {
             humidity: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
             working_buildings: HashMap::default(),
+            energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),
+            energy_wind_solar: 0.0,
         }
     }
 

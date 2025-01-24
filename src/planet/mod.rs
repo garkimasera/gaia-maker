@@ -5,6 +5,7 @@ mod biome;
 mod buildings;
 mod civ;
 mod defs;
+mod energy_source;
 mod event;
 mod heat_transfer;
 mod initial_conditions;
@@ -132,6 +133,8 @@ impl Planet {
         self.update(sim, params);
         self.cycles += 1;
         self.res.apply_diff();
+
+        self::energy_source::sim_energy_source(self, sim, params);
 
         self::tile_event::advance(self, sim, params);
         self::buildings::advance(self, sim, params);

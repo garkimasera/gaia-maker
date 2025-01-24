@@ -211,6 +211,9 @@
         resource_availability_factor: 0.004,
         base_tech_exp: 0.02,
         tech_exp_evolution: (100, 200, 300, 500, 800),
+        table_rainfall_hydro: [(0, 0.4e-6), (1000, 5.0e-6), (2000, 8.0e-6)],
+        available_geothermal_ratio: 0.05,
+        table_solar_constant_wind_solar: [(0, 0.3e-5), (1000, 1.0e-5), (2000, 2.0e-5)],
         event_duration: {civilize: 108},
     ),
     event: (

@@ -640,6 +640,12 @@ pub struct SimParams {
     pub base_tech_exp: f32,
     /// Required tech exp to evolve the age
     pub tech_exp_evolution: [f32; CivilizationAge::LEN - 1],
+    /// Rainfall to hydro energy source table [mm] - [GJ/m^2]
+    pub table_rainfall_hydro: Vec<(f32, f32)>,
+    /// Available geothermal ratio by civilization
+    pub available_geothermal_ratio: f32,
+    /// Solar constant to wind & solar energy source table [W/m^2] - [GJ/m^2]
+    pub table_solar_constant_wind_solar: Vec<(f32, f32)>,
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
