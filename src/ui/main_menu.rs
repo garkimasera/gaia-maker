@@ -53,6 +53,7 @@ pub fn main_menu(
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
     textures: Res<EguiTextures>,
+    random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
         state.mode = MainMenuMode::Error;
@@ -88,6 +89,7 @@ pub fn main_menu(
                             conf.lang = lang;
                             crate::text_assets::set_lang(lang);
                             ew_conf_change.send_default();
+                            state.new_planet.name = t!("new-planet");
                         }
                     });
                 })
@@ -101,6 +103,7 @@ pub fn main_menu(
                 &mut state,
                 &textures,
                 &mut window.single_mut(),
+                &random_name_list_map,
             );
         }
         MainMenuMode::Load => {

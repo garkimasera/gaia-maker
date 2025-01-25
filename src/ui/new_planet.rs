@@ -1,5 +1,6 @@
 use bevy::prelude::EventWriter;
 use bevy_egui::{egui, EguiContexts};
+use rand::seq::SliceRandom;
 
 use crate::{
     planet::{Basics, GasKind, Params, StartParams},
@@ -14,7 +15,7 @@ use super::{
 #[derive(Clone, Debug)]
 pub struct NewPlanetState {
     planet: NewPlanetKind,
-    name: String,
+    pub(super) name: String,
     solar_constant: f32,
     difference_in_elevation: f32,
     water: f32,
@@ -32,7 +33,7 @@ impl NewPlanetState {
     pub fn new(params: &Params) -> Self {
         NewPlanetState {
             planet: NewPlanetKind::Id(params.start_planets[0].id.clone()),
-            name: String::new(),
+            name: t!("new-planet"),
             solar_constant: params.custom_planet.solar_constant.default,
             difference_in_elevation: params.custom_planet.difference_in_elevation.default,
             water: params.custom_planet.water_volume.default_percentage,
@@ -49,6 +50,7 @@ pub fn new_planet(
     state: &mut MainMenuState,
     textures: &EguiTextures,
     window: &mut bevy::window::Window,
+    random_name_list_map: &crate::text_assets::RandomNameListMap,
 ) {
     egui::Window::new(t!("search-new-planet"))
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
@@ -101,6 +103,18 @@ pub fn new_planet(
                             window.ime_enabled = true;
                             window.ime_position =
                                 bevy::math::Vec2::new(result.rect.left(), result.rect.top());
+                        }
+
+                        if let Some(random_name_list) =
+                            random_name_list_map.0.get(&crate::text_assets::get_lang())
+                        {
+                            if ui.button(t!("random-name")).clicked() {
+                                state.new_planet.name = random_name_list
+                                    .0
+                                    .choose(&mut rand::thread_rng())
+                                    .map(|name| name.to_owned())
+                                    .unwrap_or_else(|| t!("new-planet"));
+                            }
                         }
                     });
                 });

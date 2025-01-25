@@ -1,6 +1,6 @@
 use anyhow::bail;
 use bevy::asset::io::Reader;
-use bevy::asset::{AssetLoader, LoadContext};
+use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext};
 use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use crossbeam::atomic::AtomicCell;
@@ -16,7 +16,9 @@ pub struct TextAssetsPlugin;
 impl Plugin for TextAssetsPlugin {
     fn build(&self, app: &mut App) {
         app.init_asset::<TranslationText>()
-            .register_asset_loader(TextLoader);
+            .register_asset_loader(TextLoader)
+            .init_asset::<RandomNameList>()
+            .register_asset_loader(RandomNameListLoader);
     }
 }
 
@@ -85,32 +87,52 @@ pub struct TranslationText(HashMap<String, String>);
 
 #[derive(Debug, Resource, AssetCollection)]
 pub struct TranslationTexts {
-    #[asset(path = "text/en", collection(typed))]
-    en: Vec<Handle<TranslationText>>,
-    #[asset(path = "text/ja", collection(typed))]
-    ja: Vec<Handle<TranslationText>>,
+    #[asset(path = "text/en", collection)]
+    en: Vec<UntypedHandle>,
+    #[asset(path = "text/ja", collection)]
+    ja: Vec<UntypedHandle>,
 }
 
 pub fn set_text_global(
+    mut commands: Commands,
     translation_texts: Res<TranslationTexts>,
     assets: Res<Assets<TranslationText>>,
+    assets_random_name_list: Res<Assets<RandomNameList>>,
 ) {
     let mut map = HashMap::default();
+    let mut random_name_list_map = HashMap::default();
 
-    map.insert(Lang::English, merge_text(&translation_texts.en, &assets));
-    map.insert(Lang::Japanese, merge_text(&translation_texts.ja, &assets));
+    let langs = &[
+        (Lang::English, &translation_texts.en),
+        (Lang::Japanese, &translation_texts.ja),
+    ];
+
+    for (lang, handles) in langs {
+        let mut text_handles = Vec::new();
+        for handle in handles.iter() {
+            if let Ok(handle) = handle.clone().try_typed::<TranslationText>() {
+                text_handles.push(handle);
+            } else if let Ok(handle) = handle.clone().try_typed::<RandomNameList>() {
+                random_name_list_map.insert(
+                    *lang,
+                    assets_random_name_list.get(&handle).cloned().unwrap(),
+                );
+            }
+        }
+        let translation_text = TranslationText(
+            text_handles
+                .iter()
+                .map(|h| assets.get(h).cloned().unwrap())
+                .flat_map(|t| t.0.into_iter())
+                .collect(),
+        );
+        map.insert(*lang, translation_text);
+    }
 
     let t = &mut TRANSLATION_TEXTS.write().unwrap();
     **t = map;
-}
 
-fn merge_text(t: &[Handle<TranslationText>], assets: &Assets<TranslationText>) -> TranslationText {
-    TranslationText(
-        t.iter()
-            .map(|h| assets.get(h).cloned().unwrap())
-            .flat_map(|t| t.0.into_iter())
-            .collect(),
-    )
+    commands.insert_resource(RandomNameListMap(random_name_list_map));
 }
 
 pub fn get_text<S: AsRef<str>>(s: S, map: HashMap<String, String>) -> String {
@@ -196,4 +218,44 @@ fn process_map(
         }
     }
     Ok(())
+}
+
+#[derive(Clone, Debug, Default, Asset, TypePath)]
+pub struct RandomNameList(pub Vec<String>);
+
+#[derive(Clone, Debug, Default, Resource)]
+pub struct RandomNameListMap(pub HashMap<Lang, RandomNameList>);
+
+struct RandomNameListLoader;
+
+impl AssetLoader for RandomNameListLoader {
+    type Asset = RandomNameList;
+    type Settings = ();
+    type Error = anyhow::Error;
+
+    async fn load(
+        &self,
+        reader: &mut dyn Reader,
+        _settings: &Self::Settings,
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut s = String::new();
+        reader.read_to_string(&mut s).await?;
+
+        Ok(RandomNameList(
+            s.lines()
+                .filter_map(|line| {
+                    if !line.trim_start().is_empty() {
+                        Some(line.to_owned())
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+        ))
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["random_name_list"]
+    }
 }
