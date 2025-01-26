@@ -298,6 +298,23 @@ impl CivilizationAge {
     pub const LEN: usize = Self::EarlySpaceAge as usize + 1;
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+#[repr(u8)]
+pub enum EnergySource {
+    Biomass = 0,
+    WindSolar,
+    HydroGeothermal,
+    FossilFuel,
+    Nuclear,
+    Gift,
+}
+
+impl EnergySource {
+    pub const LEN: usize = Self::Gift as usize + 1;
+}
+
 #[derive(
     Clone,
     Copy,
@@ -652,6 +669,8 @@ pub struct SimParams {
     pub available_geothermal_ratio: f32,
     /// Solar constant to wind & solar energy source table [W/m^2] - [GJ/m^2]
     pub table_solar_constant_wind_solar: Vec<(f32, f32)>,
+    /// Energy source limit by settlement age
+    pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
