@@ -22,8 +22,17 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         }
 
+        // Caclulate settlement congestion rate
+        let cr = calc_congestion_rate(p, planet_size, |p| {
+            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
+                1.0
+            } else {
+                0.0
+            }
+        });
+
         // Energy
-        let resource_availability = consume_energy(planet, sim, p, &settlement, params);
+        let resource_availability = consume_energy(planet, sim, p, &settlement, params, cr);
         super::debug::tile_log(p, "ra", |_| resource_availability);
 
         // Tech exp
@@ -43,13 +52,6 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         planet.map[p].structure = Some(Structure::Settlement(settlement));
 
         // Settlement spreading
-        let cr = calc_congestion_rate(p, planet_size, |p| {
-            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
-                1.0
-            } else {
-                0.0
-            }
-        });
         let normalized_pop =
             (settlement.pop / params.sim.settlement_spread_pop[settlement.age as usize]).min(2.0);
         let prob = (params.sim.coef_settlement_spreading_a
@@ -89,13 +91,60 @@ fn consume_energy(
     p: Coords,
     settlement: &Settlement,
     params: &Params,
+    cr: f32,
 ) -> f32 {
     let age = settlement.age as usize;
 
-    let energy_demand = settlement.pop * params.sim.energy_demand_per_pop[age];
-    let biomass_to_consume = energy_demand / params.sim.biomass_energy_factor;
+    let demand = settlement.pop * params.sim.energy_demand_per_pop[age];
+    let mut supply = [0.0; EnergySource::LEN];
+    let mut consume = [0.0; EnergySource::LEN];
+
+    // Calculate sparse energy supply
+    let mut surrounding_wind_solar = 0.0;
+    let mut surrounding_hydro_geothermal = 0.0;
+
+    for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
+            if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
+                surrounding_wind_solar += sim.energy_wind_solar;
+                surrounding_hydro_geothermal += sim.energy_hydro_geothermal[p_adj];
+            }
+        }
+    }
+    supply[EnergySource::WindSolar as usize] =
+        surrounding_wind_solar * (1.0 - cr) + sim.energy_wind_solar;
+    supply[EnergySource::HydroGeothermal as usize] =
+        surrounding_hydro_geothermal * (1.0 - cr) + sim.energy_hydro_geothermal[p];
+
+    // Calculate energy distribution
+    let priority = [
+        EnergySource::Gift as usize,
+        EnergySource::HydroGeothermal as usize,
+        EnergySource::Nuclear as usize,
+        EnergySource::WindSolar as usize,
+        EnergySource::FossilFuel as usize,
+    ];
+    let mut remaining = demand;
+    for src in priority {
+        consume[src] = (demand * params.sim.energy_source_limit_by_age[age][src])
+            .min(supply[src])
+            .min(remaining);
+        remaining -= consume[src];
+    }
+    consume[EnergySource::Biomass as usize] = remaining;
 
     // Consume biomass from a tile that has maximum biomass
+    let impact_on_biomass: f32 = params
+        .sim
+        .energy_source_biomass_impact
+        .iter()
+        .enumerate()
+        .map(|(src, a)| a * consume[src])
+        .sum();
+    if impact_on_biomass <= 0.0 {
+        return 1.0;
+    }
+    let biomass_to_consume = impact_on_biomass / params.sim.biomass_energy_factor;
     let mut p_max_biomass = p;
     let mut total_biomass = planet.map[p].biomass;
     let mut max_biomass = total_biomass;
@@ -112,12 +161,13 @@ fn consume_energy(
         }
     }
 
+    // Decrease biomass
     let total_biomass = total_biomass * sim.biomass_density_to_mass();
     let max_biomass = max_biomass * sim.biomass_density_to_mass();
     let available_biomass_ratio = if biomass_to_consume > 0.0 {
         total_biomass / biomass_to_consume
     } else {
-        0.0
+        return 1.0;
     };
 
     let new_biomass = (max_biomass - biomass_to_consume).max(0.0);
@@ -129,7 +179,7 @@ fn consume_energy(
     if x < 1.0 {
         x * x
     } else {
-        ((x - 1.0).sqrt() + 1.0).min(2.0)
+        x.min(1.0)
     }
 }
 

@@ -671,6 +671,8 @@ pub struct SimParams {
     pub table_solar_constant_wind_solar: Vec<(f32, f32)>,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Factor to calculate impact on biomass by energy source
+    pub energy_source_biomass_impact: [f32; EnergySource::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
