@@ -29,6 +29,7 @@ details = "Details"
 difference-in-elevation = "Difference in Elevation"
 enabled = "Enabled"
 energy = "Energy"
+energy-consumption = "Energy Consumption"
 exit = "Exit"
 fertility = "Fertility"
 gene-points = "Gene Points"
@@ -128,6 +129,15 @@ aerosol-injection = "Aerosol Injection"
 black-dust = "Black Dust"
 fire = "Fire"
 plague = "Plague"
+
+# Energy sources
+[energy_source]
+biomass = "Biomass"
+wind-solar = "Wind & Solar"
+hydro-geothermal = "Hydro & Geothermal"
+fossil-fuel = "Fossil Fuel"
+nuclear = "Nuclear"
+gift = "Gift"
 
 # Preferences
 [preference]

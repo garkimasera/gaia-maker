@@ -255,8 +255,11 @@ pub struct Animal {
     pub n: f32,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Civilization {}
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+pub struct Civilization {
+    pub total_pop: f32,
+    pub total_energy_consumption: [f32; EnergySource::LEN],
+}
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Settlement {

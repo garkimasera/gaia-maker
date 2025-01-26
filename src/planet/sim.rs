@@ -46,6 +46,8 @@ pub struct Sim {
     pub working_buildings: fnv::FnvHashMap<BuildingKind, u32>,
     /// Hydro and geothermal energy source [GJ]
     pub energy_hydro_geothermal: Array2d<f32>,
+    /// Used to sum civilization values
+    pub civ_sum: CivSum,
     /// Wind and solar energy source [GJ]
     pub energy_wind_solar: f32,
 }
@@ -88,6 +90,7 @@ impl Sim {
             working_buildings: HashMap::default(),
             energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),
             energy_wind_solar: 0.0,
+            civ_sum: CivSum::default(),
         }
     }
 
@@ -99,4 +102,29 @@ impl Sim {
     pub fn convert_p_cyclic(&self, p: Coords) -> Option<Coords> {
         geom::CyclicMode::X.convert_coords(self.size, p)
     }
+}
+
+#[derive(Default, Debug)]
+pub struct CivSum(HashMap<AnimalId, CivSumValues>);
+
+impl CivSum {
+    pub fn iter(&self) -> impl Iterator<Item = (&AnimalId, &CivSumValues)> {
+        self.0.iter()
+    }
+
+    pub fn get_mut(&mut self, animal_id: AnimalId) -> &mut CivSumValues {
+        self.0.entry(animal_id).or_default()
+    }
+
+    pub fn reset(&mut self) {
+        for value in self.0.values_mut() {
+            *value = CivSumValues::default();
+        }
+    }
+}
+
+#[derive(Clone, Default, Debug)]
+pub struct CivSumValues {
+    pub total_pop: f64,
+    pub total_energy_consumption: [f64; EnergySource::LEN],
 }

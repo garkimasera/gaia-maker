@@ -2,18 +2,22 @@ use arrayvec::ArrayVec;
 use geom::Coords;
 use num_traits::FromPrimitive;
 use rand::{seq::SliceRandom, Rng};
+use strum::IntoEnumIterator;
 
 use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    sim.civ_sum.reset();
+
     let planet_size = planet.map.size();
 
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;
         };
+        let animal_id = settlement.id;
         let animal_attr = &params.animals[&settlement.id];
 
         // Delete settlement if the biome is unhabitable for the animal
@@ -49,7 +53,13 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let dn = growth_speed * ratio * (-ratio + 1.0);
         settlement.pop += dn;
 
-        planet.map[p].structure = Some(Structure::Settlement(settlement));
+        // Settlement extinction
+        if settlement.pop < params.sim.settlement_extinction_threshold {
+            planet.map[p].structure = None;
+            continue;
+        } else {
+            planet.map[p].structure = Some(Structure::Settlement(settlement));
+        };
 
         // Settlement spreading
         let normalized_pop =
@@ -76,12 +86,20 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             }
         }
 
-        // Settlement extinction
-        planet.map[p].structure = if settlement.pop < params.sim.settlement_extinction_threshold {
-            None
-        } else {
-            Some(Structure::Settlement(settlement))
-        };
+        debug_assert!(settlement.pop > 0.0, "{}", settlement.pop);
+        sim.civ_sum.get_mut(animal_id).total_pop += settlement.pop as f64;
+    }
+
+    for (id, sum_values) in sim.civ_sum.iter() {
+        if sum_values.total_pop == 0.0 {
+            let _ = planet.civs.remove(id);
+            continue;
+        }
+        let c = planet.civs.entry(*id).or_default();
+        c.total_pop = sum_values.total_pop as f32;
+        for (src, e) in sum_values.total_energy_consumption.iter().enumerate() {
+            c.total_energy_consumption[src] = *e as f32;
+        }
     }
 }
 
@@ -94,6 +112,7 @@ fn consume_energy(
     cr: f32,
 ) -> f32 {
     let age = settlement.age as usize;
+    let animal_id = settlement.id;
 
     let demand = settlement.pop * params.sim.energy_demand_per_pop[age];
     let mut supply = [0.0; EnergySource::LEN];
@@ -132,6 +151,11 @@ fn consume_energy(
         remaining -= consume[src];
     }
     consume[EnergySource::Biomass as usize] = remaining;
+
+    let sum_values = sim.civ_sum.get_mut(animal_id);
+    for src in EnergySource::iter() {
+        sum_values.total_energy_consumption[src as usize] += consume[src as usize] as f64;
+    }
 
     // Consume biomass from a tile that has maximum biomass
     let impact_on_biomass: f32 = params
@@ -246,6 +270,6 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
             }
         }
 
-        planet.civs.insert(animal_id, Civilization {});
+        planet.civs.insert(animal_id, Civilization::default());
     }
 }

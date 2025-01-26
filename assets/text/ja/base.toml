@@ -29,6 +29,7 @@ details = "詳細"
 difference-in-elevation = "高低差"
 enabled = "有効"
 energy = "エネルギー"
+energy-consumption = "エネルギー消費量"
 exit = "終了"
 fertility = "肥沃度"
 gene-point = "遺伝子ポイント"
@@ -127,6 +128,15 @@ aerosol-injection = "エアロゾル注入"
 black-dust = "黒色塵"
 fire = "火災"
 plague = "疫病"
+
+# Energy sources
+[energy_source]
+biomass = "バイオマス"
+wind-solar = "風力 & 太陽"
+hydro-geothermal = "水力 & 地熱"
+fossil-fuel = "化石燃料"
+nuclear = "原子力"
+gift = "ギフト"
 
 # Preferences
 [preference]

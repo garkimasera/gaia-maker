@@ -14,6 +14,7 @@ pub enum Panel {
     #[default]
     Planet,
     Atmosphere,
+    Civilization,
     History,
 }
 
@@ -25,6 +26,7 @@ pub fn stat_window(
     params: Res<Params>,
     save_file_metadata: Res<SaveFileMetadata>,
     mut current_panel: Local<Panel>,
+    mut current_civ_id: Local<Option<AnimalId>>,
     mut current_graph_item: Local<GraphItem>,
 ) {
     if !wos.stat {
@@ -45,6 +47,7 @@ pub fn stat_window(
             match *current_panel {
                 Panel::Planet => planet_stat(ui, &planet, save_file_metadata.debug_mode_enabled),
                 Panel::Atmosphere => atmo_stat(ui, &planet),
+                Panel::Civilization => civ_stat(ui, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
         })
@@ -107,6 +110,35 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
             ui.label(format!(
                 "{:.2}%",
                 planet.atmo.mass(gas_kind) / total_mass * 100.0
+            ));
+            ui.end_row();
+        }
+    });
+}
+
+fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<AnimalId>) {
+    if planet.civs.is_empty() {
+        ui.label(t!("no-civilization"));
+        *current_civ_id = None;
+        return;
+    }
+
+    let civ_ids: Vec<AnimalId> = planet.civs.keys().copied().collect();
+    if current_civ_id.is_none() {
+        *current_civ_id = Some(civ_ids[0]);
+    }
+    let current_civ_id = current_civ_id.unwrap();
+    let c = &planet.civs[&current_civ_id];
+
+    ui.label(format!("{}: {:.0}", t!("population"), c.total_pop));
+
+    ui.label(t!("energy-consumption"));
+    egui::Grid::new("table_civ").striped(true).show(ui, |ui| {
+        for src in EnergySource::iter() {
+            ui.label(t!("energy_source", src));
+            ui.label(format!(
+                "{:.0} GJ",
+                c.total_energy_consumption[src as usize]
             ));
             ui.end_row();
         }
