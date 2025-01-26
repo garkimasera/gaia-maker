@@ -126,5 +126,6 @@ impl CivSum {
 #[derive(Clone, Default, Debug)]
 pub struct CivSumValues {
     pub total_pop: f64,
+    pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f64; EnergySource::LEN],
 }

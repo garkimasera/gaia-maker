@@ -89,15 +89,18 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
 
         debug_assert!(settlement.pop > 0.0, "{}", settlement.pop);
-        sim.civ_sum.get_mut(animal_id).total_pop += settlement.pop as f64;
+        let civ_sum_values = sim.civ_sum.get_mut(animal_id);
+        civ_sum_values.total_settlement[settlement.age as usize] += 1;
+        civ_sum_values.total_pop += settlement.pop as f64;
     }
 
     for (id, sum_values) in sim.civ_sum.iter() {
-        if sum_values.total_pop == 0.0 {
+        if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 {
             let _ = planet.civs.remove(id);
             continue;
         }
         let c = planet.civs.entry(*id).or_default();
+        c.total_settlement = sum_values.total_settlement;
         c.total_pop = sum_values.total_pop as f32;
         for (src, e) in sum_values.total_energy_consumption.iter().enumerate() {
             c.total_energy_consumption[src] = *e as f32;

@@ -131,9 +131,20 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
     let c = &planet.civs[&current_civ_id];
 
     ui.label(format!("{}: {:.0}", t!("population"), c.total_pop));
+    ui.separator();
+
+    ui.label(t!("cities"));
+    egui::Grid::new("table_cities").show(ui, |ui| {
+        for age in CivilizationAge::iter() {
+            ui.label(t!(age));
+            ui.label(format!("{}", c.total_settlement[age as usize]));
+            ui.end_row();
+        }
+    });
+    ui.separator();
 
     ui.label(t!("energy-consumption"));
-    egui::Grid::new("table_civ").striped(true).show(ui, |ui| {
+    egui::Grid::new("table_civ").show(ui, |ui| {
         for src in EnergySource::iter() {
             ui.label(t!("energy_source", src));
             ui.label(format!(

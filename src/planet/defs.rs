@@ -259,6 +259,7 @@ pub struct Animal {
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Civilization {
     pub total_pop: f32,
+    pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f32; EnergySource::LEN],
 }
 
