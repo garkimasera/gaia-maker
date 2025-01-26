@@ -205,7 +205,8 @@ pub struct AnimalAttr {
     pub size: AnimalSize,
     pub cost: f32,
     pub habitat: AnimalHabitat,
-    #[serde(default = "growth_speed_default")]
+    #[serde(default = "animal_ratio_attr_default")]
+    #[serde_as(as = "Percent")]
     pub growth_speed: f32,
     /// Livable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
@@ -214,7 +215,7 @@ pub struct AnimalAttr {
     pub civ: Option<AnimalCivParams>,
 }
 
-fn growth_speed_default() -> f32 {
+fn animal_ratio_attr_default() -> f32 {
     1.0
 }
 

@@ -2,6 +2,6 @@
     size: small,
     cost: 2,
     habitat: land,
-    growth_speed: 1.4,
+    growth_speed: 140,
     temp: (5, 50),
 )
