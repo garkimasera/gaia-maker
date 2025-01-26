@@ -50,7 +50,12 @@ pub fn bisection<F: FnMut(f32) -> f32>(
 }
 
 pub fn range_to_livability_trapezoid((min, max): (f32, f32), a: f32, x: f32) -> f32 {
-    assert!(min <= max);
+    let (min, max) = if min <= max {
+        (min, max)
+    } else {
+        let a = (max + min) / 2.0;
+        (a, a)
+    };
 
     let l = max - min;
     let b = l / a;
@@ -67,8 +72,9 @@ pub fn range_to_livability_trapezoid((min, max): (f32, f32), a: f32, x: f32) -> 
         0.0
     };
 
-    debug_assert!((0.0..=1.0).contains(&result));
-    result
+    debug_assert!(result.is_finite(), "{:?},{}", (min, max, a, x), result);
+    // Clamp result because of float precision
+    result.clamp(0.0, 1.0)
 }
 
 #[rustfmt::skip]
