@@ -43,7 +43,9 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         tech_exp(&mut settlement, params);
 
         // Pop growth & decline
-        let cap_animal = super::animal::calc_cap_without_biomass(planet, p, animal_attr, params);
+        let civ_temp_bonus = params.sim.civ_temp_bonus[settlement.age as usize];
+        let cap_animal =
+            super::animal::calc_cap_without_biomass(planet, p, animal_attr, params, civ_temp_bonus);
         let cap = params.sim.settlement_max_pop[settlement.age as usize]
             * cap_animal
             * resource_availability;

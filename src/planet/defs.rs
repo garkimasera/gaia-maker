@@ -646,6 +646,8 @@ pub struct SimParams {
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
+    /// Livable temperature bonus by civilization
+    pub civ_temp_bonus: [f32; CivilizationAge::LEN],
     /// Population of settlements to calulate spread probability
     pub settlement_spread_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
