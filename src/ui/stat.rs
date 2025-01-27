@@ -127,8 +127,18 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
     if current_civ_id.is_none() {
         *current_civ_id = Some(civ_ids[0]);
     }
-    let current_civ_id = current_civ_id.unwrap();
-    let c = &planet.civs[&current_civ_id];
+    let mut selected_civ_id = current_civ_id.unwrap();
+
+    egui::ComboBox::from_id_salt("select-civilization")
+        .selected_text(t!("animal", selected_civ_id))
+        .show_ui(ui, |ui| {
+            for id in &civ_ids {
+                ui.selectable_value(&mut selected_civ_id, *id, t!("animal", id));
+            }
+        });
+
+    *current_civ_id = Some(selected_civ_id);
+    let c = &planet.civs[&selected_civ_id];
 
     ui.label(format!("{}: {:.0}", t!("population"), c.total_pop));
     ui.separator();
