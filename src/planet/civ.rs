@@ -142,21 +142,36 @@ fn consume_energy(
 
     // Calculate energy distribution
     let priority = [
-        EnergySource::Gift as usize,
-        EnergySource::HydroGeothermal as usize,
-        EnergySource::Nuclear as usize,
-        EnergySource::WindSolar as usize,
-        EnergySource::FossilFuel as usize,
+        EnergySource::Gift,
+        EnergySource::HydroGeothermal,
+        EnergySource::Nuclear,
+        EnergySource::WindSolar,
+        EnergySource::FossilFuel,
     ];
     let mut remaining = demand;
     for src in priority {
-        consume[src] = (demand * params.sim.energy_source_limit_by_age[age][src])
+        let src = src as usize;
+        debug_assert!(supply[src] >= 0.0);
+        consume[src] += (demand * params.sim.energy_source_limit_by_age[age][src])
             .min(supply[src])
             .min(remaining);
         remaining -= consume[src];
     }
     consume[EnergySource::Biomass as usize] = remaining;
 
+    // Add minimum required or waste energy consume
+    for src in EnergySource::iter() {
+        let src = src as usize;
+        let req = demand * params.sim.energy_source_min_by_age[age][src];
+        let supply = supply[src] - consume[src];
+        if src == 0 || supply > req {
+            consume[src] += req;
+        } else {
+            consume[src] += supply.max(0.0);
+        }
+    }
+
+    // Record
     let sum_values = sim.civ_sum.get_mut(animal_id);
     for src in EnergySource::iter() {
         sum_values.total_energy_consumption[src as usize] += consume[src as usize] as f64;
