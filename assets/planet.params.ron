@@ -301,6 +301,12 @@
             effect: AdjustSolarPower,
             control: increase_rate,
         ),
+        ice_importer: (
+            energy: -400,
+            cost: 500,
+            build_max: 20,
+            effect: AddWater( value: 2e+10 ),
+        ),
         nitrogen_importer: (
             energy: -50,
             cost: 100,

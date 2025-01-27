@@ -391,6 +391,7 @@ pub enum SpaceBuildingKind {
     AsteroidMiningStation,
     DysonSwarmUnit,
     OrbitalMirror,
+    IceImporter,
     NitrogenImporter,
     CarbonImporter,
     IonIrradiator,
@@ -430,9 +431,11 @@ pub enum BuildingEffect {
         mass: f32,
         limit_atm: f32,
     },
+    AddWater {
+        value: f32,
+    },
     Vapor {
         value: f32,
-        additional_water: f32,
     },
     Heater {
         heat: f32,

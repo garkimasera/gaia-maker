@@ -86,6 +86,9 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     planet.atmo.add(*kind, mass * n as f32);
                 }
             }
+            BuildingEffect::AddWater { value } => {
+                planet.water.water_volume += value;
+            }
             _ => (),
         }
     }

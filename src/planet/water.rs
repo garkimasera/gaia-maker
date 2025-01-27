@@ -78,13 +78,8 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
                 sim.vapor_new[p] =
                     linear_interpolation(&params.sim.ocean_vaporization_table, planet.map[p].temp)
                         / RAINFALL_DURATION;
-            } else if let Some(BuildingEffect::Vapor {
-                value,
-                additional_water,
-            }) = building_effect
-            {
+            } else if let Some(BuildingEffect::Vapor { value }) = building_effect {
                 sim.vapor_new[p] = value / RAINFALL_DURATION;
-                planet.water.water_volume += additional_water;
             } else {
                 let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                     .into_iter()

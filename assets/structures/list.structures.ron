@@ -16,9 +16,9 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -20,
+            energy: -10,
             cost: 100,
-            effect: Vapor ( value: 5000, additional_water: 1e+9 ),
+            effect: Vapor ( value: 5000 ),
         ),
     ),
     fertilization_plant: (
@@ -27,7 +27,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -0.02,
+            energy: -0.05,
             cost: 50,
             effect: Fertilize ( increment: 0.1, max: 40.0, range: 2 ),
         ),
