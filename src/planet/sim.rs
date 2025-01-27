@@ -116,9 +116,12 @@ impl CivSum {
         self.0.entry(animal_id).or_default()
     }
 
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self, ids: impl Iterator<Item = AnimalId>) {
         for value in self.0.values_mut() {
             *value = CivSumValues::default();
+        }
+        for id in ids {
+            self.0.entry(id).or_default();
         }
     }
 }
