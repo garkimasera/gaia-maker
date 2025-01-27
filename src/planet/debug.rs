@@ -80,3 +80,17 @@ fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
 
     format!("{}(n={:.3})", animal.id, animal.n)
 }
+
+pub trait PlanetDebug {
+    fn delete_settlement(&mut self);
+}
+
+impl PlanetDebug for Planet {
+    fn delete_settlement(&mut self) {
+        for p in self.map.iter_idx() {
+            if matches!(self.map[p].structure, Some(Structure::Settlement(_))) {
+                self.map[p].structure = None;
+            }
+        }
+    }
+}

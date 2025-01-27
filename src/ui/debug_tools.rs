@@ -1,6 +1,7 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
-use crate::sim::SaveFileMetadata;
-use crate::{planet::*, screen::HoverTile};
+use crate::planet::debug::PlanetDebug;
+use crate::planet::*;
+use crate::{screen::HoverTile, sim::SaveFileMetadata};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use geom::Coords;
@@ -73,7 +74,7 @@ pub fn debug_tools_window(
             match *current_panel {
                 Panel::TileInfo => info_ui(ui, &planet, &sim, p),
                 Panel::Sim => sim_ui(ui, &mut planet),
-                Panel::Map => map_panel.ui(ui, &mut cursor_mode, &params),
+                Panel::Map => map_panel.ui(ui, &mut planet, &mut cursor_mode, &params),
                 Panel::Planet => planet_ui(ui, &mut planet),
                 Panel::Atmo => atmo_ui(ui, &mut planet),
             }
@@ -123,7 +124,13 @@ pub struct MapPanel {
 }
 
 impl MapPanel {
-    fn ui(&mut self, ui: &mut egui::Ui, cursor_mode: &mut CursorMode, params: &Params) {
+    fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        planet: &mut Planet,
+        cursor_mode: &mut CursorMode,
+        params: &Params,
+    ) {
         let default_civ_animal = *params
             .animals
             .iter()
@@ -181,6 +188,12 @@ impl MapPanel {
                     CursorMode::PlaceSettlement(self.animal_id.unwrap(), self.settlement_age);
             }
         });
+
+        ui.separator();
+
+        if ui.button("delete all settlements").clicked() {
+            planet.delete_settlement();
+        }
     }
 }
 
