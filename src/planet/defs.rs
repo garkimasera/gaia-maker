@@ -685,6 +685,8 @@ pub struct SimParams {
     pub energy_source_min_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Factor to calculate impact on biomass by energy source
     pub energy_source_biomass_impact: [f32; EnergySource::LEN],
+    /// Soil erosion effect by settlement
+    pub soil_erosion_effect_by_settlement: [f32; CivilizationAge::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }

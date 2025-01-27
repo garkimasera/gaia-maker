@@ -39,6 +39,10 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let resource_availability = consume_energy(planet, sim, p, &settlement, params, cr);
         super::debug::tile_log(p, "ra", |_| resource_availability);
 
+        // Soil erosion
+        planet.map[p].fertility *=
+            1.0 - params.sim.soil_erosion_effect_by_settlement[settlement.age as usize];
+
         // Tech exp
         tech_exp(&mut settlement, params);
 
