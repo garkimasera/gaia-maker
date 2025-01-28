@@ -50,6 +50,8 @@ pub struct Sim {
     pub civ_sum: CivSum,
     /// Wind and solar energy source [GJ]
     pub energy_wind_solar: f32,
+    /// Civilization domain
+    pub domain: Array2d<Option<(AnimalId, f32)>>,
 }
 
 impl Sim {
@@ -91,6 +93,7 @@ impl Sim {
             energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),
             energy_wind_solar: 0.0,
             civ_sum: CivSum::default(),
+            domain: Array2d::new(size.0, size.1, None),
         }
     }
 

@@ -2,6 +2,9 @@ use super::misc::linear_interpolation;
 use super::*;
 
 pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    update_civ_domain(planet, sim);
+
+    // Update sparse energy source
     sim.energy_wind_solar = linear_interpolation(
         &params.sim.table_solar_constant_wind_solar,
         planet.basics.solar_constant,
@@ -15,6 +18,31 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             linear_interpolation(&params.sim.table_rainfall_hydro, planet.map[p].rainfall)
                 * sim.tile_area
                 + geothermal_per_tile;
+    }
+}
+
+pub fn update_civ_domain(planet: &Planet, sim: &mut Sim) {
+    for p in planet.map.iter_idx() {
+        sim.domain[p] = None;
+    }
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(settlement)) = &planet.map[p].structure else {
+            continue;
+        };
+        sim.domain[p] = Some((settlement.id, f32::INFINITY));
+
+        for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+            if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
+                if let Some((_, weight)) = sim.domain[p_adj] {
+                    if settlement.pop > weight {
+                        sim.domain[p_adj] = Some((settlement.id, settlement.pop));
+                    }
+                } else {
+                    sim.domain[p_adj] = Some((settlement.id, settlement.pop));
+                }
+            }
+        }
     }
 }
 
