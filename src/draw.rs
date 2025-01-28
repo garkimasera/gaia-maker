@@ -14,6 +14,21 @@ pub struct UpdateMap {
     need_update: bool,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Resource)]
+pub struct DisplayOpts {
+    pub animals: bool,
+    pub cities: bool,
+}
+
+impl Default for DisplayOpts {
+    fn default() -> Self {
+        Self {
+            animals: true,
+            cities: true,
+        }
+    }
+}
+
 impl UpdateMap {
     pub fn update(&mut self) {
         self.need_update = true;
@@ -21,13 +36,13 @@ impl UpdateMap {
 }
 
 #[derive(Debug, Component)]
-pub struct FastAnimatedTexture;
+struct FastAnimatedTexture;
 
 #[derive(Debug, Component)]
-pub struct SlowAnimatedTexture;
+struct SlowAnimatedTexture;
 
 #[derive(Debug, Default, Resource)]
-pub struct AnimationCounter {
+struct AnimationCounter {
     fast: usize,
     slow: usize,
 }
@@ -40,6 +55,7 @@ impl Plugin for DrawPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<UpdateMap>()
             .init_resource::<UpdateMap>()
+            .init_resource::<DisplayOpts>()
             .init_resource::<LayeredTexMap>()
             .init_resource::<AnimationCounter>()
             .add_systems(
@@ -198,7 +214,7 @@ fn spawn_structure_textures(
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
-    current_layer: Res<OverlayLayerKind>,
+    (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     mut tex_entities: Local<Vec<Entity>>,
 ) {
     if !update_map.need_update {
@@ -221,6 +237,9 @@ fn spawn_structure_textures(
         let attrs = &params.structures[&kind];
 
         let index = if let Structure::Settlement(settlement) = structure {
+            if !display_opts.cities {
+                continue;
+            }
             settlement.age as usize
         } else {
             0
@@ -255,7 +274,7 @@ fn spawn_animal_textures(
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
-    current_layer: Res<OverlayLayerKind>,
+    (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
@@ -266,6 +285,9 @@ fn spawn_animal_textures(
         commands.entity(*entity).despawn();
     }
     tex_entities.clear();
+    if !display_opts.animals {
+        return;
+    }
 
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
