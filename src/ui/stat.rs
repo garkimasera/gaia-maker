@@ -201,7 +201,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
     let min_bound_margin = match item {
         GraphItem::AverageAirTemperature | GraphItem::AverageSeaTemperature => 1.0e-1,
         GraphItem::AverageRainfall => 1.0e+0,
-        GraphItem::Biomass => 1.0e-2,
+        GraphItem::Biomass | GraphItem::BuriedCarbon => 1.0e-2,
         GraphItem::Oxygen | GraphItem::Nitrogen | GraphItem::CarbonDioxide => 1.0e-5,
         GraphItem::Population => 1.0e+1,
     };
@@ -239,6 +239,7 @@ pub enum GraphItem {
     Oxygen,
     Nitrogen,
     CarbonDioxide,
+    BuriedCarbon,
     Population,
 }
 
@@ -260,6 +261,9 @@ impl GraphItem {
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),
+            Self::BuriedCarbon => record
+                .map(|record| record.buried_carbon as f64 / 1000.0)
+                .unwrap_or(0.0),
             Self::Population => record.map(|record| record.pop(None) as f64).unwrap_or(0.0),
         }
     }
@@ -273,6 +277,7 @@ impl GraphItem {
             Self::Oxygen => format!("{:.2e} atm", value),
             Self::Nitrogen => format!("{:.2e} atm", value),
             Self::CarbonDioxide => format!("{:.2e} atm", value),
+            Self::BuriedCarbon => format!("{:.1} Gt", value),
             Self::Population => format!("{:.0}", value),
         }
     }

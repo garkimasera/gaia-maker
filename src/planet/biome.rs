@@ -92,6 +92,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Biomass
     let mut sum_biomass = 0.0;
+    let mut sum_buried_carbon = 0.0;
     let density_to_mass = sim.biomass_density_to_mass();
     let speed_factor_by_atmo = linear_interpolation(
         &params.sim.biomass_growth_speed_atm_table,
@@ -141,8 +142,10 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             sum_biomass += *biomass as f64;
             planet.map[p].buried_carbon += carbon_weight * biomass_to_buried_carbon_ratio;
         }
+        sum_buried_carbon += planet.map[p].buried_carbon as f64;
     }
     planet.stat.sum_biomass = sum_biomass as f32 * density_to_mass;
+    planet.stat.sum_buried_carbon = sum_buried_carbon as f32;
 
     // Biome transistion
     process_biome_transition(planet, sim, params);

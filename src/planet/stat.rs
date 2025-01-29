@@ -10,6 +10,7 @@ pub struct Stat {
     pub average_sea_temp: f32,
     pub average_rainfall: f32,
     pub sum_biomass: f32,
+    pub sum_buried_carbon: f32,
     history: VecDeque<Record>,
 }
 
@@ -19,6 +20,7 @@ pub struct Record {
     pub average_sea_temp: f32,
     pub average_rainfall: f32,
     pub biomass: f32,
+    pub buried_carbon: f32,
     pub p_o2: f32,
     pub p_n2: f32,
     pub p_co2: f32,
@@ -32,6 +34,7 @@ impl Stat {
             average_sea_temp: 0.0,
             average_rainfall: 0.0,
             sum_biomass: 0.0,
+            sum_buried_carbon: 0.0,
             history: VecDeque::with_capacity(params.history.max_record + 1),
         }
     }
@@ -62,6 +65,7 @@ pub fn record_stats(planet: &mut Planet, params: &Params) {
         average_sea_temp: planet.stat.average_sea_temp,
         average_rainfall: planet.stat.average_rainfall,
         biomass: planet.stat.sum_biomass,
+        buried_carbon: planet.stat.sum_buried_carbon,
         p_o2: planet.atmo.partial_pressure(GasKind::Oxygen),
         p_n2: planet.atmo.partial_pressure(GasKind::Nitrogen),
         p_co2: planet.atmo.partial_pressure(GasKind::CarbonDioxide),
