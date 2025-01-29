@@ -679,6 +679,12 @@ pub struct SimParams {
     pub available_geothermal_ratio: f32,
     /// Solar constant to wind & solar energy source table [W/m^2] - [GJ/m^2]
     pub table_solar_constant_wind_solar: Vec<(f32, f32)>,
+    /// Threshold of buried carbon to be available as fossil fuel [Mt]
+    pub buried_carbon_energy_threshold: f32,
+    /// The number of tiles to mine fossil fuel
+    pub n_tiles_fossil_fuel_mine: usize,
+    /// Max sea depth to use geothermal or fossil fuel [m]
+    pub max_depth_undersea_resource: f32,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Energy source minimum required or waste by settlement age

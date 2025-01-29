@@ -2,6 +2,7 @@ use super::misc::linear_interpolation;
 use super::*;
 
 pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    sim.civ_sum.reset(planet.civs.keys().copied());
     update_civ_domain(planet, sim);
 
     // Update sparse energy source
@@ -14,10 +15,35 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         planet.basics.geothermal_power * 3600.0 * 24.0 * 1.0e-6 / sim.n_tiles as f32;
 
     for p in planet.map.iter_idx() {
+        let geothermal =
+            if planet.height_above_sea_level(p) > params.sim.max_depth_undersea_resource {
+                geothermal_per_tile
+            } else {
+                0.0
+            };
         sim.energy_hydro_geothermal[p] =
             linear_interpolation(&params.sim.table_rainfall_hydro, planet.map[p].rainfall)
                 * sim.tile_area
-                + geothermal_per_tile;
+                + geothermal
+    }
+
+    // Fossil fuel
+    for p in planet.map.iter_idx() {
+        let Some((id, _)) = sim.domain[p] else {
+            continue;
+        };
+        let available = planet.map[p].buried_carbon - params.sim.buried_carbon_energy_threshold;
+        if available <= 0.0 {
+            continue;
+        }
+        let src_tiles = &mut sim.civ_sum.get_mut(id).fossil_fuel_src_tiles;
+        src_tiles.insert(
+            ordered_float::NotNan::new(available).expect("invalid buried carbon value"),
+            p,
+        );
+        if src_tiles.len() > params.sim.n_tiles_fossil_fuel_mine {
+            src_tiles.pop_first();
+        }
     }
 }
 

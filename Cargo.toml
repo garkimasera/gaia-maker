@@ -32,6 +32,9 @@ fnv = "1"
 image = { version = "0.25.5", default-features = false, features = ["png", "rayon"] }
 log = "0.4"
 noise = "0.9"
+num-derive = "0.4.2"
+num-traits = "0.2.19"
+ordered-float = { version = "4.6.0", default-features = false }
 rand = { version = "0.8", features = ["small_rng"] }
 regex = "1"
 rmp-serde = "1.3.0"
@@ -43,8 +46,6 @@ toml = "0.8.19"
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
-num-derive = "0.4.2"
-num-traits = "0.2.19"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

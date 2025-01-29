@@ -8,8 +8,6 @@ use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    sim.civ_sum.reset(planet.civs.keys().copied());
-
     let planet_size = planet.map.size();
 
     for p in planet.map.iter_idx() {
