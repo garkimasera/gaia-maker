@@ -11,8 +11,11 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         planet.basics.solar_constant,
     ) * sim.tile_area;
 
-    let geothermal_per_tile =
-        planet.basics.geothermal_power * 3600.0 * 24.0 * 1.0e-6 / sim.n_tiles as f32;
+    let geothermal_per_tile = planet.basics.geothermal_power
+        * params.sim.available_geothermal_ratio
+        * (3600.0 * 24.0)
+        * 1.0e-9
+        / sim.n_tiles as f32;
 
     for p in planet.map.iter_idx() {
         let geothermal =
@@ -24,7 +27,7 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         sim.energy_hydro_geothermal[p] =
             linear_interpolation(&params.sim.table_rainfall_hydro, planet.map[p].rainfall)
                 * sim.tile_area
-                + geothermal
+                + geothermal;
     }
 
     // Fossil fuel
@@ -44,6 +47,17 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if src_tiles.len() > params.sim.n_tiles_fossil_fuel_mine {
             src_tiles.pop_first();
         }
+    }
+
+    for (_, sum_values) in sim.civ_sum.iter_mut() {
+        let available_fossil_fuel_mass = sum_values
+            .fossil_fuel_src_tiles
+            .keys()
+            .map(|mass| mass.into_inner())
+            .sum::<f32>();
+        sum_values.fossil_fuel_supply = available_fossil_fuel_mass
+            * params.sim.fossil_fuel_combustion_energy
+            * params.sim.available_fossil_fuel_ratio;
     }
 }
 
@@ -104,13 +118,18 @@ pub fn process_settlement_energy(
     supply[EnergySource::HydroGeothermal as usize] =
         surrounding_hydro_geothermal * (1.0 - cr) + sim.energy_hydro_geothermal[p];
 
+    // Calculate fossil fuel & gift energy supply
+    let sum_values = sim.civ_sum.get_mut(animal_id);
+    supply[EnergySource::FossilFuel as usize] =
+        sum_values.fossil_fuel_supply * (settlement.pop / sum_values.total_pop as f32);
+
     // Calculate energy distribution
     let priority = [
         EnergySource::Gift,
         EnergySource::HydroGeothermal,
         EnergySource::Nuclear,
-        EnergySource::WindSolar,
         EnergySource::FossilFuel,
+        EnergySource::WindSolar,
     ];
     let mut remaining = demand;
     for src in priority {
@@ -188,5 +207,24 @@ pub fn process_settlement_energy(
         x * x
     } else {
         x.min(1.0)
+    }
+}
+
+pub fn consume_buried_carbon(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    for (_, sum_values) in sim.civ_sum.iter() {
+        let mass = sum_values.total_energy_consumption[EnergySource::FossilFuel as usize] as f32
+            / params.sim.fossil_fuel_combustion_energy;
+        let available_fossil_fuel_mass = sum_values
+            .fossil_fuel_src_tiles
+            .keys()
+            .map(|mass| mass.into_inner())
+            .sum::<f32>();
+
+        for (m, p) in &sum_values.fossil_fuel_src_tiles {
+            let consume_mass = mass * (m.into_inner() / available_fossil_fuel_mass);
+            planet.map[*p].buried_carbon = (planet.map[*p].buried_carbon - consume_mass).max(0.0);
+        }
+
+        planet.atmo.release_carbon(mass);
     }
 }

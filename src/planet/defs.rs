@@ -645,7 +645,7 @@ pub struct SimParams {
     pub coef_animal_kill_by_congestion_b: f32,
     /// Animal livable oxygen range by size
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
-    /// Coefficent to calulate gene point income.
+    /// Coefficent to calculate gene point income.
     pub coef_gene_point_income: f32,
     /// Initial population of settlements
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
@@ -653,7 +653,7 @@ pub struct SimParams {
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
     /// Livable temperature bonus by civilization
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
-    /// Population of settlements to calulate spread probability
+    /// Population of settlements to calculate spread probability
     pub settlement_spread_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
     pub base_pop_growth_speed: f32,
@@ -685,6 +685,10 @@ pub struct SimParams {
     pub n_tiles_fossil_fuel_mine: usize,
     /// Max sea depth to use geothermal or fossil fuel [m]
     pub max_depth_undersea_resource: f32,
+    /// Fossil fuel combustion energy [GJ/Mt]
+    pub fossil_fuel_combustion_energy: f32,
+    /// The ratio of available fossil fuel per cycle.
+    pub available_fossil_fuel_ratio: f32,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Energy source minimum required or waste by settlement age

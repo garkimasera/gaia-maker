@@ -111,8 +111,14 @@ impl Sim {
 pub struct CivSum(HashMap<AnimalId, CivSumValues>);
 
 impl CivSum {
-    pub fn iter(&self) -> impl Iterator<Item = (&AnimalId, &CivSumValues)> {
-        self.0.iter()
+    pub fn iter(&self) -> impl Iterator<Item = (AnimalId, &CivSumValues)> {
+        self.0.iter().map(|(key, sum_values)| (*key, sum_values))
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (AnimalId, &mut CivSumValues)> {
+        self.0
+            .iter_mut()
+            .map(|(key, sum_values)| (*key, sum_values))
     }
 
     pub fn get_mut(&mut self, animal_id: AnimalId) -> &mut CivSumValues {
@@ -135,4 +141,5 @@ pub struct CivSumValues {
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f64; EnergySource::LEN],
     pub fossil_fuel_src_tiles: BTreeMap<ordered_float::NotNan<f32>, Coords>,
+    pub fossil_fuel_supply: f32,
 }
