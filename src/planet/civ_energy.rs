@@ -123,6 +123,16 @@ pub fn process_settlement_energy(
     supply[EnergySource::FossilFuel as usize] =
         sum_values.fossil_fuel_supply * (settlement.pop / sum_values.total_pop as f32);
 
+    // Calculate nuclear energy supply
+    let a = match settlement.age {
+        CivilizationAge::AtomicAge => {
+            (params.sim.base_nuclear_ratio + settlement.tech_exp).clamp(0.0, 1.0)
+        }
+        CivilizationAge::EarlySpaceAge => 1.0,
+        _ => 0.0,
+    };
+    supply[EnergySource::Nuclear as usize] = demand * a;
+
     // Calculate energy distribution
     let priority = [
         EnergySource::Gift,

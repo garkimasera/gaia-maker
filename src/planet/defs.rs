@@ -689,6 +689,8 @@ pub struct SimParams {
     pub fossil_fuel_combustion_energy: f32,
     /// The ratio of available fossil fuel per cycle.
     pub available_fossil_fuel_ratio: f32,
+    /// Basic nuclear supply ratio
+    pub base_nuclear_ratio: f32,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Energy source minimum required or waste by settlement age
