@@ -35,7 +35,6 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         // Energy
         let resource_availability =
             super::civ_energy::process_settlement_energy(planet, sim, p, &settlement, params, cr);
-        super::debug::tile_log(p, "ra", |_| resource_availability);
 
         // Soil erosion
         planet.map[p].fertility *=

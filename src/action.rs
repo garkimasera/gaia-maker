@@ -91,6 +91,7 @@ fn new_structure(kind: StructureKind) -> Structure {
         StructureKind::FertilizationPlant => Structure::FertilizationPlant,
         StructureKind::Heater => Structure::Heater,
         StructureKind::CarbonCapturer => Structure::CarbonCapturer,
+        StructureKind::GiftTower => Structure::GiftTower,
         _ => unreachable!(),
     }
 }

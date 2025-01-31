@@ -30,22 +30,30 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 + geothermal;
     }
 
-    // Fossil fuel
+    // Fossil fuel & gift energy
     for p in planet.map.iter_idx() {
         let Some((id, _)) = sim.domain[p] else {
             continue;
         };
+        let sum_values = sim.civ_sum.get_mut(id);
+
         let available = planet.map[p].buried_carbon - params.sim.buried_carbon_energy_threshold;
-        if available <= 0.0 {
-            continue;
+        if available > 0.0 {
+            let src_tiles = &mut sum_values.fossil_fuel_src_tiles;
+            src_tiles.insert(
+                ordered_float::NotNan::new(available).expect("invalid buried carbon value"),
+                p,
+            );
+            if src_tiles.len() > params.sim.n_tiles_fossil_fuel_mine {
+                src_tiles.pop_first();
+            }
         }
-        let src_tiles = &mut sim.civ_sum.get_mut(id).fossil_fuel_src_tiles;
-        src_tiles.insert(
-            ordered_float::NotNan::new(available).expect("invalid buried carbon value"),
-            p,
-        );
-        if src_tiles.len() > params.sim.n_tiles_fossil_fuel_mine {
-            src_tiles.pop_first();
+
+        if matches!(planet.map[p].structure, Some(Structure::GiftTower)) {
+            let attrs = params.building_attrs(StructureKind::GiftTower);
+            if let Some(BuildingEffect::SupplyEnergy { value }) = attrs.effect {
+                sum_values.gift_supply += value;
+            }
         }
     }
 
@@ -71,6 +79,9 @@ pub fn update_civ_domain(planet: &Planet, sim: &mut Sim) {
             continue;
         };
         sim.domain[p] = Some((settlement.id, f32::INFINITY));
+        sim.civ_sum
+            .get_mut(settlement.id)
+            .total_pop_for_energy_distribution += settlement.pop as f64;
 
         for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
             if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
@@ -120,8 +131,9 @@ pub fn process_settlement_energy(
 
     // Calculate fossil fuel & gift energy supply
     let sum_values = sim.civ_sum.get_mut(animal_id);
-    supply[EnergySource::FossilFuel as usize] =
-        sum_values.fossil_fuel_supply * (settlement.pop / sum_values.total_pop as f32);
+    let a = settlement.pop / sum_values.total_pop_for_energy_distribution as f32;
+    supply[EnergySource::FossilFuel as usize] = sum_values.fossil_fuel_supply * a;
+    supply[EnergySource::Gift as usize] = sum_values.gift_supply * a;
 
     // Calculate nuclear energy supply
     let a = match settlement.age {

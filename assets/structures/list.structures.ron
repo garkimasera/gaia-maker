@@ -54,6 +54,17 @@
             effect: CaptureCarbonDioxide ( mass: 2.0e+4, limit_atm: 0.3 ),
         ),
     ),
+    gift_tower: (
+        width: 48,
+        height: 48,
+        columns: 1,
+        rows: 2,
+        building: (
+            energy: -1,
+            cost: 150,
+            effect: SupplyEnergy ( value: 8.0e+7 ),
+        ),
+    ),
     settlement: (
         width: 48,
         height: 48,

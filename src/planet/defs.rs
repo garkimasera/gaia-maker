@@ -150,6 +150,7 @@ pub enum Structure {
     FertilizationPlant,
     Heater,
     CarbonCapturer,
+    GiftTower,
     Settlement(Settlement),
 }
 
@@ -448,6 +449,9 @@ pub enum BuildingEffect {
     CaptureCarbonDioxide {
         mass: f32,
         limit_atm: f32,
+    },
+    SupplyEnergy {
+        value: f32,
     },
 }
 
