@@ -308,6 +308,7 @@ fn layers_menu(
     let old = *display_opts;
     ui.checkbox(&mut display_opts.animals, t!("animal"));
     ui.checkbox(&mut display_opts.cities, t!("cities"));
+    ui.checkbox(&mut display_opts.structures, t!("structures"));
     if *display_opts != old {
         update_map.update();
     }

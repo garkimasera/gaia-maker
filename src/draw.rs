@@ -18,6 +18,7 @@ pub struct UpdateMap {
 pub struct DisplayOpts {
     pub animals: bool,
     pub cities: bool,
+    pub structures: bool,
 }
 
 impl Default for DisplayOpts {
@@ -25,6 +26,7 @@ impl Default for DisplayOpts {
         Self {
             animals: true,
             cities: true,
+            structures: true,
         }
     }
 }
@@ -242,6 +244,9 @@ fn spawn_structure_textures(
             }
             settlement.age as usize
         } else {
+            if !display_opts.structures {
+                continue;
+            }
             0
         };
         let index = if monochrome {
@@ -295,7 +300,13 @@ fn spawn_animal_textures(
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
         if planet.map[p].structure.is_some() {
-            continue;
+            if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
+                if display_opts.cities {
+                    continue;
+                }
+            } else if display_opts.structures {
+                continue;
+            }
         }
 
         // Select the largest animal at this tile
