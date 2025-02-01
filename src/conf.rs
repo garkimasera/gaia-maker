@@ -1,12 +1,11 @@
 use anyhow::Context;
 use bevy::prelude::*;
-use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
 use crate::GameState;
 use crate::{assets::UiAssets, text_assets::Lang};
 
-const CONF_FILE_NAME: &str = "conf.ron";
+const CONF_FILE_NAME: &str = "conf.toml";
 
 #[derive(Clone, Copy, Debug)]
 pub struct ConfPlugin;
@@ -14,15 +13,17 @@ pub struct ConfPlugin;
 impl Plugin for ConfPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ConfChange>()
-            .add_plugins(RonAssetPlugin::<Conf>::new(&["conf.ron"]))
+            .add_plugins(bevy_common_assets::toml::TomlAssetPlugin::<Conf>::new(&[
+                "conf.toml",
+            ]))
             .add_systems(Update, on_change)
             .add_systems(OnExit(GameState::AssetLoading), set_conf);
     }
 }
 
 fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>>) {
-    if let Some(conf) = &conf {
-        let conf = ron::to_string(&**conf).unwrap();
+    if let Some(conf) = conf {
+        let conf = toml::to_string(&*conf).unwrap();
         if er_conf_change.read().next().is_some() {
             if let Err(e) = crate::platform::write_data_file(CONF_FILE_NAME, &conf) {
                 log::error!("cannot save conf: {}", e);
@@ -34,7 +35,7 @@ fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>
 
 fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
     let conf = match crate::platform::read_data_file(CONF_FILE_NAME)
-        .and_then(|data| ron::from_str(&data).context("deserialize conf"))
+        .and_then(|data| toml::from_str(&data).context("deserialize conf"))
     {
         Ok(conf) => conf,
         Err(e) => {

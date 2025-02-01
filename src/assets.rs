@@ -47,7 +47,7 @@ impl Plugin for AssetsPlugin {
 
 #[derive(Debug, Resource, AssetCollection)]
 pub struct UiAssets {
-    #[asset(path = "default.conf.ron")]
+    #[asset(path = "default.conf.toml")]
     pub default_conf: Handle<Conf>,
     #[asset(path = "fonts/Mplus2-SemiBold.otf.gz")]
     pub font: Handle<GunzipBin>,
