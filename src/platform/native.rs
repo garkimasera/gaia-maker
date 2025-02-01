@@ -1,6 +1,6 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 
-use super::{CONF_FILE_NAME, DEFAULT_WINDOW_SIZE};
+use super::DEFAULT_WINDOW_SIZE;
 
 pub const N_SAVE_FILES: usize = 99;
 
@@ -23,20 +23,19 @@ fn find_data_dir() -> Option<std::path::PathBuf> {
     dirs::data_dir().map(|path| path.join(env!("CARGO_PKG_NAME")))
 }
 
-fn conf_file() -> Option<std::path::PathBuf> {
-    crate::platform::data_dir().map(|data_dir| data_dir.join(CONF_FILE_NAME))
+/// Read file under the data directory
+pub fn read_data_file(file_name: &str) -> Result<String> {
+    let data_dir =
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    std::fs::read_to_string(data_dir.join(file_name)).with_context(|| format!("read {}", file_name))
 }
 
-pub fn conf_load() -> Result<crate::conf::Conf> {
-    let conf_file_path = conf_file().ok_or_else(|| anyhow!("cannot get data directory path"))?;
-    let conf = ron::from_str(&std::fs::read_to_string(conf_file_path)?)?;
-    Ok(conf)
-}
-
-pub fn conf_save(conf: &crate::conf::Conf) -> Result<()> {
-    let s = ron::to_string(conf)?;
-    let conf_file_path = conf_file().ok_or_else(|| anyhow!("cannot get data directory path"))?;
-    std::fs::write(conf_file_path, s)?;
+/// Write string data to a file under the data directory
+pub fn write_data_file(file_name: &str, content: &str) -> Result<()> {
+    let data_dir =
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    std::fs::create_dir_all(data_dir)?;
+    std::fs::write(data_dir.join(file_name), content)?;
     Ok(())
 }
 

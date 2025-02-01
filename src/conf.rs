@@ -1,9 +1,12 @@
+use anyhow::Context;
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
 use crate::GameState;
 use crate::{assets::UiAssets, text_assets::Lang};
+
+const CONF_FILE_NAME: &str = "conf.ron";
 
 #[derive(Clone, Copy, Debug)]
 pub struct ConfPlugin;
@@ -19,8 +22,9 @@ impl Plugin for ConfPlugin {
 
 fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>>) {
     if let Some(conf) = &conf {
+        let conf = ron::to_string(&**conf).unwrap();
         if er_conf_change.read().next().is_some() {
-            if let Err(e) = crate::platform::conf_save(conf) {
+            if let Err(e) = crate::platform::write_data_file(CONF_FILE_NAME, &conf) {
                 log::error!("cannot save conf: {}", e);
             }
             log::info!("conf saved");
@@ -29,7 +33,9 @@ fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>
 }
 
 fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
-    let conf = match crate::platform::conf_load() {
+    let conf = match crate::platform::read_data_file(CONF_FILE_NAME)
+        .and_then(|data| ron::from_str(&data).context("deserialize conf"))
+    {
         Ok(conf) => conf,
         Err(e) => {
             log::info!("cannot load config: {}", e);

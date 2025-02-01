@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 
-use super::{CONF_FILE_NAME, DEFAULT_WINDOW_SIZE};
+use super::DEFAULT_WINDOW_SIZE;
 
 pub const N_SAVE_FILES: usize = 1;
 
@@ -9,19 +9,17 @@ pub fn addon_directory() -> Vec<std::path::PathBuf> {
     Vec::new()
 }
 
-pub fn conf_load() -> Result<crate::conf::Conf> {
+pub fn read_data_file(file_name: &str) -> Result<String> {
     let s = get_web_storage()?
-        .get_item(CONF_FILE_NAME)
+        .get_item(file_name)
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;
-    let conf = ron::from_str(&s)?;
-    Ok(conf)
+    Ok(s)
 }
 
-pub fn conf_save(conf: &crate::conf::Conf) -> Result<()> {
-    let s = ron::to_string(conf)?;
+pub fn write_data_file(file_name: &str, content: &str) -> Result<()> {
     get_web_storage()?
-        .set_item(CONF_FILE_NAME, &s)
+        .set_item(file_name, &content)
         .map_err(|e| anyhow!("setItem failed: {:?}", e))?;
     Ok(())
 }
