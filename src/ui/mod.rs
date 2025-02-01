@@ -164,7 +164,9 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     style.visuals.widgets.hovered.rounding = rounding;
     style.visuals.widgets.active.rounding = rounding;
     style.visuals.widgets.open.rounding = rounding;
-    style.visuals.widgets.noninteractive.fg_stroke.color = egui::Color32::from_rgb(180, 180, 180);
+    let text_color = egui::Color32::from_rgb(208, 208, 208);
+    style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
+    style.visuals.widgets.inactive.fg_stroke.color = text_color;
     style.spacing.scroll = egui::style::ScrollStyle::solid();
     style.interaction.tooltip_delay = 0.2;
 

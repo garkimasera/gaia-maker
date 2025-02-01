@@ -203,10 +203,9 @@ fn sidebar(
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-energy");
         ui.image(texture).on_hover_text(t!("energy"));
-        ui.label(format!(
-            "{:.1} / {:.1} TW",
-            planet.res.used_energy, planet.res.energy
-        ));
+        let used_energy = crate::text::format_float_1000(planet.res.used_energy, 1);
+        let energy = crate::text::format_float_1000(planet.res.energy, 1);
+        ui.label(format!("{} / {} TW", used_energy, energy));
     });
     // Material
     ui.horizontal(|ui| {
@@ -387,7 +386,7 @@ fn build_menu(
         ui.close_menu();
     }
     ui.separator();
-    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(8.0, 0.0);
+    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
     for kind in &planet.player.buildable_structures {
         let response = ui.button(t!(kind));
         if response.clicked() {
@@ -413,7 +412,7 @@ fn action_menu(
     textures: &EguiTextures,
     params: &Params,
 ) {
-    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(8.0, 0.0);
+    let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
     for &kind in params.event.tile_event_costs.keys() {
         let response = ui.button(t!(kind));
         if response.clicked() {

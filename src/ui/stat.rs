@@ -155,12 +155,22 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
 
     ui.label(t!("energy-consumption"));
     egui::Grid::new("table_civ").show(ui, |ui| {
+        let max = c
+            .total_energy_consumption
+            .iter()
+            .map(|e| ordered_float::OrderedFloat::from(*e))
+            .max()
+            .unwrap()
+            .into_inner();
         for src in EnergySource::iter() {
             ui.label(t!("energy_source", src));
-            ui.label(format!(
-                "{:.0} GJ",
-                c.total_energy_consumption[src as usize]
-            ));
+            let e = c.total_energy_consumption[src as usize];
+            let s = if max < 1000.0 {
+                format!("{} GJ", crate::text::format_float_1000(e, 0))
+            } else {
+                format!("{} PJ", crate::text::format_float_1000(e / 1000.0, 3))
+            };
+            ui.label(s);
             ui.end_row();
         }
     });

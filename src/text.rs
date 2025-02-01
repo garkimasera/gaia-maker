@@ -1,3 +1,5 @@
+use compact_str::format_compact;
+
 use crate::planet::{Msg, MsgKind};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -61,5 +63,19 @@ pub fn split_to_head_body(s: &str) -> (&str, Option<&str>) {
         (head, Some(body))
     } else {
         (s, None)
+    }
+}
+
+pub fn format_float_1000(value: f32, precision: usize) -> compact_str::CompactString {
+    if value > 1000.0 || precision == 0 {
+        format_compact!("{:.0}", value)
+    } else if value > 100.0 || precision == 1 {
+        format_compact!("{:.1}", value)
+    } else if value > 10.0 || precision == 2 {
+        format_compact!("{:.2}", value)
+    } else if value > 1.0 || precision == 3 {
+        format_compact!("{:.3}", value)
+    } else {
+        format_compact!("{}", value)
     }
 }
