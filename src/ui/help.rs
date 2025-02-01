@@ -39,7 +39,7 @@ impl AsRef<str> for HelpItem {
 pub enum BasicsItem {
     #[default]
     Concept,
-    Administrator,
+    Player,
     Terraforming,
 }
 

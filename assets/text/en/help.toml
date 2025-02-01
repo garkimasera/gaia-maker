@@ -1,12 +1,12 @@
 basics = "Basics"
 concept = "Concept"
-administrator = "Administrator"
+player = "Player"
 terraforming = "Terraforming"
 space-buildings = "Buildings"
 
 [help]
-concept = "In Gaia Maker, players assume the role of administrator of an undeveloped planet and the star system that contains it, and are responsible for terraforming and operating the facility. Terraforming is the process of improving a barren planet into a habitable environment. Terraforming is essential for humans to establish large settlements outside of Earth. Various types of facilities are constructed to adjust the atmosphere, temperature, and vegetation on the planet. In this way, we can create an ideal environment for life."
-administrator = "The player, the administrator, has come a long way over the years in an interstellar spacecraft to this star system containing a terraforming candidate planet. The administrator possesses technology equivalent to a Type II civilization and also possesses terraforming technology for an Earth-like planet. They have also brought genetic data of various plants and animals from their home planet for terraforming.\n\nA Type II civilization is a civilization that, on the Kardashev scale, has the technological level to harness the entire energy of a given star system. They collect stellar energy through the Dyson Sphere and use this abundant energy for interstellar travel and terraforming."
+concept = "In Gaia Maker, players assume the role of overseer of an undeveloped planet and the star system that contains it, and are responsible for terraforming and operating the facility. Terraforming is the process of improving a barren planet into a habitable environment. Terraforming is essential for humans to establish large settlements outside of Earth. Various types of facilities are constructed to adjust the atmosphere, temperature, and vegetation on the planet. In this way, we can create an ideal environment for life."
+player = "The player, the overseer, has come a long way over the years in an interstellar spacecraft to this star system containing a terraforming candidate planet. The overseer possesses technology equivalent to a Type II civilization and also possesses terraforming technology for an Earth-like planet. They have also brought genetic data of various plants and animals from their home planet for terraforming.\n\nType II civilization refers to civilization that has a technological level capable of utilizing all the energy in a star system, according to the Kardashev scale. They collect energy from stars using Dyson Swarms, and use the abundant energy for interstellar travel and terraforming."
 terraforming = "The basis of terraforming is to control the temperature, precipitation, and soil on the planet to allow plants to grow. The following facilities can help with this.\n\nOrbital Mirror\nThis facility, which can be built in planetary orbits, increases or decreases the amount of stellar light reaching the surface and alter the temperature.\n\nRainmaker\nIf the planet has an ocean, there will be rainfall around it, otherwise this facility will generate rainfall.\n\nFertilization Plant\nIncreases the fertility of the surrounding area and grows plants."
 
 oxygen-generator = "Oxygen generators isolate oxygen from oxides in the planet's crust. The process requires a large amount of energy."
@@ -14,6 +14,7 @@ rainmaker = "Rainmakers generate rain clouds and increase the amount of rainfall
 fertilization-plant = "Fertilization Plants slowly transform the surrounding area into soil suitable for plant growth. Plant growth requires soil with sufficient nutrients, and Fertilization Plant promotes their formation by deploying fertilizers and soil improvement drones."
 heater = "Heaters emit energy into the atmosphere as heat, raising the surrounding temperature."
 carbon-capturer = "Carbon Capturers collect and reduce carbon dioxide from the atmosphere. The carbon obtained through reduction is stored underground, and the oxygen is released into the atmosphere."
+gift-tower = "Gift Towers supply energy to the surrounding civilization. They provide energy in the most convenient form according to the technological level of that civilization. They promote the growth of civilization, but energy obtained without effort can also have a negative impact on civilization."
 
 fusion-reactor = "Fusion reactors provide the energy needed to operate facilities. Fusion is a highly efficient energy source essential to space civilization, but if more energy is needed, it will require the use of giant fusion reactors, stars."
 asteroid-mining-station = "Asteroid mining stations mine ore from asteroids and process it into materials that can be used for construction and other purposes."
