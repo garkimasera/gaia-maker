@@ -22,7 +22,6 @@ impl Planet {
             cycles: 0,
             basics: start_params.basics.clone(),
             state: State::default(),
-            player: Player::default(),
             res: Resources::new(start_params),
             map,
             atmo: Atmosphere::new(start_params, params),
@@ -39,12 +38,6 @@ impl Planet {
         for (&kind, &n) in &start_params.space_buildings {
             let building = planet.space_building_mut(kind);
             building.n = n;
-        }
-
-        for structure_kind in StructureKind::iter() {
-            if structure_kind.buildable_by_player() {
-                planet.player.buildable_structures.insert(structure_kind);
-            }
         }
 
         // Adjust water volume

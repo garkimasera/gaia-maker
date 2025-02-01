@@ -1,10 +1,11 @@
 use bevy::{app::AppExit, prelude::*};
 use bevy_egui::{egui, EguiContexts};
 use geom::Coords;
+use strum::IntoEnumIterator;
 
 use crate::{
     conf::Conf,
-    planet::{Cost, Params, Planet, KELVIN_CELSIUS},
+    planet::{Cost, Params, Planet, StructureKind, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     sim::{ManagePlanet, SaveFileMetadata},
     text::WithUnitDisplay,
@@ -74,7 +75,6 @@ pub fn panels(
                         &mut next_game_state,
                     ),
                     &textures,
-                    &planet,
                     &params,
                 );
             });
@@ -98,7 +98,6 @@ fn toolbar(
         &mut NextState<GameState>,
     ),
     textures: &EguiTextures,
-    planet: &Planet,
     params: &Params,
 ) {
     let button = |ui: &mut egui::Ui, path: &str, s: &str| {
@@ -123,7 +122,7 @@ fn toolbar(
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
-        build_menu(ui, cursor_mode, textures, planet, params);
+        build_menu(ui, cursor_mode, textures, params);
     });
 
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
@@ -378,7 +377,6 @@ fn build_menu(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
     textures: &EguiTextures,
-    planet: &Planet,
     params: &Params,
 ) {
     if ui.button(t!("demolition")).clicked() {
@@ -387,10 +385,10 @@ fn build_menu(
     }
     ui.separator();
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
-    for kind in &planet.player.buildable_structures {
+    for kind in StructureKind::iter().filter(|kind| kind.buildable_by_player()) {
         let response = ui.button(t!(kind));
         if response.clicked() {
-            *cursor_mode = CursorMode::Build(*kind);
+            *cursor_mode = CursorMode::Build(kind);
             ui.close_menu();
         }
         if response.hovered() {
@@ -399,7 +397,7 @@ fn build_menu(
                 response.layer_id,
                 response.id,
                 pos_tooltip,
-                |ui| HelpItem::Structures(*kind).ui(ui, textures, params),
+                |ui| HelpItem::Structures(kind).ui(ui, textures, params),
             );
         }
         ui.end_row();

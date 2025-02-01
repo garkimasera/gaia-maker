@@ -38,7 +38,6 @@ use geom::{Array2d, Coords};
 use misc::SymmetricalLinearDist;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
 use std::f32::consts::PI;
 use strum::IntoEnumIterator;
 
@@ -62,11 +61,6 @@ pub struct Tile {
     pub buried_carbon: f32,
     pub ice: f32,
     pub event: Option<Box<TileEvent>>,
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct Player {
-    pub buildable_structures: BTreeSet<StructureKind>,
 }
 
 impl Default for Tile {
@@ -116,7 +110,6 @@ pub struct Planet {
     pub cycles: u64,
     pub basics: Basics,
     pub state: State,
-    pub player: Player,
     pub res: Resources,
     pub map: Array2d<Tile>,
     pub atmo: Atmosphere,
