@@ -64,6 +64,9 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
             ui.label(t!("planet-name"));
             ui.label(&planet.basics.name);
             ui.end_row();
+            ui.label(t!("cycles"));
+            ui.label(format!("{}", planet.cycles));
+            ui.end_row();
             ui.label(t!("radius"));
             ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
             ui.end_row();
