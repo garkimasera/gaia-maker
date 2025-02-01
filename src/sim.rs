@@ -1,3 +1,4 @@
+use anyhow::Context;
 use bevy::prelude::*;
 
 use crate::conf::Conf;
@@ -10,6 +11,11 @@ pub use crate::saveload::SaveFileMetadata;
 
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
+
+const GLOBAL_DATA_FILE_NAME: &str = "gaia-maker_global";
+
+#[derive(Clone, Default, Debug, Resource, serde::Serialize, serde::Deserialize)]
+pub struct GlobalData {}
 
 #[derive(Clone, Debug, Event)]
 pub enum ManagePlanet {
@@ -32,6 +38,7 @@ impl Plugin for SimPlugin {
             .add_event::<ManagePlanetError>()
             .add_event::<StartEvent>()
             .init_resource::<SaveFileMetadata>()
+            .add_systems(OnExit(GameState::AssetLoading), load_global_data)
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
@@ -42,6 +49,24 @@ impl Plugin for SimPlugin {
             )
             .add_systems(Update, manage_planet.before(GameSystemSet::Draw));
     }
+}
+
+fn load_global_data(mut command: Commands) {
+    let global_data = match crate::platform::read_data_file(GLOBAL_DATA_FILE_NAME)
+        .and_then(|data| toml::from_str(&data).context("deserialize global data"))
+    {
+        Ok(global_data) => global_data,
+        Err(e) => {
+            log::warn!("cannot load global data: {:?}", e);
+            let global_data = GlobalData::default();
+            let s = toml::to_string(&global_data).unwrap();
+            if let Err(e) = crate::platform::write_data_file(GLOBAL_DATA_FILE_NAME, &s) {
+                log::error!("cannot write global data: {:?}", e);
+            }
+            global_data
+        }
+    };
+    command.insert_resource(global_data);
 }
 
 fn start_sim(mut update_map: ResMut<UpdateMap>) {
