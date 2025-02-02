@@ -57,7 +57,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 }
                 planet.atmo.aerosol += params.event.aerosol_injection_amount;
             }
-            TileEventKind::Plague => todo!(),
+            _ => (),
         }
     }
 }
@@ -77,7 +77,13 @@ pub fn cause_tile_event(
         TileEventKind::AerosolInjection => TileEvent::AerosolInjection {
             remaining_cycles: params.event.aerosol_injection_cycles,
         },
-        TileEventKind::Plague => todo!(),
+        TileEventKind::Plague => {
+            if let Some(Structure::Settlement(_)) = &mut planet.map[p].structure {
+                TileEvent::Plague
+            } else {
+                return;
+            }
+        }
     };
 
     planet.map[p].event = Some(Box::new(event));

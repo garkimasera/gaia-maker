@@ -471,6 +471,8 @@ pub enum BuildingEffect {
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum PlanetEvent {
     Civilize { target: AnimalId },
+    Plague(PlagueEvent),
+    War(WarEvent),
 }
 
 impl PlanetEvent {
@@ -478,6 +480,12 @@ impl PlanetEvent {
         self.into()
     }
 }
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PlagueEvent {}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct WarEvent {}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {

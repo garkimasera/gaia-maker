@@ -14,6 +14,7 @@ mod misc;
 mod monitoring;
 mod msg;
 mod new;
+mod plague;
 mod resources;
 mod serde_with_types;
 mod sim;
