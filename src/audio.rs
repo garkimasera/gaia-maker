@@ -24,6 +24,7 @@ impl AudioPlayer<'_> {
             log::warn!("unknown sound effect {}", path);
             return;
         };
+        self.channel_se.stop();
         self.channel_se.play(audio_source.clone());
     }
 }

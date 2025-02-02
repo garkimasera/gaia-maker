@@ -43,7 +43,9 @@ fn cursor_action(
             CursorMode::Normal => (),
             CursorMode::Demolition => {
                 update_map.update();
-                planet.demolition(coords, &mut sim, &params);
+                if planet.demolition(coords, &mut sim, &params) {
+                    audio_player.play_se("demolish");
+                }
             }
             CursorMode::Build(kind) => {
                 if planet.buildable(params.structures[&kind].as_ref()) {

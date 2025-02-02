@@ -32,7 +32,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 let rainfall = planet.map[p].rainfall;
                 let TileEvent::BlackDust {
                     ref mut remaining_cycles,
-                } = &mut **planet.map[p].event.as_mut().unwrap()
+                } = &mut *planet.map[p].event.as_mut().unwrap()
                 else {
                     unreachable!()
                 };
@@ -47,7 +47,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             TileEventKind::AerosolInjection => {
                 let TileEvent::AerosolInjection {
                     ref mut remaining_cycles,
-                } = &mut **planet.map[p].event.as_mut().unwrap()
+                } = &mut *planet.map[p].event.as_mut().unwrap()
                 else {
                     unreachable!()
                 };
@@ -86,5 +86,5 @@ pub fn cause_tile_event(
         }
     };
 
-    planet.map[p].event = Some(Box::new(event));
+    planet.map[p].event = Some(event);
 }

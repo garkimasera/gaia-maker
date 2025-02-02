@@ -173,7 +173,7 @@ pub enum StructureBuildingState {
     Disabled,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(TileEventKind))]
 #[strum_discriminants(derive(
     PartialOrd,

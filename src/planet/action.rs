@@ -28,9 +28,19 @@ impl Planet {
         self.update(sim, params);
     }
 
-    pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
-        self.map[p].structure = None;
-        self.update(sim, params);
+    pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) -> bool {
+        if self.map[p].structure.is_some() {
+            self.map[p].structure = None;
+            self.update(sim, params);
+            if let Some(event_kind) = self.map[p].event.map(|event| event.kind()) {
+                if matches!(event_kind, TileEventKind::Plague) {
+                    self.map[p].event = None;
+                }
+            }
+            true
+        } else {
+            false
+        }
     }
 
     pub fn build_space_building(
