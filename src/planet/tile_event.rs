@@ -66,7 +66,7 @@ pub fn cause_tile_event(
     planet: &mut Planet,
     p: Coords,
     kind: TileEventKind,
-    _sim: &mut Sim,
+    sim: &mut Sim,
     params: &Params,
 ) {
     let event = match kind {
@@ -79,6 +79,7 @@ pub fn cause_tile_event(
         },
         TileEventKind::Plague => {
             if let Some(Structure::Settlement(_)) = &mut planet.map[p].structure {
+                super::plague::cause_plague(planet, sim, params, p);
                 TileEvent::Plague
             } else {
                 return;

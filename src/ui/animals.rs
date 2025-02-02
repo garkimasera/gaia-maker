@@ -117,10 +117,7 @@ fn contents(
 
         if let Some(c) = &attr.civ {
             ui.scope(|ui| {
-                let event = PlanetEvent::Civilize {
-                    target: state.current,
-                };
-                if planet.events.in_progress(&event) {
+                if planet.events.in_progress_civilize_event(state.current) {
                     ui.disable();
                     let _ = ui.button(t!("civilizing-in-progress"));
                 } else if planet.civs.contains_key(&state.current) {
@@ -133,6 +130,9 @@ fn contents(
                     }
                     if ui.button(t!("civilize")).clicked() {
                         planet.res.consume(cost);
+                        let event = PlanetEvent::Civilize {
+                            target: state.current,
+                        };
                         planet.start_event(event, sim, params);
                     }
                 }

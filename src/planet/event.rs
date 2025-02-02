@@ -9,8 +9,47 @@ pub struct Events {
 }
 
 impl Events {
-    pub fn in_progress(&self, event: &PlanetEvent) -> bool {
-        self.in_progress.iter().any(|e| e.event == *event)
+    pub fn start_event(&mut self, event: PlanetEvent, params: &Params) {
+        let duration = params.sim.event_duration.get(&event.kind()).copied();
+        self.in_progress.push(EventInProgress {
+            event,
+            duration,
+            progress: 0,
+        });
+    }
+
+    pub fn in_progress_iter(&self, kind: PlanetEventKind) -> impl Iterator<Item = &PlanetEvent> {
+        self.in_progress.iter().filter_map(move |e| {
+            if e.event.kind() == kind {
+                Some(&e.event)
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn in_progress_iter_mut(
+        &mut self,
+        kind: PlanetEventKind,
+    ) -> impl Iterator<Item = &mut PlanetEvent> {
+        self.in_progress.iter_mut().filter_map(move |e| {
+            if e.event.kind() == kind {
+                Some(&mut e.event)
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn in_progress_civilize_event(&self, animal_id: AnimalId) -> bool {
+        self.in_progress_iter(PlanetEventKind::Civilize)
+            .any(|event| {
+                if let PlanetEvent::Civilize { target } = event {
+                    *target == animal_id
+                } else {
+                    false
+                }
+            })
     }
 }
 
@@ -23,14 +62,22 @@ pub struct EventInProgress {
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let mut completed_events = Vec::new();
+    let mut plague_ended = false;
 
-    let events = planet.events.in_progress.clone();
-    for event in events {
-        match event.event {
-            PlanetEvent::Plague(plague_event) => {
-                super::plague::sim_plague(planet, sim, params, plague_event);
+    let mut event_kind_list: Vec<_> = planet
+        .events
+        .in_progress
+        .iter()
+        .map(|e| e.event.kind())
+        .collect();
+    event_kind_list.sort();
+    event_kind_list.dedup();
+    for event_kind in event_kind_list {
+        match event_kind {
+            PlanetEventKind::Plague => {
+                plague_ended = super::plague::sim_plague(planet, sim, params);
             }
-            PlanetEvent::War(_) => todo!(),
+            PlanetEventKind::War => todo!(),
             _ => (),
         }
     }
@@ -38,17 +85,26 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for ein in &mut planet.events.in_progress {
         ein.progress += 1;
         // Event complete
-        if ein.progress >= params.sim.event_duration[&ein.event.kind()] {
-            completed_events.push(ein.event.clone());
+        if let Some(duration) = params.sim.event_duration.get(&ein.event.kind()) {
+            if ein.progress >= *duration {
+                completed_events.push(ein.event.clone());
+            }
         }
     }
 
     planet.events.in_progress.retain(|ein| {
+        // Check the event is completed by the duration
         if let Some(duration) = ein.duration {
-            ein.progress < duration
-        } else {
-            true
+            if ein.progress >= duration {
+                return false;
+            }
         }
+        // Check plague event is ended
+        if plague_ended && ein.event.kind() == PlanetEventKind::Plague {
+            return false;
+        }
+
+        true
     });
 
     for event in completed_events {
@@ -60,13 +116,4 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             _ => (),
         }
     }
-}
-
-pub fn start_event(planet: &mut Planet, event: PlanetEvent, _sim: &mut Sim, params: &Params) {
-    let duration = params.sim.event_duration.get(&event.kind()).copied();
-    planet.events.in_progress.push(EventInProgress {
-        event,
-        duration,
-        progress: 0,
-    });
 }

@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use fnv::FnvHashMap;
+use geom::{Array2d, Coords};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, Same};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
@@ -454,18 +455,9 @@ pub enum BuildingEffect {
     },
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(PlanetEventKind))]
-#[strum_discriminants(derive(
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    EnumIter,
-    AsRefStr,
-    Display
-))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize, EnumIter, AsRefStr))]
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum PlanetEvent {
@@ -480,8 +472,21 @@ impl PlanetEvent {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PlagueEvent {}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PlagueEvent {
+    pub start_at: Coords,
+    pub map: Array2d<PlagueStatus>,
+}
+
+#[derive(Copy, Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
+pub enum PlagueStatus {
+    #[default]
+    None,
+    Infected {
+        start_pop: f32,
+    },
+    Cured,
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WarEvent {}

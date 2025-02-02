@@ -158,8 +158,8 @@ impl Planet {
             (self.stat.sum_biomass / params.sim.coef_gene_point_income).sqrt();
     }
 
-    pub fn start_event(&mut self, event: PlanetEvent, sim: &mut Sim, params: &Params) {
-        self::event::start_event(self, event, sim, params);
+    pub fn start_event(&mut self, event: PlanetEvent, _sim: &mut Sim, params: &Params) {
+        self.events.start_event(event, params);
     }
 
     pub fn n_tile(&self) -> u32 {
