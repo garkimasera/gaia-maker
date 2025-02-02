@@ -149,7 +149,7 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
     ui.label(t!("cities"));
     egui::Grid::new("table_cities").show(ui, |ui| {
         for age in CivilizationAge::iter() {
-            ui.label(t!(age));
+            ui.label(t!("age", age));
             ui.label(format!("{}", c.total_settlement[age as usize]));
             ui.end_row();
         }

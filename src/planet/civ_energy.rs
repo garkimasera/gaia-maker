@@ -137,10 +137,10 @@ pub fn process_settlement_energy(
 
     // Calculate nuclear energy supply
     let a = match settlement.age {
-        CivilizationAge::AtomicAge => {
+        CivilizationAge::Atomic => {
             (params.sim.base_nuclear_ratio + settlement.tech_exp).clamp(0.0, 1.0)
         }
-        CivilizationAge::EarlySpaceAge => 1.0,
+        CivilizationAge::EarlySpace => 1.0,
         _ => 0.0,
     };
     supply[EnergySource::Nuclear as usize] = demand * a;

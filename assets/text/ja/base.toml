@@ -110,14 +110,6 @@ carbon-capturer = "炭素還元機"
 gift-tower = "ギフトタワー"
 settlement = "居住地"
 
-# Civilization Ages
-stone-age = "石器時代"
-bronze-age = "青銅器時代"
-iron-age = "鉄器時代"
-industrial-age = "工業化時代"
-atomic-age = "原子力時代"
-early-space-age = "初期宇宙時代"
-
 # Space Buildings
 fusion-reactor = "核融合炉"
 asteroid-mining-station = "小惑星採掘ステーション"
@@ -133,6 +125,15 @@ aerosol-injection = "エアロゾル注入"
 black-dust = "黒色塵"
 fire = "火災"
 plague = "疫病"
+
+# Civilization Ages
+[age]
+stone = "石器"
+bronze = "青銅器"
+iron = "鉄器"
+industrial = "工業化"
+atomic = "原子力"
+early-space = "初期宇宙"
 
 # Energy sources
 [energy_source]

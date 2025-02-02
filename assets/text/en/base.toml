@@ -110,14 +110,6 @@ carbon-capturer = "Carbon Capturer"
 gift-tower = "Gift Tower"
 settlement = "Settlement"
 
-# Civilization Ages
-stone-age = "Stone Age"
-bronze-age = "Bronze Age"
-iron-age = "Iron Age"
-industrial-age = "Industrial Age"
-atomic-age = "Atomic Age"
-early-space-age = "Early Space Age"
-
 # Space Buildings
 fusion-reactor = "Fusion Reactor"
 asteroid-mining-station = "Asteroid Mining Station"
@@ -134,6 +126,15 @@ aerosol-injection = "Aerosol Injection"
 black-dust = "Black Dust"
 fire = "Fire"
 plague = "Plague"
+
+# Civilization Ages
+[age]
+stone = "Stone"
+bronze = "Bronze"
+iron = "Iron"
+industrial = "Industrial"
+atomic = "Atomic"
+early-space = "Early Space"
 
 # Energy sources
 [energy_source]

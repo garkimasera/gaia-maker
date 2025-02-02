@@ -8,7 +8,12 @@ pub fn structure_info(structure: &Structure) -> String {
             } else {
                 t!("settlement")
             };
-            format!("{} ({})", s, t!(settlement.age.as_ref()))
+            format!(
+                "{} ({}, {})",
+                s,
+                t!("animal", settlement.id),
+                t!("age", settlement.age),
+            )
         }
         _ => {
             t!(structure.kind().as_ref())

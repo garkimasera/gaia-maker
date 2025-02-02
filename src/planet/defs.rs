@@ -272,7 +272,6 @@ pub struct Settlement {
     pub tech_exp: f32,
 }
 
-#[allow(clippy::enum_variant_names)]
 #[derive(
     Clone,
     Copy,
@@ -292,16 +291,16 @@ pub struct Settlement {
 #[repr(u8)]
 pub enum CivilizationAge {
     #[default]
-    StoneAge = 0,
-    BronzeAge,
-    IronAge,
-    IndustrialAge,
-    AtomicAge,
-    EarlySpaceAge,
+    Stone = 0,
+    Bronze,
+    Iron,
+    Industrial,
+    Atomic,
+    EarlySpace,
 }
 
 impl CivilizationAge {
-    pub const LEN: usize = Self::EarlySpaceAge as usize + 1;
+    pub const LEN: usize = Self::EarlySpace as usize + 1;
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter)]

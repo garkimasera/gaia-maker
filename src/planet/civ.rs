@@ -145,8 +145,8 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
 
         let settlement = Settlement {
             id: animal_id,
-            age: CivilizationAge::StoneAge,
-            pop: params.sim.settlement_init_pop[CivilizationAge::StoneAge as usize],
+            age: CivilizationAge::Stone,
+            pop: params.sim.settlement_init_pop[CivilizationAge::Stone as usize],
             tech_exp: 0.0,
         };
         let mut p_settlement = None;
