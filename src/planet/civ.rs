@@ -54,7 +54,14 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let growth_speed = params.sim.base_pop_growth_speed;
         let ratio = settlement.pop / cap.max(1e-10);
         let dn = growth_speed * ratio * (-ratio + 1.0);
-        settlement.pop += dn;
+
+        let can_growth = !matches!(
+            planet.map[p].event.map(|e| e.kind()),
+            Some(TileEventKind::Plague),
+        );
+        if dn < 0.0 || can_growth {
+            settlement.pop += dn;
+        }
 
         // Settlement extinction
         if settlement.pop < params.sim.settlement_extinction_threshold {

@@ -256,6 +256,15 @@
         black_dust_decrease_by_rainfall: 200,
         aerosol_injection_cycles: 40,
         aerosol_injection_amount: 0.002,
+        plague_list: [
+            (
+                w: 0.01, w_manual: 0.5,
+                infectivity: 0.4, distant_infectivity: 0.2,
+                lethality: 0.5,
+            ),
+        ],
+        plague_spread_base_probability: 0.2,
+        plague_base_lethality_speed: 0.01,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

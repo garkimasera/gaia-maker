@@ -278,6 +278,8 @@ pub struct Settlement {
     Copy,
     PartialEq,
     Eq,
+    PartialOrd,
+    Ord,
     Default,
     Hash,
     Debug,
@@ -474,6 +476,7 @@ impl PlanetEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlagueEvent {
+    pub i: usize,
     pub start_at: Coords,
     pub map: Array2d<PlagueStatus>,
 }
@@ -483,7 +486,7 @@ pub enum PlagueStatus {
     #[default]
     None,
     Infected {
-        start_pop: f32,
+        target_pop: f32,
     },
     Cured,
 }
@@ -739,6 +742,26 @@ pub struct EventParams {
     pub aerosol_injection_cycles: u32,
     /// Aerosol injection amount
     pub aerosol_injection_amount: f32,
+    /// Plague list
+    pub plague_list: Vec<PlagueParams>,
+    /// Base probability of plague spreading
+    pub plague_spread_base_probability: f32,
+    /// Base lethality speed of plague
+    pub plague_base_lethality_speed: f32,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
+pub struct PlagueParams {
+    /// Weight to choose
+    pub w: f32,
+    /// Weight to choose when manual
+    pub w_manual: f32,
+    /// Plague infectivity
+    pub infectivity: f32,
+    /// Plague distant lethality
+    pub distant_infectivity: f32,
+    /// Plague lethality
+    pub lethality: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
