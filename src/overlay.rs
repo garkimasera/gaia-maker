@@ -110,6 +110,24 @@ impl ColorMaterials {
             (color.blue * 255.0) as u8,
         ]
     }
+
+    pub fn color_list(&self) -> Vec<Vec<Color>> {
+        let high_low = self
+            .white_yellow_red
+            .iter()
+            .map(|(color, _)| *color)
+            .collect();
+
+        let depth_height = self
+            .blue_dark_blue
+            .iter()
+            .rev()
+            .chain(&self.brown_white)
+            .map(|(color, _)| *color)
+            .collect();
+
+        vec![high_low, depth_height]
+    }
 }
 
 fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
@@ -138,7 +156,7 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
         })
         .collect::<Vec<_>>();
 
-    let brown_white = GRAD_BROWN_WIHTE
+    let brown_white = GRAD_BROWN_WHITE
         .into_iter()
         .map(|[r, g, b]| {
             let color = Srgba {
@@ -176,7 +194,7 @@ fn prepare_color_materials(mut commands: Commands, mut materials: ResMut<Assets<
     commands.insert_resource(color_materials);
 }
 
-const GRAD_BROWN_WIHTE: [[u8; 3]; N_POINTS] = [
+const GRAD_BROWN_WHITE: [[u8; 3]; N_POINTS] = [
     [104, 13, 13],
     [108, 32, 32],
     [110, 43, 44],

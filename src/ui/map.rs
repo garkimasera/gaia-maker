@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_egui::egui::epaint;
 use bevy_egui::{egui, EguiContexts};
 use geom::RectIter;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
@@ -7,6 +8,8 @@ use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::{Centering, InScreenTileRange};
+
+pub const H_LEGEND_IMG: u32 = 8;
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, AsRefStr, EnumIter, Resource)]
 #[strum(serialize_all = "kebab-case")]
@@ -43,6 +46,7 @@ pub fn map_window(
         Local<MapLayer>,
         Local<MapLayer>,
     ),
+    mut legend: Local<Option<Legend>>,
 ) {
     *image_update_counter += 1;
 
@@ -52,6 +56,13 @@ pub fn map_window(
 
     let ctx = egui_ctxs.ctx_mut();
     let m = 3;
+
+    let legend = if let Some(legend) = &*legend {
+        legend
+    } else {
+        *legend = Some(Legend::new(ctx, &color_materials, &params));
+        legend.as_ref().unwrap()
+    };
 
     let map_tex_handle = if let Some(map_tex_handle) = &mut *map_tex_handle {
         map_tex_handle
@@ -94,6 +105,7 @@ pub fn map_window(
                         ew_centering.send(Centering(pos));
                     }
                 }
+                legend.ui(ui, *map_layer);
             });
         })
         .unwrap()
@@ -234,6 +246,115 @@ fn map_img(
     }
 }
 
+pub struct Legend {
+    gradation_images: Vec<(egui::TextureHandle, egui::load::SizedTexture)>,
+    layout: egui::Layout,
+    biome_colors: Vec<(Biome, [u8; 3])>,
+}
+
+impl Legend {
+    fn new(ctx: &mut egui::Context, color_materials: &ColorMaterials, params: &Params) -> Self {
+        let h = H_LEGEND_IMG;
+
+        let gradation_images = color_materials
+            .color_list()
+            .iter()
+            .enumerate()
+            .map(|(i, colors)| {
+                let w = colors.len() as u32;
+                let pixels = RectIter::new((0, 0), (w - 1, h - 1))
+                    .map(|coords| {
+                        let color = colors[coords.0 as usize].to_srgba();
+                        egui::Color32::from_rgba_unmultiplied(
+                            (color.red * 255.0) as u8,
+                            (color.green * 255.0) as u8,
+                            (color.blue * 255.0) as u8,
+                            255,
+                        )
+                    })
+                    .collect();
+                let image = egui::ColorImage {
+                    size: [w as usize, h as usize],
+                    pixels,
+                };
+                let texture_handle = ctx.load_texture(
+                    format!("legend_gradation_image_{}", i),
+                    image,
+                    egui::TextureOptions::NEAREST,
+                );
+                let sized_texture = egui::load::SizedTexture::from_handle(&texture_handle);
+                (texture_handle, sized_texture)
+            })
+            .collect();
+
+        let layout = egui::Layout::from_main_dir_and_cross_align(
+            egui::Direction::LeftToRight,
+            egui::Align::Center,
+        )
+        .with_main_wrap(true);
+
+        let mut biome_colors: Vec<_> = params
+            .biomes
+            .iter()
+            .map(|(biome, biome_attrs)| (*biome, biome_attrs.color))
+            .collect();
+        biome_colors.sort();
+
+        Self {
+            gradation_images,
+            layout,
+            biome_colors,
+        }
+    }
+
+    fn ui(&self, ui: &mut egui::Ui, map_layer: MapLayer) {
+        ui.add_space(3.0);
+        match map_layer {
+            MapLayer::AirTemperature
+            | MapLayer::Rainfall
+            | MapLayer::Fertility
+            | MapLayer::Biomass => {
+                ui_high_low(ui, self.gradation_images[0].1);
+            }
+            MapLayer::Height => {
+                ui_high_low(ui, self.gradation_images[1].1);
+            }
+            MapLayer::Biome => {
+                let legend_items = self
+                    .biome_colors
+                    .iter()
+                    .map(|&(biome, color)| (color, t!(biome)));
+                self.ui_color_legend(ui, legend_items);
+            }
+            MapLayer::Cities => {
+                let legend_items =
+                    CivilizationAge::iter().map(|age| (CITY_COLORS[age as usize], t!("age", age)));
+                self.ui_color_legend(ui, legend_items);
+            }
+        }
+    }
+
+    fn ui_color_legend(&self, ui: &mut egui::Ui, items: impl Iterator<Item = ([u8; 3], String)>) {
+        ui.allocate_ui(egui::vec2(ui.available_size_before_wrap().x, 0.0), |ui| {
+            ui.with_layout(self.layout, |ui| {
+                for (color, s) in items {
+                    ui.add(ColorLegend::new(color, s));
+                }
+            })
+        });
+    }
+}
+
+fn ui_high_low(ui: &mut egui::Ui, texture: egui::load::SizedTexture) {
+    ui.vertical_centered(|ui| {
+        ui.horizontal(|ui| {
+            ui.label(t!("low"));
+            ui.image(texture);
+            ui.label(t!("high"));
+        });
+    });
+}
+
 const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
     [255, 0, 0],
     [255, 92, 0],
@@ -242,3 +363,66 @@ const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
     [0, 204, 255],
     [190, 0, 255],
 ];
+
+struct ColorLegend {
+    color: egui::Color32,
+    text: egui::WidgetText,
+}
+
+impl ColorLegend {
+    fn new(color: [u8; 3], text: impl Into<egui::WidgetText>) -> Self {
+        Self {
+            color: egui::Color32::from_rgb(color[0], color[1], color[2]),
+            text: text.into(),
+        }
+    }
+}
+
+impl egui::Widget for ColorLegend {
+    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        let space = 3.0;
+        let left_space = 2.0;
+        let layout_job =
+            self.text
+                .into_layout_job(ui.style(), egui::FontSelection::Default, egui::Align::Min);
+        let galley = ui.fonts(|fonts| fonts.layout_job(layout_job));
+
+        let icon_size = egui::Vec2::new(H_LEGEND_IMG as f32, H_LEGEND_IMG as f32);
+        let galley_size = galley.rect.size();
+        let desired_size = egui::Vec2::new(
+            icon_size.x + galley_size.x + space,
+            icon_size.y.max(galley_size.y) + left_space,
+        );
+
+        let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
+        response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::WidgetType::Label, ui.is_enabled(), galley.text())
+        });
+
+        let (icon_pos_y, galley_pos_y) = if icon_size.y > galley_size.y {
+            (0.0, (icon_size.y - galley_size.y) / 2.0)
+        } else {
+            ((galley_size.y - icon_size.y) / 2.0, 0.0)
+        };
+
+        let icon_rect = egui::Rect::from_min_size(egui::Pos2::new(0.0, icon_pos_y), icon_size)
+            .translate(rect.left_top().to_vec2());
+        let galley_pos = rect.left_top() + egui::Vec2::new(icon_size.x + space, galley_pos_y);
+
+        if ui.is_rect_visible(response.rect) {
+            let painter = ui.painter();
+            painter.add(epaint::RectShape::filled(
+                icon_rect,
+                egui::Rounding::ZERO,
+                self.color,
+            ));
+            painter.add(epaint::TextShape::new(
+                galley_pos,
+                galley,
+                ui.style().visuals.text_color(),
+            ));
+        }
+        response
+    }
+}
