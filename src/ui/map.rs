@@ -1,3 +1,6 @@
+use std::collections::BTreeMap;
+use std::sync::LazyLock;
+
 use bevy::prelude::*;
 use bevy_egui::egui::epaint;
 use bevy_egui::{egui, EguiContexts};
@@ -22,6 +25,7 @@ pub enum MapLayer {
     Fertility,
     Biomass,
     Cities,
+    Structures,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Resource)]
@@ -235,6 +239,26 @@ fn map_img(
                         params.biomes[&Biome::Ocean].color
                     }
                 }
+                MapLayer::Structures => {
+                    if let Some(kind) = planet.map[(x, y)]
+                        .structure
+                        .as_ref()
+                        .map(|s| s.kind())
+                        .and_then(|kind| {
+                            if matches!(kind, StructureKind::Settlement) {
+                                None
+                            } else {
+                                Some(kind)
+                            }
+                        })
+                    {
+                        STRUCTURE_COLORS[&kind]
+                    } else if planet.map[(x, y)].biome.is_land() {
+                        params.biomes[&Biome::Rock].color
+                    } else {
+                        params.biomes[&Biome::Ocean].color
+                    }
+                }
             };
             egui::Color32::from_rgba_unmultiplied(color[0], color[1], color[2], 255)
         })
@@ -331,6 +355,12 @@ impl Legend {
                     CivilizationAge::iter().map(|age| (CITY_COLORS[age as usize], t!("age", age)));
                 self.ui_color_legend(ui, legend_items);
             }
+            MapLayer::Structures => {
+                let legend_items = STRUCTURE_COLORS
+                    .iter()
+                    .map(|(kind, color)| (*color, t!(kind)));
+                self.ui_color_legend(ui, legend_items);
+            }
         }
     }
 
@@ -363,6 +393,17 @@ const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
     [0, 204, 255],
     [190, 0, 255],
 ];
+
+static STRUCTURE_COLORS: LazyLock<BTreeMap<StructureKind, [u8; 3]>> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(StructureKind::OxygenGenerator, [0, 128, 255]);
+    map.insert(StructureKind::Rainmaker, [0, 255, 255]);
+    map.insert(StructureKind::FertilizationPlant, [255, 160, 0]);
+    map.insert(StructureKind::Heater, [255, 0, 0]);
+    map.insert(StructureKind::CarbonCapturer, [192, 192, 192]);
+    map.insert(StructureKind::GiftTower, [190, 0, 255]);
+    map
+});
 
 struct ColorLegend {
     color: egui::Color32,
