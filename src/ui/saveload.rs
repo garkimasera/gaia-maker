@@ -92,7 +92,7 @@ pub fn show_load_window(
                     .resizable(false)
                     .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
                     .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
-                    .column(egui_extras::Column::auto().at_least(35.0))
+                    .column(egui_extras::Column::auto().at_least(39.0))
                     .column(egui_extras::Column::auto().at_least(145.0))
                     .column(egui_extras::Column::auto().at_least(50.0))
                     .min_scrolled_height(0.0);
@@ -100,9 +100,7 @@ pub fn show_load_window(
                 table
                     .max_scroll_height(220.0)
                     .header(row_height, |mut header| {
-                        header.col(|ui| {
-                            ui.strong("#");
-                        });
+                        header.col(|_ui| {});
                         header.col(|ui| {
                             ui.strong(t!("date-saved"));
                         });

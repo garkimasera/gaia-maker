@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::{collections::VecDeque, io::Read};
 
 use anyhow::Result;
 use byteorder::ReadBytesExt;
@@ -19,7 +19,7 @@ pub struct SavedTime(String);
 #[derive(Default, Debug)]
 pub struct SaveState {
     pub current: String,
-    pub list: Vec<(SavedTime, String)>, // Latest saved time and name list
+    pub list: VecDeque<(SavedTime, String)>, // Latest saved time and name list
     pub manual_save_files: Vec<u32>,
     pub auto_save_files: Vec<u32>,
     pub save_file_metadata: SaveFileMetadata,

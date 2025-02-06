@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 use crate::conf::Conf;
 use crate::draw::UpdateMap;
+use crate::saveload::SavedTime;
 use crate::screen::{Centering, HoverTile};
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
@@ -88,7 +89,10 @@ fn set_save_state(mut save_state: ResMut<SaveState>) {
         }
     };
     save_sub_dirs.sort_by_key(|(time, _)| std::cmp::Reverse(time.clone()));
-    save_state.list = save_sub_dirs;
+    save_state.list = save_sub_dirs.into();
+    if let Some(latest_sub_dir) = save_state.list.front() {
+        save_state.current = latest_sub_dir.1.clone();
+    }
 }
 
 fn start_sim(mut update_map: ResMut<UpdateMap>) {
@@ -199,7 +203,15 @@ fn manage_planet(
                     replacement: " ",
                 },
             );
+            let sub_dir_name = check_save_dir_name_dup(&save_state, sub_dir_name);
+            save_state
+                .list
+                .push_front((SavedTime::now(), sub_dir_name.clone()));
             save_state.current = sub_dir_name;
+
+            if let Err(e) = crate::saveload::save_to(&planet, &mut save_state, true) {
+                log::warn!("cannot save: {:?}", e);
+            }
             Some(planet)
         }
         ManagePlanet::Save { auto, .. } => {
@@ -250,5 +262,30 @@ fn manage_planet(
         }
 
         next_game_state.set(GameState::Running);
+    }
+}
+
+fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
+    let mut max = 0;
+    let mut dup = false;
+    let prefix = format!("{} (", name);
+
+    for (_, s) in &save_state.list {
+        dup |= *s == name;
+        if let Some(s) = s.strip_prefix(&prefix) {
+            if let Some(s) = s.strip_suffix(")") {
+                if let Ok(i) = s.parse::<u32>() {
+                    if i > max {
+                        max = i;
+                    }
+                }
+            }
+        }
+    }
+
+    if dup {
+        format!("{} ({})", name, max + 1)
+    } else {
+        name
     }
 }
