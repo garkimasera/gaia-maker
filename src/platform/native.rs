@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Context, Result};
 
-use super::DEFAULT_WINDOW_SIZE;
+use crate::saveload::SavedTime;
 
-pub const N_SAVE_FILES: usize = 99;
+use super::DEFAULT_WINDOW_SIZE;
 
 static DATA_DIR: std::sync::LazyLock<Option<std::path::PathBuf>> =
     std::sync::LazyLock::new(find_data_dir);
@@ -39,20 +39,108 @@ pub fn write_data_file(file_name: &str, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn savefile_write(file_name: &str, data: &[u8]) -> Result<()> {
+pub fn write_savefile(dir_name: &str, file_name: &str, data: &[u8]) -> Result<()> {
     let data_dir =
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
-    let save_dir_path = data_dir.join("save");
+    let save_dir_path = data_dir.join("saves").join(dir_name);
     std::fs::create_dir_all(&save_dir_path)?;
     std::fs::write(save_dir_path.join(file_name), data)?;
     Ok(())
 }
 
-pub fn savefile_read(file_name: &str) -> Result<Vec<u8>> {
+pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
     let data_dir =
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
-    let save_dir_path = data_dir.join("save");
-    Ok(std::fs::read(save_dir_path.join(file_name))?)
+    let save_dir_path = data_dir.join("saves").join(dir_name);
+    let file_path = save_dir_path.join(file_name);
+    std::fs::read(&file_path).with_context(|| format!("reading \"{}\"", file_path.display()))
+}
+
+pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
+    let saves_dir_path = crate::platform::data_dir()
+        .ok_or_else(|| anyhow!("cannot get data directory path"))?
+        .join("saves");
+    let mut dirs = Vec::new();
+
+    for entry in std::fs::read_dir(&saves_dir_path)? {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(e) => {
+                log::warn!("error in loading \"{}\": {}", saves_dir_path.display(), e);
+                continue;
+            }
+        };
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(e) => {
+                log::warn!("error in loading \"{}\": {}", saves_dir_path.display(), e);
+                continue;
+            }
+        };
+        let metadata = match entry.metadata() {
+            Ok(metadata) => metadata,
+            Err(e) => {
+                log::warn!("error in loading \"{}\": {}", saves_dir_path.display(), e);
+                continue;
+            }
+        };
+        if !file_type.is_dir() {
+            continue;
+        }
+        let Some(sub_dir_name) = entry
+            .path()
+            .file_name()
+            .map(|path| path.to_string_lossy().into_owned())
+        else {
+            continue;
+        };
+        let modified = if let Ok(modified) = metadata.modified() {
+            SavedTime::from(modified)
+        } else {
+            SavedTime::now()
+        };
+        dirs.push((modified, sub_dir_name));
+    }
+
+    Ok(dirs)
+}
+
+pub fn save_sub_dir_files(dir_name: &str) -> Result<Vec<String>> {
+    let dir_path = crate::platform::data_dir()
+        .ok_or_else(|| anyhow!("cannot get data directory path"))?
+        .join("saves")
+        .join(dir_name);
+    let mut files = Vec::new();
+
+    for entry in std::fs::read_dir(&dir_path)? {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(e) => {
+                log::warn!("error in loading \"{}\": {}", dir_path.display(), e);
+                continue;
+            }
+        };
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(e) => {
+                log::warn!("error in loading \"{}\": {}", dir_path.display(), e);
+                continue;
+            }
+        };
+        if !file_type.is_file() {
+            continue;
+        }
+        let Some(file_name) = entry
+            .path()
+            .file_name()
+            .map(|path| path.to_string_lossy().into_owned())
+        else {
+            continue;
+        };
+        files.push(file_name);
+    }
+
+    Ok(files)
 }
 
 pub fn window_open() {}

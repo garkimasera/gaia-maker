@@ -106,7 +106,7 @@ impl Plugin for UiPlugin {
                     layers_window,
                     dialog::dialogs,
                     help::help_window,
-                    saveload::saveload_window,
+                    saveload::load_window,
                     error_popup::error_popup,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,

@@ -7,7 +7,7 @@ use crate::screen::{Centering, HoverTile};
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
-pub use crate::saveload::SaveFileMetadata;
+pub use crate::saveload::SaveState;
 
 #[derive(Clone, Copy, Debug)]
 pub struct SimPlugin;
@@ -20,14 +20,21 @@ pub struct GlobalData {}
 #[derive(Clone, Debug, Event)]
 pub enum ManagePlanet {
     New(StartParams),
-    Save(usize),
-    Load(usize),
+    Save {
+        auto: bool,
+        _new_name: Option<String>,
+    },
+    Load {
+        sub_dir_name: String,
+        auto: bool,
+        n: u32,
+    },
 }
 
 #[derive(Clone, Debug, Event)]
 pub struct StartEvent(pub PlanetEvent);
 
-impl Resource for SaveFileMetadata {}
+impl Resource for SaveState {}
 impl Resource for Planet {}
 impl Resource for Params {}
 impl Resource for Sim {}
@@ -37,8 +44,11 @@ impl Plugin for SimPlugin {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
             .add_event::<StartEvent>()
-            .init_resource::<SaveFileMetadata>()
-            .add_systems(OnExit(GameState::AssetLoading), load_global_data)
+            .init_resource::<SaveState>()
+            .add_systems(
+                OnExit(GameState::AssetLoading),
+                (load_global_data, set_save_state),
+            )
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
@@ -67,6 +77,18 @@ fn load_global_data(mut command: Commands) {
         }
     };
     command.insert_resource(global_data);
+}
+
+fn set_save_state(mut save_state: ResMut<SaveState>) {
+    let mut save_sub_dirs = match crate::platform::save_sub_dirs() {
+        Ok(save_sub_dirs) => save_sub_dirs,
+        Err(e) => {
+            log::warn!("{}", e);
+            Vec::new()
+        }
+    };
+    save_sub_dirs.sort_by_key(|(time, _)| std::cmp::Reverse(time.clone()));
+    save_state.list = save_sub_dirs;
 }
 
 fn start_sim(mut update_map: ResMut<UpdateMap>) {
@@ -125,7 +147,10 @@ fn update(
     planet.advance(&mut sim, &params);
 
     if conf.autosave_enabled && planet.cycles % conf.autosave_cycle_duration == 0 {
-        ew_manage_planet.send(ManagePlanet::Save(0));
+        ew_manage_planet.send(ManagePlanet::Save {
+            auto: true,
+            _new_name: None,
+        });
     }
 }
 
@@ -153,7 +178,7 @@ fn manage_planet(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
-    mut save_file_metadata: ResMut<SaveFileMetadata>,
+    mut save_state: ResMut<SaveState>,
     params: Option<Res<Params>>,
 ) {
     let Some(params) = params else {
@@ -166,33 +191,48 @@ fn manage_planet(
     let new_planet = match e {
         ManagePlanet::New(start_params) => {
             let planet = Planet::new(start_params, &params);
-            *save_file_metadata = SaveFileMetadata::default();
+            let sub_dir_name = sanitize_filename::sanitize_with_options(
+                &start_params.basics.name,
+                sanitize_filename::Options {
+                    truncate: true,
+                    windows: true,
+                    replacement: " ",
+                },
+            );
+            save_state.current = sub_dir_name;
             Some(planet)
         }
-        ManagePlanet::Save(slot) => {
+        ManagePlanet::Save { auto, .. } => {
             if let Err(e) =
-                crate::saveload::save_to(*slot, planet.as_ref().unwrap(), &save_file_metadata)
+                crate::saveload::save_to(planet.as_ref().unwrap(), &mut save_state, *auto)
             {
                 log::warn!("cannot save: {:?}", e);
             }
             None
         }
-        ManagePlanet::Load(slot) => match crate::saveload::load_from(*slot) {
-            Ok((planet, metadata)) => {
-                *save_file_metadata = metadata;
-                Some(planet)
+        ManagePlanet::Load {
+            sub_dir_name,
+            auto,
+            n,
+        } => {
+            save_state.current = sub_dir_name.clone();
+            match crate::saveload::load_from(&save_state, *auto, *n) {
+                Ok((planet, metadata)) => {
+                    save_state.save_file_metadata = metadata;
+                    Some(planet)
+                }
+                Err(e) => {
+                    log::warn!("cannot load: {:?}", e);
+                    let e = if e.is::<rmp_serde::decode::Error>() {
+                        ManagePlanetError::Decode
+                    } else {
+                        ManagePlanetError::Other
+                    };
+                    ew_manage_planet_error.send(e);
+                    None
+                }
             }
-            Err(e) => {
-                log::warn!("cannot load: {:?}", e);
-                let e = if e.is::<rmp_serde::decode::Error>() {
-                    ManagePlanetError::Decode
-                } else {
-                    ManagePlanetError::Other
-                };
-                ew_manage_planet_error.send(e);
-                None
-            }
-        },
+        }
     };
 
     if let Some(new_planet) = new_planet {

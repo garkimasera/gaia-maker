@@ -7,7 +7,7 @@ use crate::{
     conf::Conf,
     planet::{Cost, Params, Planet, StructureKind, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    sim::{ManagePlanet, SaveFileMetadata},
+    sim::ManagePlanet,
     text::WithUnitDisplay,
     GameSpeed, GameState,
 };
@@ -26,13 +26,7 @@ pub fn panels(
         EventWriter<ManagePlanet>,
         ResMut<NextState<GameState>>,
     ),
-    (planet, textures, params, save_file_metadata, conf): (
-        Res<Planet>,
-        Res<EguiTextures>,
-        Res<Params>,
-        Res<SaveFileMetadata>,
-        Res<Conf>,
-    ),
+    (planet, textures, params, conf): (Res<Planet>, Res<EguiTextures>, Res<Params>, Res<Conf>),
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
@@ -68,7 +62,6 @@ pub fn panels(
                     &mut cursor_mode,
                     &mut wos,
                     &mut speed,
-                    &save_file_metadata,
                     (
                         &mut app_exit_events,
                         &mut ew_manage_planet,
@@ -91,7 +84,6 @@ fn toolbar(
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
-    save_file_metadata: &SaveFileMetadata,
     (app_exit_events, ew_manage_planet, next_game_state): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
@@ -109,14 +101,7 @@ fn toolbar(
         |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
 
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
-        game_menu(
-            ui,
-            wos,
-            save_file_metadata,
-            app_exit_events,
-            ew_manage_planet,
-            next_game_state,
-        );
+        game_menu(ui, wos, app_exit_events, ew_manage_planet, next_game_state);
     });
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
@@ -433,26 +418,21 @@ fn action_menu(
 fn game_menu(
     ui: &mut egui::Ui,
     wos: &mut WindowsOpenState,
-    save_file_metadata: &SaveFileMetadata,
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     next_game_state: &mut NextState<GameState>,
 ) {
-    ui.scope(|ui| {
-        if let Some(slot) = save_file_metadata.manual_slot {
-            if ui.button(t!("save-to-slot"; slot=slot)).clicked() {
-                ew_manage_planet.send(ManagePlanet::Save(slot));
-                ui.close_menu();
-            }
-        } else {
-            ui.disable();
-            let _ = ui.button(t!("save-to-slot-disabled"));
-        }
-    });
-    if ui.button(format!("{}...", t!("save"))).clicked() {
-        wos.save = true;
+    if ui.button(t!("save")).clicked() {
+        ew_manage_planet.send(ManagePlanet::Save {
+            auto: false,
+            _new_name: None,
+        });
         ui.close_menu();
     }
+    // if ui.button(format!("{}...", t!("save-as"))).clicked() {
+    //     wos.save = true;
+    //     ui.close_menu();
+    // }
     if ui.button(format!("{}...", t!("load"))).clicked() {
         wos.load = true;
         ui.close_menu();

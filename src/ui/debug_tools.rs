@@ -1,7 +1,8 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
-use crate::{screen::HoverTile, sim::SaveFileMetadata};
+use crate::saveload::SaveState;
+use crate::screen::HoverTile;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use geom::Coords;
@@ -24,7 +25,7 @@ pub fn debug_tools_window(
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
-    mut save_file_metadata: ResMut<SaveFileMetadata>,
+    mut save_state: ResMut<SaveState>,
     params: Res<Params>,
     sim: Res<Sim>,
     hover_tile: Query<&HoverTile>,
@@ -38,11 +39,11 @@ pub fn debug_tools_window(
         return;
     }
 
-    if !save_file_metadata.debug_mode_enabled {
+    if !save_state.save_file_metadata.debug_mode_enabled {
         egui::Modal::new("use-debug-mode".into()).show(egui_ctxs.ctx_mut(), |ui| {
             ui.label("Enable Debug Mode?");
             if ui.button("Yes").clicked() {
-                save_file_metadata.debug_mode_enabled = true;
+                save_state.save_file_metadata.debug_mode_enabled = true;
             }
             if ui.button("No").clicked() {
                 wos.debug_tools = false;

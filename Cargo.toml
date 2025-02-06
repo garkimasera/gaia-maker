@@ -46,6 +46,7 @@ toml = "0.8.19"
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
+sanitize-filename = "0.6.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

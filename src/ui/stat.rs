@@ -6,7 +6,7 @@ use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::{planet::*, sim::SaveFileMetadata};
+use crate::{planet::*, sim::SaveState};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
 #[strum(serialize_all = "kebab-case")]
@@ -24,7 +24,7 @@ pub fn stat_window(
     mut wos: ResMut<WindowsOpenState>,
     planet: Res<Planet>,
     params: Res<Params>,
-    save_file_metadata: Res<SaveFileMetadata>,
+    save_state: Res<SaveState>,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
     mut current_graph_item: Local<GraphItem>,
@@ -45,7 +45,11 @@ pub fn stat_window(
             ui.separator();
 
             match *current_panel {
-                Panel::Planet => planet_stat(ui, &planet, save_file_metadata.debug_mode_enabled),
+                Panel::Planet => planet_stat(
+                    ui,
+                    &planet,
+                    save_state.save_file_metadata.debug_mode_enabled,
+                ),
                 Panel::Atmosphere => atmo_stat(ui, &planet),
                 Panel::Civilization => civ_stat(ui, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),

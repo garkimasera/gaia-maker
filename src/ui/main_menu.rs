@@ -4,7 +4,7 @@ use bevy_egui::{egui, EguiContexts};
 
 use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
-use crate::sim::{ManagePlanet, ManagePlanetError};
+use crate::sim::{ManagePlanet, ManagePlanetError, SaveState};
 use crate::text_assets::Lang;
 use strum::IntoEnumIterator;
 
@@ -45,8 +45,8 @@ pub fn main_menu(
     mut egui_ctxs: EguiContexts,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
-    mut conf: ResMut<Conf>,
-    mut ew_conf_change: EventWriter<ConfChange>,
+    save_state: Res<SaveState>,
+    (mut conf, mut ew_conf_change): (ResMut<Conf>, EventWriter<ConfChange>),
     mut er_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
@@ -108,12 +108,11 @@ pub fn main_menu(
         }
         MainMenuMode::Load => {
             let mut open_state = true;
-            super::saveload::show_saveload_window(
+            super::saveload::show_load_window(
                 egui_ctxs.ctx_mut(),
                 &mut ew_manage_planet,
                 &mut open_state,
-                None,
-                true,
+                &save_state,
             );
             if !open_state {
                 state.mode = MainMenuMode::Menu;
