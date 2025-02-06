@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
 
-use super::DEFAULT_WINDOW_SIZE;
+use crate::saveload::SavedTime;
 
-pub const N_SAVE_FILES: usize = 1;
+use super::DEFAULT_WINDOW_SIZE;
 
 #[cfg(feature = "asset_tar")]
 pub fn addon_directory() -> Vec<std::path::PathBuf> {
@@ -24,7 +24,7 @@ pub fn write_data_file(file_name: &str, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn savefile_write(file_name: &str, data: &[u8]) -> Result<()> {
+pub fn write_savefile(dir_name: &str, file_name: &str, data: &[u8]) -> Result<()> {
     use std::io::Write;
 
     let base64_encoder =
@@ -37,17 +37,17 @@ pub fn savefile_write(file_name: &str, data: &[u8]) -> Result<()> {
     log::info!("save {} bytes to local storage", s.len());
 
     get_web_storage()?
-        .set_item(&format!("save/{}", file_name), &s)
+        .set_item(&format!("saves/{}/{}", dir_name, file_name), &s)
         .map_err(|e| anyhow!("setItem failed: {:?}", e))?;
 
     Ok(())
 }
 
-pub fn savefile_read(file_name: &str) -> Result<Vec<u8>> {
+pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
     use std::io::{Cursor, Read};
 
     let s = get_web_storage()?
-        .get_item(&format!("save/{}", file_name))
+        .get_item(&format!("saves/{}/{}", dir_name, file_name))
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;
     let mut s = Cursor::new(s);
@@ -58,6 +58,54 @@ pub fn savefile_read(file_name: &str) -> Result<Vec<u8>> {
     let mut data = Vec::new();
     decoder.read_to_end(&mut data)?;
     Ok(data)
+}
+
+pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let mut sub_dirs = std::collections::BTreeSet::new();
+
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        if let Some(s) = key.strip_prefix("saves/") {
+            log::info!("{}", s);
+            if let Some((sub_dir_name, _)) = s.split_once('/') {
+                sub_dirs.insert(sub_dir_name.to_string());
+            }
+        }
+    }
+
+    // Use SavedTime::now for dir modified time because the number of sub dirs is limited to one in wasm
+    Ok(sub_dirs
+        .into_iter()
+        .map(|sub_dir_name| (SavedTime::now(), sub_dir_name))
+        .collect())
+}
+
+pub fn save_sub_dir_files(dir_name: &str) -> Result<Vec<String>> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let dir_path = format!("saves/{}/", dir_name);
+    let mut files = Vec::new();
+
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        if let Some(file_name) = key.strip_prefix(&dir_path) {
+            files.push(file_name.to_owned());
+        }
+    }
+
+    Ok(files)
 }
 
 fn get_web_storage() -> Result<web_sys::Storage> {
