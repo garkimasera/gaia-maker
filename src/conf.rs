@@ -54,6 +54,8 @@ pub struct Conf {
     pub ui: UiConf,
     pub autosave_enabled: bool,
     pub autosave_cycle_duration: u64,
+    pub autosave_max_files: usize,
+    pub manual_max_files: usize,
     #[serde(default)]
     pub max_simulation_speed: bool,
 }

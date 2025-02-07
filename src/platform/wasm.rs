@@ -60,6 +60,13 @@ pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
     Ok(data)
 }
 
+pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
+    let web_storage = get_web_storage()?;
+    web_storage
+        .remove_item(&format!("saves/{}/{}", dir_name, file_name))
+        .map_err(|e| anyhow!("removeItem failed: {:?}", e))
+}
+
 pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
     let web_storage = get_web_storage()?;
     let len = web_storage

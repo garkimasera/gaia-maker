@@ -3,6 +3,8 @@ lang = "English"
 camera_move_speed = 48.0
 autosave_enabled = true
 autosave_cycle_duration = 1000
+autosave_max_files = 5
+manual_max_files = 5
 
 [ui]
 scale_factor = 1.0

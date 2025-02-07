@@ -56,6 +56,15 @@ pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
     std::fs::read(&file_path).with_context(|| format!("reading \"{}\"", file_path.display()))
 }
 
+pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
+    let data_dir =
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    let save_dir_path = data_dir.join("saves").join(dir_name);
+    let file_path = save_dir_path.join(file_name);
+    std::fs::remove_file(&file_path)?;
+    Ok(())
+}
+
 pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
     let saves_dir_path = crate::platform::data_dir()
         .ok_or_else(|| anyhow!("cannot get data directory path"))?

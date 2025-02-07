@@ -1,4 +1,5 @@
-use std::{collections::VecDeque, io::Read};
+use std::collections::{BTreeSet, VecDeque};
+use std::io::Read;
 
 use anyhow::Result;
 use byteorder::ReadBytesExt;
@@ -6,7 +7,7 @@ use bytes::BufMut;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::planet::Planet;
+use crate::{conf::Conf, planet::Planet};
 
 pub const SAVE_FILE_EXTENSION: &str = "planet";
 
@@ -19,10 +20,36 @@ pub struct SavedTime(String);
 #[derive(Default, Debug)]
 pub struct SaveState {
     pub current: String,
-    pub list: VecDeque<(SavedTime, String)>, // Latest saved time and name list
-    pub manual_save_files: Vec<u32>,
-    pub auto_save_files: Vec<u32>,
+    pub list: VecDeque<(SavedTime, String)>, // Latest saved time and directory name list
+    pub manual_save_files: BTreeSet<u32>,
+    pub auto_save_files: BTreeSet<u32>,
     pub save_file_metadata: SaveFileMetadata,
+}
+
+impl SaveState {
+    pub fn change_current(&mut self, name: &str, new_sub_dir: bool) {
+        log::info!(
+            "change current save sub dir to {}, new = {}",
+            name,
+            new_sub_dir
+        );
+        self.current = name.to_owned();
+        self.save_file_metadata = SaveFileMetadata::default();
+        self.manual_save_files.clear();
+        self.auto_save_files.clear();
+
+        if new_sub_dir {
+            return;
+        }
+
+        for item in crate::saveload::read_save_sub_dir(name) {
+            if item.auto {
+                self.auto_save_files.insert(item.n);
+            } else {
+                self.manual_save_files.insert(item.n);
+            }
+        }
+    }
 }
 
 pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Result<()> {
@@ -35,41 +62,38 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
     )
     .to_bytes();
 
-    let file_name = if auto {
-        let n = save_state
+    let n = if auto {
+        save_state
             .auto_save_files
-            .iter()
+            .last()
             .copied()
-            .max()
             .unwrap_or_default()
-            + 1;
-        save_state.auto_save_files.push(n);
-        format!("autosave{:06}.{}", n, SAVE_FILE_EXTENSION)
+            + 1
     } else {
-        let n = save_state
+        save_state
             .manual_save_files
-            .iter()
+            .last()
             .copied()
-            .max()
             .unwrap_or_default()
-            + 1;
-        save_state.manual_save_files.push(n);
-        format!("{:06}.{}", n, SAVE_FILE_EXTENSION)
+            + 1
     };
+    let file_name = save_file_name(auto, n);
 
     log::info!("save {}/{}", save_state.current, file_name);
 
     crate::platform::write_savefile(&save_state.current, &file_name, &bytes)?;
 
+    if auto {
+        save_state.auto_save_files.insert(n);
+    } else {
+        save_state.manual_save_files.insert(n);
+    }
+
     Ok(())
 }
 
 pub fn load_from(save_state: &SaveState, auto: bool, n: u32) -> Result<(Planet, SaveFileMetadata)> {
-    let file_name = if auto {
-        format!("autosave{:06}.{}", n, SAVE_FILE_EXTENSION)
-    } else {
-        format!("{:06}.{}", n, SAVE_FILE_EXTENSION)
-    };
+    let file_name = save_file_name(auto, n);
     let data = SaveFile::from_bytes(&crate::platform::read_savefile(
         &save_state.current,
         &file_name,
@@ -172,7 +196,6 @@ impl SaveFile {
 #[derive(Clone, Debug)]
 pub struct SaveSubDirItem {
     pub time: SavedTime,
-    pub _file_name: String,
     pub auto: bool,
     pub n: u32,
 }
@@ -224,7 +247,6 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
 
         list.push(SaveSubDirItem {
             time: save_file.time,
-            _file_name: file_name,
             auto,
             n,
         });
@@ -232,6 +254,60 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
 
     list.sort_by_key(|item| std::cmp::Reverse(item.time.clone()));
     list
+}
+
+pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
+    let mut max = 0;
+    let mut dup = false;
+    let prefix = format!("{} (", name);
+
+    for (_, s) in &save_state.list {
+        dup |= *s == name;
+        if let Some(s) = s.strip_prefix(&prefix) {
+            if let Some(s) = s.strip_suffix(")") {
+                if let Ok(i) = s.parse::<u32>() {
+                    if i > max {
+                        max = i;
+                    }
+                }
+            }
+        }
+    }
+
+    if dup {
+        format!("{} ({})", name, max + 1)
+    } else {
+        name
+    }
+}
+
+pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
+    if save_state.auto_save_files.len() > conf.autosave_max_files {
+        if let Some(min) = save_state.auto_save_files.pop_first() {
+            let file_name = save_file_name(true, min);
+            log::info!("delete {}/{}", save_state.current, file_name);
+            if let Err(e) = crate::platform::delete_savefile(&save_state.current, &file_name) {
+                log::warn!("cannot delete save file: {:?}", e);
+            }
+        }
+    }
+    if save_state.manual_save_files.len() > conf.manual_max_files {
+        if let Some(min) = save_state.manual_save_files.pop_first() {
+            let file_name = save_file_name(false, min);
+            log::info!("delete {}/{}", save_state.current, file_name);
+            if let Err(e) = crate::platform::delete_savefile(&save_state.current, &file_name) {
+                log::warn!("cannot delete save file: {:?}", e);
+            }
+        }
+    }
+}
+
+pub fn save_file_name(auto: bool, n: u32) -> String {
+    if auto {
+        format!("autosave{:06}.{}", n, SAVE_FILE_EXTENSION)
+    } else {
+        format!("{:06}.{}", n, SAVE_FILE_EXTENSION)
+    }
 }
 
 impl SavedTime {
