@@ -112,7 +112,7 @@ pub fn main_menu(
                 egui_ctxs.ctx_mut(),
                 &mut ew_manage_planet,
                 &mut open_state,
-                &save_state,
+                &save_state.current,
             );
             if !open_state {
                 state.mode = MainMenuMode::Menu;

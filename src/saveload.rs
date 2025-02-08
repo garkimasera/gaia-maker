@@ -29,9 +29,9 @@ pub struct SaveState {
 impl SaveState {
     pub fn change_current(&mut self, name: &str, new_sub_dir: bool) {
         log::info!(
-            "change current save sub dir to {}, new = {}",
+            "change current save sub dir to \"{}\", new = {}",
             name,
-            new_sub_dir
+            new_sub_dir,
         );
         self.current = name.to_owned();
         self.save_file_metadata = SaveFileMetadata::default();
@@ -42,11 +42,13 @@ impl SaveState {
             return;
         }
 
-        for item in crate::saveload::read_save_sub_dir(name) {
-            if item.auto {
-                self.auto_save_files.insert(item.n);
-            } else {
-                self.manual_save_files.insert(item.n);
+        if !name.is_empty() {
+            for item in crate::saveload::read_save_sub_dir(name).0 {
+                if item.auto {
+                    self.auto_save_files.insert(item.n);
+                } else {
+                    self.manual_save_files.insert(item.n);
+                }
             }
         }
     }
@@ -203,14 +205,15 @@ pub struct SaveSubDirItem {
 static RE_SAVE_FILE: std::sync::LazyLock<Regex> =
     std::sync::LazyLock::new(|| Regex::new(r"(autosave)?(\d+)\..+").unwrap());
 
-pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
+pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
+    let mut planet_name = String::new();
     let mut list = Vec::new();
 
     let save_sub_dir_files = match crate::platform::save_sub_dir_files(sub_dir_name) {
         Ok(save_sub_dir_files) => save_sub_dir_files,
         Err(e) => {
-            log::warn!("{}", e);
-            return Vec::new();
+            log::warn!("{:?}", e);
+            return (Vec::new(), planet_name);
         }
     };
 
@@ -219,6 +222,12 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
         if !file_name.ends_with(&ext) {
             continue;
         }
+
+        let Some(caps) = RE_SAVE_FILE.captures(&file_name) else {
+            log::warn!("invalid save file name: {}", file_name);
+            continue;
+        };
+
         let save_file_data = match crate::platform::read_savefile(sub_dir_name, &file_name) {
             Ok(save_file_data) => save_file_data,
             Err(e) => {
@@ -226,6 +235,7 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
                 continue;
             }
         };
+
         let save_file = match SaveFile::from_bytes(&save_file_data) {
             Ok(save_file) => save_file,
             Err(e) => {
@@ -234,10 +244,11 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
             }
         };
 
-        let Some(caps) = RE_SAVE_FILE.captures(&file_name) else {
-            log::warn!("invalid save file name: {}", file_name);
-            continue;
-        };
+        if planet_name.is_empty() {
+            if let Ok(planet) = rmp_serde::from_slice::<Planet>(&save_file.planet_data) {
+                planet_name = planet.basics.name.clone();
+            }
+        }
 
         let auto = caps
             .get(1)
@@ -253,7 +264,8 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> Vec<SaveSubDirItem> {
     }
 
     list.sort_by_key(|item| std::cmp::Reverse(item.time.clone()));
-    list
+
+    (list, planet_name)
 }
 
 pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
@@ -326,6 +338,12 @@ impl std::fmt::Display for SavedTime {
 impl From<std::time::SystemTime> for SavedTime {
     fn from(value: std::time::SystemTime) -> Self {
         let time: chrono::DateTime<chrono::Local> = value.into();
-        Self(time.to_string().split_once('.').unwrap().0.into())
+        Self::from(time)
+    }
+}
+
+impl From<chrono::DateTime<chrono::Local>> for SavedTime {
+    fn from(value: chrono::DateTime<chrono::Local>) -> Self {
+        Self(value.format("%Y-%m-%d %H:%M:%S").to_string())
     }
 }

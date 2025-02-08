@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Context, Result};
 
-use crate::saveload::SavedTime;
+use crate::{conf::Conf, saveload::SavedTime};
 
 use super::DEFAULT_WINDOW_SIZE;
 
@@ -61,7 +61,17 @@ pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("saves").join(dir_name);
     let file_path = save_dir_path.join(file_name);
-    std::fs::remove_file(&file_path)?;
+    std::fs::remove_file(&file_path)
+        .with_context(|| format!("remove \"{}\"", file_path.display()))?;
+    Ok(())
+}
+
+pub fn delete_save_sub_dir(dir_name: &str) -> Result<()> {
+    let data_dir =
+        crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
+    let save_dir_path = data_dir.join("saves").join(dir_name);
+    std::fs::remove_dir_all(&save_dir_path)
+        .with_context(|| format!("remove \"{}\"", save_dir_path.display()))?;
     Ok(())
 }
 
@@ -111,6 +121,7 @@ pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
         dirs.push((modified, sub_dir_name));
     }
 
+    dirs.sort_by_key(|(time, _)| std::cmp::Reverse(time.clone()));
     Ok(dirs)
 }
 
@@ -150,6 +161,10 @@ pub fn save_sub_dir_files(dir_name: &str) -> Result<Vec<String>> {
     }
 
     Ok(files)
+}
+
+pub fn modify_conf(conf: Conf) -> Conf {
+    conf
 }
 
 pub fn window_open() {}

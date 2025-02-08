@@ -30,6 +30,12 @@ pub enum ManagePlanet {
         auto: bool,
         n: u32,
     },
+    Delete {
+        sub_dir_name: String,
+        all: bool,
+        auto: bool,
+        n: u32,
+    },
 }
 
 #[derive(Clone, Debug, Event)]
@@ -50,6 +56,7 @@ impl Plugin for SimPlugin {
                 OnExit(GameState::AssetLoading),
                 (load_global_data, set_save_state),
             )
+            .add_systems(OnEnter(GameState::MainMenu), reset_save_state)
             .add_systems(
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
@@ -89,11 +96,11 @@ fn set_save_state(mut save_state: ResMut<SaveState>) {
         }
     };
     save_sub_dirs.sort_by_key(|(time, _)| std::cmp::Reverse(time.clone()));
-    let latest_sub_dir = save_sub_dirs.first().cloned();
     save_state.list = save_sub_dirs.into();
-    if let Some(latest_sub_dir) = latest_sub_dir {
-        save_state.change_current(&latest_sub_dir.1, false);
-    }
+}
+
+fn reset_save_state(mut save_state: ResMut<SaveState>) {
+    save_state.change_current("", false);
 }
 
 fn start_sim(mut update_map: ResMut<UpdateMap>) {
@@ -246,6 +253,37 @@ fn manage_planet(
                     None
                 }
             }
+        }
+        ManagePlanet::Delete {
+            sub_dir_name,
+            all,
+            auto,
+            n,
+        } => {
+            if *all {
+                if let Err(e) = crate::platform::delete_save_sub_dir(sub_dir_name) {
+                    log::warn!("cannot delete save sub dir: {:?}", e);
+                }
+            } else {
+                let file_name = crate::saveload::save_file_name(*auto, *n);
+                log::info!("delete save file \"{}/{}\"", sub_dir_name, file_name);
+                if let Err(e) = crate::platform::delete_savefile(sub_dir_name, &file_name) {
+                    log::warn!("cannot delete save file: {:?}", e);
+                }
+                if *sub_dir_name == save_state.current {
+                    if *auto {
+                        save_state.auto_save_files.remove(n);
+                    } else {
+                        save_state.manual_save_files.remove(n);
+                    }
+                }
+            }
+
+            // If the sub dir has been deleted
+            if save_state.auto_save_files.is_empty() && save_state.auto_save_files.is_empty() {
+                save_state.list.retain(|(_, s)| s != sub_dir_name);
+            }
+            None
         }
     };
 

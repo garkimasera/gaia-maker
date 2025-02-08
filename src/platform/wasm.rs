@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 
-use crate::saveload::SavedTime;
+use crate::{conf::Conf, saveload::SavedTime};
 
 use super::DEFAULT_WINDOW_SIZE;
 
@@ -65,6 +65,33 @@ pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
     web_storage
         .remove_item(&format!("saves/{}/{}", dir_name, file_name))
         .map_err(|e| anyhow!("removeItem failed: {:?}", e))
+}
+
+pub fn delete_save_sub_dir(dir_name: &str) -> Result<()> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let dir_path = format!("saves/{}/", dir_name);
+
+    let mut keys = Vec::new();
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        keys.push(key);
+    }
+
+    for key in keys {
+        if key.starts_with(&dir_path) {
+            web_storage
+                .remove_item(&key)
+                .map_err(|e| anyhow!("removeItem failed: {:?}", e))?;
+        }
+    }
+
+    Ok(())
 }
 
 pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
@@ -139,6 +166,12 @@ pub fn preferred_window_size() -> (u32, u32) {
     let height = height as u32;
 
     (width, height)
+}
+
+pub fn modify_conf(mut conf: Conf) -> Conf {
+    conf.autosave_max_files = 1;
+    conf.manual_max_files = 1;
+    conf
 }
 
 pub fn window_open() {

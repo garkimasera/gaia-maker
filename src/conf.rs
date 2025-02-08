@@ -43,6 +43,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
             conf.get(&ui_assets.default_conf).unwrap().clone()
         }
     };
+    let conf = crate::platform::modify_conf(conf);
     crate::text_assets::set_lang(conf.lang);
     command.insert_resource(conf);
 }
