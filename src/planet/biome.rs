@@ -207,7 +207,9 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             continue;
         };
 
-        let transition_probability = if planet.map[p].event.is_some() {
+        // Specific tile events cause biome transition
+        let transition_probability = if planet.map[p].tile_events.get(TileEventKind::Fire).is_some()
+        {
             1.0
         } else if sim.before_start {
             params.sim.before_start_biome_transition_probability

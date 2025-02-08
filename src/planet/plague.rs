@@ -1,5 +1,5 @@
 use arrayvec::ArrayVec;
-use geom::{Array2d, Coords};
+use geom::Coords;
 use rand::{seq::SliceRandom, Rng};
 
 use super::{defs::*, Planet, Sim};
@@ -12,12 +12,7 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
             }
         }
         // Start new plague
-        let size = planet.map.size();
-        let plague_event = PlagueEvent {
-            i: 0,
-            start_at: p,
-            map: Array2d::new(size.0, size.1, PlagueStatus::None),
-        };
+        let plague_event = PlagueEvent { i: 0, start_at: p };
         planet
             .events
             .start_event(PlanetEvent::Plague(plague_event), params);
@@ -30,9 +25,10 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
     };
     let plague_params = &params.event.plague_list[plague_event.i];
     if let Some(Structure::Settlement(settlement)) = planet.map[p].structure {
-        plague_event.map[p] = PlagueStatus::Infected {
+        planet.map[p].tile_events.insert(TileEvent::Plague {
+            cured: false,
             target_pop: settlement.pop * (1.0 - plague_params.lethality),
-        };
+        });
     }
 }
 
@@ -53,63 +49,59 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
     let mut p_pop_max_uninfected_settlement = None;
 
     for p in planet.map.iter_idx() {
-        let Some(Structure::Settlement(ref mut settlement)) = planet.map[p].structure else {
-            if matches!(planet.map[p].event, Some(TileEvent::Plague)) {
-                planet.map[p].event = None;
+        let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
+            planet.map[p].tile_events.remove(TileEventKind::Plague);
+            continue;
+        };
+        let Some(TileEvent::Plague { cured, target_pop }) = planet.map[p]
+            .tile_events
+            .get_mut(TileEventKind::Plague)
+            .copied()
+        else {
+            if settlement.age >= CivilizationAge::Industrial
+                && settlement.pop > pop_max_uninfected_settlement
+            {
+                pop_max_uninfected_settlement = settlement.pop;
+                p_pop_max_uninfected_settlement = Some(p);
             }
             continue;
         };
 
-        match plague_event.map[p] {
-            PlagueStatus::Infected { target_pop } => {
-                count_infected += 1;
-                settlement.pop -=
-                    (settlement.pop - target_pop / 2.0) * params.event.plague_base_lethality_speed;
-                if settlement.pop < target_pop {
-                    plague_event.map[p] = PlagueStatus::Cured;
-                    continue;
-                }
+        if !cured {
+            count_infected += 1;
+            settlement.pop -=
+                (settlement.pop - target_pop / 2.0) * params.event.plague_base_lethality_speed;
+            planet.map[p].structure = Some(Structure::Settlement(settlement));
 
-                if planet.map[p].event.is_none() {
-                    planet.map[p].event = Some(TileEvent::Plague);
-                }
+            if settlement.pop < target_pop {
+                planet.map[p].tile_events.insert(TileEvent::Plague {
+                    cured: true,
+                    target_pop,
+                });
+                continue;
+            }
 
-                // Spread plague
-                if sim.rng.gen_bool(
-                    (params.event.plague_spread_base_probability * plague_params.infectivity)
-                        .min(1.0)
-                        .into(),
-                ) {
-                    let mut target_tiles: ArrayVec<(Coords, f32), 8> = ArrayVec::new();
-                    for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-                        if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
-                            if let Some(Structure::Settlement(target_settlement)) =
-                                &planet.map[p_adj].structure
-                            {
-                                target_tiles.push((p_adj, target_settlement.pop));
-                            }
-                        }
-                    }
-                    if let Some((p_target, pop)) = target_tiles.choose(&mut sim.rng) {
-                        if plague_event.map[*p_target] == PlagueStatus::None {
-                            plague_event.map[*p_target] = PlagueStatus::Infected {
-                                target_pop: pop * (1.0 - plague_params.lethality),
-                            };
+            // Spread plague
+            if sim.rng.gen_bool(
+                (params.event.plague_spread_base_probability * plague_params.infectivity)
+                    .min(1.0)
+                    .into(),
+            ) {
+                let mut target_tiles: ArrayVec<(Coords, f32), 8> = ArrayVec::new();
+                for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+                    if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
+                        if let Some(Structure::Settlement(target_settlement)) =
+                            &planet.map[p_adj].structure
+                        {
+                            target_tiles.push((p_adj, target_settlement.pop));
                         }
                     }
                 }
-            }
-            PlagueStatus::None => {
-                if settlement.age >= CivilizationAge::Industrial
-                    && settlement.pop > pop_max_uninfected_settlement
-                {
-                    pop_max_uninfected_settlement = settlement.pop;
-                    p_pop_max_uninfected_settlement = Some(p);
-                }
-            }
-            PlagueStatus::Cured => {
-                if matches!(planet.map[p].event, Some(TileEvent::Plague)) {
-                    planet.map[p].event = None;
+                if let Some((p_target, pop)) = target_tiles.choose(&mut sim.rng) {
+                    planet.map[*p_target].tile_events.insert(TileEvent::Plague {
+                        cured: false,
+                        target_pop: pop * (1.0 - plague_params.lethality),
+                    });
                 }
             }
         }
@@ -118,9 +110,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
     if count_infected == 0 {
         // Clear remaining plague tile events
         for p in planet.map.iter_idx() {
-            if matches!(planet.map[p].event, Some(TileEvent::Plague)) {
-                planet.map[p].event = None;
-            }
+            planet.map[p].tile_events.remove(TileEventKind::Plague);
         }
         true
     } else {
@@ -131,9 +121,10 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
                     .min(1.0)
                     .into(),
             ) {
-                plague_event.map[p] = PlagueStatus::Infected {
+                planet.map[p].tile_events.insert(TileEvent::Plague {
+                    cured: false,
                     target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
-                };
+                });
             }
         }
         false

@@ -2487,7 +2487,9 @@ dependencies = [
  "ron",
  "sanitize-filename",
  "serde",
+ "serde_repr",
  "serde_with",
+ "smallvec",
  "strum",
  "tile-geom",
  "toml",
@@ -4386,6 +4388,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_repr"
+version = "0.1.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c64451ba24fc7a6a2d60fc75dd9c83c90903b19028d4eff35e88fc1e86564e9"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "serde_spanned"
 version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4477,6 +4490,9 @@ name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "smithay-client-toolkit"

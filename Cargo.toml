@@ -39,14 +39,16 @@ rand = { version = "0.8", features = ["small_rng"] }
 regex = "1"
 rmp-serde = "1.3.0"
 ron = "0.8"
+sanitize-filename = "0.6.0"
 serde = { version = "1", features = ["derive"] }
+serde_repr = "0.1.19"
 serde_with = "3"
+smallvec = { version = "1.13.2", features = ["serde"] }
 strum = { version = "0.26", features = ["derive"] }
 toml = "0.8.19"
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
-sanitize-filename = "0.6.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"

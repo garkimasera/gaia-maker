@@ -32,11 +32,9 @@ impl Planet {
         if self.map[p].structure.is_some() {
             self.map[p].structure = None;
             self.update(sim, params);
-            if let Some(event_kind) = self.map[p].event.map(|event| event.kind()) {
-                if matches!(event_kind, TileEventKind::Plague) {
-                    self.map[p].event = None;
-                }
-            }
+            self.map[p]
+                .tile_events
+                .retain(|e| e.kind() != TileEventKind::Plague);
             true
         } else {
             false

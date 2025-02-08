@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use fnv::FnvHashMap;
-use geom::{Array2d, Coords};
+use geom::Coords;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, Same};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
@@ -192,7 +192,7 @@ pub enum TileEvent {
     Fire,
     BlackDust { remaining_cycles: u32 },
     AerosolInjection { remaining_cycles: u32 },
-    Plague,
+    Plague { cured: bool, target_pop: f32 },
 }
 
 impl TileEvent {
@@ -478,17 +478,6 @@ impl PlanetEvent {
 pub struct PlagueEvent {
     pub i: usize,
     pub start_at: Coords,
-    pub map: Array2d<PlagueStatus>,
-}
-
-#[derive(Copy, Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub enum PlagueStatus {
-    #[default]
-    None,
-    Infected {
-        target_pop: f32,
-    },
-    Cured,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

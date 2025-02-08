@@ -32,6 +32,7 @@ pub use self::msg::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
 pub use self::stat::{Record, Stat};
+pub use self::tile_event::TileEvents;
 pub use self::water::*;
 
 use fnv::FnvHashMap;
@@ -61,7 +62,7 @@ pub struct Tile {
     /// Buried carbon mass [Mt]
     pub buried_carbon: f32,
     pub ice: f32,
-    pub event: Option<TileEvent>,
+    pub tile_events: TileEvents,
 }
 
 impl Default for Tile {
@@ -79,7 +80,7 @@ impl Default for Tile {
             vapor: 0.0,
             buried_carbon: 0.0,
             ice: 0.0,
-            event: None,
+            tile_events: TileEvents::default(),
         }
     }
 }

@@ -365,14 +365,27 @@ fn spawn_tile_animation_textures(
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
-        let Some(kind) = planet.map[p].event.as_ref().map(|event| event.kind()) else {
+        let Some(kind) = planet.map[p]
+            .tile_events
+            .list()
+            .iter()
+            .filter_map(|e| {
+                let key = tile_event_order_key(e);
+                if key > 0 {
+                    Some((key, e.kind()))
+                } else {
+                    None
+                }
+            })
+            .max_by_key(|(key, _)| *key)
+        else {
             continue;
         };
 
         let index = counter.fast;
         let index = if monochrome { index + 2 } else { index };
 
-        let Some(t) = texture_handles.tile_animations.get(kind.as_ref()) else {
+        let Some(t) = texture_handles.tile_animations.get(kind.1.as_ref()) else {
             continue;
         };
 
@@ -503,4 +516,19 @@ fn coord_rotation_x(size: (u32, u32), p: Coords) -> Coords {
         p.0
     };
     Coords(new_x, p.1)
+}
+
+fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
+    match tile_event {
+        TileEvent::Fire => 9000,
+        TileEvent::BlackDust { .. } => 1000,
+        TileEvent::AerosolInjection { .. } => 2000,
+        TileEvent::Plague { cured, .. } => {
+            if *cured {
+                0
+            } else {
+                3000
+            }
+        }
+    }
 }
