@@ -47,12 +47,6 @@ impl Plugin for ScreenPlugin {
             )
             .add_systems(
                 Update,
-                on_enter_running
-                    .run_if(in_state(GameState::Running))
-                    .after(GameSystemSet::StartSim),
-            )
-            .add_systems(
-                Update,
                 (centering, on_resize)
                     .run_if(in_state(GameState::Running))
                     .before(GameSystemSet::Draw),
@@ -121,25 +115,6 @@ fn set_scale_factor_to_occupied_screen_space(
     conf: Res<Conf>,
 ) {
     occupied_screen_space.scale_factor = conf.ui.scale_factor;
-}
-
-fn on_enter_running(
-    planet: Option<Res<Planet>>,
-    mut ew_centering: EventWriter<Centering>,
-    mut done: Local<bool>,
-) {
-    let Some(planet) = planet else {
-        return;
-    };
-    if *done {
-        return;
-    }
-    *done = true;
-    let h = planet.map.size().1;
-    ew_centering.send(Centering(Vec2 {
-        x: 0.0,
-        y: h as f32 * TILE_SIZE / 2.0,
-    }));
 }
 
 fn mouse_event(
