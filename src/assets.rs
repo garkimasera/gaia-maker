@@ -1,9 +1,5 @@
 use std::cmp::Ordering;
 
-use crate::conf::Conf;
-use crate::gz::GunzipBin;
-use crate::planet::*;
-use crate::GameState;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_asset_loader::prelude::*;
@@ -12,7 +8,13 @@ use bevy_kira_audio::AudioSource;
 use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::Deserialize;
+use serde_with::{serde_as, DisplayFromStr, Same};
 use strum::IntoEnumIterator;
+
+use crate::conf::Conf;
+use crate::gz::GunzipBin;
+use crate::planet::*;
+use crate::GameState;
 
 #[derive(Clone, Copy, Debug)]
 pub struct AssetsPlugin;
@@ -65,9 +67,12 @@ pub struct UiAssets {
 #[serde(transparent)]
 pub struct ParamsAsset(Params);
 
+#[serde_as]
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
+pub struct BiomeAssetList(
+    #[serde_as(as = "FnvHashMap<DisplayFromStr, Same>")] FnvHashMap<Biome, BiomeAttrs>,
+);
 
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]

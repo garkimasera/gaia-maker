@@ -1,5 +1,5 @@
 {
-    rock: (
+    "rock": (
         z: 80.0,
         albedo: 0.3,
         revaporization_ratio: 0.1,
@@ -13,7 +13,7 @@
         ),
         color: (198, 118, 37),
     ),
-    ocean: (
+    "ocean": (
         z: 90.0,
         albedo: 0.2,
         revaporization_ratio: 0.0,
@@ -27,7 +27,7 @@
         ),
         color: (43, 82, 187),
     ),
-    sea_ice: (
+    "sea-ice": (
         z: 95.0,
         albedo: 0.8,
         revaporization_ratio: 0.0,
@@ -41,7 +41,7 @@
         ),
         color: (234, 238, 241),
     ),
-    desert: (
+    "desert": (
         z: 50.0,
         albedo: 0.35,
         revaporization_ratio: 0.1,
@@ -55,7 +55,7 @@
         ),
         color: (211, 141, 66),
     ),
-    ice_field: (
+    "ice-field": (
         z: 70.0,
         albedo: 0.8,
         revaporization_ratio: 0.1,
@@ -69,7 +69,7 @@
         ),
         color: (234, 238, 241),
     ),
-    tundra: (
+    "tundra": (
         z: 45.0,
         albedo: 0.6,
         revaporization_ratio: 0.2,
@@ -83,7 +83,7 @@
         ),
         color: (171, 171, 171),
     ),
-    grassland: (
+    "grassland": (
         z: 40.0,
         albedo: 0.2,
         revaporization_ratio: 0.3,
@@ -97,7 +97,7 @@
         ),
         color: (94, 138, 64),
     ),
-    boreal_forest: (
+    "boreal-forest": (
         z: 35.0,
         albedo: 0.2,
         revaporization_ratio: 0.7,
@@ -111,7 +111,7 @@
         ),
         color: (24, 80, 22),
     ),
-    temperate_forest: (
+    "temperate-forest": (
         z: 34.0,
         albedo: 0.2,
         revaporization_ratio: 0.7,
@@ -125,7 +125,7 @@
         ),
         color: (37, 117, 19),
     ),
-    tropical_rainforest: (
+    "tropical-rainforest": (
         z: 33.0,
         albedo: 0.2,
         revaporization_ratio: 0.7,

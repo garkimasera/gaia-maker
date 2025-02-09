@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, HashMap};
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, Same};
+use serde_with::{serde_as, DisplayFromStr, Same};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
 use super::serde_with_types::*;
@@ -54,29 +54,32 @@ impl Default for State {
     Copy,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     Default,
     Debug,
-    Serialize,
-    Deserialize,
+    serde_repr::Serialize_repr,
+    serde_repr::Deserialize_repr,
     EnumString,
+    Display,
     EnumIter,
     AsRefStr,
 )]
-#[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
+#[repr(u8)]
 pub enum Biome {
     #[default]
-    Rock,
-    Ocean,
-    SeaIce,
-    Desert,
+    // Barren
+    Rock = 1,
     IceField,
+    Desert,
+    // Water
+    Ocean = 21,
+    SeaIce,
+    // Grassland
+    Grassland = 41,
     Tundra,
-    Grassland,
-    BorealForest,
+    // Forest
+    BorealForest = 61,
     TemperateForest,
     TropicalRainforest,
 }
@@ -244,12 +247,13 @@ impl AnimalSize {
     }
 }
 
+#[serde_as]
 #[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AnimalHabitat {
     Land,
     Sea,
-    Biomes(Vec<Biome>),
+    Biomes(#[serde_as(as = "Vec<DisplayFromStr>")] Vec<Biome>),
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
@@ -283,13 +287,13 @@ pub struct Settlement {
     Default,
     Hash,
     Debug,
-    Serialize,
-    Deserialize,
+    serde_repr::Serialize_repr,
+    serde_repr::Deserialize_repr,
     AsRefStr,
+    Display,
     EnumIter,
     num_derive::FromPrimitive,
 )]
-#[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum CivilizationAge {

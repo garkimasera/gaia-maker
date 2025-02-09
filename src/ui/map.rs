@@ -317,12 +317,23 @@ impl Legend {
         )
         .with_main_wrap(true);
 
-        let mut biome_colors: Vec<_> = params
-            .biomes
+        // Biome order in map legend
+        let biomes = [
+            Biome::Rock,
+            Biome::Ocean,
+            Biome::IceField,
+            Biome::SeaIce,
+            Biome::Desert,
+            Biome::Tundra,
+            Biome::Grassland,
+            Biome::BorealForest,
+            Biome::TemperateForest,
+            Biome::TropicalRainforest,
+        ];
+        let biome_colors: Vec<_> = biomes
             .iter()
-            .map(|(biome, biome_attrs)| (*biome, biome_attrs.color))
+            .map(|biome| (*biome, params.biomes[biome].color))
             .collect();
-        biome_colors.sort();
 
         Self {
             gradation_images,
