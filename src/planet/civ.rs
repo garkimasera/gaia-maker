@@ -55,7 +55,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let ratio = settlement.pop / cap.max(1e-10);
         let dn = growth_speed * ratio * (-ratio + 1.0);
 
-        let can_growth = planet.map[p].tile_events.get(TileEventKind::Fire).is_none();
+        let can_growth = !planet.map[p].tile_events.contains(TileEventKind::Fire);
         if dn < 0.0 || can_growth {
             settlement.pop += dn;
         }

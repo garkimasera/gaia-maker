@@ -29,11 +29,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let cloud_albedo =
         linear_interpolation(&params.sim.cloud_albedo_table, planet.atmo.cloud_amount);
     for p in map_iter_idx {
-        if planet.map[p]
-            .tile_events
-            .get(TileEventKind::BlackDust)
-            .is_some()
-        {
+        if planet.map[p].tile_events.contains(TileEventKind::BlackDust) {
             sim.albedo[p] = params.event.black_dust_albedo;
         } else {
             let tile_albedo = params.biomes[&planet.map[p].biome].albedo;

@@ -17,6 +17,10 @@ impl TileEvents {
         self.0.retain(|e| e.kind() != kind);
     }
 
+    pub fn contains(&self, kind: TileEventKind) -> bool {
+        self.0.iter().any(|e| e.kind() == kind)
+    }
+
     pub fn get(&self, kind: TileEventKind) -> Option<&TileEvent> {
         self.0.iter().find(|e| e.kind() == kind)
     }

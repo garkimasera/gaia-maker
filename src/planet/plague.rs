@@ -98,10 +98,13 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
                     }
                 }
                 if let Some((p_target, pop)) = target_tiles.choose(&mut sim.rng) {
-                    planet.map[*p_target].tile_events.insert(TileEvent::Plague {
-                        cured: false,
-                        target_pop: pop * (1.0 - plague_params.lethality),
-                    });
+                    let tile_events = &mut planet.map[*p_target].tile_events;
+                    if !tile_events.contains(TileEventKind::Plague) {
+                        tile_events.insert(TileEvent::Plague {
+                            cured: false,
+                            target_pop: pop * (1.0 - plague_params.lethality),
+                        });
+                    }
                 }
             }
         }
