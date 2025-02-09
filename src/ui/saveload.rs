@@ -25,6 +25,7 @@ struct DeleteModal {
     all: bool,
     auto: bool,
     n: u32,
+    time: Option<SavedTime>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -228,6 +229,7 @@ pub fn show_load_window(
                 auto: ws.file_list[selected].auto,
                 n: ws.file_list[selected].n,
                 all: ws.file_list.len() == 1,
+                time: Some(ws.file_list[selected].time.clone()),
             });
         } else {
             ew_manage_planet.send(ManagePlanet::Load {
@@ -270,7 +272,15 @@ impl DeleteModal {
         let mut close = false;
 
         egui::Modal::new("delete-save".into()).show(ctx, |ui| {
-            ui.label("really delete?");
+            ui.label(t!("msg", "delete-save-data"));
+            ui.add_space(5.0);
+            let s = if let Some(time) = self.time.clone() {
+                format!("{} ({})", time, self.sub_dir_name)
+            } else {
+                self.sub_dir_name.to_string()
+            };
+            ui.label(s);
+            ui.add_space(5.0);
             ui.horizontal(|ui| {
                 if ui.button(t!("delete")).clicked() {
                     ew_manage_planet.send(ManagePlanet::Delete {

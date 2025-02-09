@@ -161,6 +161,7 @@ warn-low-temp = "Too low temperature\nAn effective way to raise the temperature 
 loading-failed = "Loading failed"
 loading-failed-desc-decode-error = "Loading failed. The save data was created with an incompatible version or is corrupted."
 loading-failed-desc-not-found = "Loading failed. Cannot find saved data."
+delete-save-data = "Delete the following save data?"
 
 # Events
 [event]

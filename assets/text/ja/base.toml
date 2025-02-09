@@ -160,6 +160,7 @@ warn-low-temp = "低すぎる気温\n気温が低すぎます。気温を上げ�
 loading-failed = "ロード失敗"
 loading-failed-desc-decode-error = "ロードに失敗しました。セーブデータが互換のないバージョンで作成されたか、破損しています。"
 loading-failed-desc-not-found = "ロードに失敗しました。セーブデータを見つけられません。"
+delete-save-data = "以下のセーブデータを削除しますか?"
 
 # Events
 [event]
