@@ -87,6 +87,7 @@ start = "Start"
 statistics = "Statistics"
 structures = "Structures"
 tile-event = "Tile Event"
+tutorial = "Tutorial"
 upkeep = "Upkeep"
 water = "Water"
 

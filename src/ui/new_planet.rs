@@ -75,6 +75,9 @@ pub fn new_planet(
                     ui.vertical(|ui| {
                         ui.set_min_height(200.0);
                         for planet in &params.start_planets {
+                            if planet.id == "tutorial" {
+                                continue;
+                            }
                             ui.selectable_value(
                                 &mut state.new_planet.planet,
                                 NewPlanetKind::Id(planet.id.clone()),

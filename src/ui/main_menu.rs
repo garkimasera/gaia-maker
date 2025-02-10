@@ -15,6 +15,7 @@ use super::EguiTextures;
 pub enum MainMenuMode {
     #[default]
     Menu,
+    Tutorial,
     NewPlanet,
     Load,
     Error,
@@ -68,12 +69,15 @@ pub fn main_menu(
             egui::Window::new(t!("menu"))
                 .title_bar(false)
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 127.0))
-                .default_width(0.0)
+                .default_width(150.0)
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
+                        }
+                        if ui.button(t!("tutorial")).clicked() {
+                            state.mode = MainMenuMode::Tutorial;
                         }
                         if ui.button(t!("load")).clicked() {
                             state.mode = MainMenuMode::Load;
@@ -94,6 +98,22 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+        }
+        MainMenuMode::Tutorial => {
+            if let Some(cancelled) = super::saveload::check_save_limit(
+                egui_ctxs.ctx_mut(),
+                &mut ew_manage_planet,
+                &save_state,
+            ) {
+                if cancelled {
+                    state.mode = MainMenuMode::Menu;
+                }
+            } else {
+                let mut start_params =
+                    crate::planet::start_planet_to_start_params("tutorial", &params);
+                start_params.basics.name = t!("tutorial");
+                ew_manage_planet.send(ManagePlanet::New(start_params));
+            }
         }
         MainMenuMode::NewPlanet => {
             super::new_planet::new_planet(

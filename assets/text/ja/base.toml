@@ -87,6 +87,7 @@ start = "開始"
 statistics = "統計"
 structures = "構造物"
 tile-event = "タイルイベント"
+tutorial = "チュートリアル"
 upkeep = "維持"
 water = "水"
 
