@@ -306,3 +306,42 @@ impl DeleteModal {
         close
     }
 }
+
+pub fn check_save_limit(
+    ctx: &mut egui::Context,
+    ew_manage_planet: &mut EventWriter<ManagePlanet>,
+    save_state: &SaveState,
+) -> Option<bool> {
+    if !crate::platform::SAVE_DIRS_LIMIT {
+        return None;
+    }
+    if save_state.dirs.is_empty() {
+        return None;
+    }
+    let mut canceled = false;
+    let name = save_state.dirs[0].1.clone();
+
+    egui::Modal::new("check-save-limit".into()).show(ctx, |ui| {
+        ui.label(t!("msg", "save-limit"));
+        ui.strong(t!("msg", "save-limit-strong"));
+        ui.add_space(5.0);
+        ui.label(&name);
+        ui.add_space(5.0);
+
+        ui.horizontal(|ui| {
+            if ui.button(t!("delete")).clicked() {
+                ew_manage_planet.send(ManagePlanet::Delete {
+                    sub_dir_name: name,
+                    all: true,
+                    auto: false,
+                    n: 0,
+                });
+            }
+            if ui.button(t!("cancel")).clicked() {
+                canceled = true;
+            }
+        });
+    });
+
+    Some(canceled)
+}

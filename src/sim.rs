@@ -96,7 +96,7 @@ fn set_save_state(mut save_state: ResMut<SaveState>) {
         }
     };
     save_sub_dirs.sort_by_key(|(time, _)| std::cmp::Reverse(time.clone()));
-    save_state.list = save_sub_dirs.into();
+    save_state.dirs = save_sub_dirs.into();
 }
 
 fn reset_save_state(mut save_state: ResMut<SaveState>) {
@@ -213,7 +213,7 @@ fn manage_planet(
             );
             let sub_dir_name = crate::saveload::check_save_dir_name_dup(&save_state, sub_dir_name);
             save_state
-                .list
+                .dirs
                 .push_front((SavedTime::now(), sub_dir_name.clone()));
             save_state.change_current(&sub_dir_name, true);
 
@@ -281,7 +281,7 @@ fn manage_planet(
 
             // If the sub dir has been deleted
             if save_state.auto_save_files.is_empty() && save_state.auto_save_files.is_empty() {
-                save_state.list.retain(|(_, s)| s != sub_dir_name);
+                save_state.dirs.retain(|(_, s)| s != sub_dir_name);
             }
             None
         }

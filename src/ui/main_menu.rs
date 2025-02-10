@@ -104,6 +104,7 @@ pub fn main_menu(
                 &textures,
                 &mut window.single_mut(),
                 &random_name_list_map,
+                &save_state,
             );
         }
         MainMenuMode::Load => {

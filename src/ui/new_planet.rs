@@ -4,7 +4,7 @@ use rand::seq::SliceRandom;
 
 use crate::{
     planet::{Basics, GasKind, Params, StartParams},
-    sim::ManagePlanet,
+    sim::{ManagePlanet, SaveState},
 };
 
 use super::{
@@ -51,7 +51,17 @@ pub fn new_planet(
     textures: &EguiTextures,
     window: &mut bevy::window::Window,
     random_name_list_map: &crate::text_assets::RandomNameListMap,
+    save_state: &SaveState,
 ) {
+    if let Some(cancelled) =
+        super::saveload::check_save_limit(egui_ctxs.ctx_mut(), &mut ew_manage_planet, save_state)
+    {
+        if cancelled {
+            state.mode = MainMenuMode::Menu;
+        }
+        return;
+    }
+
     egui::Window::new(t!("search-new-planet"))
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
         .default_width(0.0)

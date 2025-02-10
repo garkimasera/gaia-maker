@@ -7,6 +7,8 @@ use super::DEFAULT_WINDOW_SIZE;
 static DATA_DIR: std::sync::LazyLock<Option<std::path::PathBuf>> =
     std::sync::LazyLock::new(find_data_dir);
 
+pub const SAVE_DIRS_LIMIT: bool = false;
+
 pub fn data_dir() -> Option<&'static std::path::Path> {
     DATA_DIR.as_ref().map(|path| path.as_ref())
 }

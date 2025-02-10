@@ -20,7 +20,7 @@ pub struct SavedTime(String);
 #[derive(Default, Debug)]
 pub struct SaveState {
     pub current: String,
-    pub list: VecDeque<(SavedTime, String)>, // Latest saved time and directory name list
+    pub dirs: VecDeque<(SavedTime, String)>, // Latest saved time and directory name list
     pub manual_save_files: BTreeSet<u32>,
     pub auto_save_files: BTreeSet<u32>,
     pub save_file_metadata: SaveFileMetadata,
@@ -273,7 +273,7 @@ pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
     let mut dup = false;
     let prefix = format!("{} (", name);
 
-    for (_, s) in &save_state.list {
+    for (_, s) in &save_state.dirs {
         dup |= *s == name;
         if let Some(s) = s.strip_prefix(&prefix) {
             if let Some(s) = s.strip_suffix(")") {

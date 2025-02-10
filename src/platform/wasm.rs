@@ -4,6 +4,8 @@ use crate::{conf::Conf, saveload::SavedTime};
 
 use super::DEFAULT_WINDOW_SIZE;
 
+pub const SAVE_DIRS_LIMIT: bool = true;
+
 #[cfg(feature = "asset_tar")]
 pub fn addon_directory() -> Vec<std::path::PathBuf> {
     Vec::new()
