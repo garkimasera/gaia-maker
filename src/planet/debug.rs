@@ -102,7 +102,8 @@ impl PlanetDebug for Planet {
         write!(s, "[").unwrap();
         for (i, p) in self.map.iter_idx().enumerate() {
             let separator = if i == 0 { "" } else { "," };
-            write!(s, "{}{:.1}", separator, self.map[p].height).unwrap();
+            let newline = if i % 64 == 0 { "\n" } else { "" };
+            write!(s, "{}{}{:.2}", separator, newline, self.map[p].height).unwrap();
         }
         write!(s, "]").unwrap();
         s
