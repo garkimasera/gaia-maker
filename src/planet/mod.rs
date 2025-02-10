@@ -226,6 +226,7 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
         initial_conditions: start_planet.initial_conditions.clone(),
         height_table: start_planet.height_table.clone(),
         target_sea_level: start_planet.target_sea_level,
+        height_map: start_planet.height_map.clone(),
         ..params.default_start_params.clone()
     }
 }

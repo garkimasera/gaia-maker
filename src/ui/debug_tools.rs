@@ -110,8 +110,6 @@ fn info_ui(ui: &mut egui::Ui, planet: &Planet, sim: &Sim, p: Coords) {
 }
 
 fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet) {
-    ui.label(format!("{} cycles", planet.cycles));
-
     if ui.button("max resources").clicked() {
         planet.res.debug_max();
     }
@@ -194,6 +192,12 @@ impl MapPanel {
 
         if ui.button("delete all settlements").clicked() {
             planet.delete_settlement();
+        }
+
+        ui.separator();
+        if ui.button("copy height map").clicked() {
+            let s = planet.height_map_as_string();
+            ui.output_mut(|o| o.copied_text = s);
         }
     }
 }

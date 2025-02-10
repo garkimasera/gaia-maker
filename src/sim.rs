@@ -18,6 +18,7 @@ const GLOBAL_DATA_FILE_NAME: &str = "gaia-maker_global";
 #[derive(Clone, Default, Debug, Resource, serde::Serialize, serde::Deserialize)]
 pub struct GlobalData {}
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, Event)]
 pub enum ManagePlanet {
     New(StartParams),

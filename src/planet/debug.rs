@@ -1,6 +1,8 @@
+use std::collections::BTreeMap;
+use std::fmt::Write;
+use std::sync::{LazyLock, RwLock};
+
 use geom::Coords;
-use std::sync::LazyLock;
-use std::{collections::BTreeMap, sync::RwLock};
 
 use crate::planet::{Animal, Planet, Sim, Structure, KELVIN_CELSIUS};
 
@@ -83,6 +85,7 @@ fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
 
 pub trait PlanetDebug {
     fn delete_settlement(&mut self);
+    fn height_map_as_string(&self) -> String;
 }
 
 impl PlanetDebug for Planet {
@@ -92,5 +95,16 @@ impl PlanetDebug for Planet {
                 self.map[p].structure = None;
             }
         }
+    }
+
+    fn height_map_as_string(&self) -> String {
+        let mut s = String::new();
+        write!(s, "[").unwrap();
+        for (i, p) in self.map.iter_idx().enumerate() {
+            let separator = if i == 0 { "" } else { "," };
+            write!(s, "{}{:.1}", separator, self.map[p].height).unwrap();
+        }
+        write!(s, "]").unwrap();
+        s
     }
 }

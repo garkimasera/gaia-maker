@@ -528,6 +528,8 @@ pub struct StartParams {
     pub initial_conditions: Vec<InitialCondition>,
     pub height_table: Vec<(f32, f32)>,
     pub target_sea_level: Option<f32>,
+    #[serde(default)]
+    pub height_map: Vec<f32>,
 }
 
 #[serde_as]
@@ -811,6 +813,8 @@ pub struct StartPlanet {
     pub height_table: Vec<(f32, f32)>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub target_sea_level: Option<f32>,
+    #[serde(default)]
+    pub height_map: Vec<f32>,
 }
 
 #[derive(
