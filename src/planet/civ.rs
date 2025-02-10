@@ -55,7 +55,11 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let ratio = settlement.pop / cap.max(1e-10);
         let dn = growth_speed * ratio * (-ratio + 1.0);
 
-        let can_growth = !planet.map[p].tile_events.contains(TileEventKind::Fire);
+        let can_growth = !planet.map[p]
+            .tile_events
+            .list()
+            .iter()
+            .any(growth_blocked_by_tile_event);
         if dn < 0.0 || can_growth {
             settlement.pop += dn;
         }
@@ -179,5 +183,13 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
         }
 
         planet.civs.insert(animal_id, Civilization::default());
+    }
+}
+
+fn growth_blocked_by_tile_event(tile_event: &TileEvent) -> bool {
+    match tile_event {
+        TileEvent::Fire | TileEvent::BlackDust { .. } => true,
+        TileEvent::Plague { cured, .. } => !cured,
+        _ => false,
     }
 }
