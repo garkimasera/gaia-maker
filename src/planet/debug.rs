@@ -4,7 +4,7 @@ use std::sync::{LazyLock, RwLock};
 
 use geom::Coords;
 
-use crate::planet::{Animal, Planet, Sim, Structure, KELVIN_CELSIUS};
+use crate::planet::*;
 
 static POS_FOR_LOG: LazyLock<RwLock<Option<Coords>>> = LazyLock::new(RwLock::default);
 static TILE_LOGS: LazyLock<RwLock<BTreeMap<&'static str, String>>> = LazyLock::new(RwLock::default);
@@ -84,11 +84,28 @@ fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
 }
 
 pub trait PlanetDebug {
+    fn edit_biome(&mut self, p: Coords, biome: Biome);
+    fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params);
+    fn place_settlement(&mut self, p: Coords, settlement: Settlement);
     fn delete_settlement(&mut self);
     fn height_map_as_string(&self) -> String;
 }
 
 impl PlanetDebug for Planet {
+    fn edit_biome(&mut self, p: Coords, biome: Biome) {
+        self.map[p].biome = biome;
+    }
+
+    fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params) {
+        let h = &mut self.map[p].height;
+        *h = (*h + value).max(0.0);
+        super::water::update_sea_level(self, sim, params);
+    }
+
+    fn place_settlement(&mut self, p: Coords, settlement: Settlement) {
+        self.map[p].structure = Some(Structure::Settlement(settlement));
+    }
+
     fn delete_settlement(&mut self) {
         for p in self.map.iter_idx() {
             if matches!(self.map[p].structure, Some(Structure::Settlement(_))) {

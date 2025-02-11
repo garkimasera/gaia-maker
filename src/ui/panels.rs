@@ -247,6 +247,9 @@ fn sidebar(
             CursorMode::EditBiome(biome) => {
                 format!("biome editing: {}", biome.as_ref())
             }
+            CursorMode::ChangeHeight(value) => {
+                format!("change height: {}", value)
+            }
             CursorMode::PlaceSettlement(id, age) => {
                 format!("settlement: {} {:?}", id, age)
             }

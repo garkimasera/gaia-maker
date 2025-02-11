@@ -3,6 +3,7 @@ use geom::Coords;
 
 use crate::audio::AudioPlayer;
 use crate::draw::UpdateMap;
+use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
 use crate::screen::CursorMode;
 use crate::{GameState, GameSystemSet};
@@ -69,6 +70,10 @@ fn cursor_action(
             CursorMode::EditBiome(biome) => {
                 update_map.update();
                 planet.edit_biome(coords, biome);
+            }
+            CursorMode::ChangeHeight(value) => {
+                update_map.update();
+                planet.change_height(coords, value, &mut sim, &params);
             }
             CursorMode::PlaceSettlement(id, age) => {
                 update_map.update();

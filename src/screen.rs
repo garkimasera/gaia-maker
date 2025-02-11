@@ -25,6 +25,7 @@ pub enum CursorMode {
     TileEvent(TileEventKind),
     SpawnAnimal(AnimalId),
     EditBiome(Biome),
+    ChangeHeight(f32),
     PlaceSettlement(AnimalId, CivilizationAge),
 }
 

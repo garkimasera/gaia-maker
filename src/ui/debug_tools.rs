@@ -187,6 +187,14 @@ impl MapPanel {
                     CursorMode::PlaceSettlement(self.animal_id.unwrap(), self.settlement_age);
             }
         });
+        ui.horizontal(|ui| {
+            if ui.button("height +100").clicked() {
+                *cursor_mode = CursorMode::ChangeHeight(100.0);
+            }
+            if ui.button("height -100").clicked() {
+                *cursor_mode = CursorMode::ChangeHeight(-100.0);
+            }
+        });
 
         ui.separator();
 
