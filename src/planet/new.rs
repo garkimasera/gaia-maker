@@ -43,13 +43,13 @@ impl Planet {
 
         // Adjust water volume
         if let Some(target_sea_level) = start_params.target_sea_level {
-            let mut sim = Sim::new(&planet);
+            let sim = Sim::new(&planet);
             let target_sea_level = target_sea_level * start_params.difference_in_elevation;
             let max_water_volume = planet.water.water_volume;
             let water_volume = misc::bisection(
                 |water_volume| {
                     planet.water.water_volume = water_volume;
-                    sim_water(&mut planet, &mut sim, params);
+                    super::water::update_sea_level(&mut planet, &sim, params);
                     planet.water.sea_level - target_sea_level
                 },
                 0.0,

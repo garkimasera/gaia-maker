@@ -33,6 +33,12 @@ impl Water {
 }
 
 pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    update_sea_level(planet, sim, params);
+    advance_rainfall_calc(planet, sim, params);
+    snow_calc(planet, sim, params);
+}
+
+pub fn update_sea_level(planet: &mut Planet, sim: &Sim, params: &Params) {
     planet.water.sea_level = bisection(|x| target_function(planet, sim, x), 0.0, 10000.0, 10, 10.0);
 
     for p in planet.map.iter_idx() {
@@ -46,9 +52,6 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             tile.biome = Biome::Rock;
         }
     }
-
-    advance_rainfall_calc(planet, sim, params);
-    snow_calc(planet, sim, params);
 }
 
 fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
