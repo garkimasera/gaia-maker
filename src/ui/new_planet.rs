@@ -75,7 +75,7 @@ pub fn new_planet(
                     ui.vertical(|ui| {
                         ui.set_min_height(200.0);
                         for planet in &params.start_planets {
-                            if planet.id == "tutorial" {
+                            if planet.id == crate::tutorial::TUTORIAL_PLANET {
                                 continue;
                             }
                             ui.selectable_value(

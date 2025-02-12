@@ -7,7 +7,7 @@ use bytes::BufMut;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::{conf::Conf, planet::Planet};
+use crate::{conf::Conf, planet::Planet, tutorial::TutorialState};
 
 pub const SAVE_FILE_EXTENSION: &str = "planet";
 
@@ -122,6 +122,8 @@ pub struct SaveFile {
 pub struct SaveFileMetadata {
     #[serde(default)]
     pub debug_mode_enabled: bool,
+    #[serde(default)]
+    pub tutorial_state: Option<TutorialState>,
 }
 
 impl SaveFile {

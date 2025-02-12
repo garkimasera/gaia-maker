@@ -5,7 +5,8 @@ use crate::conf::Conf;
 use crate::draw::UpdateMap;
 use crate::saveload::SavedTime;
 use crate::screen::{Centering, HoverTile};
-use crate::ui::WindowsOpenState;
+use crate::tutorial::{TutorialState, TUTORIAL_PLANET};
+use crate::ui::{UiWindowsSystemSet, WindowsOpenState};
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 
 pub use crate::saveload::SaveState;
@@ -66,7 +67,13 @@ impl Plugin for SimPlugin {
                 FixedUpdate,
                 (update, start_event).run_if(in_state(GameState::Running)),
             )
-            .add_systems(Update, manage_planet.before(GameSystemSet::Draw));
+            .add_systems(Update, manage_planet.before(GameSystemSet::Draw))
+            .add_systems(
+                Update,
+                crate::tutorial::update_tutorial
+                    .run_if(in_state(GameState::Running))
+                    .before(UiWindowsSystemSet),
+            );
     }
 }
 
@@ -217,6 +224,10 @@ fn manage_planet(
                 .dirs
                 .push_front((SavedTime::now(), sub_dir_name.clone()));
             save_state.change_current(&sub_dir_name, true);
+
+            if planet.basics.origin == TUTORIAL_PLANET {
+                save_state.save_file_metadata.tutorial_state = Some(TutorialState::default());
+            }
 
             if let Err(e) = crate::saveload::save_to(&planet, &mut save_state, true) {
                 log::warn!("cannot save: {:?}", e);

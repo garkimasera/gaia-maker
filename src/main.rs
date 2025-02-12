@@ -23,6 +23,7 @@ mod screen;
 mod sim;
 mod text;
 mod title_screen;
+mod tutorial;
 mod ui;
 
 use bevy::{

@@ -11,6 +11,7 @@ mod preferences;
 mod saveload;
 mod space_buildings;
 mod stat;
+mod tutorial;
 
 use bevy::prelude::*;
 use bevy_egui::{
@@ -107,6 +108,7 @@ impl Plugin for UiPlugin {
                     dialog::dialogs,
                     help::help_window,
                     saveload::load_window,
+                    tutorial::tutorial_popup,
                     error_popup::error_popup,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,

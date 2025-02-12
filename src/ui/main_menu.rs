@@ -6,6 +6,7 @@ use crate::conf::{Conf, ConfChange};
 use crate::planet::Params;
 use crate::sim::{ManagePlanet, ManagePlanetError, SaveState};
 use crate::text_assets::Lang;
+use crate::tutorial::TUTORIAL_PLANET;
 use strum::IntoEnumIterator;
 
 use super::new_planet::NewPlanetState;
@@ -76,7 +77,7 @@ pub fn main_menu(
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
                         }
-                        if ui.button(t!("tutorial")).clicked() {
+                        if ui.button(t!(TUTORIAL_PLANET)).clicked() {
                             state.mode = MainMenuMode::Tutorial;
                         }
                         if ui.button(t!("load")).clicked() {
@@ -110,8 +111,8 @@ pub fn main_menu(
                 }
             } else {
                 let mut start_params =
-                    crate::planet::start_planet_to_start_params("tutorial", &params);
-                start_params.basics.name = t!("tutorial");
+                    crate::planet::start_planet_to_start_params(TUTORIAL_PLANET, &params);
+                start_params.basics.name = t!(TUTORIAL_PLANET);
                 ew_manage_planet.send(ManagePlanet::New(start_params));
             }
         }
