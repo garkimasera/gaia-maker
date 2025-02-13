@@ -40,6 +40,9 @@ pub enum ManagePlanet {
     },
 }
 
+#[derive(Clone, Default, Debug, Event)]
+pub struct SwitchPlanet;
+
 #[derive(Clone, Debug, Event)]
 pub struct StartEvent(pub PlanetEvent);
 
@@ -52,6 +55,7 @@ impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
+            .add_event::<SwitchPlanet>()
             .add_event::<StartEvent>()
             .init_resource::<SaveState>()
             .add_systems(
@@ -121,7 +125,8 @@ fn update(
     mut sim: ResMut<Sim>,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
-    speed: Res<GameSpeed>,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
+    mut speed: ResMut<GameSpeed>,
     hover_tile: Query<&HoverTile>,
     wos: Res<WindowsOpenState>,
     conf: Res<Conf>,
@@ -130,6 +135,10 @@ fn update(
 ) {
     if wos.save || wos.load {
         return;
+    }
+
+    if er_switch_planet.read().fold(false, |_, _| true) {
+        *speed = GameSpeed::Paused;
     }
 
     *count_frame += 1;
@@ -195,6 +204,7 @@ fn manage_planet(
     mut command: Commands,
     mut er_manage_planet: EventReader<ManagePlanet>,
     mut ew_manage_planet_error: EventWriter<ManagePlanetError>,
+    mut ew_switch_planet: EventWriter<SwitchPlanet>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
@@ -313,6 +323,7 @@ fn manage_planet(
             command.insert_resource(new_planet);
         }
 
+        ew_switch_planet.send_default();
         next_game_state.set(GameState::Running);
     }
 }

@@ -11,6 +11,7 @@ use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::{Centering, InScreenTileRange};
+use crate::sim::SwitchPlanet;
 
 pub const H_LEGEND_IMG: u32 = 8;
 
@@ -39,6 +40,7 @@ pub fn map_window(
     planet: Res<Planet>,
     params: Res<Params>,
     color_materials: Res<ColorMaterials>,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
     mut screen: (
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
@@ -76,7 +78,8 @@ pub fn map_window(
         map_tex_handle.as_mut().unwrap()
     };
 
-    if *image_update_counter >= 60 || *map_layer != *before_map_layer || need_update.0 {
+    let switched = er_switch_planet.read().fold(false, |_, _| true);
+    if *image_update_counter >= 60 || *map_layer != *before_map_layer || need_update.0 || switched {
         let color_image = map_img(&planet, &params, *map_layer, &color_materials, m);
         map_tex_handle.set(color_image, egui::TextureOptions::NEAREST);
         *before_map_layer = *map_layer;
