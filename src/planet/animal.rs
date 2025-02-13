@@ -5,6 +5,17 @@ use rand::{seq::SliceRandom, Rng};
 
 use super::*;
 
+impl Tile {
+    pub fn largest_animal(&self) -> Option<&Animal> {
+        match self.animal {
+            [_, _, Some(ref animal)] => Some(animal),
+            [_, Some(ref animal), None] => Some(animal),
+            [Some(ref animal), None, None] => Some(animal),
+            _ => None,
+        }
+    }
+}
+
 pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     if planet.cycles % params.sim.animal_sim_interval as u64 != 0 {
         return;

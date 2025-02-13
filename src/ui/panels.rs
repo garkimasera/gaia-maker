@@ -350,11 +350,14 @@ fn sidebar(
 
     ui.label(t!(tile.biome));
 
-    if let Some(structure) = &tile.structure {
-        ui.label(crate::info::structure_info(structure));
+    let s = if let Some(structure) = &tile.structure {
+        crate::info::structure_info(structure)
+    } else if let Some(animal) = tile.largest_animal() {
+        t!("animal", animal.id)
     } else {
-        ui.label("");
-    }
+        "".into()
+    };
+    ui.label(s);
 
     ui.separator();
 

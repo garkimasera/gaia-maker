@@ -310,11 +310,8 @@ fn spawn_animal_textures(
         }
 
         // Select the largest animal at this tile
-        let animal = match planet.map[p].animal {
-            [_, _, Some(ref animal)] => animal,
-            [_, Some(ref animal), None] => animal,
-            [Some(ref animal), None, None] => animal,
-            _ => continue,
+        let Some(animal) = planet.map[p].largest_animal() else {
+            continue;
         };
 
         let index = counter.slow;
