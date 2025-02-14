@@ -1,4 +1,4 @@
-use super::{label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{misc::label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};

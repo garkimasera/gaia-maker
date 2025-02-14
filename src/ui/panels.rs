@@ -12,7 +12,7 @@ use crate::{
     GameSpeed, GameState,
 };
 
-use super::{help::HelpItem, EguiTextures, LabelWithIcon, WindowsOpenState};
+use super::{help::HelpItem, misc::LabelWithIcon, EguiTextures, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,

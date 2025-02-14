@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::{label_with_icon, EguiTextures, WindowsOpenState};
+use super::{misc::label_with_icon, EguiTextures, WindowsOpenState};
 use crate::planet::{
     BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
 };
