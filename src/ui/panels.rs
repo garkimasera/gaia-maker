@@ -12,7 +12,7 @@ use crate::{
     GameSpeed, GameState,
 };
 
-use super::{help::HelpItem, misc::LabelWithIcon, EguiTextures, WindowsOpenState};
+use super::{help::HelpItem, misc::LabelWithIcon, UiTextures, WindowsOpenState};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -26,7 +26,7 @@ pub fn panels(
         EventWriter<ManagePlanet>,
         ResMut<NextState<GameState>>,
     ),
-    (planet, textures, params, conf): (Res<Planet>, Res<EguiTextures>, Res<Params>, Res<Conf>),
+    (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
@@ -89,7 +89,7 @@ fn toolbar(
         &mut EventWriter<ManagePlanet>,
         &mut NextState<GameState>,
     ),
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
     let button = |ui: &mut egui::Ui, path: &str, s: &str| {
@@ -179,38 +179,20 @@ fn sidebar(
     planet: &Planet,
     params: &Params,
     hover_tile: &HoverTile,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     conf: &Conf,
     last_hover_tile: &mut Option<Coords>,
 ) {
-    // Energy
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-power");
-        ui.image(texture).on_hover_text(t!("power"));
-        let used_energy = crate::text::format_float_1000(planet.res.used_power, 1);
-        let energy = crate::text::format_float_1000(planet.res.power, 1);
-        ui.label(format!("{} / {} TW", used_energy, energy));
-    });
-    // Material
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-material");
-        ui.image(texture).on_hover_text(t!("material"));
-        ui.label(WithUnitDisplay::Material(planet.res.material).to_string());
-        ui.label(
-            egui::RichText::new(format!(
-                "(+{})",
-                WithUnitDisplay::Material(planet.res.diff_material)
-            ))
-            .small(),
-        );
-    });
-    // Gene point
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-gene");
-        ui.image(texture).on_hover_text(t!("gene-points"));
-        ui.label(WithUnitDisplay::GenePoint(planet.res.gene_point).to_string());
-        ui.label(egui::RichText::new(format!("({:+.2})", planet.res.diff_gene_point)).small());
-    });
+    // Resource indicators
+    super::misc::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
+    super::misc::material_indicator(ui, textures, planet.res.material, planet.res.diff_material);
+    super::misc::gene_point_indicator(
+        ui,
+        textures,
+        planet.res.gene_point,
+        planet.res.diff_gene_point,
+    );
+
     ui.separator();
 
     // Information about selected tool
@@ -367,7 +349,7 @@ fn sidebar(
 fn build_menu(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
     if ui.button(t!("demolition")).clicked() {
@@ -398,7 +380,7 @@ fn build_menu(
 fn action_menu(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::{misc::label_with_icon, EguiTextures, WindowsOpenState};
+use super::{misc::label_with_icon, UiTextures, WindowsOpenState};
 use crate::planet::{
     BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
 };
@@ -99,7 +99,7 @@ pub fn help_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     params: Res<Params>,
     mut current_item: Local<HelpItem>,
 ) {
@@ -143,7 +143,7 @@ pub fn help_window(
 }
 
 impl HelpItem {
-    pub fn ui(&self, ui: &mut egui::Ui, textures: &EguiTextures, params: &Params) {
+    pub fn ui(&self, ui: &mut egui::Ui, textures: &UiTextures, params: &Params) {
         if let Some(building_attrs) = match self {
             HelpItem::Structures(kind) => Some(&params.structures[kind].building),
             HelpItem::SpaceBuildings(kind) => Some(&params.space_buildings[kind]),
@@ -173,7 +173,7 @@ impl HelpItem {
     }
 }
 
-fn ui_building_attr(ui: &mut egui::Ui, textures: &EguiTextures, attrs: &BuildingAttrs) {
+fn ui_building_attr(ui: &mut egui::Ui, textures: &UiTextures, attrs: &BuildingAttrs) {
     // Cost
     if attrs.cost > 0.0 {
         ui.label(egui::RichText::new(t!("cost")).strong());

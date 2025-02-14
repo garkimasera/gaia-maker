@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use super::EguiTextures;
+use super::UiTextures;
 use crate::tutorial::*;
 use crate::{screen::OccupiedScreenSpace, sim::SaveState};
 
@@ -11,7 +11,7 @@ pub fn tutorial_popup(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut save_state: ResMut<SaveState>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
 ) {
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
         return;
@@ -49,7 +49,7 @@ pub fn tutorial_popup(
 }
 
 impl TutorialStep {
-    fn ui(&self) -> fn(&mut egui::Ui, &EguiTextures) {
+    fn ui(&self) -> fn(&mut egui::Ui, &UiTextures) {
         match *self {
             Self::Start(0) => |ui, _| {
                 ui.label(t!("tutorial", "start-0"));
@@ -64,6 +64,13 @@ impl TutorialStep {
                 ui.vertical_centered(|ui| {
                     ui.image(textures.get("ui/icon-map"));
                 });
+            },
+            Self::Power(0) => |ui, textures| {
+                ui.label(t!("tutorial", "power-0-1"));
+                super::misc::power_indicator(ui, textures, 30.0, 2.0);
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "power-0-2"));
+                super::misc::material_indicator(ui, textures, 100.0, 20.0);
             },
             _ => unreachable!(),
         }

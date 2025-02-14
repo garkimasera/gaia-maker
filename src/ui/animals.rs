@@ -1,4 +1,4 @@
-use super::{misc::label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{misc::label_with_icon, OccupiedScreenSpace, UiTextures, WindowsOpenState};
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
@@ -17,7 +17,7 @@ pub fn animals_window(
     mut cursor_mode: ResMut<CursorMode>,
     (mut planet, mut sim): (ResMut<Planet>, ResMut<Sim>),
     params: Res<Params>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
 ) {
     if !wos.animals {
@@ -59,7 +59,7 @@ fn contents(
     planet: &mut Planet,
     sim: &mut Sim,
     params: &Params,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     cursor_mode: &mut CursorMode,
 ) {
     ui.horizontal(|ui| {

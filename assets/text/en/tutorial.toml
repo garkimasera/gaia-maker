@@ -2,3 +2,5 @@
 start-0 = "After a long journey, you have arrived at a planet suitable for terraforming. Become the overseer of this planet and transform it into an environment suitable for life through terraforming."
 start-1-1 = "To move your viewpoint on the planet, use the WASD or arrow keys."
 start-1-2 = "To see the whole planet, click on the icon below from the toolbar to display the map."
+power-0-1 = "In order to operate facilities used for terraforming, sufficient power is required. Power consumption and production are shown in the sidebar below."
+power-0-2 = "Construction of facilities requires material. Material stored and production are shown in the sidebar below."

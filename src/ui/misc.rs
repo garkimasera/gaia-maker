@@ -1,10 +1,12 @@
 use bevy_egui::egui::{self, epaint, load::SizedTexture};
 
-use super::EguiTextures;
+use crate::text::WithUnitDisplay;
+
+use super::UiTextures;
 
 pub fn label_with_icon(
     ui: &mut egui::Ui,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     icon: &str,
     s: impl Into<egui::WidgetText>,
 ) {
@@ -73,4 +75,44 @@ impl egui::Widget for LabelWithIcon {
         }
         response
     }
+}
+
+pub fn power_indicator(ui: &mut egui::Ui, textures: &UiTextures, power: f32, used_power: f32) {
+    ui.horizontal(|ui| {
+        let texture = textures.get("ui/icon-power");
+        ui.image(texture).on_hover_text(t!("power"));
+        let used_power = crate::text::format_float_1000(used_power, 1);
+        let power = crate::text::format_float_1000(power, 1);
+        ui.label(format!("{} / {} TW", used_power, power));
+    });
+}
+
+pub fn material_indicator(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    material: f32,
+    diff_material: f32,
+) {
+    ui.horizontal(|ui| {
+        let texture = textures.get("ui/icon-material");
+        ui.image(texture).on_hover_text(t!("material"));
+        ui.label(WithUnitDisplay::Material(material).to_string());
+        ui.label(
+            egui::RichText::new(format!("(+{})", WithUnitDisplay::Material(diff_material))).small(),
+        );
+    });
+}
+
+pub fn gene_point_indicator(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    gene_point: f32,
+    diff_gene_point: f32,
+) {
+    ui.horizontal(|ui| {
+        let texture = textures.get("ui/icon-gene");
+        ui.image(texture).on_hover_text(t!("gene-points"));
+        ui.label(WithUnitDisplay::GenePoint(gene_point).to_string());
+        ui.label(egui::RichText::new(format!("({:+.2})", diff_gene_point)).small());
+    });
 }

@@ -10,7 +10,7 @@ use crate::tutorial::TUTORIAL_PLANET;
 use strum::IntoEnumIterator;
 
 use super::new_planet::NewPlanetState;
-use super::EguiTextures;
+use super::UiTextures;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum MainMenuMode {
@@ -54,7 +54,7 @@ pub fn main_menu(
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {

@@ -6,7 +6,7 @@ use bevy_egui::{
 use compact_str::format_compact;
 use strum::IntoEnumIterator;
 
-use super::{help::HelpItem, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{help::HelpItem, OccupiedScreenSpace, UiTextures, WindowsOpenState};
 use crate::planet::*;
 
 const BUILDING_BACKGROUND_SIZE: (u32, u32) = (336, 48);
@@ -17,7 +17,7 @@ pub fn space_buildings_window(
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
     mut sim: ResMut<Sim>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     params: Res<Params>,
 ) {
     if !wos.space_building {
@@ -56,7 +56,7 @@ pub fn buildng_row(
     kind: SpaceBuildingKind,
     planet: &mut Planet,
     sim: &mut Sim,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
     attrs: &BuildingAttrs,
 ) {
@@ -131,7 +131,7 @@ struct BuildingImage {
 }
 
 impl BuildingImage {
-    fn new(kind: SpaceBuildingKind, n: u32, textures: &EguiTextures) -> Self {
+    fn new(kind: SpaceBuildingKind, n: u32, textures: &UiTextures) -> Self {
         let (background_star, left_padding) = match kind {
             SpaceBuildingKind::DysonSwarmUnit => {
                 let t = textures.get("ui/background-building-star");

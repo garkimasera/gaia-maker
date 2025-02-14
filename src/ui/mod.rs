@@ -61,9 +61,9 @@ pub enum Dialog {
 }
 
 #[derive(Clone, Default, Resource)]
-pub struct EguiTextures(HashMap<String, SizedTexture>);
+pub struct UiTextures(HashMap<String, SizedTexture>);
 
-impl EguiTextures {
+impl UiTextures {
     fn get(&self, path: impl AsRef<str>) -> SizedTexture {
         *self
             .0
@@ -224,7 +224,7 @@ fn load_textures(
         texture_handles.push(texture_handle);
     }
 
-    commands.insert_resource(EguiTextures(egui_textures));
+    commands.insert_resource(UiTextures(egui_textures));
 }
 
 fn bevy_image_to_egui_texture(

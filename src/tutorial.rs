@@ -14,6 +14,7 @@ pub struct TutorialState {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, strum::EnumDiscriminants)]
 pub enum TutorialStep {
     Start(usize),
+    Power(usize),
     Fertilize,
     GenOxygen(usize),
 }
@@ -57,7 +58,13 @@ impl TutorialState {
 }
 
 impl TutorialStep {
-    const ORDER: &[Self] = &[Self::Start(0), Self::Start(1), Self::Fertilize];
+    const ORDER: &[Self] = &[
+        Self::Start(0),
+        Self::Start(1),
+        Self::Power(0),
+        Self::Power(1),
+        Self::Fertilize,
+    ];
 
     fn next(&self) -> Option<Self> {
         if let Some((i, _)) = Self::ORDER

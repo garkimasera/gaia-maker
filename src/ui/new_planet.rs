@@ -9,7 +9,7 @@ use crate::{
 
 use super::{
     main_menu::{MainMenuMode, MainMenuState},
-    EguiTextures,
+    UiTextures,
 };
 
 #[derive(Clone, Debug)]
@@ -48,7 +48,7 @@ pub fn new_planet(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: &Params,
     state: &mut MainMenuState,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     window: &mut bevy::window::Window,
     random_name_list_map: &crate::text_assets::RandomNameListMap,
     save_state: &SaveState,
@@ -179,7 +179,7 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
     ew_manage_planet.send(ManagePlanet::New(start_params));
 }
 
-fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiTextures) {
+fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &UiTextures) {
     use crate::planet::PlanetHabitability;
 
     let start_planet = params
