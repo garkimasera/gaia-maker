@@ -96,7 +96,7 @@ pub fn buildng_row(
             }
         }
 
-        if attrs.energy < 0.0 {
+        if attrs.power < 0.0 {
             if n > 0 {
                 if ui.button("-1").clicked() {
                     planet.demolish_space_building(kind, 1, sim, params);

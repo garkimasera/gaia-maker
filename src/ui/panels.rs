@@ -185,10 +185,10 @@ fn sidebar(
 ) {
     // Energy
     ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-energy");
-        ui.image(texture).on_hover_text(t!("energy"));
-        let used_energy = crate::text::format_float_1000(planet.res.used_energy, 1);
-        let energy = crate::text::format_float_1000(planet.res.energy, 1);
+        let texture = textures.get("ui/icon-power");
+        ui.image(texture).on_hover_text(t!("power"));
+        let used_energy = crate::text::format_float_1000(planet.res.used_power, 1);
+        let energy = crate::text::format_float_1000(planet.res.power, 1);
         ui.label(format!("{} / {} TW", used_energy, energy));
     });
     // Material
@@ -258,9 +258,9 @@ fn sidebar(
         ui.horizontal(|ui| {
             for (lack, cost) in &cost_list {
                 let (texture, s) = match cost {
-                    Cost::Energy(value, _) => (
-                        textures.get("ui/icon-energy"),
-                        WithUnitDisplay::Energy(*value).to_string(),
+                    Cost::Power(value, _) => (
+                        textures.get("ui/icon-power"),
+                        WithUnitDisplay::Power(*value).to_string(),
                     ),
                     Cost::Material(value) => (
                         textures.get("ui/icon-material"),

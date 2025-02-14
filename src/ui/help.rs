@@ -185,23 +185,23 @@ fn ui_building_attr(ui: &mut egui::Ui, textures: &EguiTextures, attrs: &Building
         );
     }
     // Upkeep
-    if attrs.energy < 0.0 {
+    if attrs.power < 0.0 {
         ui.label(egui::RichText::new(t!("upkeep")).strong());
         label_with_icon(
             ui,
             textures,
-            "ui/icon-energy",
-            WithUnitDisplay::Energy(-attrs.energy).to_string(),
+            "ui/icon-power",
+            WithUnitDisplay::Power(-attrs.power).to_string(),
         );
     }
     // Produce
-    if attrs.energy > 0.0 {
+    if attrs.power > 0.0 {
         ui.label(egui::RichText::new(t!("produce")).strong());
         label_with_icon(
             ui,
             textures,
-            "ui/icon-energy",
-            WithUnitDisplay::Energy(attrs.energy).to_string(),
+            "ui/icon-power",
+            WithUnitDisplay::Power(attrs.power).to_string(),
         );
     } else if let Some(BuildingEffect::ProduceMaterial { mass }) = &attrs.effect {
         ui.label(egui::RichText::new(t!("produce")).strong());

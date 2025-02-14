@@ -6,8 +6,8 @@ const GENE_POINT_MAX: f32 = 999.0;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Resources {
-    pub energy: f32,
-    pub used_energy: f32,
+    pub power: f32,
+    pub used_power: f32,
     pub material: f32,
     pub diff_material: f32,
     pub gene_point: f32,
@@ -22,13 +22,13 @@ impl Resources {
         }
     }
 
-    pub fn surplus_energy(&self) -> f32 {
-        self.energy - self.used_energy
+    pub fn surplus_power(&self) -> f32 {
+        self.power - self.used_power
     }
 
     pub fn reset_before_update(&mut self) {
-        self.energy = 0.0;
-        self.used_energy = 0.0;
+        self.power = 0.0;
+        self.used_power = 0.0;
         self.diff_material = 0.0;
         self.diff_gene_point = 0.0;
     }
@@ -45,7 +45,7 @@ impl Resources {
 
     pub fn consume(&mut self, cost: Cost) {
         match cost {
-            Cost::Energy(_, _) => todo!(),
+            Cost::Power(_, _) => todo!(),
             Cost::Material(value) => {
                 assert!(self.material >= value);
                 self.material -= value;
@@ -59,7 +59,7 @@ impl Resources {
 
     pub fn enough_to_consume(&self, cost: Cost) -> bool {
         match cost {
-            Cost::Energy(value, _) => self.surplus_energy() > value,
+            Cost::Power(value, _) => self.surplus_power() > value,
             Cost::Material(value) => self.material >= value,
             Cost::GenePoint(value) => self.gene_point >= value,
         }

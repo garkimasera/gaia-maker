@@ -39,10 +39,10 @@ pub fn update(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         } else {
             None
         };
-        if attrs.energy > 0.0 {
-            planet.res.energy += attrs.energy * n as f32;
+        if attrs.power > 0.0 {
+            planet.res.power += attrs.power * n as f32;
         } else {
-            planet.res.used_energy += -attrs.energy * n as f32;
+            planet.res.used_power += -attrs.power * n as f32;
         }
 
         match &attrs.effect {

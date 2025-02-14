@@ -4,7 +4,7 @@ use crate::planet::{Msg, MsgKind};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum WithUnitDisplay {
-    Energy(f32),
+    Power(f32),
     Material(f32),
     GenePoint(f32),
 }
@@ -12,7 +12,7 @@ pub enum WithUnitDisplay {
 impl std::fmt::Display for WithUnitDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match *self {
-            WithUnitDisplay::Energy(value) => {
+            WithUnitDisplay::Power(value) => {
                 write!(f, "{}TW", value)
             }
             WithUnitDisplay::Material(value) => {

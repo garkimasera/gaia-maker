@@ -113,10 +113,10 @@ pub fn cursor_mode_lack_and_cost(
     match cursor_mode {
         CursorMode::Build(kind) => {
             if let Some(attr) = params.structures.get(kind).map(|a| &a.building) {
-                if attr.energy < 0.0 {
+                if attr.power < 0.0 {
                     cost_list.push((
-                        -attr.energy > planet.res.surplus_energy(),
-                        Cost::Energy(-attr.energy, 0),
+                        -attr.power > planet.res.surplus_power(),
+                        Cost::Power(-attr.power, 0),
                     ));
                 }
                 if attr.cost > 0.0 {

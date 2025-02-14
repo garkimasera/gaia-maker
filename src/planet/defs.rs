@@ -354,7 +354,7 @@ pub enum GasKind {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BuildingAttrs {
     #[serde(default)]
-    pub energy: f32,
+    pub power: f32,
     #[serde(default)]
     pub cost: f32,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
@@ -761,8 +761,8 @@ pub struct PlagueParams {
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Cost {
-    /// Needed surplus energy and cycles
-    Energy(f32, u32),
+    /// Needed surplus power and cycles
+    Power(f32, u32),
     Material(f32),
     GenePoint(f32),
 }

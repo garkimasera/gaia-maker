@@ -2,7 +2,7 @@ use super::*;
 
 impl Planet {
     pub fn buildable(&self, building: &BuildingAttrs) -> bool {
-        if self.res.surplus_energy() < -building.energy {
+        if self.res.surplus_power() < -building.power {
             return false;
         }
         if building.cost > self.res.material {
