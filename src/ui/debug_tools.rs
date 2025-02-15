@@ -42,6 +42,8 @@ pub fn debug_tools_window(
     if !save_state.save_file_metadata.debug_mode_enabled {
         egui::Modal::new("use-debug-mode".into()).show(egui_ctxs.ctx_mut(), |ui| {
             ui.label("Enable Debug Mode?");
+            ui.strong("Debug mode flag is saved in the save data.");
+            ui.strong("Use of debug mode is at your own risk.");
             if ui.button("Yes").clicked() {
                 save_state.save_file_metadata.debug_mode_enabled = true;
             }
