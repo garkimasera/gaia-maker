@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumDiscriminants};
 
-use crate::{planet::Planet, sim::SaveState};
+use crate::{planet::*, sim::SaveState};
 
 pub const TUTORIAL_PLANET: &str = "tutorial";
 
@@ -24,8 +24,8 @@ pub enum TutorialStep {
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum ChecklistItem {
-    PowerChecklist0,
     PowerChecklist1,
+    PowerChecklist2,
 }
 
 impl Default for TutorialState {
@@ -138,18 +138,26 @@ impl TutorialStep {
     }
 }
 
-fn check(_planet: &Planet, _item: ChecklistItem) -> bool {
-    false
+fn check(planet: &Planet, item: ChecklistItem) -> bool {
+    match item {
+        ChecklistItem::PowerChecklist1 => {
+            planet.space_building(SpaceBuildingKind::FusionReactor).n >= 4
+        }
+        ChecklistItem::PowerChecklist2 => {
+            planet
+                .space_building(SpaceBuildingKind::AsteroidMiningStation)
+                .n
+                >= 3
+        }
+    }
 }
 
-fn checklist(d: TutorialStepDiscriminants) -> Vec<ChecklistItem> {
+fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
     match d {
-        TutorialStepDiscriminants::Power => {
-            vec![
-                ChecklistItem::PowerChecklist0,
-                ChecklistItem::PowerChecklist1,
-            ]
-        }
-        _ => Vec::new(),
+        TutorialStepDiscriminants::Power => &[
+            ChecklistItem::PowerChecklist1,
+            ChecklistItem::PowerChecklist2,
+        ],
+        _ => &[],
     }
 }

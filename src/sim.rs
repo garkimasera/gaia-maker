@@ -220,7 +220,7 @@ fn manage_planet(
     };
     let new_planet = match e {
         ManagePlanet::New(start_params) => {
-            let planet = Planet::new(start_params, &params);
+            let mut planet = Planet::new(start_params, &params);
             let sub_dir_name = sanitize_filename::sanitize_with_options(
                 &start_params.basics.name,
                 sanitize_filename::Options {
@@ -237,6 +237,7 @@ fn manage_planet(
 
             if planet.basics.origin == TUTORIAL_PLANET {
                 save_state.save_file_metadata.tutorial_state = Some(TutorialState::default());
+                planet.res.material = 1.0e+5; // Additional material for tutorial
             }
 
             if let Err(e) = crate::saveload::save_to(&planet, &mut save_state, true) {
