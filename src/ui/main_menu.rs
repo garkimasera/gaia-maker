@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
 use crate::conf::{Conf, ConfChange};
-use crate::manage_planet::{ManagePlanet, ManagePlanetError, SaveState};
+use crate::manage_planet::{GlobalData, ManagePlanet, ManagePlanetError, SaveState};
 use crate::planet::Params;
 use crate::text_assets::Lang;
 use crate::tutorial::TUTORIAL_PLANET;
@@ -54,7 +54,7 @@ pub fn main_menu(
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
-    textures: Res<UiTextures>,
+    (textures, global_data): (Res<UiTextures>, Res<GlobalData>),
     random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
@@ -74,6 +74,7 @@ pub fn main_menu(
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                        resume_ui(ui, &global_data, &mut ew_manage_planet);
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
                         }
@@ -134,7 +135,7 @@ pub fn main_menu(
                 egui_ctxs.ctx_mut(),
                 &mut ew_manage_planet,
                 &mut open_state,
-                &save_state.current,
+                &save_state.current_save_sub_dir,
             );
             if !open_state {
                 state.mode = MainMenuMode::Menu;
@@ -156,6 +157,22 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+        }
+    }
+}
+
+fn resume_ui(
+    ui: &mut egui::Ui,
+    global_data: &GlobalData,
+    ew_manage_planet: &mut EventWriter<ManagePlanet>,
+) {
+    if let Some((save_sub_dir, auto, n)) = &global_data.latest_save_dir_file {
+        if ui.button(t!("resume")).clicked() {
+            ew_manage_planet.send(ManagePlanet::Load {
+                sub_dir_name: save_sub_dir.clone(),
+                auto: *auto,
+                n: *n,
+            });
         }
     }
 }

@@ -58,7 +58,7 @@ pub fn load_window(
         egui_ctxs.ctx_mut(),
         &mut ew_manage_planet,
         &mut open_state,
-        &save_state.current,
+        &save_state.current_save_sub_dir,
     );
 
     if open_state {

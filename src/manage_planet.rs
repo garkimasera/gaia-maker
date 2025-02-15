@@ -14,10 +14,12 @@ pub use crate::saveload::SaveState;
 #[derive(Clone, Copy, Debug)]
 pub struct ManagePlanetPlugin;
 
-const GLOBAL_DATA_FILE_NAME: &str = "gaia-maker_global";
+const GLOBAL_DATA_FILE_NAME: &str = "global.json";
 
 #[derive(Clone, Default, Debug, Resource, serde::Serialize, serde::Deserialize)]
-pub struct GlobalData {}
+pub struct GlobalData {
+    pub latest_save_dir_file: Option<(String, bool, u32)>,
+}
 
 #[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, Event)]
@@ -43,6 +45,11 @@ pub enum ManagePlanet {
 #[derive(Clone, Default, Debug, Event)]
 pub struct SwitchPlanet;
 
+#[derive(Clone, Default, Debug, Event)]
+pub struct GlobalDataChanged {
+    pub app_exit_after_saved: bool,
+}
+
 #[derive(Clone, Debug, Event)]
 pub struct StartEvent(pub PlanetEvent);
 
@@ -57,6 +64,7 @@ impl Plugin for ManagePlanetPlugin {
             .add_event::<ManagePlanetError>()
             .add_event::<SwitchPlanet>()
             .add_event::<StartEvent>()
+            .add_event::<GlobalDataChanged>()
             .init_resource::<SaveState>()
             .add_systems(
                 OnExit(GameState::AssetLoading),
@@ -72,6 +80,7 @@ impl Plugin for ManagePlanetPlugin {
                 (update, start_event).run_if(in_state(GameState::Running)),
             )
             .add_systems(Update, manage_planet.before(GameSystemSet::Draw))
+            .add_systems(Update, save_global_data_on_changed)
             .add_systems(
                 Update,
                 crate::tutorial::update_tutorial
@@ -83,13 +92,13 @@ impl Plugin for ManagePlanetPlugin {
 
 fn load_global_data(mut command: Commands) {
     let global_data = match crate::platform::read_data_file(GLOBAL_DATA_FILE_NAME)
-        .and_then(|data| toml::from_str(&data).context("deserialize global data"))
+        .and_then(|data| serde_json::from_str(&data).context("deserialize global data"))
     {
         Ok(global_data) => global_data,
         Err(e) => {
             log::warn!("cannot load global data: {:?}", e);
             let global_data = GlobalData::default();
-            let s = toml::to_string(&global_data).unwrap();
+            let s = serde_json::to_string(&global_data).unwrap();
             if let Err(e) = crate::platform::write_data_file(GLOBAL_DATA_FILE_NAME, &s) {
                 log::error!("cannot write global data: {:?}", e);
             }
@@ -97,6 +106,32 @@ fn load_global_data(mut command: Commands) {
         }
     };
     command.insert_resource(global_data);
+}
+
+fn save_global_data_on_changed(
+    mut er_global_data_changed: EventReader<GlobalDataChanged>,
+    mut app_exit_events: EventWriter<AppExit>,
+    global_data: Option<Res<GlobalData>>,
+) {
+    let Some(global_data) = global_data else {
+        return;
+    };
+    let mut changed = false;
+    let mut exit = false;
+    for c in er_global_data_changed.read() {
+        changed = true;
+        exit = c.app_exit_after_saved;
+    }
+    if changed {
+        let s = serde_json::to_string(&*global_data).unwrap();
+        if let Err(e) = crate::platform::write_data_file(GLOBAL_DATA_FILE_NAME, &s) {
+            log::error!("cannot write global data: {:?}", e);
+            return;
+        }
+        if exit {
+            app_exit_events.send(AppExit::Success);
+        }
+    }
 }
 
 fn set_save_state(mut save_state: ResMut<SaveState>) {
@@ -205,13 +240,18 @@ fn manage_planet(
     mut er_manage_planet: EventReader<ManagePlanet>,
     mut ew_manage_planet_error: EventWriter<ManagePlanetError>,
     mut ew_switch_planet: EventWriter<SwitchPlanet>,
+    mut ew_global_data_changed: EventWriter<GlobalDataChanged>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut ew_centering: EventWriter<Centering>,
     mut planet: Option<ResMut<Planet>>,
     mut save_state: ResMut<SaveState>,
-    res_maybe_initialized: (Option<Res<Params>>, Option<Res<Conf>>),
+    res_maybe_initialized: (
+        Option<Res<Params>>,
+        Option<Res<Conf>>,
+        Option<ResMut<GlobalData>>,
+    ),
 ) {
-    let (Some(params), Some(conf)) = res_maybe_initialized else {
+    let (Some(params), Some(conf), Some(mut global_data)) = res_maybe_initialized else {
         return;
     };
 
@@ -246,12 +286,17 @@ fn manage_planet(
             Some(planet)
         }
         ManagePlanet::Save { auto, .. } => {
-            if let Err(e) =
-                crate::saveload::save_to(planet.as_ref().unwrap(), &mut save_state, *auto)
-            {
-                log::warn!("cannot save: {:?}", e);
+            match crate::saveload::save_to(planet.as_ref().unwrap(), &mut save_state, *auto) {
+                Ok((save_sub_dir, n)) => {
+                    global_data.latest_save_dir_file = Some((save_sub_dir, *auto, n));
+                    crate::saveload::check_save_files_limit(&mut save_state, &conf);
+                    ew_global_data_changed.send_default();
+                }
+                Err(e) => {
+                    log::warn!("cannot save: {:?}", e);
+                }
             }
-            crate::saveload::check_save_files_limit(&mut save_state, &conf);
+
             None
         }
         ManagePlanet::Load {
@@ -293,7 +338,7 @@ fn manage_planet(
                 if let Err(e) = crate::platform::delete_savefile(sub_dir_name, &file_name) {
                     log::warn!("cannot delete save file: {:?}", e);
                 }
-                if *sub_dir_name == save_state.current {
+                if *sub_dir_name == save_state.current_save_sub_dir {
                     if *auto {
                         save_state.auto_save_files.remove(n);
                     } else {

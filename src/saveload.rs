@@ -19,7 +19,7 @@ pub struct SavedTime(String);
 
 #[derive(Default, Debug)]
 pub struct SaveState {
-    pub current: String,
+    pub current_save_sub_dir: String,
     pub dirs: VecDeque<(SavedTime, String)>, // Latest saved time and directory name list
     pub manual_save_files: BTreeSet<u32>,
     pub auto_save_files: BTreeSet<u32>,
@@ -33,7 +33,7 @@ impl SaveState {
             name,
             new_sub_dir,
         );
-        self.current = name.to_owned();
+        self.current_save_sub_dir = name.to_owned();
         self.save_file_metadata = SaveFileMetadata::default();
         self.manual_save_files.clear();
         self.auto_save_files.clear();
@@ -54,7 +54,7 @@ impl SaveState {
     }
 }
 
-pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Result<()> {
+pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Result<(String, u32)> {
     let planet_data = rmp_serde::to_vec(planet)?;
 
     let bytes = SaveFile::new(
@@ -81,9 +81,9 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
     };
     let file_name = save_file_name(auto, n);
 
-    log::info!("save {}/{}", save_state.current, file_name);
+    log::info!("save {}/{}", save_state.current_save_sub_dir, file_name);
 
-    crate::platform::write_savefile(&save_state.current, &file_name, &bytes)?;
+    crate::platform::write_savefile(&save_state.current_save_sub_dir, &file_name, &bytes)?;
 
     if auto {
         save_state.auto_save_files.insert(n);
@@ -91,13 +91,13 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
         save_state.manual_save_files.insert(n);
     }
 
-    Ok(())
+    Ok((save_state.current_save_sub_dir.clone(), n))
 }
 
 pub fn load_from(save_state: &SaveState, auto: bool, n: u32) -> Result<(Planet, SaveFileMetadata)> {
     let file_name = save_file_name(auto, n);
     let data = SaveFile::from_bytes(&crate::platform::read_savefile(
-        &save_state.current,
+        &save_state.current_save_sub_dir,
         &file_name,
     )?)?;
     log::info!(
@@ -299,8 +299,10 @@ pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
     if save_state.auto_save_files.len() > conf.autosave_max_files {
         if let Some(min) = save_state.auto_save_files.pop_first() {
             let file_name = save_file_name(true, min);
-            log::info!("delete {}/{}", save_state.current, file_name);
-            if let Err(e) = crate::platform::delete_savefile(&save_state.current, &file_name) {
+            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+            if let Err(e) =
+                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+            {
                 log::warn!("cannot delete save file: {:?}", e);
             }
         }
@@ -308,8 +310,10 @@ pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
     if save_state.manual_save_files.len() > conf.manual_max_files {
         if let Some(min) = save_state.manual_save_files.pop_first() {
             let file_name = save_file_name(false, min);
-            log::info!("delete {}/{}", save_state.current, file_name);
-            if let Err(e) = crate::platform::delete_savefile(&save_state.current, &file_name) {
+            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+            if let Err(e) =
+                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+            {
                 log::warn!("cannot delete save file: {:?}", e);
             }
         }
