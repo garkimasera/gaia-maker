@@ -26,18 +26,41 @@ pub fn tutorial_popup(
         .default_width(WINDOW_WIDTH)
         .show(egui_ctxs.ctx_mut(), |ui| {
             tutorial_ui(ui, &textures);
+
+            if has_next_tutorial && !tutorial_state.checklist().is_empty() {
+                ui.add_space(8.0);
+                egui::Grid::new("tutorial_checklist")
+                    .num_columns(2)
+                    .max_col_width(292.0)
+                    .show(ui, |ui| {
+                        for (item, checked) in tutorial_state.checklist() {
+                            let texture = if *checked {
+                                textures.get("ui/icon-check")
+                            } else {
+                                textures.get("ui/icon-cross")
+                            };
+
+                            ui.image(texture);
+                            ui.label(t!("tutorial", item));
+                            ui.end_row();
+                        }
+                    });
+            }
+
             ui.separator();
 
             ui.vertical_centered(|ui| {
                 if can_back && ui.button(t!("back")).clicked() {
                     tutorial_state.move_back();
                 }
-                let s = if has_next_tutorial {
-                    t!("next-tutorial")
-                } else {
-                    t!("next")
-                };
-                if ui.add_enabled(checked, egui::Button::new(s)).clicked() {
+                if has_next_tutorial {
+                    if ui
+                        .add_enabled(checked, egui::Button::new(t!("next-tutorial")))
+                        .clicked()
+                    {
+                        tutorial_state.move_next();
+                    }
+                } else if ui.button(t!("next")).clicked() {
                     tutorial_state.move_next();
                 }
             });
@@ -71,6 +94,14 @@ impl TutorialStep {
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "power-0-2"));
                 super::misc::material_indicator(ui, textures, 100.0, 20.0);
+            },
+            Self::Power(1) => |ui, textures| {
+                ui.label(t!("tutorial", "power-1-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-space-buildings"));
+                });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "power-1-2"));
             },
             _ => unreachable!(),
         }

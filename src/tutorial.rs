@@ -1,17 +1,18 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use strum::{AsRefStr, Display, EnumDiscriminants};
 
 use crate::{planet::Planet, sim::SaveState};
 
 pub const TUTORIAL_PLANET: &str = "tutorial";
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, Resource)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize, Resource)]
 pub struct TutorialState {
     current: TutorialStep,
-    checked: bool,
+    checklist: Vec<(ChecklistItem, bool)>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, strum::EnumDiscriminants)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, EnumDiscriminants)]
 pub enum TutorialStep {
     Start(usize),
     Power(usize),
@@ -19,11 +20,19 @@ pub enum TutorialStep {
     GenOxygen(usize),
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, AsRefStr, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum ChecklistItem {
+    PowerChecklist0,
+    PowerChecklist1,
+}
+
 impl Default for TutorialState {
     fn default() -> Self {
         Self {
             current: TutorialStep::Start(0),
-            checked: false,
+            checklist: Vec::new(),
         }
     }
 }
@@ -32,20 +41,21 @@ pub fn update_tutorial(mut save_state: ResMut<SaveState>, planet: Res<Planet>) {
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
         return;
     };
-    if !tutorial_state.checked && tutorial_state.current.check_complete(&planet) {
-        tutorial_state.checked = true;
+
+    for (item, checked) in &mut tutorial_state.checklist {
+        if !*checked {
+            *checked = check(&planet, *item);
+        }
     }
 }
 
 impl TutorialState {
     pub fn move_next(&mut self) {
-        self.current = self.current.next().unwrap();
-        log::info!("change tutorial step to {:?}", self.current);
+        self.move_to(self.current.next().unwrap());
     }
 
     pub fn move_back(&mut self) {
-        self.current = self.current.back().unwrap();
-        log::info!("change tutorial step to {:?}", self.current);
+        self.move_to(self.current.back().unwrap());
     }
 
     pub fn current_step(&self) -> TutorialStep {
@@ -53,7 +63,20 @@ impl TutorialState {
     }
 
     pub fn checked(&self) -> bool {
-        self.checked
+        self.checklist.iter().all(|(_, checked)| *checked)
+    }
+
+    pub fn checklist(&self) -> &[(ChecklistItem, bool)] {
+        &self.checklist
+    }
+
+    fn move_to(&mut self, step: TutorialStep) {
+        let dstep = TutorialStepDiscriminants::from(step);
+        if TutorialStepDiscriminants::from(self.current) != dstep {
+            self.checklist = checklist(dstep).iter().map(|item| (*item, false)).collect();
+        }
+        log::info!("change tutorial step to {:?}", step);
+        self.current = step;
     }
 }
 
@@ -113,20 +136,20 @@ impl TutorialStep {
         };
         d == back
     }
+}
 
-    fn check_complete(&self, planet: &Planet) -> bool {
-        match *self {
-            Self::Fertilize => check_fertilize(planet),
-            Self::GenOxygen(1) => check_gen_oxygen(planet),
-            _ => true,
+fn check(_planet: &Planet, _item: ChecklistItem) -> bool {
+    false
+}
+
+fn checklist(d: TutorialStepDiscriminants) -> Vec<ChecklistItem> {
+    match d {
+        TutorialStepDiscriminants::Power => {
+            vec![
+                ChecklistItem::PowerChecklist0,
+                ChecklistItem::PowerChecklist1,
+            ]
         }
+        _ => Vec::new(),
     }
-}
-
-fn check_fertilize(_planet: &Planet) -> bool {
-    false
-}
-
-fn check_gen_oxygen(_planet: &Planet) -> bool {
-    false
 }
