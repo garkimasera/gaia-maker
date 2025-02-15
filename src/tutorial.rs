@@ -16,7 +16,7 @@ pub struct TutorialState {
 pub enum TutorialStep {
     Start(usize),
     Power(usize),
-    Fertilize,
+    Fertilize(usize),
     GenOxygen(usize),
 }
 
@@ -26,6 +26,8 @@ pub enum TutorialStep {
 pub enum ChecklistItem {
     PowerChecklist1,
     PowerChecklist2,
+    FertilizeChecklist1,
+    FertilizeChecklist2,
 }
 
 impl Default for TutorialState {
@@ -86,7 +88,9 @@ impl TutorialStep {
         Self::Start(1),
         Self::Power(0),
         Self::Power(1),
-        Self::Fertilize,
+        Self::Fertilize(0),
+        Self::Fertilize(1),
+        Self::GenOxygen(0),
     ];
 
     fn next(&self) -> Option<Self> {
@@ -149,6 +153,22 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
                 .n
                 >= 3
         }
+        ChecklistItem::FertilizeChecklist1 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| matches!(tile.structure, Some(Structure::FertilizationPlant)))
+                .count()
+                >= 3
+        }
+        ChecklistItem::FertilizeChecklist2 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| tile.biome == Biome::Grassland)
+                .count()
+                >= 10
+        }
     }
 }
 
@@ -157,6 +177,10 @@ fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
         TutorialStepDiscriminants::Power => &[
             ChecklistItem::PowerChecklist1,
             ChecklistItem::PowerChecklist2,
+        ],
+        TutorialStepDiscriminants::Fertilize => &[
+            ChecklistItem::FertilizeChecklist1,
+            ChecklistItem::FertilizeChecklist2,
         ],
         _ => &[],
     }
