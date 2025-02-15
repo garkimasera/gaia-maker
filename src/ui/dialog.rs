@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use crate::{conf::Conf, planet::Planet, screen::OccupiedScreenSpace, sim::StartEvent};
+use crate::{conf::Conf, manage_planet::StartEvent, planet::Planet, screen::OccupiedScreenSpace};
 
 use super::{Dialog, WindowsOpenState};
 

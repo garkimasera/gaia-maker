@@ -27,9 +27,9 @@ use crate::{
     conf::Conf,
     draw::{DisplayOpts, UpdateMap},
     gz::GunzipBin,
+    manage_planet::ManagePlanetError,
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
-    sim::ManagePlanetError,
     GameState,
 };
 

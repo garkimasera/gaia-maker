@@ -5,9 +5,9 @@ use strum::IntoEnumIterator;
 
 use crate::{
     conf::Conf,
+    manage_planet::ManagePlanet,
     planet::{Cost, Params, Planet, StructureKind, KELVIN_CELSIUS},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    sim::ManagePlanet,
     text::WithUnitDisplay,
     GameSpeed, GameState,
 };

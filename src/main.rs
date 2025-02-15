@@ -15,12 +15,12 @@ mod draw;
 mod gz;
 mod image_assets;
 mod info;
+mod manage_planet;
 mod overlay;
 mod planet;
 mod platform;
 mod saveload;
 mod screen;
-mod sim;
 mod text;
 mod title_screen;
 mod tutorial;
@@ -70,7 +70,7 @@ fn main() {
         .add_plugins(title_screen::TitleScreenPlugin)
         .add_plugins(draw::DrawPlugin)
         .add_plugins(action::ActionPlugin)
-        .add_plugins(sim::SimPlugin)
+        .add_plugins(manage_planet::ManagePlanetPlugin)
         .insert_resource(WinitSettings::game())
         .init_resource::<GameSpeed>()
         .run();

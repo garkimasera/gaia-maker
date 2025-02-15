@@ -3,8 +3,8 @@ use bevy_egui::{egui, EguiContexts};
 use rand::seq::SliceRandom;
 
 use crate::{
+    manage_planet::{ManagePlanet, SaveState},
     planet::{Basics, GasKind, Params, StartParams},
-    sim::{ManagePlanet, SaveState},
 };
 
 use super::{

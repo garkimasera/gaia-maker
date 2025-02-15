@@ -5,8 +5,8 @@ use bevy_egui::{egui, EguiContexts};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::{
+    manage_planet::{ManagePlanet, SaveState},
     saveload::{SaveSubDirItem, SavedTime},
-    sim::{ManagePlanet, SaveState},
 };
 
 #[derive(Default, Debug)]

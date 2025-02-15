@@ -6,7 +6,7 @@ use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::{planet::*, sim::SaveState};
+use crate::{manage_planet::SaveState, planet::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
 #[strum(serialize_all = "kebab-case")]

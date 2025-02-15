@@ -12,7 +12,7 @@ use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 pub use crate::saveload::SaveState;
 
 #[derive(Clone, Copy, Debug)]
-pub struct SimPlugin;
+pub struct ManagePlanetPlugin;
 
 const GLOBAL_DATA_FILE_NAME: &str = "gaia-maker_global";
 
@@ -51,7 +51,7 @@ impl Resource for Planet {}
 impl Resource for Params {}
 impl Resource for Sim {}
 
-impl Plugin for SimPlugin {
+impl Plugin for ManagePlanetPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()

@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
 use crate::conf::{Conf, ConfChange};
+use crate::manage_planet::{ManagePlanet, ManagePlanetError, SaveState};
 use crate::planet::Params;
-use crate::sim::{ManagePlanet, ManagePlanetError, SaveState};
 use crate::text_assets::Lang;
 use crate::tutorial::TUTORIAL_PLANET;
 use strum::IntoEnumIterator;

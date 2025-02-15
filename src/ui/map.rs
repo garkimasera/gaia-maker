@@ -8,10 +8,10 @@ use geom::RectIter;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
+use crate::manage_planet::SwitchPlanet;
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::{Centering, InScreenTileRange};
-use crate::sim::SwitchPlanet;
 
 pub const H_LEGEND_IMG: u32 = 8;
 

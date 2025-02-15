@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumDiscriminants};
 
-use crate::{planet::*, sim::SaveState};
+use crate::{manage_planet::SaveState, planet::*};
 
 pub const TUTORIAL_PLANET: &str = "tutorial";
 
