@@ -1,0 +1,6 @@
+(
+    size: large,
+    cost: 30,
+    habitat: land,
+    temp: (12, 32),
+)
