@@ -85,8 +85,9 @@ small = "小型"
 solar-constant = "太陽定数"
 spawn = "配置"
 speed-fast = "高速"
-speed-normal = "通常速度"
+speed-medium = "中速"
 speed-paused = "停止"
+speed-slow = "低速"
 star-system = "星系"
 start = "開始"
 statistics = "統計"
@@ -156,7 +157,6 @@ gift = "ギフト"
 # Preferences
 [preference]
 autosave-enabled = "オートセーブ"
-max-simulation-speed = "シミュレーション速度最大化"
 
 # Messages
 [msg]

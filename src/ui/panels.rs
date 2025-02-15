@@ -92,6 +92,8 @@ fn toolbar(
     textures: &UiTextures,
     params: &Params,
 ) {
+    // Menu buttons
+
     let button = |ui: &mut egui::Ui, path: &str, s: &str| {
         ui.add(egui::ImageButton::new(textures.get(path)))
             .on_hover_text(t!(s))
@@ -116,6 +118,8 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
+    // Window buttons
+
     if button(ui, "ui/icon-space-buildings", "space-buildings") {
         wos.space_building = !wos.space_building;
     }
@@ -138,6 +142,8 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
+    // Game speed selector
+
     let texture = if *speed == GameSpeed::Paused {
         "ui/icon-speed-paused-selected"
     } else {
@@ -147,13 +153,22 @@ fn toolbar(
         *speed = GameSpeed::Paused;
     }
 
-    let texture = if *speed == GameSpeed::Normal {
-        "ui/icon-speed-normal-selected"
+    let texture = if *speed == GameSpeed::Slow {
+        "ui/icon-speed-slow-selected"
     } else {
-        "ui/icon-speed-normal"
+        "ui/icon-speed-slow"
     };
-    if button(ui, texture, "speed-normal") {
-        *speed = GameSpeed::Normal;
+    if button(ui, texture, "speed-slow") {
+        *speed = GameSpeed::Slow;
+    }
+
+    let texture = if *speed == GameSpeed::Medium {
+        "ui/icon-speed-medium-selected"
+    } else {
+        "ui/icon-speed-medium"
+    };
+    if button(ui, texture, "speed-medium") {
+        *speed = GameSpeed::Medium;
     }
 
     let texture = if *speed == GameSpeed::Fast {

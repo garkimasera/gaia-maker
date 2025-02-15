@@ -85,8 +85,9 @@ small = "Small"
 solar-constant = "Solar Constant"
 spawn = "Spawn"
 speed-fast = "Fast speed"
-speed-normal = "Normal speed"
+speed-medium = "Medium speed"
 speed-paused = "Pause"
+speed-slow = "Slow speed"
 star-system = "Star system"
 start = "Start"
 statistics = "Statistics"
@@ -157,7 +158,6 @@ gift = "Gift"
 # Preferences
 [preference]
 autosave-enabled = "Enable Autosave"
-max-simulation-speed = "Max simulation speed"
 
 # Messages
 [msg]

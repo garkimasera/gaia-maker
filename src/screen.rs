@@ -431,7 +431,7 @@ fn keyboard_input(
         match *speed {
             GameSpeed::Paused => {
                 if *old_gamespeed == GameSpeed::Paused {
-                    *old_gamespeed = GameSpeed::Normal;
+                    *old_gamespeed = GameSpeed::Slow;
                 }
                 std::mem::swap(&mut *speed, &mut *old_gamespeed);
             }

@@ -143,11 +143,11 @@ fn update(
 
     *count_frame += 1;
 
-    match (*speed, conf.max_simulation_speed) {
-        (GameSpeed::Paused, _) => {
+    match *speed {
+        GameSpeed::Paused => {
             return;
         }
-        (GameSpeed::Normal, _) => {
+        GameSpeed::Slow => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
                     < 60 * params.sim.sim_normal_loop_duration_ms / 1000
@@ -155,8 +155,7 @@ fn update(
                 return;
             }
         }
-        (_, true) => (),
-        (GameSpeed::Fast, _) => {
+        GameSpeed::Medium => {
             if last_update.is_some()
                 && *count_frame - last_update.unwrap()
                     < 60 * params.sim.sim_fast_loop_duration_ms / 1000
@@ -164,6 +163,7 @@ fn update(
                 return;
             }
         }
+        GameSpeed::Fast => (),
     }
     *last_update = Some(*count_frame);
     crate::planet::debug::clear_logs(

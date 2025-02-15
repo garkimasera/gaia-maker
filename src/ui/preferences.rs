@@ -23,11 +23,6 @@ pub fn preferences_window(
                 &mut conf.autosave_enabled,
                 t!("preference", "autosave-enabled"),
             );
-
-            ui.checkbox(
-                &mut conf.max_simulation_speed,
-                t!("preference", "max-simulation-speed"),
-            );
         })
         .unwrap()
         .response

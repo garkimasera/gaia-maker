@@ -88,7 +88,8 @@ pub enum GameState {
 pub enum GameSpeed {
     #[default]
     Paused,
-    Normal,
+    Slow,
+    Medium,
     Fast,
 }
 
