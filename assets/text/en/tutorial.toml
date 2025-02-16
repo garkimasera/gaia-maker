@@ -15,4 +15,16 @@ fertilize-0-2 = "The air temperature should be between 10 and 30°C, and the rai
 fertilize-1-1 = "When you find a tile with good conditions, click on the icon below in the toolbar to open the menu and select the Soil Fertilization Plant. Then, click on the tile you want to build."
 fertilize-1-2 = "Let's build several Soil Fertilization Plants at a distance from each other. When you've finished building, click the icon below on the toolbar to advance the time."
 fertilize-checklist1 = "Build three or more Soil Fertilization Plants"
-fertilize-checklist2 = "Grasslands spread over 10 tiles or more."
+fertilize-checklist2 = "Grasslands spread over 10 tiles or more"
+
+build-oxygen-0-1 = "Congratulations! Life has begun to spread across the planet. Next, let's check the state of the atmosphere. Click on the following icon in the toolbar to open the statistics window, and then click on the Atmosphere tab."
+build-oxygen-0-2 = "For advanced ecosystems such as forests and animals, a certain amount of oxygen is needed in the planet's atmosphere. If there is not enough oxygen, let's build Oxygen Generators."
+build-oxygen-1-1 = "Oxygen Generators require a lot of power. Click on the icon below in the toolbar to open the building window and construct a Dyson Swarm Units to obtain power."
+build-oxygen-1-2 = "If you don't have enough material for building, please advance the time after adding Asteroid Mining Stations.\nAfter obtaining power, open the menu by clicking the icon below in the toolbar, and select Oxygen Generator. Then, click on an empty tile to build it."
+build-oxygen-checklist1 = "5 Dyson Swarm Units"
+build-oxygen-checklist2 = "8 Oxygen Generators"
+
+wait-oxygen-0-1 = "Once you have built Oxygen Generators, the oxygen concentration will increase, and you will have to wait for forests to form.\nThis process takes time, so click on the following icon in the toolbar to advance the time quickly."
+wait-oxygen-0-2 = "If you want to speed up this process, add Dyson Swarm Units and Oxygen Generators as soon as you have enough material."
+wait-oxygen-checklist1 = "The partial pressure of oxygen reaches 0.12 atm"
+wait-oxygen-checklist2 = "Forests spread over 50 tiles or more"

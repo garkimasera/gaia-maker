@@ -124,6 +124,34 @@ impl TutorialStep {
                     ui.image(textures.get("ui/icon-speed-medium"));
                 });
             },
+            Self::BuildOxygen(0) => |ui, textures| {
+                ui.label(t!("tutorial", "build-oxygen-0-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-stat"));
+                });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "build-oxygen-0-2"));
+            },
+            Self::BuildOxygen(1) => |ui, textures| {
+                ui.label(t!("tutorial", "build-oxygen-1-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-space-buildings"));
+                });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "build-oxygen-1-2"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-build"));
+                });
+            },
+            Self::WaitOxygen(0) => |ui, textures| {
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "wait-oxygen-0-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-speed-fast"));
+                });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "wait-oxygen-0-2"));
+            },
             _ => unreachable!(),
         }
     }

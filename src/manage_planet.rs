@@ -277,7 +277,7 @@ fn manage_planet(
 
             if planet.basics.origin == TUTORIAL_PLANET {
                 save_state.save_file_metadata.tutorial_state = Some(TutorialState::default());
-                planet.res.material = 1.0e+5; // Additional material for tutorial
+                planet.res.material = 8.0e+5; // Additional material for tutorial
             }
 
             if let Err(e) = crate::saveload::save_to(&planet, &mut save_state, true) {

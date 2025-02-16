@@ -17,7 +17,9 @@ pub enum TutorialStep {
     Start(usize),
     Power(usize),
     Fertilize(usize),
-    GenOxygen(usize),
+    BuildOxygen(usize),
+    WaitOxygen(usize),
+    Carbon(usize),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, AsRefStr, Display)]
@@ -28,6 +30,10 @@ pub enum ChecklistItem {
     PowerChecklist2,
     FertilizeChecklist1,
     FertilizeChecklist2,
+    BuildOxygenChecklist1,
+    BuildOxygenChecklist2,
+    WaitOxygenChecklist1,
+    WaitOxygenChecklist2,
 }
 
 impl Default for TutorialState {
@@ -90,7 +96,10 @@ impl TutorialStep {
         Self::Power(1),
         Self::Fertilize(0),
         Self::Fertilize(1),
-        Self::GenOxygen(0),
+        Self::BuildOxygen(0),
+        Self::BuildOxygen(1),
+        Self::WaitOxygen(0),
+        Self::Carbon(0),
     ];
 
     fn next(&self) -> Option<Self> {
@@ -169,6 +178,33 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
                 .count()
                 >= 10
         }
+        ChecklistItem::BuildOxygenChecklist1 => {
+            planet.space_building(SpaceBuildingKind::DysonSwarmUnit).n >= 5
+        }
+        ChecklistItem::BuildOxygenChecklist2 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| matches!(tile.structure, Some(Structure::OxygenGenerator)))
+                .count()
+                >= 8
+        }
+        ChecklistItem::WaitOxygenChecklist1 => {
+            planet.atmo.partial_pressure(GasKind::Oxygen) >= 0.12
+        }
+        ChecklistItem::WaitOxygenChecklist2 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| {
+                    matches!(
+                        tile.biome,
+                        Biome::BorealForest | Biome::TemperateForest | Biome::TropicalRainforest
+                    )
+                })
+                .count()
+                >= 50
+        }
     }
 }
 
@@ -181,6 +217,14 @@ fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
         TutorialStepDiscriminants::Fertilize => &[
             ChecklistItem::FertilizeChecklist1,
             ChecklistItem::FertilizeChecklist2,
+        ],
+        TutorialStepDiscriminants::BuildOxygen => &[
+            ChecklistItem::BuildOxygenChecklist1,
+            ChecklistItem::BuildOxygenChecklist2,
+        ],
+        TutorialStepDiscriminants::WaitOxygen => &[
+            ChecklistItem::WaitOxygenChecklist1,
+            ChecklistItem::WaitOxygenChecklist2,
         ],
         _ => &[],
     }
