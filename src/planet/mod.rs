@@ -196,12 +196,22 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
 
     let mut atmo = params.default_start_params.atmo.clone();
 
-    *atmo.get_mut(&GasKind::Nitrogen).unwrap() = rng
-        .sample(SymmetricalLinearDist::from(start_planet.nitrogen))
-        .into();
-    *atmo.get_mut(&GasKind::CarbonDioxide).unwrap() = rng
-        .sample(SymmetricalLinearDist::from(start_planet.carbon_dioxide))
-        .into();
+    if let Some(range) = start_planet.nitrogen {
+        *atmo.get_mut(&GasKind::Oxygen).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.oxygen {
+        *atmo.get_mut(&GasKind::Oxygen).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.carbon_dioxide {
+        *atmo.get_mut(&GasKind::CarbonDioxide).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.argon {
+        *atmo.get_mut(&GasKind::Argon).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
 
     StartParams {
         basics: Basics {

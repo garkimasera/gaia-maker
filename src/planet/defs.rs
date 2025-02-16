@@ -806,8 +806,14 @@ pub struct StartPlanet {
     pub geothermal_power: Option<(f32, f32)>,
     pub elevation: (f32, f32),
     pub water_volume: (f32, f32),
-    pub nitrogen: (f32, f32),
-    pub carbon_dioxide: (f32, f32),
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub nitrogen: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub oxygen: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub carbon_dioxide: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub argon: Option<(f32, f32)>,
     pub initial_conditions: Vec<InitialCondition>,
     #[serde(default)]
     pub height_table: Vec<(f32, f32)>,

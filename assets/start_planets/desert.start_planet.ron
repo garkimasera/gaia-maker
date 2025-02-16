@@ -6,6 +6,8 @@
     elevation: (7000.0, 1000.0),
     water_volume: (0.0, 0.0),
     nitrogen: (0.75, 0.08),
+    oxygen: (8.0e-6, 2.0e-6),
     carbon_dioxide: (0.08, 0.02),
+    argon: (1.0e-2, 0.2e-2),
     initial_conditions: [],
 )
