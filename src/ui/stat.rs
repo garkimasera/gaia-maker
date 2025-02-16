@@ -111,13 +111,17 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
 
     let total_mass = planet.atmo.total_mass();
 
-    egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
+    egui::Grid::new("grid_atmo").striped(true).show(ui, |ui| {
         for gas_kind in GasKind::iter() {
             ui.label(t!(gas_kind));
             ui.label(format!(
                 "{:.2}%",
-                planet.atmo.mass(gas_kind) / total_mass * 100.0
+                planet.atmo.mass(gas_kind) / total_mass * 100.0,
             ));
+            ui.horizontal(|ui| {
+                ui.add_space(8.0);
+                ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)));
+            });
             ui.end_row();
         }
     });
