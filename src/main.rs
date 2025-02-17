@@ -105,9 +105,27 @@ struct AssetPlugin;
 impl Plugin for AssetPlugin {
     #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
-        let asset_file_path = option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz");
+        use std::path::PathBuf;
+        #[cfg(feature = "deb")]
+        fn asset_file_path() -> PathBuf {
+            let usr_dir = std::env::current_exe()
+                .expect("cannot get current exe path")
+                .to_owned()
+                .parent()
+                .expect("cannot get usr directory path")
+                .to_owned()
+                .parent()
+                .expect("cannot get usr directory path")
+                .to_owned();
+            usr_dir.join("share/games/gaia-maker/assets.tar.gz")
+        }
+        #[cfg(not(feature = "deb"))]
+        fn asset_file_path() -> PathBuf {
+            PathBuf::from(option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz"))
+        }
+
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
-            archive_files: vec![std::path::PathBuf::from(asset_file_path)],
+            archive_files: vec![asset_file_path()],
             addon_directories: platform::addon_directory(),
             ..Default::default()
         });

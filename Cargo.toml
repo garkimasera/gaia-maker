@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
 license = "GPL-3.0"
+description = "Planet and terraforming simulation game"
 
 [features]
 default = []
 asset_tar = ["dep:bevy_asset_tar"]
+deb = ["asset_tar"]
 
 [dependencies]
 anyhow = "1"
@@ -57,3 +59,16 @@ web-sys = { version = "0.3", features = ["Window", "Storage", "Location"] }
 
 [profile.dev]
 opt-level = 1
+
+[package.metadata.deb]
+depends = "$auto"
+extended-description = ""
+section = "games"
+priority = "optional"
+assets = [
+    ["target/release/gaia-maker", "usr/games/", "755"],
+    ["assets.tar.gz", "usr/share/games/gaia-maker/assets.tar.gz", "644"],
+    ["gaia-maker.desktop", "usr/share/applications/", "644"],
+    ["assets/icon.png", "usr/share/pixmaps/gaia-maker.png", "644"],
+]
+features = ["deb"]
