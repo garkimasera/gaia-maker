@@ -169,26 +169,20 @@ impl egui::Widget for BuildingImage {
 
         if ui.is_rect_visible(response.rect) {
             let painter = ui.painter();
-            painter.add(epaint::RectShape {
-                rect,
-                rounding: egui::Rounding::ZERO,
-                fill: egui::Color32::WHITE,
-                stroke: egui::Stroke::NONE,
-                blur_width: 0.0,
-                fill_texture_id: self.background.id,
-                uv,
-            });
+            painter.add(
+                epaint::RectShape::filled(rect, 0, egui::Color32::WHITE)
+                    .with_texture(self.background.id, uv),
+            );
 
             if let Some(background_star) = &self.background_star {
-                painter.add(epaint::RectShape {
-                    rect: egui::Rect::from_min_size(rect.min, background_star.size),
-                    rounding: egui::Rounding::ZERO,
-                    fill: egui::Color32::WHITE,
-                    stroke: egui::Stroke::NONE,
-                    blur_width: 0.0,
-                    fill_texture_id: background_star.id,
-                    uv,
-                });
+                painter.add(
+                    epaint::RectShape::filled(
+                        egui::Rect::from_min_size(rect.min, background_star.size),
+                        0,
+                        egui::Color32::WHITE,
+                    )
+                    .with_texture(background_star.id, uv),
+                );
             }
 
             let n = std::cmp::min(
@@ -200,15 +194,14 @@ impl egui::Widget for BuildingImage {
                     self.building.size.x * i as f32 + self.left_padding,
                     0.5 * (rect.height() - self.building.size.y),
                 );
-                painter.add(epaint::RectShape {
-                    rect: egui::Rect::from_min_size(rect.min + v, self.building.size),
-                    rounding: egui::Rounding::ZERO,
-                    fill: egui::Color32::WHITE,
-                    stroke: egui::Stroke::NONE,
-                    blur_width: 0.0,
-                    fill_texture_id: self.building.id,
-                    uv,
-                });
+                painter.add(
+                    epaint::RectShape::filled(
+                        egui::Rect::from_min_size(rect.min + v, self.building.size),
+                        0,
+                        egui::Color32::WHITE,
+                    )
+                    .with_texture(self.building.id, uv),
+                );
             }
         }
         response

@@ -176,7 +176,7 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
                 } else {
                     1.0 / params.biomes[&next_biome].mean_transition_time
                 };
-                if rng.gen_bool(transition_probability as f64) {
+                if rng.random_bool(transition_probability as f64) {
                     planet.map[p].biome = next_biome;
                 }
             }
@@ -216,7 +216,7 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
         } else {
             1.0 / params.biomes[&next_biome].mean_transition_time
         };
-        if rng.gen_bool(transition_probability as f64) {
+        if rng.random_bool(transition_probability as f64) {
             planet.map[p].biome = next_biome;
         }
     }

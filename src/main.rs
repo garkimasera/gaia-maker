@@ -108,15 +108,12 @@ impl Plugin for AssetPlugin {
         use std::path::PathBuf;
         #[cfg(feature = "deb")]
         fn asset_file_path() -> PathBuf {
-            let usr_dir = std::env::current_exe()
-                .expect("cannot get current exe path")
-                .to_owned()
+            let current_exe = std::env::current_exe().expect("cannot get current exe path");
+            let usr_dir = current_exe
                 .parent()
                 .expect("cannot get usr directory path")
-                .to_owned()
                 .parent()
-                .expect("cannot get usr directory path")
-                .to_owned();
+                .expect("cannot get usr directory path");
             usr_dir.join("share/games/gaia-maker/assets.tar.gz")
         }
         #[cfg(not(feature = "deb"))]

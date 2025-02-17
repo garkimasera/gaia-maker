@@ -1,7 +1,7 @@
 use arrayvec::ArrayVec;
 use geom::Coords;
 use num_traits::FromPrimitive;
-use rand::{seq::SliceRandom, Rng};
+use rand::{seq::IndexedRandom, Rng};
 
 use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
 
@@ -78,7 +78,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let prob = (params.sim.coef_settlement_spreading_a
             * (params.sim.coef_settlement_spreading_b * normalized_pop - cr))
             .clamp(0.0, 1.0);
-        if sim.rng.gen_bool(prob.into()) {
+        if sim.rng.random_bool(prob.into()) {
             let mut target_tiles: ArrayVec<Coords, 16> = ArrayVec::new();
             for d in geom::CHEBYSHEV_DISTANCE_2_COORDS {
                 if let Some(p_next) = sim.convert_p_cyclic(p + *d) {

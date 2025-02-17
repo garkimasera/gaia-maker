@@ -1,6 +1,6 @@
 use bevy::prelude::EventWriter;
 use bevy_egui::{egui, EguiContexts};
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 
 use crate::{
     manage_planet::{ManagePlanet, SaveState},
@@ -126,7 +126,7 @@ pub fn new_planet(
                             {
                                 state.new_planet.name = random_name_list
                                     .0
-                                    .choose(&mut rand::thread_rng())
+                                    .choose(&mut rand::rng())
                                     .map(|name| name.to_owned())
                                     .unwrap();
                             }

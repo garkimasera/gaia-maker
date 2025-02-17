@@ -159,14 +159,14 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     ctx.set_theme(egui::Theme::Dark);
     let mut style = (*ctx.style()).clone();
 
-    let rounding = egui::Rounding::same(2.0);
-    style.visuals.window_rounding = rounding;
-    style.visuals.menu_rounding = rounding;
-    style.visuals.widgets.noninteractive.rounding = rounding;
-    style.visuals.widgets.inactive.rounding = rounding;
-    style.visuals.widgets.hovered.rounding = rounding;
-    style.visuals.widgets.active.rounding = rounding;
-    style.visuals.widgets.open.rounding = rounding;
+    let cr = egui::CornerRadius::same(2);
+    style.visuals.window_corner_radius = cr;
+    style.visuals.menu_corner_radius = cr;
+    style.visuals.widgets.noninteractive.corner_radius = cr;
+    style.visuals.widgets.inactive.corner_radius = cr;
+    style.visuals.widgets.hovered.corner_radius = cr;
+    style.visuals.widgets.active.corner_radius = cr;
+    style.visuals.widgets.open.corner_radius = cr;
     let text_color = egui::Color32::from_rgb(208, 208, 208);
     style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
     style.visuals.widgets.inactive.fg_stroke.color = text_color;

@@ -122,7 +122,7 @@ fn process_building_on_tile(planet: &mut Planet, p: Coords, sim: &mut Sim, param
         }
 
         loop {
-            let p_target = p + (sim.rng.gen_range(-3..=3), sim.rng.gen_range(-3..=3));
+            let p_target = p + (sim.rng.random_range(-3..=3), sim.rng.random_range(-3..=3));
             if planet.map.in_range(p_target) {
                 planet.map[p_target].buried_carbon += carbon_mass;
                 break;

@@ -173,28 +173,14 @@ fn map_ui(
     )
     .translate(rect.left_top().to_vec2());
     let r2 = egui::Rect::from_two_pos(r1.min + egui::vec2(1.0, 1.0), r1.max - egui::vec2(1.0, 1.0));
-    painter.rect_stroke(r1, egui::Rounding::ZERO, stroke1);
-    painter.rect_stroke(r2, egui::Rounding::ZERO, stroke2);
-    painter.rect_stroke(
-        r1.translate(egui::vec2(w as f32, 0.0)),
-        egui::Rounding::ZERO,
-        stroke1,
-    );
-    painter.rect_stroke(
-        r2.translate(egui::vec2(w as f32, 0.0)),
-        egui::Rounding::ZERO,
-        stroke2,
-    );
-    painter.rect_stroke(
-        r1.translate(egui::vec2(-(w as f32), 0.0)),
-        egui::Rounding::ZERO,
-        stroke1,
-    );
-    painter.rect_stroke(
-        r2.translate(egui::vec2(-(w as f32), 0.0)),
-        egui::Rounding::ZERO,
-        stroke2,
-    );
+    let cr = egui::CornerRadius::ZERO;
+    let sk = egui::StrokeKind::Middle;
+    painter.rect_stroke(r1, cr, stroke1, sk);
+    painter.rect_stroke(r2, cr, stroke2, sk);
+    painter.rect_stroke(r1.translate(egui::vec2(w as f32, 0.0)), cr, stroke1, sk);
+    painter.rect_stroke(r2.translate(egui::vec2(w as f32, 0.0)), cr, stroke2, sk);
+    painter.rect_stroke(r1.translate(egui::vec2(-(w as f32), 0.0)), cr, stroke1, sk);
+    painter.rect_stroke(r2.translate(egui::vec2(-(w as f32), 0.0)), cr, stroke2, sk);
 
     response
 }
@@ -469,7 +455,7 @@ impl egui::Widget for ColorLegend {
             let painter = ui.painter();
             painter.add(epaint::RectShape::filled(
                 icon_rect,
-                egui::Rounding::ZERO,
+                egui::CornerRadius::ZERO,
                 self.color,
             ));
             painter.add(epaint::TextShape::new(

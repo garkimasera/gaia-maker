@@ -207,7 +207,7 @@ impl MapPanel {
         ui.separator();
         if ui.button("copy height map").clicked() {
             let s = planet.height_map_as_string();
-            ui.output_mut(|o| o.copied_text = s);
+            ui.output_mut(|o| o.commands.push(egui::OutputCommand::CopyText(s)));
         }
     }
 }

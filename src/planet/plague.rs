@@ -1,6 +1,6 @@
 use arrayvec::ArrayVec;
 use geom::Coords;
-use rand::{seq::SliceRandom, Rng};
+use rand::{seq::IndexedRandom, Rng};
 
 use super::{defs::*, Planet, Sim};
 
@@ -82,7 +82,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
             }
 
             // Spread plague
-            if sim.rng.gen_bool(
+            if sim.rng.random_bool(
                 (params.event.plague_spread_base_probability * plague_params.infectivity)
                     .min(1.0)
                     .into(),
@@ -119,7 +119,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
     } else {
         // Spread to distant settlement
         if let Some(p) = p_pop_max_uninfected_settlement {
-            if sim.rng.gen_bool(
+            if sim.rng.random_bool(
                 (params.event.plague_spread_base_probability * plague_params.distant_infectivity)
                     .min(1.0)
                     .into(),

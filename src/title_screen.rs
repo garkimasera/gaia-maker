@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rand::{seq::SliceRandom, Rng, SeedableRng};
+use rand::{seq::IndexedRandom, Rng, SeedableRng};
 
 use crate::{draw::UpdateMap, GameState};
 
@@ -91,8 +91,8 @@ fn setup_title_screen(
     let mesh = meshes.add(Mesh::from(Rectangle::new(2.0, 2.0)));
 
     for _ in 0..N_STARS {
-        let x = rng.gen_range(-2000.0..2000.0);
-        let y = rng.gen_range(-2000.0..2000.0);
+        let x = rng.random_range(-2000.0..2000.0);
+        let y = rng.random_range(-2000.0..2000.0);
         commands
             .spawn((
                 Mesh2d(mesh.clone()),

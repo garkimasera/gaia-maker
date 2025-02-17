@@ -1,7 +1,7 @@
 use arrayvec::ArrayVec;
 use geom::Direction;
 use misc::{calc_congestion_rate, range_to_livability_trapezoid};
-use rand::{seq::SliceRandom, Rng};
+use rand::{seq::IndexedRandom, Rng};
 
 use super::*;
 
@@ -82,7 +82,7 @@ fn process_each_animal(
     });
     let prob = (params.sim.coef_animal_fisson_a * (params.sim.coef_animal_fisson_b * new_n - cr))
         .clamp(0.0, 1.0);
-    if sim.rng.gen_bool(prob.into()) {
+    if sim.rng.random_bool(prob.into()) {
         let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
         for d in Direction::EIGHT_DIRS {
             if let Some(p_next) = sim.convert_p_cyclic(p + d.as_coords()) {
@@ -105,20 +105,20 @@ fn process_each_animal(
     let prob = (params.sim.coef_animal_kill_by_congestion_a
         * (cr - params.sim.coef_animal_kill_by_congestion_b))
         .clamp(0.0, 1.0);
-    if sim.rng.gen_bool(prob.into()) {
+    if sim.rng.random_bool(prob.into()) {
         planet.map[p].animal[size as usize] = None;
         return;
     }
 
     // Random walk
-    if sim.rng.gen_bool(params.sim.animal_move_weight) {
+    if sim.rng.random_bool(params.sim.animal_move_weight) {
         let dir = *Direction::EIGHT_DIRS.choose(&mut sim.rng).unwrap();
         if let Some(p_dest) = sim.convert_p_cyclic(p + dir.as_coords()) {
             // If the destination is empty
             if planet.map[p_dest].animal[size as usize].is_none() {
                 let cap_dest = calc_cap(planet, p_dest, attr, params);
                 let move_probability = (cap_dest / (cap + 0.001)).clamp(0.0, 1.0);
-                if sim.rng.gen_bool(move_probability.into()) {
+                if sim.rng.random_bool(move_probability.into()) {
                     planet.map[p_dest].animal[size as usize] =
                         planet.map[p].animal[size as usize].take();
                 }

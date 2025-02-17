@@ -58,15 +58,13 @@ impl egui::Widget for LabelWithIcon {
 
         if ui.is_rect_visible(response.rect) {
             let painter = ui.painter();
-            painter.add(epaint::RectShape {
-                rect: icon_rect,
-                rounding: egui::Rounding::ZERO,
-                fill: egui::Color32::WHITE,
-                stroke: egui::Stroke::NONE,
-                blur_width: 0.0,
-                fill_texture_id: self.icon.id,
-                uv: egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-            });
+
+            painter.add(
+                epaint::RectShape::filled(icon_rect, 0, egui::Color32::WHITE).with_texture(
+                    self.icon.id,
+                    egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+                ),
+            );
             painter.add(epaint::TextShape::new(
                 galley_pos,
                 galley,
