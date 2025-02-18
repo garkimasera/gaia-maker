@@ -36,7 +36,7 @@ log = "0.4"
 noise = "0.9"
 num-derive = "0.4.2"
 num-traits = "0.2.19"
-ordered-float = { version = "4.6.0", default-features = false }
+ordered-float = { version = "5.0.0", default-features = false }
 rand = { version = "0.9.0", features = ["small_rng"] }
 regex = "1"
 rmp-serde = "1.3.0"
@@ -56,6 +56,7 @@ tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = ["Window", "Storage", "Location"] }
+getrandom = { version = "0.3", features = ["wasm_js"] } # For rand v0.9
 
 [profile.dev]
 opt-level = 1
