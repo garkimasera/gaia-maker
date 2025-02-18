@@ -2527,6 +2527,7 @@ dependencies = [
  "toml",
  "wasm-bindgen",
  "web-sys",
+ "winit",
 ]
 
 [[package]]

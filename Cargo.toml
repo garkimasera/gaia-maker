@@ -49,6 +49,7 @@ serde_with = "3"
 smallvec = { version = "1.13.2", features = ["serde"] }
 strum = { version = "0.27.1", features = ["derive"] }
 toml = "0.8.19"
+winit = { version = "0.30.9", default-features = false }
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
@@ -70,6 +71,6 @@ assets = [
     ["target/release/gaia-maker", "usr/games/", "755"],
     ["assets.tar.gz", "usr/share/games/gaia-maker/assets.tar.gz", "644"],
     ["gaia-maker.desktop", "usr/share/applications/", "644"],
-    ["assets/icon.png", "usr/share/pixmaps/gaia-maker.png", "644"],
+    ["icon.png", "usr/share/pixmaps/gaia-maker.png", "644"],
 ]
 features = ["deb"]

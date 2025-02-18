@@ -42,6 +42,7 @@ impl Plugin for ScreenPlugin {
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
+            .add_systems(Startup, set_window_icon)
             .add_systems(
                 OnEnter(GameState::Running),
                 (setup_cursor, set_scale_factor_to_occupied_screen_space),
@@ -475,5 +476,19 @@ fn keyboard_input(
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
+    }
+}
+
+fn set_window_icon(windows: NonSend<bevy::winit::WinitWindows>) {
+    let image_bytes = include_bytes!("../icon.png");
+    let image = image::load_from_memory_with_format(image_bytes, image::ImageFormat::Png)
+        .unwrap()
+        .into_rgba8();
+    let (w, h) = image.dimensions();
+    let bytes = image.into_raw();
+    let icon = winit::window::Icon::from_rgba(bytes, w, h).unwrap();
+
+    for window in windows.windows.values() {
+        window.set_window_icon(Some(icon.clone()));
     }
 }
