@@ -35,6 +35,8 @@ use crate::{
 
 use self::dialog::MsgDialog;
 
+const HELP_TOOLTIP_WIDTH: f32 = 256.0;
+
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
 

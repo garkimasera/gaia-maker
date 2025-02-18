@@ -6,7 +6,9 @@ use bevy_egui::{
 use compact_str::format_compact;
 use strum::IntoEnumIterator;
 
-use super::{help::HelpItem, OccupiedScreenSpace, UiTextures, WindowsOpenState};
+use super::{
+    help::HelpItem, OccupiedScreenSpace, UiTextures, WindowsOpenState, HELP_TOOLTIP_WIDTH,
+};
 use crate::planet::*;
 
 const BUILDING_BACKGROUND_SIZE: (u32, u32) = (336, 48);
@@ -17,12 +19,17 @@ pub fn space_buildings_window(
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
     mut sim: ResMut<Sim>,
+    window: bevy::prelude::Query<
+        &mut bevy::window::Window,
+        bevy::prelude::With<bevy::window::PrimaryWindow>,
+    >,
     textures: Res<UiTextures>,
     params: Res<Params>,
 ) {
     if !wos.space_building {
         return;
     }
+    let window_width = window.get_single().unwrap().width();
 
     let rect = egui::Window::new(t!("space-buildings"))
         .open(&mut wos.space_building)
@@ -41,6 +48,7 @@ pub fn space_buildings_window(
                         &textures,
                         &params,
                         params.building_attrs(kind),
+                        window_width,
                     );
                 });
             }
@@ -59,6 +67,7 @@ pub fn buildng_row(
     textures: &UiTextures,
     params: &Params,
     attrs: &BuildingAttrs,
+    window_width: f32,
 ) {
     let build_max = attrs.build_max.unwrap();
     let buildable = planet.buildable(attrs) && build_max > planet.space_building(kind).n;
@@ -73,12 +82,22 @@ pub fn buildng_row(
     let response = ui.add(BuildingImage::new(kind, building.n, textures));
     if response.hovered() {
         let help_item = HelpItem::SpaceBuildings(kind);
+        let right_top = response.rect.right_top();
+        let pos = if right_top.x + HELP_TOOLTIP_WIDTH < window_width {
+            right_top
+        } else {
+            response.rect.left_top() + egui::vec2(-HELP_TOOLTIP_WIDTH - 20.0, 0.0)
+        };
+
         egui::containers::show_tooltip_at(
             &response.ctx,
             response.layer_id,
             response.id,
-            response.rect.right_top(),
-            |ui| help_item.ui(ui, textures, params),
+            pos,
+            |ui| {
+                ui.set_max_width(HELP_TOOLTIP_WIDTH);
+                help_item.ui(ui, textures, params);
+            },
         );
     }
 

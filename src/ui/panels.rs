@@ -385,7 +385,10 @@ fn build_menu(
                 response.layer_id,
                 response.id,
                 pos_tooltip,
-                |ui| HelpItem::Structures(kind).ui(ui, textures, params),
+                |ui| {
+                    ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
+                    HelpItem::Structures(kind).ui(ui, textures, params);
+                },
             );
         }
         ui.end_row();
@@ -411,7 +414,10 @@ fn action_menu(
                 response.layer_id,
                 response.id,
                 pos_tooltip,
-                |ui| HelpItem::TileEvent(kind).ui(ui, textures, params),
+                |ui| {
+                    ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
+                    HelpItem::TileEvent(kind).ui(ui, textures, params);
+                },
             );
         }
         ui.end_row();
