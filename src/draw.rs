@@ -10,7 +10,7 @@ use geom::{Array2d, Coords, Direction, RectIter};
 pub struct DrawPlugin;
 
 #[derive(Clone, Copy, Default, Debug, Resource, Event)]
-pub struct UpdateMap {
+pub struct UpdateDraw {
     need_update: bool,
 }
 
@@ -31,7 +31,7 @@ impl Default for DisplayOpts {
     }
 }
 
-impl UpdateMap {
+impl UpdateDraw {
     pub fn update(&mut self) {
         self.need_update = true;
     }
@@ -55,8 +55,8 @@ const CORNER_PIECE_GRID: [(usize, usize); 4] = [(0, 1), (0, 0), (1, 0), (1, 1)];
 
 impl Plugin for DrawPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<UpdateMap>()
-            .init_resource::<UpdateMap>()
+        app.add_event::<UpdateDraw>()
+            .init_resource::<UpdateDraw>()
             .init_resource::<DisplayOpts>()
             .init_resource::<LayeredTexMap>()
             .init_resource::<AnimationCounter>()
@@ -72,7 +72,7 @@ impl Plugin for DrawPlugin {
                     .in_set(GameSystemSet::Draw)
                     .run_if(in_state(GameState::Running)),
             )
-            .add_systems(Update, reset_update_map.after(GameSystemSet::Draw))
+            .add_systems(Update, reset_update_draw.after(GameSystemSet::Draw))
             .add_systems(
                 Update,
                 update_animation.run_if(bevy::time::common_conditions::on_timer(
@@ -96,12 +96,12 @@ impl Default for LayeredTexMap {
 }
 
 fn update_layered_tex_map(
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     params: Res<Params>,
     planet: Res<Planet>,
     mut ltm: ResMut<LayeredTexMap>,
 ) {
-    if !update_map.need_update && !planet.is_changed() {
+    if !update_draw.need_update && !planet.is_changed() {
         return;
     }
 
@@ -138,7 +138,7 @@ fn update_layered_tex_map(
 
 fn spawn_map_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     ltm: Res<LayeredTexMap>,
     params: Res<Params>,
     biome_textures: Res<BiomeTextures>,
@@ -147,7 +147,7 @@ fn spawn_map_textures(
     current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
 
@@ -210,7 +210,7 @@ fn spawn_map_textures(
 
 fn spawn_structure_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     params: Res<Params>,
     structure_textures: Res<StructureTextures>,
     texture_handles: Res<TextureHandles>,
@@ -219,7 +219,7 @@ fn spawn_structure_textures(
     (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -275,7 +275,7 @@ fn spawn_structure_textures(
 
 fn spawn_animal_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
@@ -283,7 +283,7 @@ fn spawn_animal_textures(
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -341,7 +341,7 @@ fn spawn_animal_textures(
 
 fn spawn_tile_animation_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
@@ -349,7 +349,7 @@ fn spawn_tile_animation_textures(
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -408,7 +408,7 @@ fn spawn_tile_animation_textures(
 
 fn spawn_overlay_meshes(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     mut meshes: ResMut<Assets<Mesh>>,
     color_materials: Res<ColorMaterials>,
     in_screen_tile_range: Res<InScreenTileRange>,
@@ -418,7 +418,7 @@ fn spawn_overlay_meshes(
     mut tile_mesh: Local<Option<Handle<Mesh>>>,
     mut mesh_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update && *current_layer == *prev_layer {
+    if !update_draw.need_update && *current_layer == *prev_layer {
         return;
     }
 
@@ -499,8 +499,8 @@ fn corner_idx<F: Fn(Coords) -> bool>(f: F, pos: Coords, corner: Coords) -> usize
     }
 }
 
-fn reset_update_map(mut update_map: ResMut<UpdateMap>) {
-    update_map.need_update = false;
+fn reset_update_draw(mut update_draw: ResMut<UpdateDraw>) {
+    update_draw.need_update = false;
 }
 
 fn coord_rotation_x(size: (u32, u32), p: Coords) -> Coords {

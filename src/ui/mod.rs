@@ -25,7 +25,7 @@ use strum::IntoEnumIterator;
 use crate::{
     assets::UiAssets,
     conf::Conf,
-    draw::{DisplayOpts, UpdateMap},
+    draw::{DisplayOpts, UpdateDraw},
     gz::GunzipBin,
     manage_planet::ManagePlanetError,
     overlay::OverlayLayerKind,
@@ -275,7 +275,7 @@ fn layers_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
-    mut update_map: ResMut<UpdateMap>,
+    mut update_draw: ResMut<UpdateDraw>,
     mut display_opts: ResMut<DisplayOpts>,
 ) {
     if !wos.layers {
@@ -287,7 +287,7 @@ fn layers_window(
         .vscroll(false)
         .default_width(100.0)
         .show(egui_ctxs.ctx_mut(), |ui| {
-            layers_menu(ui, &mut current_layer, &mut update_map, &mut display_opts);
+            layers_menu(ui, &mut current_layer, &mut update_draw, &mut display_opts);
         })
         .unwrap()
         .response
@@ -298,7 +298,7 @@ fn layers_window(
 fn layers_menu(
     ui: &mut egui::Ui,
     current_layer: &mut OverlayLayerKind,
-    update_map: &mut UpdateMap,
+    update_draw: &mut UpdateDraw,
     display_opts: &mut DisplayOpts,
 ) {
     let mut new_layer = *current_layer;
@@ -309,7 +309,7 @@ fn layers_menu(
     }
     if new_layer != *current_layer {
         *current_layer = new_layer;
-        update_map.update();
+        update_draw.update();
     }
     ui.separator();
 
@@ -318,6 +318,6 @@ fn layers_menu(
     ui.checkbox(&mut display_opts.cities, t!("cities"));
     ui.checkbox(&mut display_opts.structures, t!("structures"));
     if *display_opts != old {
-        update_map.update();
+        update_draw.update();
     }
 }

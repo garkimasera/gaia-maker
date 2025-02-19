@@ -535,8 +535,8 @@ pub struct StartParams {
 #[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SimParams {
-    pub sim_normal_loop_duration_ms: u64,
-    pub sim_fast_loop_duration_ms: u64,
+    pub sim_slow_loop_duration_ms: u64,
+    pub sim_medium_loop_duration_ms: u64,
     pub total_mass_per_atm: f32,
     pub secs_per_cycle: f32,
     /// Heat capacity of air [J/(kg*K)]

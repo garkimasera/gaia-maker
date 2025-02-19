@@ -1,8 +1,10 @@
+use std::time::Duration;
+
 use anyhow::Context;
 use bevy::prelude::*;
 
 use crate::conf::Conf;
-use crate::draw::UpdateMap;
+use crate::draw::UpdateDraw;
 use crate::saveload::SavedTime;
 use crate::screen::{Centering, HoverTile};
 use crate::tutorial::{TutorialState, TUTORIAL_PLANET};
@@ -150,23 +152,22 @@ fn reset_save_state(mut save_state: ResMut<SaveState>) {
     save_state.change_current("", false);
 }
 
-fn start_sim(mut update_map: ResMut<UpdateMap>) {
-    update_map.update();
+fn start_sim(mut update_draw: ResMut<UpdateDraw>) {
+    update_draw.update();
 }
 
 fn update(
-    mut planet: ResMut<Planet>,
-    mut update_map: ResMut<UpdateMap>,
-    mut sim: ResMut<Sim>,
+    (mut planet, mut sim): (ResMut<Planet>, ResMut<Sim>),
+    mut update_draw: ResMut<UpdateDraw>,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
     mut er_switch_planet: EventReader<SwitchPlanet>,
     mut speed: ResMut<GameSpeed>,
     hover_tile: Query<&HoverTile>,
+    time: Res<Time<Real>>,
     wos: Res<WindowsOpenState>,
     conf: Res<Conf>,
-    mut count_frame: Local<u64>,
-    mut last_update: Local<Option<u64>>,
+    (mut last_advance_planet, mut last_update_draw): (Local<Duration>, Local<Duration>),
 ) {
     if wos.save || wos.load {
         return;
@@ -176,45 +177,41 @@ fn update(
         *speed = GameSpeed::Paused;
     }
 
-    *count_frame += 1;
+    let now = time.elapsed();
 
-    match *speed {
-        GameSpeed::Paused => {
-            return;
-        }
+    let advance_planet = match *speed {
+        GameSpeed::Paused => false,
         GameSpeed::Slow => {
-            if last_update.is_some()
-                && *count_frame - last_update.unwrap()
-                    < 60 * params.sim.sim_normal_loop_duration_ms / 1000
-            {
-                return;
-            }
+            now - *last_advance_planet > Duration::from_millis(params.sim.sim_slow_loop_duration_ms)
         }
         GameSpeed::Medium => {
-            if last_update.is_some()
-                && *count_frame - last_update.unwrap()
-                    < 60 * params.sim.sim_fast_loop_duration_ms / 1000
-            {
-                return;
-            }
+            now - *last_advance_planet
+                > Duration::from_millis(params.sim.sim_medium_loop_duration_ms)
         }
-        GameSpeed::Fast => (),
-    }
-    *last_update = Some(*count_frame);
-    crate::planet::debug::clear_logs(
-        hover_tile
-            .get_single()
-            .ok()
-            .and_then(|hover_tile| hover_tile.0),
-    );
-    update_map.update();
-    planet.advance(&mut sim, &params);
+        GameSpeed::Fast => true,
+    };
 
-    if conf.autosave_enabled && planet.cycles % conf.autosave_cycle_duration == 0 {
-        ew_manage_planet.send(ManagePlanet::Save {
-            auto: true,
-            _new_name: None,
-        });
+    if advance_planet {
+        crate::planet::debug::clear_logs(
+            hover_tile
+                .get_single()
+                .ok()
+                .and_then(|hover_tile| hover_tile.0),
+        );
+        planet.advance(&mut sim, &params);
+        *last_advance_planet = now;
+
+        if conf.autosave_enabled && planet.cycles % conf.autosave_cycle_duration == 0 {
+            ew_manage_planet.send(ManagePlanet::Save {
+                auto: true,
+                _new_name: None,
+            });
+        }
+    }
+
+    if advance_planet && now - *last_update_draw > Duration::from_millis(1000 / 30) {
+        *last_update_draw = now;
+        update_draw.update();
     }
 }
 

@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use rand::{seq::IndexedRandom, Rng, SeedableRng};
 
-use crate::{draw::UpdateMap, GameState};
+use crate::{draw::UpdateDraw, GameState};
 
 #[derive(Clone, Copy, Debug)]
 pub struct TitleScreenPlugin;
 
 impl Plugin for TitleScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<UpdateMap>()
+        app.add_event::<UpdateDraw>()
             .add_systems(Startup, setup_title_screen)
             .add_systems(OnEnter(GameState::MainMenu), enter_title_screen)
             .add_systems(OnExit(GameState::MainMenu), exit_title_screen);

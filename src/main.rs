@@ -57,6 +57,7 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(gz::GzPlugin)
         .add_plugins(text_assets::TextAssetsPlugin)
         .add_plugins(image_assets::ImageAssetsPlugin)

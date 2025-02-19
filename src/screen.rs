@@ -1,7 +1,7 @@
 use crate::action::CursorAction;
 use crate::assets::UiAssets;
 use crate::conf::Conf;
-use crate::draw::UpdateMap;
+use crate::draw::UpdateDraw;
 use crate::ui::WindowsOpenState;
 use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
 use bevy::window::{PrimaryWindow, WindowResized};
@@ -195,7 +195,7 @@ fn mouse_event(
 
 fn centering(
     mut er_centering: EventReader<Centering>,
-    mut update_map: ResMut<UpdateMap>,
+    mut update_draw: ResMut<UpdateDraw>,
     screen: Res<OccupiedScreenSpace>,
     window: Query<(&Window, &bevy_egui::EguiContextSettings), With<PrimaryWindow>>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
@@ -207,7 +207,7 @@ fn centering(
     };
 
     for e in er_centering.read() {
-        update_map.update();
+        update_draw.update();
         let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
 
         let center = &e.0;

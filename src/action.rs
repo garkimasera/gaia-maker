@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use geom::Coords;
 
 use crate::audio::AudioPlayer;
-use crate::draw::UpdateMap;
+use crate::draw::UpdateDraw;
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
 use crate::screen::CursorMode;
@@ -30,7 +30,7 @@ impl Plugin for ActionPlugin {
 
 fn cursor_action(
     mut er: EventReader<CursorAction>,
-    mut update_map: ResMut<UpdateMap>,
+    mut update_draw: ResMut<UpdateDraw>,
     cursor_mode: Res<CursorMode>,
     mut sim: ResMut<Sim>,
     params: Res<Params>,
@@ -43,14 +43,14 @@ fn cursor_action(
         match *cursor_mode {
             CursorMode::Normal => (),
             CursorMode::Demolition => {
-                update_map.update();
+                update_draw.update();
                 if planet.demolition(coords, &mut sim, &params) {
                     audio_player.play_se("demolish");
                 }
             }
             CursorMode::Build(kind) => {
                 if planet.buildable(params.structures[&kind].as_ref()) {
-                    update_map.update();
+                    update_draw.update();
                     if planet.placeable(coords) {
                         planet.place(coords, new_structure(kind), &mut sim, &params);
                         audio_player.play_se("build");
@@ -59,24 +59,24 @@ fn cursor_action(
             }
             CursorMode::TileEvent(kind) => {
                 planet.cause_tile_event(coords, kind, &mut sim, &params);
-                update_map.update();
+                update_draw.update();
             }
             CursorMode::SpawnAnimal(animal_id) => {
                 if planet.animal_spawnable(coords, animal_id, &params) {
-                    update_map.update();
+                    update_draw.update();
                     planet.spawn_animal(coords, animal_id, &params);
                 }
             }
             CursorMode::EditBiome(biome) => {
-                update_map.update();
+                update_draw.update();
                 planet.edit_biome(coords, biome);
             }
             CursorMode::ChangeHeight(value) => {
-                update_map.update();
+                update_draw.update();
                 planet.change_height(coords, value, &mut sim, &params);
             }
             CursorMode::PlaceSettlement(id, age) => {
-                update_map.update();
+                update_draw.update();
                 planet.place_settlement(
                     coords,
                     Settlement {
