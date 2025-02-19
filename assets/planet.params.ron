@@ -244,6 +244,7 @@
         event_duration: {civilize: 108},
     ),
     event: (
+        n_animal_to_civilize: 8.0,
         tile_event_costs: {
             fire: Material(100.0),
             black_dust: Material(50.0),

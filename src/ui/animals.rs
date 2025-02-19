@@ -107,6 +107,17 @@ fn contents(
             attr.temp.1 - KELVIN_CELSIUS,
         ));
         ui.end_row();
+
+        if let Some(civ) = &attr.civ {
+            ui.label(t!("civilize-cost"));
+            label_with_icon(
+                ui,
+                textures,
+                "ui/icon-gene",
+                WithUnitDisplay::GenePoint(civ.civilize_cost).to_string(),
+            );
+            ui.end_row();
+        }
     });
 
     ui.separator();
@@ -115,7 +126,7 @@ fn contents(
             *cursor_mode = CursorMode::SpawnAnimal(state.current);
         }
 
-        if let Some(c) = &attr.civ {
+        if attr.civ.is_some() {
             ui.scope(|ui| {
                 if planet.events.in_progress_civilize_event(state.current) {
                     ui.disable();
@@ -124,16 +135,18 @@ fn contents(
                     ui.disable();
                     let _ = ui.button(t!("civilized"));
                 } else {
-                    let cost = Cost::GenePoint(c.civilize_cost);
-                    if !planet.res.enough_to_consume(cost) {
+                    let s = if let Err(s) = planet.can_civilize(state.current, params) {
                         ui.disable();
-                    }
-                    if ui.button(t!("civilize")).clicked() {
-                        planet.res.consume(cost);
-                        let event = PlanetEvent::Civilize {
-                            target: state.current,
-                        };
-                        planet.start_event(event, sim, params);
+                        t!("msg", s)
+                    } else {
+                        String::new()
+                    };
+                    if ui
+                        .button(t!("civilize"))
+                        .on_disabled_hover_text(s)
+                        .clicked()
+                    {
+                        planet.civilize_animal(state.current, sim, params);
                     }
                 }
             });

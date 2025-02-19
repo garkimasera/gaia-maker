@@ -719,6 +719,8 @@ pub struct SimParams {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EventParams {
+    /// Minimum required animal population to civilize
+    pub n_animal_to_civilize: f32,
     /// Resource cost for tile event
     pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
     /// The ratio of biomass burn at one cycle

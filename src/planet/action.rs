@@ -117,4 +117,13 @@ impl Planet {
             n: 0.1,
         });
     }
+
+    pub fn civilize_animal(&mut self, animal_id: AnimalId, sim: &mut Sim, params: &Params) {
+        let Some(civ) = &params.animals[&animal_id].civ else {
+            unreachable!()
+        };
+        self.res.consume(Cost::GenePoint(civ.civilize_cost));
+        let event = PlanetEvent::Civilize { target: animal_id };
+        self.start_event(event, sim, params);
+    }
 }

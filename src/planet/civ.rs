@@ -193,3 +193,30 @@ fn growth_blocked_by_tile_event(tile_event: &TileEvent) -> bool {
         _ => false,
     }
 }
+
+impl Planet {
+    pub fn can_civilize(&self, id: AnimalId, params: &Params) -> Result<(), &'static str> {
+        let Some(civ) = &params.animals[&id].civ else {
+            unreachable!()
+        };
+
+        let sum: f32 = self
+            .map
+            .iter()
+            .map(|tile| {
+                tile.get_animal(id, params)
+                    .map(|animal| animal.n)
+                    .unwrap_or_default()
+            })
+            .sum();
+        if sum < params.event.n_animal_to_civilize {
+            return Err("animal-insufficient-population");
+        }
+
+        if self.res.gene_point < civ.civilize_cost {
+            return Err("lack-of-gene-points");
+        }
+
+        Ok(())
+    }
+}
