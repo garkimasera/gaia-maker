@@ -6,6 +6,7 @@ autosave_cycle_duration = 1000
 autosave_max_files = 5
 manual_max_files = 5
 screen_refresh_rate = "medium"
+show_fps = false
 
 [ui]
 scale_factor = 1.0

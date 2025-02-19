@@ -158,6 +158,7 @@ gift = "ギフト"
 [preference]
 autosave-enabled = "オートセーブ"
 screen-refresh-rate = "画面更新頻度"
+show-fps = "FPS表示"
 
 # Messages
 [msg]

@@ -159,6 +159,7 @@ gift = "Gift"
 [preference]
 autosave-enabled = "Enable Autosave"
 screen-refresh-rate = "Screen Refresh Rate"
+show-fps = "Show FPS"
 
 # Messages
 [msg]

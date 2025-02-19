@@ -34,6 +34,7 @@ pub fn preferences_window(
                         }
                     });
             });
+            ui.checkbox(&mut conf.show_fps, t!("preference", "show-fps"));
         })
         .unwrap()
         .response

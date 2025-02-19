@@ -59,6 +59,7 @@ pub struct Conf {
     pub autosave_max_files: usize,
     pub manual_max_files: usize,
     pub screen_refresh_rate: HighLow3,
+    pub show_fps: bool,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Reflect)]

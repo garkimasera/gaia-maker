@@ -1,4 +1,4 @@
-use bevy::{app::AppExit, prelude::*};
+use bevy::{app::AppExit, diagnostic::DiagnosticsStore, prelude::*};
 use bevy_egui::{egui, EguiContexts};
 use geom::Coords;
 use strum::IntoEnumIterator;
@@ -27,6 +27,7 @@ pub fn panels(
         ResMut<NextState<GameState>>,
     ),
     (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
+    diagnostics_store: Res<DiagnosticsStore>,
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
@@ -45,6 +46,7 @@ pub fn panels(
                 &textures,
                 &conf,
                 &mut last_hover_tile,
+                &diagnostics_store,
             );
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -197,7 +199,17 @@ fn sidebar(
     textures: &UiTextures,
     conf: &Conf,
     last_hover_tile: &mut Option<Coords>,
+    diagnostics_store: &DiagnosticsStore,
 ) {
+    // FPS indicator
+    const FPS: bevy::diagnostic::DiagnosticPath =
+        bevy::diagnostic::DiagnosticPath::const_new("fps");
+    if conf.show_fps {
+        if let Some(fps) = diagnostics_store.get(&FPS).and_then(|d| d.average()) {
+            ui.label(format!("FPS: {:.2}", fps));
+        }
+    }
+
     // Resource indicators
     super::misc::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
     super::misc::material_indicator(ui, textures, planet.res.material, planet.res.diff_material);
