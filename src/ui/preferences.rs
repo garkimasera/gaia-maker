@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
+use strum::IntoEnumIterator;
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::conf::{Conf, ConfChange};
+use crate::conf::{Conf, ConfChange, HighLow3};
 
 pub fn preferences_window(
     mut egui_ctxs: EguiContexts,
@@ -23,6 +24,16 @@ pub fn preferences_window(
                 &mut conf.autosave_enabled,
                 t!("preference", "autosave-enabled"),
             );
+            ui.horizontal(|ui| {
+                ui.label(t!("preference", "screen-refresh-rate"));
+                egui::ComboBox::from_id_salt("screen-refresh-rate")
+                    .selected_text(t!(conf.screen_refresh_rate))
+                    .show_ui(ui, |ui| {
+                        for item in HighLow3::iter() {
+                            ui.selectable_value(&mut conf.screen_refresh_rate, item, t!(item));
+                        }
+                    });
+            });
         })
         .unwrap()
         .response

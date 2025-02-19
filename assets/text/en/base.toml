@@ -158,6 +158,7 @@ gift = "Gift"
 # Preferences
 [preference]
 autosave-enabled = "Enable Autosave"
+screen-refresh-rate = "Screen Refresh Rate"
 
 # Messages
 [msg]

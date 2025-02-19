@@ -1,6 +1,7 @@
 use anyhow::Context;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use strum::{AsRefStr, EnumIter};
 
 use crate::GameState;
 use crate::{assets::UiAssets, text_assets::Lang};
@@ -57,6 +58,7 @@ pub struct Conf {
     pub autosave_cycle_duration: u64,
     pub autosave_max_files: usize,
     pub manual_max_files: usize,
+    pub screen_refresh_rate: HighLow3,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Reflect)]
@@ -65,6 +67,17 @@ pub struct UiConf {
     pub font_scale: f32,
     pub messages_in_list: usize,
     pub min_sidebar_width: f32,
+}
+
+#[derive(
+    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize, AsRefStr, EnumIter,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum HighLow3 {
+    Low,
+    Medium,
+    High,
 }
 
 #[derive(Clone, Copy, Debug, Event)]

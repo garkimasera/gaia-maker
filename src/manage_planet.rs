@@ -209,7 +209,12 @@ fn update(
         }
     }
 
-    if advance_planet && now - *last_update_draw > Duration::from_millis(1000 / 30) {
+    let refresh_frame = match conf.screen_refresh_rate {
+        crate::conf::HighLow3::Low => 7,
+        crate::conf::HighLow3::Medium => 15,
+        crate::conf::HighLow3::High => 30,
+    };
+    if advance_planet && now - *last_update_draw > Duration::from_millis(1000 / refresh_frame) {
         *last_update_draw = now;
         update_draw.update();
     }
