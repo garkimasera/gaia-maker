@@ -3,6 +3,7 @@ mod debug_tools;
 mod dialog;
 mod error_popup;
 mod help;
+mod hover_tile_tooltip;
 mod main_menu;
 mod map;
 mod misc;
@@ -118,6 +119,12 @@ impl Plugin for UiPlugin {
                 )
                     .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),
+            )
+            .add_systems(
+                Update,
+                hover_tile_tooltip::hover_tile_tooltip
+                    .run_if(in_state(GameState::Running))
+                    .after(UiWindowsSystemSet),
             );
     }
 }

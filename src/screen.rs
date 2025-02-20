@@ -345,7 +345,7 @@ pub struct OccupiedScreenSpace {
 }
 
 impl OccupiedScreenSpace {
-    fn check(&self, w: f32, h: f32, p: Vec2) -> bool {
+    pub fn check(&self, w: f32, h: f32, p: Vec2) -> bool {
         if self.opening_modal {
             return false;
         }
