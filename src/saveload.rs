@@ -96,10 +96,10 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
 
 pub fn load_from(save_state: &SaveState, auto: bool, n: u32) -> Result<(Planet, SaveFileMetadata)> {
     let file_name = save_file_name(auto, n);
-    let data = SaveFile::from_bytes(&crate::platform::read_savefile(
-        &save_state.current_save_sub_dir,
-        &file_name,
-    )?)?;
+    let mut data = Vec::new();
+    crate::platform::read_savefile(&save_state.current_save_sub_dir, &file_name)?
+        .read_to_end(&mut data)?;
+    let data = SaveFile::from_bytes(&data)?;
     log::info!(
         "load save from {} version={} time=\"{}\"",
         file_name,
@@ -230,7 +230,15 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
             continue;
         };
 
-        let save_file_data = match crate::platform::read_savefile(sub_dir_name, &file_name) {
+        let mut reader = match crate::platform::read_savefile(sub_dir_name, &file_name) {
+            Ok(save_file_data) => save_file_data,
+            Err(e) => {
+                log::warn!("cannot read {}: {:?}", file_name, e);
+                continue;
+            }
+        };
+        let mut data = Vec::new();
+        match reader.read_to_end(&mut data) {
             Ok(save_file_data) => save_file_data,
             Err(e) => {
                 log::warn!("cannot read {}: {:?}", file_name, e);
@@ -238,7 +246,7 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
             }
         };
 
-        let save_file = match SaveFile::from_bytes(&save_file_data) {
+        let save_file = match SaveFile::from_bytes(&data) {
             Ok(save_file) => save_file,
             Err(e) => {
                 log::warn!("cannot load {}: {:?}", file_name, e);

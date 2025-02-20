@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use anyhow::{anyhow, Context, Result};
 
 use crate::{conf::Conf, saveload::SavedTime};
@@ -46,16 +48,29 @@ pub fn write_savefile(dir_name: &str, file_name: &str, data: &[u8]) -> Result<()
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("saves").join(dir_name);
     std::fs::create_dir_all(&save_dir_path)?;
-    std::fs::write(save_dir_path.join(file_name), data)?;
+    let file_path = save_dir_path.join(file_name);
+
+    let mut w = zstd::stream::write::Encoder::new(
+        std::io::BufWriter::new(std::fs::File::create(file_path)?),
+        3,
+    )?;
+    w.write_all(data)?;
+    w.finish()?;
     Ok(())
 }
 
-pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
+pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<impl std::io::Read> {
     let data_dir =
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
     let save_dir_path = data_dir.join("saves").join(dir_name);
     let file_path = save_dir_path.join(file_name);
-    std::fs::read(&file_path).with_context(|| format!("reading \"{}\"", file_path.display()))
+
+    let file = std::fs::File::open(&file_path)
+        .with_context(|| format!("reading \"{}\"", file_path.display()))?;
+
+    Ok(zstd::stream::read::Decoder::new(std::io::BufReader::new(
+        file,
+    ))?)
 }
 
 pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {

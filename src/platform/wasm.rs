@@ -45,7 +45,7 @@ pub fn write_savefile(dir_name: &str, file_name: &str, data: &[u8]) -> Result<()
     Ok(())
 }
 
-pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
+pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<impl std::io::Read> {
     use std::io::{Cursor, Read};
 
     let s = get_web_storage()?
@@ -59,7 +59,7 @@ pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<Vec<u8>> {
 
     let mut data = Vec::new();
     decoder.read_to_end(&mut data)?;
-    Ok(data)
+    Ok(std::io::Cursor::new(data))
 }
 
 pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
