@@ -15,7 +15,7 @@ deb = ["asset_tar"]
 anyhow = "1"
 arrayvec = { version = "0.7", features = ["serde"] }
 base64 = "0.22"
-bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "x11", "webgl2"] }
+bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "multi_threaded", "x11", "webgl2"] }
 bevy_asset_loader = "0.22"
 bevy_common_assets = { version = "0.12", features = ["ron", "toml"] }
 bevy_egui = "0.33"
@@ -61,6 +61,10 @@ getrandom = { version = "0.3", features = ["wasm_js"] } # For rand v0.9
 
 [profile.dev]
 opt-level = 1
+
+[profile.release-debug]
+inherits = "release"
+debug = true
 
 [package.metadata.deb]
 depends = "$auto"
