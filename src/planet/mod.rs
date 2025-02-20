@@ -197,7 +197,7 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
     let mut atmo = params.default_start_params.atmo.clone();
 
     if let Some(range) = start_planet.nitrogen {
-        *atmo.get_mut(&GasKind::Oxygen).unwrap() =
+        *atmo.get_mut(&GasKind::Nitrogen).unwrap() =
             rng.sample(SymmetricalLinearDist::from(range)).into();
     }
     if let Some(range) = start_planet.oxygen {
