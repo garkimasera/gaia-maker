@@ -42,20 +42,35 @@ impl Planet {
         }
 
         // Adjust water volume
-        if let Some(target_sea_level) = start_params.target_sea_level {
+        if start_params.target_sea_level.is_some() || start_params.target_sea_area.is_some() {
             let sim = Sim::new(&planet);
-            let target_sea_level = target_sea_level * start_params.difference_in_elevation;
+            let target_sea_level = start_params
+                .target_sea_level
+                .map(|target_sea_level| target_sea_level * start_params.difference_in_elevation);
+            let target_diff = if target_sea_level.is_some() {
+                50.0
+            } else {
+                0.02
+            };
             let max_water_volume = planet.water.water_volume;
             let water_volume = misc::bisection(
                 |water_volume| {
                     planet.water.water_volume = water_volume;
                     super::water::update_sea_level(&mut planet, &sim, params);
-                    planet.water.sea_level - target_sea_level
+                    if let Some(target_sea_level) = target_sea_level {
+                        planet.water.sea_level - target_sea_level
+                    } else {
+                        let n_sea_tile =
+                            planet.map.iter().filter(|tile| tile.biome.is_sea()).count();
+                        let size = planet.map.size();
+                        let ratio = n_sea_tile as f32 / (size.0 * size.1) as f32;
+                        ratio - start_params.target_sea_area.unwrap()
+                    }
                 },
                 0.0,
                 max_water_volume * 10.0,
-                30,
-                100.0,
+                20,
+                target_diff,
             );
             planet.water.water_volume = water_volume;
         }

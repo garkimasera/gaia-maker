@@ -10,6 +10,6 @@
     carbon_dioxide: (0.007, 0.00),
     argon: (0.01, 0.00),
     initial_conditions: [],
-    height_table: [(0.0, 0.0), (0.2, 0.05), (0.4, 0.5), (0.8, 0.6), (1.0, 1.0)],
-    target_sea_level: 0.525,
+    height_table: [(0.0, 0.0), (0.2, 0.05), (0.4, 0.48), (0.8, 0.6), (1.0, 1.0)],
+    target_sea_area: 0.52,
 )
