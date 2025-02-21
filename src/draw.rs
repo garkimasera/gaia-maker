@@ -1,7 +1,7 @@
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::screen::InScreenTileRange;
-use crate::{assets::*, GameState};
-use crate::{planet::*, GameSystemSet};
+use crate::{GameState, assets::*};
+use crate::{GameSystemSet, planet::*};
 use arrayvec::ArrayVec;
 use bevy::prelude::*;
 use geom::{Array2d, Coords, Direction, RectIter};
@@ -368,11 +368,7 @@ fn spawn_tile_animation_textures(
             .iter()
             .filter_map(|e| {
                 let key = tile_event_order_key(e);
-                if key > 0 {
-                    Some((key, e.kind()))
-                } else {
-                    None
-                }
+                if key > 0 { Some((key, e.kind())) } else { None }
             })
             .max_by_key(|(key, _)| *key)
         else {

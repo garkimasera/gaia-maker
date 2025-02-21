@@ -1,5 +1,5 @@
 use bevy::prelude::EventWriter;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use rand::seq::IndexedRandom;
 
 use crate::{
@@ -8,8 +8,8 @@ use crate::{
 };
 
 use super::{
-    main_menu::{MainMenuMode, MainMenuState},
     UiTextures,
+    main_menu::{MainMenuMode, MainMenuState},
 };
 
 #[derive(Clone, Debug)]

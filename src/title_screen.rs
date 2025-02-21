@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use rand::{seq::IndexedRandom, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, seq::IndexedRandom};
 
-use crate::{draw::UpdateDraw, GameState};
+use crate::{GameState, draw::UpdateDraw};
 
 #[derive(Clone, Copy, Debug)]
 pub struct TitleScreenPlugin;

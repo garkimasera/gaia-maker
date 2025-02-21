@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, HashMap};
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr, Same};
+use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
 use super::serde_with_types::*;

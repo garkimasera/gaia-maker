@@ -24,11 +24,7 @@ impl Water {
 
     pub fn sea_water_volume(&self) -> f32 {
         let v = self.water_volume - self.ice_volume;
-        if v > 0.0 {
-            v
-        } else {
-            0.0
-        }
+        if v > 0.0 { v } else { 0.0 }
     }
 }
 

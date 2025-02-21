@@ -1,9 +1,9 @@
 use arrayvec::ArrayVec;
 use geom::Coords;
 use num_traits::FromPrimitive;
-use rand::{seq::IndexedRandom, Rng};
+use rand::{Rng, seq::IndexedRandom};
 
-use super::{defs::*, misc::calc_congestion_rate, Planet, Sim};
+use super::{Planet, Sim, defs::*, misc::calc_congestion_rate};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 

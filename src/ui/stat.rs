@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 

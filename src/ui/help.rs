@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::{misc::label_with_icon, UiTextures, WindowsOpenState};
+use super::{UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::planet::{
     BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
 };

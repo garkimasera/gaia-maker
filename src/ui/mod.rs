@@ -17,13 +17,14 @@ mod tutorial;
 
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, load::SizedTexture, FontData, FontDefinitions, FontFamily},
     EguiContextSettings, EguiContexts, EguiPlugin,
+    egui::{self, FontData, FontDefinitions, FontFamily, load::SizedTexture},
 };
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 use crate::{
+    GameState,
     assets::UiAssets,
     conf::Conf,
     draw::{DisplayOpts, UpdateDraw},
@@ -31,7 +32,6 @@ use crate::{
     manage_planet::ManagePlanetError,
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
-    GameState,
 };
 
 use self::dialog::MsgDialog;

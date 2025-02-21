@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use strum::IntoEnumIterator;
 
 use super::{OccupiedScreenSpace, WindowsOpenState};

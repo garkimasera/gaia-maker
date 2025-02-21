@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 
 use crate::{conf::Conf, saveload::SavedTime};
 

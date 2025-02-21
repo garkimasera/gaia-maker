@@ -1,5 +1,5 @@
 use geom::{Coords, CyclicMode};
-use rand::{rngs::SmallRng, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, rngs::SmallRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     assert!(table.len() > 2);

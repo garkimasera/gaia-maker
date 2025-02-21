@@ -1,7 +1,7 @@
 use geom::Array2d;
 use noise::{
-    utils::{NoiseMapBuilder, SphereMapBuilder},
     Perlin, ScalePoint,
+    utils::{NoiseMapBuilder, SphereMapBuilder},
 };
 
 #[derive(Clone, Debug)]

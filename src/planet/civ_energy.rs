@@ -225,11 +225,7 @@ pub fn process_settlement_energy(
     planet.atmo.release_carbon(diff_biomass);
 
     let x = available_biomass_ratio * params.sim.resource_availability_factor;
-    if x < 1.0 {
-        x * x
-    } else {
-        x.min(1.0)
-    }
+    if x < 1.0 { x * x } else { x.min(1.0) }
 }
 
 pub fn consume_buried_carbon(planet: &mut Planet, sim: &mut Sim, params: &Params) {

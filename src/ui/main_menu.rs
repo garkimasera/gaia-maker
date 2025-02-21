@@ -1,6 +1,6 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 
 use crate::conf::{Conf, ConfChange};
 use crate::manage_planet::{GlobalData, ManagePlanet, ManagePlanetError, SaveState};
@@ -9,8 +9,8 @@ use crate::text_assets::Lang;
 use crate::tutorial::TUTORIAL_PLANET;
 use strum::IntoEnumIterator;
 
-use super::new_planet::NewPlanetState;
 use super::UiTextures;
+use super::new_planet::NewPlanetState;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum MainMenuMode {

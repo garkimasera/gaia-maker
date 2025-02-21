@@ -1,7 +1,7 @@
-use super::{misc::label_with_icon, OccupiedScreenSpace, UiTextures, WindowsOpenState};
+use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use compact_str::format_compact;
 
 #[derive(Debug)]

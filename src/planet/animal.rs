@@ -1,7 +1,7 @@
 use arrayvec::ArrayVec;
 use geom::Direction;
 use misc::{calc_congestion_rate, range_to_livability_trapezoid};
-use rand::{seq::IndexedRandom, Rng};
+use rand::{Rng, seq::IndexedRandom};
 
 use super::*;
 

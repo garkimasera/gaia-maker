@@ -8,13 +8,13 @@ use bevy_kira_audio::AudioSource;
 use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::Deserialize;
-use serde_with::{serde_as, DisplayFromStr, Same};
+use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::IntoEnumIterator;
 
+use crate::GameState;
 use crate::conf::Conf;
 use crate::gz::GunzipBin;
 use crate::planet::*;
-use crate::GameState;
 
 #[derive(Clone, Copy, Debug)]
 pub struct AssetsPlugin;

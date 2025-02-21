@@ -3,7 +3,7 @@ use crate::assets::UiAssets;
 use crate::conf::Conf;
 use crate::draw::UpdateDraw;
 use crate::ui::WindowsOpenState;
-use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
+use crate::{GameSpeed, GameState, GameSystemSet, planet::*};
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
@@ -173,7 +173,7 @@ fn mouse_event(
         return;
     }
 
-    if let Some(coords) = hover_tile.get_single().unwrap().0 .0 {
+    if let Some(coords) = hover_tile.get_single().unwrap().0.0 {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             ew_cursor_action.send(CursorAction {
                 coords,
@@ -274,7 +274,7 @@ fn update_hover_tile(
 
     // Check covered by ui or not
     if !occupied_screen_space.check(window.width(), window.height(), cursor_pos) {
-        hover_tile.0 .0 = None;
+        hover_tile.0.0 = None;
         *hover_tile.2 = Visibility::Hidden;
         return;
     }
@@ -297,13 +297,13 @@ fn update_hover_tile(
         } else {
             tile_i - (tile_i / planet_w) * planet_w
         };
-        hover_tile.0 .0 = Some(Coords(tile_i_rotated, tile_j));
+        hover_tile.0.0 = Some(Coords(tile_i_rotated, tile_j));
         hover_tile.1.translation.x = tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.y = tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.z = 950.0;
         Visibility::Inherited
     } else {
-        hover_tile.0 .0 = None;
+        hover_tile.0.0 = None;
         Visibility::Hidden
     };
 

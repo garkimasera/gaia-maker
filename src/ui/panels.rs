@@ -1,18 +1,18 @@
 use bevy::{app::AppExit, diagnostic::DiagnosticsStore, prelude::*};
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
 use strum::IntoEnumIterator;
 
 use crate::{
+    GameSpeed, GameState,
     conf::Conf,
     manage_planet::ManagePlanet,
-    planet::{Cost, Params, Planet, StructureKind, KELVIN_CELSIUS},
+    planet::{Cost, KELVIN_CELSIUS, Params, Planet, StructureKind},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     text::WithUnitDisplay,
-    GameSpeed, GameState,
 };
 
-use super::{help::HelpItem, misc::LabelWithIcon, UiTextures, WindowsOpenState};
+use super::{UiTextures, WindowsOpenState, help::HelpItem, misc::LabelWithIcon};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -250,7 +250,7 @@ fn sidebar(
             CursorMode::TileEvent(kind) => {
                 t!(kind)
             }
-            CursorMode::SpawnAnimal(ref animal_id) => {
+            CursorMode::SpawnAnimal(animal_id) => {
                 format!("{} {}", t!("animal"), t!("animal", animal_id))
             }
             CursorMode::EditBiome(biome) => {

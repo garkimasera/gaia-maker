@@ -4,7 +4,7 @@ use crate::planet::*;
 use crate::saveload::SaveState;
 use crate::screen::HoverTile;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 

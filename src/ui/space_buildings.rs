@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, epaint, load::SizedTexture},
     EguiContexts,
+    egui::{self, epaint, load::SizedTexture},
 };
 use compact_str::format_compact;
 use strum::IntoEnumIterator;
 
 use super::{
-    help::HelpItem, OccupiedScreenSpace, UiTextures, WindowsOpenState, HELP_TOOLTIP_WIDTH,
+    HELP_TOOLTIP_WIDTH, OccupiedScreenSpace, UiTextures, WindowsOpenState, help::HelpItem,
 };
 use crate::planet::*;
 

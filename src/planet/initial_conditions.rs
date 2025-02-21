@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use super::{misc::SymmetricalLinearDist, Biome, InitialCondition, Params, Planet, Sim};
+use super::{Biome, InitialCondition, Params, Planet, Sim, misc::SymmetricalLinearDist};
 
 pub fn apply_initial_condition(
     planet: &mut Planet,

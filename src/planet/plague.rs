@@ -1,8 +1,8 @@
 use arrayvec::ArrayVec;
 use geom::Coords;
-use rand::{seq::IndexedRandom, Rng};
+use rand::{Rng, seq::IndexedRandom};
 
-use super::{defs::*, Planet, Sim};
+use super::{Planet, Sim, defs::*};
 
 pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coords) {
     let plague_event: &mut PlagueEvent = 'a: {

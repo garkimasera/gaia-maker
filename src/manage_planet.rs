@@ -7,9 +7,9 @@ use crate::conf::Conf;
 use crate::draw::UpdateDraw;
 use crate::saveload::SavedTime;
 use crate::screen::{Centering, HoverTile};
-use crate::tutorial::{TutorialState, TUTORIAL_PLANET};
+use crate::tutorial::{TUTORIAL_PLANET, TutorialState};
 use crate::ui::{UiWindowsSystemSet, WindowsOpenState};
-use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
+use crate::{GameSpeed, GameState, GameSystemSet, planet::*};
 
 pub use crate::saveload::SaveState;
 
