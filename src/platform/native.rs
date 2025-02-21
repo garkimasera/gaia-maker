@@ -188,8 +188,32 @@ pub fn window_open() {}
 
 pub fn window_close() {}
 
-pub fn window_resize() {}
+pub fn window_resize(
+    mut er: bevy::prelude::EventReader<bevy::window::WindowResized>,
+    mut conf: Option<bevy::prelude::ResMut<Conf>>,
+    mut ew_conf_change: bevy::prelude::EventWriter<crate::conf::ConfChange>,
+) {
+    if let Some(conf) = &mut conf {
+        if let Some(e) = er.read().last() {
+            conf.window = Some(crate::conf::WindowConf {
+                size: (e.width as u32, e.height as u32),
+            });
+            ew_conf_change.send_default();
+        }
+    }
+}
 
 pub fn preferred_window_size() -> (u32, u32) {
-    DEFAULT_WINDOW_SIZE
+    match crate::platform::read_data_file(crate::conf::CONF_FILE_NAME)
+        .and_then(|data| toml::from_str(&data).context("deserialize conf"))
+    {
+        Ok(conf) => modify_conf(conf)
+            .window
+            .map(|window_conf| window_conf.size)
+            .unwrap_or(DEFAULT_WINDOW_SIZE),
+        Err(e) => {
+            log::info!("cannot load config: {}", e);
+            DEFAULT_WINDOW_SIZE
+        }
+    }
 }

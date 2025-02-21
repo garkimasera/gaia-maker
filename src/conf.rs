@@ -6,7 +6,7 @@ use strum::{AsRefStr, EnumIter};
 use crate::GameState;
 use crate::{assets::UiAssets, text_assets::Lang};
 
-const CONF_FILE_NAME: &str = "conf.toml";
+pub const CONF_FILE_NAME: &str = "conf.toml";
 
 #[derive(Clone, Copy, Debug)]
 pub struct ConfPlugin;
@@ -18,7 +18,7 @@ impl Plugin for ConfPlugin {
                 "conf.toml",
             ]))
             .add_systems(Update, on_change)
-            .add_systems(OnExit(GameState::AssetLoading), set_conf);
+            .add_systems(OnExit(GameState::AssetLoading), load_conf);
     }
 }
 
@@ -34,7 +34,7 @@ fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>
     }
 }
 
-fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
+fn load_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
     let conf = match crate::platform::read_data_file(CONF_FILE_NAME)
         .and_then(|data| toml::from_str(&data).context("deserialize conf"))
     {
@@ -60,6 +60,7 @@ pub struct Conf {
     pub manual_max_files: usize,
     pub screen_refresh_rate: HighLow3,
     pub show_fps: bool,
+    pub window: Option<WindowConf>,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Reflect)]
@@ -68,6 +69,11 @@ pub struct UiConf {
     pub font_scale: f32,
     pub messages_in_list: usize,
     pub min_sidebar_width: f32,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Asset, Resource, TypePath)]
+pub struct WindowConf {
+    pub size: (u32, u32),
 }
 
 #[derive(
