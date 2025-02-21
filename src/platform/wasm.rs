@@ -238,13 +238,7 @@ pub fn window_resize(
         return;
     };
 
-    // Adjust target size to prevent pixel blurring
-    let target_width = width - width % 2;
-    let target_height = height - height % 2;
-
-    if window.width() as u32 != target_width || window.height() as u32 != target_height {
-        window
-            .resolution
-            .set(target_width as f32, target_height as f32);
+    if window.width() as u32 != width || window.height() as u32 != height {
+        window.resolution.set(width as f32, height as f32);
     }
 }

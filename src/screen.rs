@@ -66,8 +66,8 @@ impl Plugin for ScreenPlugin {
                     .run_if(in_state(GameState::Running))
                     .after(GameSystemSet::UpdateHoverTile),
             )
-            .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)))
-            .add_systems(Update, crate::platform::window_resize);
+            .add_systems(Update, crate::platform::window_resize)
+            .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)));
     }
 }
 
@@ -208,19 +208,19 @@ fn centering(
 
     for e in er_centering.read() {
         update_draw.update();
-        let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
+        let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
 
         let center = &e.0;
 
         // Change camera position
         let width = TILE_SIZE * planet.map.size().0 as f32;
         let x = center.x;
-        transform.x = if x < 0.0 {
+        cpos.x = if x < 0.0 {
             x + ((-x / width).trunc() + 1.0) * width
         } else {
             x - (x / width).trunc() * width
         };
-        transform.y = center
+        cpos.y = center
             .y
             .clamp(-TILE_SIZE, (planet.map.size().1 + 1) as f32 * TILE_SIZE);
 
@@ -229,16 +229,15 @@ fn centering(
             (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
             0.0,
         ) / 2.0;
-        *transform -= space_adjust;
+        *cpos -= space_adjust;
 
-        transform.x = transform.x.round();
-        transform.y = transform.y.round();
+        adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
 
         // Update in screen tile range
-        let x0 = ((transform.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
-        let y0 = ((transform.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
-        let x1 = ((transform.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
-        let y1 = ((transform.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
+        let x0 = ((cpos.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
+        let y0 = ((cpos.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
+        let x1 = ((cpos.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
+        let y1 = ((cpos.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
         in_screen_tile_range.y_to_from_not_clamped = (y0, y1);
         let y0 = y0.clamp(0, planet.map.size().1 as i32 - 1);
         let y1 = y1.clamp(0, planet.map.size().1 as i32 - 1);
@@ -477,6 +476,25 @@ fn keyboard_input(
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
     }
+}
+
+/// Adjust camera position to prevent pixel blurring
+pub fn adjust_camera_pos(x: &mut f32, y: &mut f32, w: f32, h: f32) {
+    let (x_fract, y_fract) = (x.fract(), y.fract());
+    if (w as u32) % 2 == 0 {
+        if x_fract > 0.0 {
+            *x = x.floor();
+        }
+    } else if x_fract == 0.0 {
+        *x += 0.5;
+    };
+    if (h as u32) % 2 == 0 {
+        if y_fract > 0.0 {
+            *y = y.floor();
+        }
+    } else if y_fract == 0.0 {
+        *y += 0.5;
+    };
 }
 
 fn set_window_icon(windows: NonSend<bevy::winit::WinitWindows>) {
