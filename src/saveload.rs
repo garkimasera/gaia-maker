@@ -96,10 +96,8 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
 
 pub fn load_from(save_state: &SaveState, auto: bool, n: u32) -> Result<(Planet, SaveFileMetadata)> {
     let file_name = save_file_name(auto, n);
-    let mut data = Vec::new();
-    crate::platform::read_savefile(&save_state.current_save_sub_dir, &file_name)?
-        .read_to_end(&mut data)?;
-    let data = SaveFile::from_bytes(&data)?;
+    let reader = crate::platform::read_savefile(&save_state.current_save_sub_dir, &file_name)?;
+    let data = SaveFile::from_reader(reader, false)?;
     log::info!(
         "load save from {} version={} time=\"{}\"",
         file_name,
@@ -154,30 +152,33 @@ impl SaveFile {
         buf
     }
 
-    fn from_bytes(data: &[u8]) -> Result<Self> {
-        let mut data = std::io::Cursor::new(data);
-
-        let len = data.read_u8()?;
+    fn from_reader<R: Read>(mut reader: R, header_only: bool) -> Result<Self> {
+        let len = reader.read_u8()?;
         let mut version = vec![0; len as usize];
-        data.read_exact(&mut version)?;
+        reader.read_exact(&mut version)?;
         let version = String::from_utf8(version)?;
 
-        let len = data.read_u8()?;
+        let len = reader.read_u8()?;
         let mut time = vec![0; len as usize];
-        data.read_exact(&mut time)?;
+        reader.read_exact(&mut time)?;
         let time = SavedTime(String::from_utf8(time)?);
 
-        let len = data.read_u8()?;
+        let len = reader.read_u8()?;
         let mut name = vec![0; len as usize];
-        data.read_exact(&mut name)?;
+        reader.read_exact(&mut name)?;
         let name = String::from_utf8(name)?;
 
-        let len = data.read_u16::<byteorder::BigEndian>()?;
+        let len = reader.read_u16::<byteorder::BigEndian>()?;
         let mut metadata = vec![0; len as usize];
-        data.read_exact(&mut metadata)?;
+        reader.read_exact(&mut metadata)?;
 
-        let mut planet_data = Vec::new();
-        data.read_to_end(&mut planet_data)?;
+        let planet_data = if header_only {
+            Vec::new()
+        } else {
+            let mut planet_data = Vec::new();
+            reader.read_to_end(&mut planet_data)?;
+            planet_data
+        };
 
         let metadata = match rmp_serde::from_slice(&metadata) {
             Ok(metadata) => metadata,
@@ -230,23 +231,14 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
             continue;
         };
 
-        let mut reader = match crate::platform::read_savefile(sub_dir_name, &file_name) {
+        let reader = match crate::platform::read_savefile(sub_dir_name, &file_name) {
             Ok(save_file_data) => save_file_data,
             Err(e) => {
                 log::warn!("cannot read {}: {:?}", file_name, e);
                 continue;
             }
         };
-        let mut data = Vec::new();
-        match reader.read_to_end(&mut data) {
-            Ok(save_file_data) => save_file_data,
-            Err(e) => {
-                log::warn!("cannot read {}: {:?}", file_name, e);
-                continue;
-            }
-        };
-
-        let save_file = match SaveFile::from_bytes(&data) {
+        let save_file = match SaveFile::from_reader(reader, true) {
             Ok(save_file) => save_file,
             Err(e) => {
                 log::warn!("cannot load {}: {:?}", file_name, e);
