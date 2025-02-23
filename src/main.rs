@@ -43,18 +43,26 @@ fn main() {
     let _args = Args::parse();
 
     crate::platform::window_open();
-    let window_size = crate::platform::preferred_window_size();
+
+    let mut window = Window {
+        title: APP_NAME.into(),
+        present_mode: PresentMode::Fifo,
+        canvas: Some("#game-screen".into()),
+        ..default()
+    };
+    match crate::platform::PreferredWindowResolution::get() {
+        platform::PreferredWindowResolution::Size(w, h) => {
+            window.resolution = WindowResolution::new(w as f32, h as f32);
+        }
+        platform::PreferredWindowResolution::Maximized => {
+            window.set_maximized(true);
+        }
+    }
 
     App::new()
         .add_plugins(AssetPlugin)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: APP_NAME.into(),
-                present_mode: PresentMode::Fifo,
-                resolution: WindowResolution::new(window_size.0 as f32, window_size.1 as f32),
-                canvas: Some("#game-screen".into()),
-                ..default()
-            }),
+            primary_window: Some(window),
             ..default()
         }))
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)

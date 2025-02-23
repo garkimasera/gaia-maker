@@ -2,8 +2,6 @@ use anyhow::{Result, anyhow};
 
 use crate::{conf::Conf, saveload::SavedTime};
 
-use super::DEFAULT_WINDOW_SIZE;
-
 pub const SAVE_DIRS_LIMIT: bool = true;
 
 #[cfg(feature = "asset_tar")]
@@ -153,23 +151,6 @@ fn get_web_storage() -> Result<web_sys::Storage> {
     Ok(storage)
 }
 
-pub fn preferred_window_size() -> (u32, u32) {
-    let Some(w) = web_sys::window() else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-
-    let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let width = width as u32;
-    let height = height as u32;
-
-    (width, height)
-}
-
 pub fn modify_conf(mut conf: Conf) -> Conf {
     conf.autosave_max_files = 1;
     conf.manual_max_files = 1;
@@ -240,5 +221,20 @@ pub fn window_resize(
 
     if window.width() as u32 != width || window.height() as u32 != height {
         window.resolution.set(width as f32, height as f32);
+    }
+}
+
+impl super::PreferredWindowResolution {
+    pub fn get() -> Self {
+        let Some(w) = web_sys::window() else {
+            return Self::default();
+        };
+        let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
+            return Self::default();
+        };
+        let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
+            return Self::default();
+        };
+        Self::Size(width as u32, height as u32)
     }
 }

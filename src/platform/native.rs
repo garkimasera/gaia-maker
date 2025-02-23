@@ -4,8 +4,6 @@ use anyhow::{Context, Result, anyhow};
 
 use crate::{conf::Conf, saveload::SavedTime};
 
-use super::DEFAULT_WINDOW_SIZE;
-
 static DATA_DIR: std::sync::LazyLock<Option<std::path::PathBuf>> =
     std::sync::LazyLock::new(find_data_dir);
 
@@ -192,28 +190,42 @@ pub fn window_resize(
     mut er: bevy::prelude::EventReader<bevy::window::WindowResized>,
     mut conf: Option<bevy::prelude::ResMut<Conf>>,
     mut ew_conf_change: bevy::prelude::EventWriter<crate::conf::ConfChange>,
+    windows: bevy::prelude::NonSend<bevy::winit::WinitWindows>,
 ) {
-    if let Some(conf) = &mut conf {
-        if let Some(e) = er.read().last() {
-            conf.window = Some(crate::conf::WindowConf {
-                size: (e.width as u32, e.height as u32),
-            });
-            ew_conf_change.send_default();
-        }
-    }
+    let Some(e) = er.read().last() else {
+        return;
+    };
+    let Some(conf) = &mut conf else {
+        return;
+    };
+    let maximized = windows.windows.values().any(|w| w.is_maximized());
+    conf.window = Some(crate::conf::WindowConf {
+        size: (e.width as u32, e.height as u32),
+        maximized,
+    });
+    ew_conf_change.send_default();
 }
 
-pub fn preferred_window_size() -> (u32, u32) {
-    match crate::platform::read_data_file(crate::conf::CONF_FILE_NAME)
-        .and_then(|data| toml::from_str(&data).context("deserialize conf"))
-    {
-        Ok(conf) => modify_conf(conf)
-            .window
-            .map(|window_conf| window_conf.size)
-            .unwrap_or(DEFAULT_WINDOW_SIZE),
-        Err(e) => {
-            log::info!("cannot load config: {}", e);
-            DEFAULT_WINDOW_SIZE
+impl super::PreferredWindowResolution {
+    pub fn get() -> Self {
+        match crate::platform::read_data_file(crate::conf::CONF_FILE_NAME)
+            .and_then(|data| toml::from_str(&data).context("deserialize conf"))
+        {
+            Ok(conf) => {
+                if let Some(window_conf) = modify_conf(conf).window {
+                    if window_conf.maximized {
+                        Self::Maximized
+                    } else {
+                        Self::Size(window_conf.size.0, window_conf.size.1)
+                    }
+                } else {
+                    Self::default()
+                }
+            }
+            Err(e) => {
+                log::info!("cannot load config: {}", e);
+                Self::default()
+            }
         }
     }
 }
