@@ -247,9 +247,7 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
         };
 
         if planet_name.is_empty() {
-            if let Ok(planet) = rmp_serde::from_slice::<Planet>(&save_file.planet_data) {
-                planet_name = planet.basics.name.clone();
-            }
+            planet_name = save_file.name.clone();
         }
 
         let auto = caps
