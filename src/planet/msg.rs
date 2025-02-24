@@ -1,8 +1,13 @@
+use geom::Coords;
 use serde::{Deserialize, Serialize};
 
 use std::cmp::Reverse;
 use std::collections::BTreeMap;
 use std::mem::discriminant;
+
+use super::AnimalId;
+
+const COMMON_NOTICE_MSG_SPAN: u64 = 1000;
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct MsgHolder {
@@ -14,21 +19,13 @@ pub struct MsgHolder {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Msg {
     pub cycles: u64,
-    pub kind: MsgKind,
-    pub span: Option<u64>,
+    pub content: MsgContent,
 }
 
 impl MsgHolder {
-    pub fn append(&mut self, cycles: u64, kind: MsgKind, span: impl Into<Option<u64>>) {
+    pub fn append(&mut self, cycles: u64, content: MsgContent) {
         self.count = Reverse(self.count.0.wrapping_add(1));
-        self.msgs.insert(
-            self.count,
-            Msg {
-                cycles,
-                kind,
-                span: span.into(),
-            },
-        );
+        self.msgs.insert(self.count, Msg { cycles, content });
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Msg> {
@@ -38,11 +35,12 @@ impl MsgHolder {
         }
     }
 
-    pub fn append_persitent_warn(&mut self, new_msg: Msg) {
+    pub fn append_persitent_warn(&mut self, cycles: u64, content: MsgContent) {
+        let new_msg = Msg { cycles, content };
         if let Some(msg) = self
             .persistent_warns
             .iter_mut()
-            .find(|msg| msg.kind == new_msg.kind)
+            .find(|msg| msg.content == new_msg.content)
         {
             *msg = new_msg
         } else {
@@ -50,14 +48,14 @@ impl MsgHolder {
         }
     }
 
-    pub fn remove_persitent_warn(&mut self, target: &MsgKind) {
+    pub fn remove_persitent_warn(&mut self, target: &MsgContent) {
         self.persistent_warns
-            .retain(|msg| discriminant(&msg.kind) != discriminant(target));
+            .retain(|msg| discriminant(&msg.content) != discriminant(target));
     }
 
     pub fn remove_outdated(&mut self, cycles: u64) {
         self.msgs.retain(|_, msg| {
-            if let Some(span) = msg.span {
+            if let Some(span) = msg.content.span() {
                 msg.cycles + span > cycles
             } else {
                 true
@@ -91,9 +89,25 @@ impl<'a> Iterator for MsgIter<'a> {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub enum MsgKind {
+pub enum MsgContent {
     WarnHighTemp,
     WarnLowTemp,
     WarnLowOxygen,
-    EventStart,
+    EventCivilized { pos: Coords, animal: AnimalId },
+}
+
+impl MsgContent {
+    pub fn span(&self) -> Option<u64> {
+        match self {
+            Self::EventCivilized { .. } => Some(COMMON_NOTICE_MSG_SPAN),
+            _ => None,
+        }
+    }
+
+    pub fn pos(&self) -> Option<Coords> {
+        match self {
+            Self::EventCivilized { pos, .. } => Some(*pos),
+            _ => None,
+        }
+    }
 }

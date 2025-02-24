@@ -179,4 +179,4 @@ save-limit-strong = "Do you want to delete the following save data and start a n
 
 # Events
 [event]
-start = "Arrival at a new planet\nYou have arrived on a barren, undeveloped planet. Depending on the conditions of the planet, you can build various facilities to transform it into an environment suitable for life.\nYou need Energy to maintain the facilities and Material to build them. Energy can be produced by building fusion reactors in orbit and Material can be produced by building asteroid mining stations in the star system.\nPlease refer to the help for further information as needed."
+civilized = "Civilization complete\nThe process of civilizing {$animal} has been completed."

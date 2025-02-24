@@ -1,6 +1,6 @@
 use compact_str::format_compact;
 
-use crate::planet::{Msg, MsgKind};
+use crate::planet::{Msg, MsgContent};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum WithUnitDisplay {
@@ -34,11 +34,14 @@ impl std::fmt::Display for WithUnitDisplay {
 impl Msg {
     pub fn text(&self) -> (MsgStyle, String) {
         use MsgStyle::*;
-        match &self.kind {
-            MsgKind::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
-            MsgKind::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
-            MsgKind::WarnLowOxygen => (Warn, t!("msg/warn-low-oxygen")),
-            MsgKind::EventStart => (Notice, t!("event/start")),
+        match &self.content {
+            MsgContent::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
+            MsgContent::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
+            MsgContent::WarnLowOxygen => (Warn, t!("msg/warn-low-oxygen")),
+            MsgContent::EventCivilized { animal, .. } => {
+                let animal = t!("animal", animal);
+                (Notice, t!("event/civilized"; animal = animal))
+            }
         }
     }
 }

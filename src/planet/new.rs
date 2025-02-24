@@ -16,9 +16,6 @@ impl Planet {
             map[p].height = *height;
         }
 
-        let mut msgs = MsgHolder::default();
-        msgs.append(0, MsgKind::EventStart, 10000);
-
         let mut planet = Planet {
             cycles: 0,
             basics: start_params.basics.clone(),
@@ -33,7 +30,7 @@ impl Planet {
             events: Events::default(),
             civs: Civs::default(),
             stat: Stat::new(params),
-            msgs,
+            msgs: MsgHolder::default(),
         };
 
         for (&kind, &n) in &start_params.space_buildings {

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
+use geom::Coords;
 
 use crate::{conf::Conf, manage_planet::StartEvent, planet::Planet, screen::OccupiedScreenSpace};
 
@@ -9,6 +10,7 @@ use super::{Dialog, WindowsOpenState};
 pub struct MsgDialog {
     head: String,
     body: String,
+    pos: Option<Coords>,
 }
 
 pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, conf: &Conf) {
@@ -35,6 +37,7 @@ pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, 
                                 let msg_dialog = MsgDialog {
                                     head: head.to_owned(),
                                     body: body.to_owned(),
+                                    pos: msg.content.pos(),
                                 };
                                 if let Some((i, _)) = wos
                                     .dialogs
@@ -81,6 +84,7 @@ pub fn dialogs(
                 .vscroll(true)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.label(&msg_dialog.body);
+                    if let Some(_pos) = msg_dialog.pos {}
                 }),
             _ => unreachable!(),
         };

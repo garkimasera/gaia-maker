@@ -3,7 +3,7 @@ use geom::Coords;
 use num_traits::FromPrimitive;
 use rand::{Rng, seq::IndexedRandom};
 
-use super::{Planet, Sim, defs::*, misc::calc_congestion_rate};
+use super::{MsgContent, Planet, Sim, defs::*, misc::calc_congestion_rate};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
@@ -180,9 +180,16 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
                     planet.map[p].structure = Some(Structure::Settlement(settlement));
                 }
             }
-        }
 
-        planet.civs.insert(animal_id, Civilization::default());
+            planet.msgs.append(
+                planet.cycles,
+                MsgContent::EventCivilized {
+                    animal: animal_id,
+                    pos: p_center,
+                },
+            );
+            planet.civs.insert(animal_id, Civilization::default());
+        }
     }
 }
 
