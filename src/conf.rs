@@ -67,7 +67,7 @@ pub struct Conf {
 pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,
-    pub messages_in_list: usize,
+    pub reports_in_list: usize,
     pub min_sidebar_width: f32,
 }
 

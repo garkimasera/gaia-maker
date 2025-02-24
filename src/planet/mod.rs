@@ -12,9 +12,9 @@ mod initial_conditions;
 mod map_generator;
 mod misc;
 mod monitoring;
-mod msg;
 mod new;
 mod plague;
+mod report;
 mod resources;
 mod serde_with_types;
 mod sim;
@@ -28,7 +28,7 @@ pub use self::atmo::Atmosphere;
 use self::civ::Civs;
 pub use self::defs::*;
 pub use self::event::*;
-pub use self::msg::*;
+pub use self::report::*;
 pub use self::resources::*;
 pub use self::sim::Sim;
 pub use self::stat::{Record, Stat};
@@ -120,7 +120,7 @@ pub struct Planet {
     pub events: Events,
     pub civs: Civs,
     pub stat: Stat,
-    pub msgs: MsgHolder,
+    pub reports: Reports,
 }
 
 impl Planet {

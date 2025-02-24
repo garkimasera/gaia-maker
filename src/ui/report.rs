@@ -7,13 +7,13 @@ use crate::{conf::Conf, manage_planet::StartEvent, planet::Planet, screen::Occup
 use super::{Dialog, WindowsOpenState};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct MsgDialog {
+pub struct ReportUi {
     head: String,
     body: String,
     pos: Option<Coords>,
 }
 
-pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, conf: &Conf) {
+pub fn report_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, conf: &Conf) {
     let text_height = egui::TextStyle::Body.resolve(ui.style()).size * 1.2;
 
     egui::ScrollArea::horizontal().show(ui, |ui| {
@@ -26,35 +26,35 @@ pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, 
             .min_scrolled_height(0.0);
 
         table.body(|mut body| {
-            for msg in planet.msgs.iter().take(conf.ui.messages_in_list) {
+            for report in planet.reports.iter().take(conf.ui.reports_in_list) {
                 body.row(text_height, |mut row| {
                     row.col(|ui| {
-                        let (style, text) = msg.text();
+                        let (style, text) = report.text();
                         ui.label(style.icon());
                         let (head, body) = crate::text::split_to_head_body(&text);
                         if let Some(body) = body {
                             if ui.link(head).clicked() {
-                                let msg_dialog = MsgDialog {
+                                let report_ui = ReportUi {
                                     head: head.to_owned(),
                                     body: body.to_owned(),
-                                    pos: msg.content.pos(),
+                                    pos: report.content.pos(),
                                 };
                                 if let Some((i, _)) = wos
                                     .dialogs
                                     .iter()
                                     .enumerate()
                                     .filter_map(|(i, m)| {
-                                        if let Dialog::Msg(msg_dialog) = m {
-                                            Some((i, msg_dialog))
+                                        if let Dialog::Report(report_ui) = m {
+                                            Some((i, report_ui))
                                         } else {
                                             None
                                         }
                                     })
-                                    .find(|(_, m)| msg_dialog == **m)
+                                    .find(|(_, m)| report_ui == **m)
                                 {
                                     wos.dialogs.remove(i);
                                 } else {
-                                    wos.dialogs.push(Dialog::Msg(msg_dialog));
+                                    wos.dialogs.push(Dialog::Report(report_ui));
                                 }
                             }
                         } else {
@@ -67,7 +67,7 @@ pub fn msg_list(ui: &mut egui::Ui, wos: &mut WindowsOpenState, planet: &Planet, 
     });
 }
 
-pub fn dialogs(
+pub fn report_windows(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
@@ -79,12 +79,12 @@ pub fn dialogs(
         let close = false;
 
         let dialog = match dialog {
-            Dialog::Msg(msg_dialog) => egui::Window::new(&msg_dialog.head)
+            Dialog::Report(report_ui) => egui::Window::new(&report_ui.head)
                 .open(&mut open)
                 .vscroll(true)
                 .show(egui_ctxs.ctx_mut(), |ui| {
-                    ui.label(&msg_dialog.body);
-                    if let Some(_pos) = msg_dialog.pos {}
+                    ui.label(&report_ui.body);
+                    if let Some(_pos) = report_ui.pos {}
                 }),
             _ => unreachable!(),
         };

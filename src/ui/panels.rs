@@ -370,7 +370,7 @@ fn sidebar(
 
     ui.separator();
 
-    super::dialog::msg_list(ui, wos, planet, conf);
+    super::report::report_list(ui, wos, planet, conf);
 }
 
 fn build_menu(

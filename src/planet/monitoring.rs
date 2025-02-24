@@ -5,33 +5,37 @@ pub fn monitor(planet: &mut Planet, params: &Params) {
         return;
     }
 
-    planet.msgs.remove_outdated(planet.cycles);
+    planet.reports.remove_outdated(planet.cycles);
 
     // Temperature warnings
     if planet.stat.average_air_temp > params.monitoring.warn_high_temp_threshold {
         planet
-            .msgs
-            .append_persitent_warn(planet.cycles, MsgContent::WarnHighTemp);
+            .reports
+            .append_persitent_warn(planet.cycles, ReportContent::WarnHighTemp);
     } else {
-        planet.msgs.remove_persitent_warn(&MsgContent::WarnHighTemp);
+        planet
+            .reports
+            .remove_persitent_warn(&ReportContent::WarnHighTemp);
     }
 
     if planet.stat.average_air_temp < params.monitoring.warn_low_temp_threshold {
         planet
-            .msgs
-            .append_persitent_warn(planet.cycles, MsgContent::WarnLowTemp);
+            .reports
+            .append_persitent_warn(planet.cycles, ReportContent::WarnLowTemp);
     } else {
-        planet.msgs.remove_persitent_warn(&MsgContent::WarnLowTemp);
+        planet
+            .reports
+            .remove_persitent_warn(&ReportContent::WarnLowTemp);
     }
 
     // Atmosphere warnings
     if planet.atmo.partial_pressure(GasKind::Oxygen) < params.monitoring.warn_low_oxygen_threshold {
         planet
-            .msgs
-            .append_persitent_warn(planet.cycles, MsgContent::WarnLowOxygen);
+            .reports
+            .append_persitent_warn(planet.cycles, ReportContent::WarnLowOxygen);
     } else {
         planet
-            .msgs
-            .remove_persitent_warn(&MsgContent::WarnLowOxygen);
+            .reports
+            .remove_persitent_warn(&ReportContent::WarnLowOxygen);
     }
 }

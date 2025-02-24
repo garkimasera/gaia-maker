@@ -1,6 +1,5 @@
 mod animals;
 mod debug_tools;
-mod dialog;
 mod error_popup;
 mod help;
 mod hover_tile_tooltip;
@@ -10,6 +9,7 @@ mod misc;
 mod new_planet;
 mod panels;
 mod preferences;
+mod report;
 mod saveload;
 mod space_buildings;
 mod stat;
@@ -34,7 +34,7 @@ use crate::{
     screen::{CursorMode, OccupiedScreenSpace},
 };
 
-use self::dialog::MsgDialog;
+use self::report::ReportUi;
 
 const HELP_TOOLTIP_WIDTH: f32 = 256.0;
 
@@ -59,7 +59,7 @@ pub struct WindowsOpenState {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Dialog {
-    Msg(MsgDialog),
+    Report(ReportUi),
     _Dummy,
 }
 
@@ -109,7 +109,7 @@ impl Plugin for UiPlugin {
                     map::map_window,
                     stat::stat_window,
                     layers_window,
-                    dialog::dialogs,
+                    report::report_windows,
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,

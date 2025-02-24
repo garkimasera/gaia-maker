@@ -30,7 +30,7 @@ impl Planet {
             events: Events::default(),
             civs: Civs::default(),
             stat: Stat::new(params),
-            msgs: MsgHolder::default(),
+            reports: Reports::default(),
         };
 
         for (&kind, &n) in &start_params.space_buildings {

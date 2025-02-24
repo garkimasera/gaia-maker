@@ -11,5 +11,5 @@ show_fps = false
 [ui]
 scale_factor = 1.0
 font_scale = 1.2
-messages_in_list = 32
+reports_in_list = 32
 min_sidebar_width = 200
