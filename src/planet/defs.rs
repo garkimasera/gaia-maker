@@ -216,6 +216,8 @@ pub struct AnimalAttr {
     /// Livable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
     pub temp: (f32, f32),
+    /// Settlement effect to livability
+    pub settlement_effect: f32,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub civ: Option<AnimalCivParams>,
 }

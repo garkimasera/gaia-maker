@@ -134,7 +134,7 @@ fn process_each_animal(
     }
 }
 
-pub fn calc_cap_without_biomass(
+pub fn calc_cap_by_atmo_temp(
     planet: &Planet,
     p: Coords,
     attr: &AnimalAttr,
@@ -171,7 +171,15 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
             / params.sim.animal_cap_max_fertility
     };
 
-    cap_biomass_or_fertility * calc_cap_without_biomass(planet, p, attr, params, 0.0)
+    let settlement_effect = if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
+        attr.settlement_effect
+    } else {
+        1.0
+    };
+
+    cap_biomass_or_fertility
+        * calc_cap_by_atmo_temp(planet, p, attr, params, 0.0)
+        * settlement_effect
 }
 
 impl AnimalHabitat {
