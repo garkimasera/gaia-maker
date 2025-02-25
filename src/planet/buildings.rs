@@ -82,7 +82,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 mass,
                 limit_atm,
             } => {
-                if planet.atmo.partial_pressure(GasKind::Oxygen) < *limit_atm {
+                if planet.atmo.partial_pressure(*kind) < *limit_atm {
                     planet.atmo.add(*kind, mass * n as f32);
                 }
             }
