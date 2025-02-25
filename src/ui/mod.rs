@@ -29,7 +29,7 @@ use crate::{
     conf::Conf,
     draw::{DisplayOpts, UpdateDraw},
     gz::GunzipBin,
-    manage_planet::ManagePlanetError,
+    manage_planet::{ManagePlanetError, SwitchPlanet},
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
 };
@@ -116,6 +116,7 @@ impl Plugin for UiPlugin {
                     error_popup::error_popup,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,
+                    reset_window_open_state,
                 )
                     .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),
@@ -326,5 +327,14 @@ fn layers_menu(
     ui.checkbox(&mut display_opts.structures, t!("structures"));
     if *display_opts != old {
         update_draw.update();
+    }
+}
+
+pub fn reset_window_open_state(
+    mut wos: ResMut<WindowsOpenState>,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
+) {
+    if er_switch_planet.read().last().is_some() {
+        wos.dialogs.clear();
     }
 }
