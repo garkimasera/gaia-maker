@@ -20,6 +20,9 @@ pub enum TutorialStep {
     BuildOxygen(usize),
     WaitOxygen(usize),
     Carbon(usize),
+    Animal(usize),
+    Civilize(usize),
+    Complete(bool),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, AsRefStr, Display)]
@@ -34,6 +37,9 @@ pub enum ChecklistItem {
     BuildOxygenChecklist2,
     WaitOxygenChecklist1,
     WaitOxygenChecklist2,
+    CarbonChecklist1,
+    AnimalChecklist1,
+    CivilizeChecklist1,
 }
 
 impl Default for TutorialState {
@@ -49,6 +55,11 @@ pub fn update_tutorial(mut save_state: ResMut<SaveState>, planet: Res<Planet>) {
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
         return;
     };
+
+    if tutorial_state.current == TutorialStep::Complete(true) {
+        save_state.save_file_metadata.tutorial_state = None;
+        return;
+    }
 
     for (item, checked) in &mut tutorial_state.checklist {
         if !*checked {
@@ -68,6 +79,12 @@ impl TutorialState {
 
     pub fn current_step(&self) -> TutorialStep {
         self.current
+    }
+
+    pub fn complete(&mut self) {
+        if let TutorialStep::Complete(complete) = &mut self.current {
+            *complete = true;
+        }
     }
 
     pub fn checked(&self) -> bool {
@@ -100,6 +117,11 @@ impl TutorialStep {
         Self::BuildOxygen(1),
         Self::WaitOxygen(0),
         Self::Carbon(0),
+        Self::Animal(0),
+        Self::Animal(1),
+        Self::Civilize(0),
+        Self::Complete(false),
+        Self::Complete(true),
     ];
 
     fn next(&self) -> Option<Self> {
@@ -148,6 +170,10 @@ impl TutorialStep {
             return false;
         };
         d == back
+    }
+
+    pub fn can_complete(&self) -> bool {
+        matches!(self, TutorialStep::Complete(_))
     }
 }
 
@@ -205,6 +231,36 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
                 .count()
                 >= 50
         }
+        ChecklistItem::CarbonChecklist1 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| matches!(tile.structure, Some(Structure::CarbonCapturer)))
+                .count()
+                >= 2
+        }
+        ChecklistItem::AnimalChecklist1 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| {
+                    if let Some(animal) = tile.animal[AnimalSize::Medium as usize] {
+                        &animal.id == "fox"
+                    } else {
+                        false
+                    }
+                })
+                .count()
+                >= 30
+        }
+        ChecklistItem::CivilizeChecklist1 => {
+            planet
+                .map
+                .iter()
+                .filter(|tile| matches!(tile.structure, Some(Structure::Settlement(_))))
+                .count()
+                >= 1
+        }
     }
 }
 
@@ -226,6 +282,9 @@ fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
             ChecklistItem::WaitOxygenChecklist1,
             ChecklistItem::WaitOxygenChecklist2,
         ],
+        TutorialStepDiscriminants::Carbon => &[ChecklistItem::CarbonChecklist1],
+        TutorialStepDiscriminants::Animal => &[ChecklistItem::AnimalChecklist1],
+        TutorialStepDiscriminants::Civilize => &[ChecklistItem::CivilizeChecklist1],
         _ => &[],
     }
 }

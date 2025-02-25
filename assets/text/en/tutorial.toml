@@ -28,3 +28,18 @@ wait-oxygen-0-1 = "Once you have built Oxygen Generators, the oxygen concentrati
 wait-oxygen-0-2 = "If you want to speed up this process, add Dyson Swarm Units and Oxygen Generators as soon as you have enough material."
 wait-oxygen-checklist1 = "The partial pressure of oxygen reaches 0.12 atm"
 wait-oxygen-checklist2 = "Forests spread over 50 tiles or more"
+
+carbon-0-1 = "The atmosphere of this planet seems to have a little too much carbon dioxide. Plants will eventually absorb the carbon dioxide, but you can remove it more quickly using Carbon Capturers. Open the menu by clicking the icon below in the toolbar, and select Carbon Capturer. Then, click on an empty tile to build it."
+carbon-0-2 = "If you don't have enough power to build, you can add a Dyson Swarm Units or remove Oxygen Generators. You can select \"Demolition\" from the same menu as building."
+carbon-checklist1 = "2 Carbon Capturers"
+
+animal-0-1 = "If there are currently enough forests, then the conditions necessary for breeding your favorite animals are in place. You need gene points to spwan animals. The number of gene points you currently have is shown in the sidebar as follows."
+animal-0-2 = "Gene points gradually increase over time. The amount of increase becomes larger as the amount of life on the planet rises."
+animal-1-1 = "To spawn animals, click on the following icon in the toolbar to display the animal window."
+animal-1-2 = "Select \"Fox\" from the list of animals, click the spawn button, and then click the tile to spawn foxes. When placing animals, the tile you place them on should be an environment suited to that animal. In the case of foxes, this is a temperate forest. If you place them in a suitable environment, they will spread to the surrounding tiles over time."
+animal-checklist1 = "Foxes inhabit more than 30 tiles"
+
+civilize-0-1 = "You can civilize animals that are suitable for civilization. Please press the civilize button from the animal window. Civilization requires gene points and a certain amount of time."
+civilize-checklist1 = "Civilization cities on the planet"
+
+complete-0-1 = "Congratulations! You have prepared the environment of the planet to the extent that civilization can develop. You are free to continue improving the environment of the planet, watch over the animals and civilization, or destroy them. The tutorial is now over, but you can continue. If you want to start from another planet, you can select \"New\" from the main menu."
