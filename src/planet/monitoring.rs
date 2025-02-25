@@ -38,4 +38,16 @@ pub fn monitor(planet: &mut Planet, params: &Params) {
             .reports
             .remove_persitent_warn(&ReportContent::WarnLowOxygen);
     }
+
+    if planet.atmo.partial_pressure(GasKind::CarbonDioxide)
+        < params.monitoring.warn_low_carbon_dioxide_threshold
+    {
+        planet
+            .reports
+            .append_persitent_warn(planet.cycles, ReportContent::WarnLowCarbonDioxide);
+    } else {
+        planet
+            .reports
+            .remove_persitent_warn(&ReportContent::WarnLowCarbonDioxide);
+    }
 }

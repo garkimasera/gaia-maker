@@ -848,6 +848,7 @@ pub struct MonitoringParams {
     pub warn_high_temp_threshold: f32,
     pub warn_low_temp_threshold: f32,
     pub warn_low_oxygen_threshold: f32,
+    pub warn_low_carbon_dioxide_threshold: f32,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

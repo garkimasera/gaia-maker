@@ -35,12 +35,13 @@ impl Report {
     pub fn text(&self) -> (MsgStyle, String) {
         use MsgStyle::*;
         match &self.content {
-            ReportContent::WarnHighTemp => (Warn, t!("msg/warn-high-temp")),
-            ReportContent::WarnLowTemp => (Warn, t!("msg/warn-low-temp")),
-            ReportContent::WarnLowOxygen => (Warn, t!("msg/warn-low-oxygen")),
+            ReportContent::WarnHighTemp => (Warn, t!("report/warn-high-temp")),
+            ReportContent::WarnLowTemp => (Warn, t!("report/warn-low-temp")),
+            ReportContent::WarnLowOxygen => (Warn, t!("report/warn-low-oxygen")),
+            ReportContent::WarnLowCarbonDioxide => (Warn, t!("report/warn-low-carbon-dioxide")),
             ReportContent::EventCivilized { animal, .. } => {
                 let animal = t!("animal", animal);
-                (Notice, t!("event/civilized"; animal = animal))
+                (Notice, t!("report/civilized"; animal = animal))
             }
         }
     }

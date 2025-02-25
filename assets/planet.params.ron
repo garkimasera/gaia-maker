@@ -358,5 +358,6 @@
         warn_high_temp_threshold: 313.15,
         warn_low_temp_threshold: 273.15,
         warn_low_oxygen_threshold: 0.15,
+        warn_low_carbon_dioxide_threshold: 150e-6,
     ),
 )

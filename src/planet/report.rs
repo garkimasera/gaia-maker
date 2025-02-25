@@ -93,6 +93,7 @@ pub enum ReportContent {
     WarnHighTemp,
     WarnLowTemp,
     WarnLowOxygen,
+    WarnLowCarbonDioxide,
     EventCivilized { pos: Coords, animal: AnimalId },
 }
 
