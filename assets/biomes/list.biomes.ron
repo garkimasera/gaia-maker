@@ -55,7 +55,7 @@
         ),
         color: (211, 141, 66),
     ),
-    "ice-field": (
+    "ice-sheet": (
         z: 70.0,
         albedo: 0.8,
         revaporization_ratio: 0.1,

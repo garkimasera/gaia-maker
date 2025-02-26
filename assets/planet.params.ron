@@ -182,7 +182,7 @@
             (0.2, 1.0),
         ],
         sea_biomass_factor: 0.05,
-        ice_thickness_of_ice_field: 2.0,
+        ice_thickness_of_ice_sheet: 2.0,
         ice_melting_temp: 260.0,
         ice_melting_height_per_temp: 0.8,
         ice_thickness_limit_table: [(0, 20), (50, 400), (100, 1000), (1000, 2000)],

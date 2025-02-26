@@ -310,7 +310,7 @@ impl Legend {
         let biomes = [
             Biome::Rock,
             Biome::Ocean,
-            Biome::IceField,
+            Biome::IceSheet,
             Biome::SeaIce,
             Biome::Desert,
             Biome::Tundra,

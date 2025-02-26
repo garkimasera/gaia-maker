@@ -70,7 +70,7 @@ pub enum Biome {
     #[default]
     // Barren
     Rock = 1,
-    IceField,
+    IceSheet,
     Desert,
     // Water
     Ocean = 21,
@@ -626,8 +626,8 @@ pub struct SimParams {
     pub biomass_to_buried_carbon_ratio_co2_table: Vec<(f32, f32)>,
     /// Sea biomass factor compared to land
     pub sea_biomass_factor: f32,
-    /// Required thickness of ice for ice field [m]
-    pub ice_thickness_of_ice_field: f32,
+    /// Required thickness of ice for ice sheet [m]
+    pub ice_thickness_of_ice_sheet: f32,
     /// Ice melting temperature [K]
     pub ice_melting_temp: f32,
     /// Ice melting speed [m/K]

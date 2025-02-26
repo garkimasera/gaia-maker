@@ -183,9 +183,9 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             continue;
         }
 
-        if tile.ice >= params.sim.ice_thickness_of_ice_field {
-            if current_biome != Biome::IceField {
-                planet.map[p].biome = Biome::IceField;
+        if tile.ice >= params.sim.ice_thickness_of_ice_sheet {
+            if current_biome != Biome::IceSheet {
+                planet.map[p].biome = Biome::IceSheet;
             }
             continue;
         }
@@ -223,7 +223,7 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
 }
 
 fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
-    if biome == Biome::IceField && tile.ice <= params.sim.ice_thickness_of_ice_field {
+    if biome == Biome::IceSheet && tile.ice <= params.sim.ice_thickness_of_ice_sheet {
         return false;
     }
 
