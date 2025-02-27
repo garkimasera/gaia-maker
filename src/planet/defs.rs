@@ -710,8 +710,16 @@ pub struct SimParams {
     pub base_nuclear_ratio: f32,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
-    /// Energy source minimum required or waste by settlement age
-    pub energy_source_min_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Energy source waste by settlement age
+    pub energy_source_waste_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Base energy efficency
+    pub energy_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Energy efficency with high qualicty
+    pub energy_high_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// High efficiency energy limit by ratio to supply
+    pub high_efficiency_limit_by_supply: [f32; EnergySource::LEN],
+    /// High efficiency energy limit by ratio to demand
+    pub high_efficiency_limit_by_demand: [f32; EnergySource::LEN],
     /// Factor to calculate impact on biomass by energy source
     pub energy_source_biomass_impact: [f32; EnergySource::LEN],
     /// Soil erosion effect by settlement

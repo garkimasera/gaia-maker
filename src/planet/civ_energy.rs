@@ -1,3 +1,5 @@
+use arrayvec::ArrayVec;
+
 use super::misc::linear_interpolation;
 use super::*;
 
@@ -146,28 +148,46 @@ pub fn process_settlement_energy(
     supply[EnergySource::Nuclear as usize] = demand * a;
 
     // Calculate energy distribution
-    let priority = [
+    let src_without_biomass = [
         EnergySource::Gift,
         EnergySource::HydroGeothermal,
         EnergySource::Nuclear,
         EnergySource::FossilFuel,
         EnergySource::WindSolar,
     ];
-    let mut remaining = demand;
-    for src in priority {
+    let mut v: ArrayVec<(usize, f32, f32), { (EnergySource::LEN - 1) * 2 }> = ArrayVec::new();
+    for src in src_without_biomass {
         let src = src as usize;
         debug_assert!(supply[src] >= 0.0);
-        consume[src] += (demand * params.sim.energy_source_limit_by_age[age][src])
-            .min(supply[src])
+        let eff = params.sim.energy_efficiency[age][src];
+        let high_eff = params.sim.energy_high_efficiency[age][src];
+        if high_eff > 0.0 {
+            let high_eff_supply = (supply[src] * params.sim.high_efficiency_limit_by_supply[src])
+                .min(demand * params.sim.high_efficiency_limit_by_demand[src]);
+            let normal_supply = supply[src] - high_eff_supply;
+            v.push((src, high_eff, high_eff_supply));
+            v.push((src, eff, normal_supply));
+        } else {
+            v.push((src, eff, supply[src]));
+        }
+    }
+    v.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+    let mut remaining = demand;
+    for (src, _eff, supply) in v {
+        let a = (demand * params.sim.energy_source_limit_by_age[age][src] - consume[src])
+            .min(supply)
             .min(remaining);
-        remaining -= consume[src];
+        debug_assert!(a >= 0.0);
+        consume[src] += a;
+        remaining -= a;
     }
     consume[EnergySource::Biomass as usize] = remaining;
 
-    // Add minimum required or waste energy consume
+    // Add waste energy consume
     for src in EnergySource::iter() {
         let src = src as usize;
-        let req = demand * params.sim.energy_source_min_by_age[age][src];
+        let req = demand * params.sim.energy_source_waste_by_age[age][src];
         let supply = supply[src] - consume[src];
         if src == 0 || supply > req {
             consume[src] += req;
