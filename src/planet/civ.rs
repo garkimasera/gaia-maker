@@ -41,7 +41,9 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             1.0 - params.sim.soil_erosion_effect_by_settlement[settlement.age as usize];
 
         // Tech exp
-        tech_exp(&mut settlement, params);
+        if planet.cycles % params.sim.advance_tech_interval_cycles == 0 {
+            tech_exp(&mut settlement, params);
+        }
 
         // Pop growth & decline
         let civ_temp_bonus = params.sim.civ_temp_bonus[settlement.age as usize];

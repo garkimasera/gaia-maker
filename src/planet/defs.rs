@@ -686,6 +686,8 @@ pub struct SimParams {
     pub biomass_energy_factor: f32,
     /// Resource availability factor
     pub resource_availability_factor: f32,
+    /// Advance tech inverval cycles
+    pub advance_tech_interval_cycles: u64,
     /// Base tech exp
     pub base_tech_exp: f32,
     /// Required tech exp to evolve the age
