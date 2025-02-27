@@ -149,7 +149,10 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
         });
 
     *current_civ_id = Some(selected_civ_id);
-    let c = &planet.civs[&selected_civ_id];
+    let Some(c) = planet.civs.get(&selected_civ_id) else {
+        *current_civ_id = None;
+        return;
+    };
 
     ui.label(format!("{}: {:.0}", t!("population"), c.total_pop));
     ui.separator();
