@@ -71,6 +71,7 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
             _ => "0".into(),
         },
     ));
+    v.push(("energy efficiency", format!("{:.1}", sim.energy_eff[p])));
 
     v
 }

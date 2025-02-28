@@ -174,15 +174,19 @@ pub fn process_settlement_energy(
     v.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
     let mut remaining = demand;
-    for (src, _eff, supply) in v {
+    let mut sum_eff = 0.0;
+    for (src, eff, supply) in v {
         let a = (demand * params.sim.energy_source_limit_by_age[age][src] - consume[src])
             .min(supply)
             .min(remaining);
         debug_assert!(a >= 0.0);
         consume[src] += a;
         remaining -= a;
+        sum_eff += a * eff;
     }
     consume[EnergySource::Biomass as usize] = remaining;
+    sum_eff += remaining * params.sim.energy_efficiency[age][EnergySource::Biomass as usize];
+    sim.energy_eff[p] = sum_eff / demand;
 
     // Add waste energy consume
     for src in EnergySource::iter() {
