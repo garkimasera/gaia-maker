@@ -54,6 +54,8 @@ pub struct Sim {
     pub domain: Array2d<Option<(AnimalId, f32)>>,
     /// Energy efficiency
     pub energy_eff: Array2d<f32>,
+    /// Settlement congestion rate
+    pub settlement_cr: Array2d<f32>,
 }
 
 impl Sim {
@@ -97,6 +99,7 @@ impl Sim {
             civ_sum: CivSum::default(),
             domain: Array2d::new(size.0, size.1, None),
             energy_eff: Array2d::new(size.0, size.1, 0.0),
+            settlement_cr: Array2d::new(size.0, size.1, 0.0),
         }
     }
 

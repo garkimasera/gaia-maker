@@ -671,14 +671,18 @@ pub struct SimParams {
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
     /// Livable temperature bonus by civilization
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
+    /// Settlement spread simulation interval cycles
+    pub settlement_spread_interval_cycles: u64,
     /// Population of settlements to calculate spread probability
     pub settlement_spread_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
     pub base_pop_growth_speed: f32,
-    /// Coefficent to calculate settlement spreading probability
-    pub coef_settlement_spreading_a: f32,
-    /// Coefficent to calculate animal fission probability
-    pub coef_settlement_spreading_b: f32,
+    /// Base settlement spreading probability
+    pub base_settlement_spreading_prob: f32,
+    /// Base settlement spreading threshold by congestion rate and livability
+    pub base_settlement_spreading_threshold: f32,
+    /// Technology propagation probability by nearby settlements
+    pub technology_propagation_prob: f64,
     /// Settlement population to extinction
     pub settlement_extinction_threshold: f32,
     /// Energy demand per pop [GJ]
