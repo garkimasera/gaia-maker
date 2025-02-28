@@ -178,90 +178,58 @@ impl TutorialStep {
 }
 
 fn check(planet: &Planet, item: ChecklistItem) -> bool {
-    match item {
-        ChecklistItem::PowerChecklist1 => {
-            planet.space_building(SpaceBuildingKind::FusionReactor).n >= 4
-        }
-        ChecklistItem::PowerChecklist2 => {
-            planet
-                .space_building(SpaceBuildingKind::AsteroidMiningStation)
-                .n
-                >= 3
-        }
-        ChecklistItem::FertilizeChecklist1 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| matches!(tile.structure, Some(Structure::FertilizationPlant)))
-                .count()
-                >= 3
-        }
-        ChecklistItem::FertilizeChecklist2 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| tile.biome == Biome::Grassland)
-                .count()
-                >= 10
-        }
-        ChecklistItem::BuildOxygenChecklist1 => {
-            planet.space_building(SpaceBuildingKind::DysonSwarmUnit).n >= 5
-        }
-        ChecklistItem::BuildOxygenChecklist2 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| matches!(tile.structure, Some(Structure::OxygenGenerator)))
-                .count()
-                >= 8
-        }
-        ChecklistItem::WaitOxygenChecklist1 => {
-            planet.atmo.partial_pressure(GasKind::Oxygen) >= 0.12
-        }
-        ChecklistItem::WaitOxygenChecklist2 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| {
-                    matches!(
-                        tile.biome,
-                        Biome::BorealForest | Biome::TemperateForest | Biome::TropicalRainforest
-                    )
-                })
-                .count()
-                >= 50
-        }
-        ChecklistItem::CarbonChecklist1 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| matches!(tile.structure, Some(Structure::CarbonCapturer)))
-                .count()
-                >= 2
-        }
-        ChecklistItem::AnimalChecklist1 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| {
-                    if let Some(animal) = tile.animal[AnimalSize::Medium as usize] {
-                        &animal.id == "fox"
-                    } else {
-                        false
-                    }
-                })
-                .count()
-                >= 30
-        }
-        ChecklistItem::CivilizeChecklist1 => {
-            planet
-                .map
-                .iter()
-                .filter(|tile| matches!(tile.structure, Some(Structure::Settlement(_))))
-                .count()
-                >= 1
-        }
-    }
+    let requirement = match item {
+        ChecklistItem::PowerChecklist1 => Requirement::SpaceBuildingBuilt {
+            kind: SpaceBuildingKind::FusionReactor,
+            n: 5,
+        },
+        ChecklistItem::PowerChecklist2 => Requirement::SpaceBuildingBuilt {
+            kind: SpaceBuildingKind::AsteroidMiningStation,
+            n: 5,
+        },
+        ChecklistItem::FertilizeChecklist1 => Requirement::StructureBuilt {
+            kind: StructureKind::FertilizationPlant,
+            n: 3,
+        },
+        ChecklistItem::FertilizeChecklist2 => Requirement::BiomeTiles {
+            biomes: vec![Biome::Grassland],
+            n: 10,
+        },
+        ChecklistItem::BuildOxygenChecklist1 => Requirement::SpaceBuildingBuilt {
+            kind: SpaceBuildingKind::DysonSwarmUnit,
+            n: 5,
+        },
+        ChecklistItem::BuildOxygenChecklist2 => Requirement::StructureBuilt {
+            kind: StructureKind::OxygenGenerator,
+            n: 8,
+        },
+        ChecklistItem::WaitOxygenChecklist1 => Requirement::PartialPressureHigherThan {
+            kind: GasKind::Oxygen,
+            value: 0.12,
+        },
+        ChecklistItem::WaitOxygenChecklist2 => Requirement::BiomeTiles {
+            biomes: vec![
+                Biome::BorealForest,
+                Biome::TemperateForest,
+                Biome::TropicalRainforest,
+            ],
+            n: 50,
+        },
+        ChecklistItem::CarbonChecklist1 => Requirement::StructureBuilt {
+            kind: StructureKind::CarbonCapturer,
+            n: 2,
+        },
+        ChecklistItem::AnimalChecklist1 => Requirement::AnimalTiles {
+            id: AnimalId::from("fox").unwrap(),
+            size: AnimalSize::Medium,
+            n: 30,
+        },
+        ChecklistItem::CivilizeChecklist1 => Requirement::Settlements {
+            n: 1,
+            animal_id: None,
+        },
+    };
+    requirement.check(planet)
 }
 
 fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
