@@ -540,7 +540,8 @@ pub struct StartParams {
 pub struct SimParams {
     pub sim_slow_loop_duration_ms: u64,
     pub sim_medium_loop_duration_ms: u64,
-    pub total_mass_per_atm: f32,
+    /// Atm per 10^12 mol (10^12g = 1Mt)
+    pub mol_per_atm: f32,
     pub secs_per_cycle: f32,
     /// Heat capacity of air [J/(kg*K)]
     pub air_heat_cap: f32,

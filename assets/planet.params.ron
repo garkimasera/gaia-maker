@@ -2,7 +2,7 @@
     sim: (
         sim_slow_loop_duration_ms: 250,
         sim_medium_loop_duration_ms: 100,
-        total_mass_per_atm: 5.0e+9,
+        mol_per_atm: 1.85e+8,
         secs_per_cycle: 86400,
         air_heat_cap: 1000.0,
         land_surface_heat_cap: 5.0e+6,

@@ -129,12 +129,11 @@ impl Planet {
         self.cycles += 1;
         self.res.apply_diff();
 
+        self::atmo::sim_atmosphere(self, sim, params);
         self::civ_energy::sim_energy_source(self, sim, params);
-
         self::tile_event::advance(self, sim, params);
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);
-        self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
         self::animal::sim_animal(self, sim, params);
