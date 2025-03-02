@@ -320,10 +320,24 @@ fn create_assets_list(
                 .expect("unexpected tile animation asset path")
                 .0
                 .into();
+            let image = images.get(handle).unwrap();
+            let nw = image.width() / TILE_SIZE as u32;
+            let nh = image.height() / TILE_SIZE as u32;
+            let layout = if nw == 2 && nh == 2 {
+                tile_animation_layout.clone()
+            } else {
+                texture_atlas_assets.add(TextureAtlasLayout::from_grid(
+                    UVec2::new(TILE_SIZE as u32, TILE_SIZE as u32),
+                    nw,
+                    nh,
+                    None,
+                    None,
+                ))
+            };
             (
                 tile_animation_id,
                 LoadedTexture {
-                    layout: tile_animation_layout.clone(),
+                    layout,
                     image: handle.clone(),
                     _width: TILE_SIZE as u32,
                     _height: TILE_SIZE as u32,

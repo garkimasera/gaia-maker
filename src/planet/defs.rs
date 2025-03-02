@@ -193,9 +193,31 @@ pub enum StructureBuildingState {
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum TileEvent {
     Fire,
-    BlackDust { remaining_cycles: u32 },
-    AerosolInjection { remaining_cycles: u32 },
-    Plague { cured: bool, target_pop: f32 },
+    BlackDust {
+        remaining_cycles: u32,
+    },
+    AerosolInjection {
+        remaining_cycles: u32,
+    },
+    Plague {
+        cured: bool,
+        target_pop: f32,
+    },
+    Vehicle {
+        kind: VehicleKind,
+        id: AnimalId,
+        age: CivilizationAge,
+        direction: (i8, i8),
+    },
+}
+
+#[derive(
+    Clone, Copy, PartialEq, Eq, Debug, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
+)]
+#[repr(u8)]
+pub enum VehicleKind {
+    Ship = 1,
+    AirPlane,
 }
 
 impl TileEvent {
@@ -757,12 +779,22 @@ pub struct EventParams {
     pub aerosol_injection_cycles: u32,
     /// Aerosol injection amount
     pub aerosol_injection_amount: f32,
+    /// Settlement random event start routine interval cycles
+    pub settlement_random_event_interval_cycles: u64,
     /// Plague list
     pub plague_list: Vec<PlagueParams>,
     /// Base probability of plague spreading
-    pub plague_spread_base_probability: f32,
+    pub plague_spread_base_prob: f32,
     /// Base lethality speed of plague
     pub plague_base_lethality_speed: f32,
+    /// Vehicle spawn probability
+    pub vehicle_spawn_prob: f32,
+    /// Vehicle move interval cycles
+    pub vehicle_move_interval_cycles: u64,
+    /// Probability of vehicle moving north or south
+    pub vehicle_ns_move_prob: f64,
+    /// Penalty to vehicle settlement probability
+    pub vehicle_settlement_penalty: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

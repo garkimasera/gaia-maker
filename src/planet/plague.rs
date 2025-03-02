@@ -32,6 +32,8 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
     }
 }
 
+pub fn cause_plague_random(_planet: &mut Planet, _sim: &mut Sim, _params: &Params) {}
+
 /// Simutate plague, return true if the processing plague is completed
 pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
     let plague_event: &mut PlagueEvent = 'a: {
@@ -83,7 +85,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
 
             // Spread plague
             if sim.rng.random_bool(
-                (params.event.plague_spread_base_probability * plague_params.infectivity)
+                (params.event.plague_spread_base_prob * plague_params.infectivity)
                     .min(1.0)
                     .into(),
             ) {
@@ -120,7 +122,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         // Spread to distant settlement
         if let Some(p) = p_pop_max_uninfected_settlement {
             if sim.rng.random_bool(
-                (params.event.plague_spread_base_probability * plague_params.distant_infectivity)
+                (params.event.plague_spread_base_prob * plague_params.distant_infectivity)
                     .min(1.0)
                     .into(),
             ) {

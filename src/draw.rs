@@ -38,7 +38,10 @@ impl UpdateDraw {
 }
 
 #[derive(Debug, Component)]
-struct FastAnimatedTexture;
+struct FastAnimatedTexture {
+    start: u8,
+    monochrome_shift: u8,
+}
 
 #[derive(Debug, Component)]
 struct SlowAnimatedTexture;
@@ -362,23 +365,24 @@ fn spawn_tile_animation_textures(
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
-        let Some(kind) = planet.map[p]
+        let Some((_, tile_event)) = planet.map[p]
             .tile_events
             .list()
             .iter()
             .filter_map(|e| {
                 let key = tile_event_order_key(e);
-                if key > 0 { Some((key, e.kind())) } else { None }
+                if key > 0 { Some((key, e)) } else { None }
             })
             .max_by_key(|(key, _)| *key)
         else {
             continue;
         };
-
-        let index = counter.fast;
-        let index = if monochrome { index + 2 } else { index };
-
-        let Some(t) = texture_handles.tile_animations.get(kind.1.as_ref()) else {
+        let animated_texture = tile_event_texture(tile_event);
+        let index = animated_texture.index(counter.fast, monochrome);
+        let Some(t) = texture_handles
+            .tile_animations
+            .get(tile_event.kind().as_ref())
+        else {
             continue;
         };
 
@@ -395,7 +399,7 @@ fn spawn_tile_animation_textures(
                     ..default()
                 },
                 Transform::from_xyz(x, y, 500.0),
-                FastAnimatedTexture,
+                animated_texture,
             ))
             .id();
         tex_entities.push(id);
@@ -455,17 +459,16 @@ fn spawn_overlay_meshes(
 fn update_animation(
     mut counter: ResMut<AnimationCounter>,
     current_layer: Res<OverlayLayerKind>,
-    mut query_fast: Query<(&mut FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
-    mut query_slow: Query<(&mut SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
+    mut query_fast: Query<(&FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
+    mut query_slow: Query<(&SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
     counter.fast ^= 1;
 
-    let new_index = counter.fast + if monochrome { 2 } else { 0 };
-
-    for (_a, mut sprite) in &mut query_fast {
-        sprite.texture_atlas.as_mut().unwrap().index = new_index;
+    for (animated_texture, mut sprite) in &mut query_fast {
+        sprite.texture_atlas.as_mut().unwrap().index =
+            animated_texture.index(counter.fast, monochrome);
     }
 
     if counter.fast == 1 {
@@ -522,6 +525,49 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
             } else {
                 3000
             }
+        }
+        TileEvent::Vehicle { .. } => 3000,
+    }
+}
+
+fn tile_event_texture(tile_event: &TileEvent) -> FastAnimatedTexture {
+    match tile_event {
+        TileEvent::Vehicle {
+            kind,
+            age,
+            direction,
+            ..
+        } => {
+            let start = match kind {
+                VehicleKind::Ship => {
+                    if *age <= CivilizationAge::Iron {
+                        0
+                    } else {
+                        4
+                    }
+                }
+                VehicleKind::AirPlane => 8,
+            };
+            let start = if direction.0 < 0 { start } else { start + 2 };
+            FastAnimatedTexture {
+                monochrome_shift: 12,
+                start,
+            }
+        }
+        _ => FastAnimatedTexture {
+            monochrome_shift: 2,
+            start: 0,
+        },
+    }
+}
+
+impl FastAnimatedTexture {
+    fn index(&self, counter: usize, monochrome: bool) -> usize {
+        let index = self.start as usize + counter;
+        if monochrome {
+            index + self.monochrome_shift as usize
+        } else {
+            index
         }
     }
 }

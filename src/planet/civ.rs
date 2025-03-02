@@ -102,6 +102,9 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             c.total_energy_consumption[src] = *e as f32;
         }
     }
+
+    // Cause settlement random events
+    cause_random_events(planet, sim, params);
 }
 
 fn spread_settlement(
@@ -142,7 +145,9 @@ fn spread_settlement(
                 target_tiles.push(q);
             }
         } else if let Some(Structure::Settlement(s)) = &mut planet.map[q].structure {
-            if s.age < settlement.age && sim.rng.random_bool(params.sim.technology_propagation_prob)
+            if s.age < settlement.age
+                && s.id == settlement.id
+                && sim.rng.random_bool(params.sim.technology_propagation_prob)
             {
                 s.age = settlement.age;
                 s.tech_exp = 0.0;
@@ -169,6 +174,77 @@ fn tech_exp(settlement: &mut Settlement, params: &Params) {
     } else if age > 0 && settlement.tech_exp < -100.0 {
         settlement.age = CivilizationAge::from_usize(age - 1).unwrap();
         settlement.tech_exp = 0.0;
+    }
+}
+
+fn cause_random_events(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    match planet.cycles % params.event.settlement_random_event_interval_cycles {
+        1 => spawn_vehicles(planet, sim, params),
+        2 => super::plague::cause_plague_random(planet, sim, params),
+        _ => (),
+    }
+}
+
+fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(settlement)) = planet.map[p].structure else {
+            continue;
+        };
+
+        for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+            let Some(p_adj) = sim.convert_p_cyclic(p + *d) else {
+                continue;
+            };
+
+            if planet.map[p_adj]
+                .tile_events
+                .contains(TileEventKind::Vehicle)
+                || !sim.rng.random_bool(params.event.vehicle_spawn_prob as f64)
+            {
+                continue;
+            }
+
+            let dx = match d.0 {
+                -1 => -1,
+                1 => 1,
+                _ => {
+                    if sim.rng.random_bool(0.5) {
+                        -1
+                    } else {
+                        1
+                    }
+                }
+            };
+            if planet.map[p_adj].biome == Biome::Ocean {
+                let kind = if settlement.age >= CivilizationAge::Atomic {
+                    if sim.rng.random_bool(0.4) {
+                        VehicleKind::AirPlane
+                    } else {
+                        VehicleKind::Ship
+                    }
+                } else if settlement.age >= CivilizationAge::Iron {
+                    VehicleKind::Ship
+                } else {
+                    continue;
+                };
+                planet.map[p_adj].tile_events.insert(TileEvent::Vehicle {
+                    kind,
+                    id: settlement.id,
+                    age: settlement.age,
+                    direction: (dx, d.1 as _),
+                });
+            } else if settlement.age >= CivilizationAge::Atomic
+                && planet.map[p_adj].structure.is_none()
+                && sim.rng.random_bool(0.2)
+            {
+                planet.map[p_adj].tile_events.insert(TileEvent::Vehicle {
+                    kind: VehicleKind::AirPlane,
+                    id: settlement.id,
+                    age: settlement.age,
+                    direction: (dx, d.1 as _),
+                });
+            }
+        }
     }
 }
 

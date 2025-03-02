@@ -214,8 +214,8 @@
         energy_demand_per_pop: (10, 33, 66, 170, 340, 420),
         biomass_energy_factor: 2500,
         resource_availability_factor: 0.004,
-        advance_tech_interval_cycles: 4,
-        base_tech_exp: 0.04,
+        advance_tech_interval_cycles: 5,
+        base_tech_exp: 0.08,
         tech_exp_evolution: (100, 200, 300, 500, 800),
         table_rainfall_hydro: [(0, 0.0e-7), (1000, 2.0e-7), (2000, 4.0e-7)],
         available_geothermal_ratio: 0.015,
@@ -280,6 +280,7 @@
         black_dust_decrease_by_rainfall: 200,
         aerosol_injection_cycles: 40,
         aerosol_injection_amount: 0.002,
+        settlement_random_event_interval_cycles: 10,
         plague_list: [
             (
                 w: 0.01, w_manual: 0.5,
@@ -287,8 +288,12 @@
                 lethality: 0.5,
             ),
         ],
-        plague_spread_base_probability: 0.2,
+        plague_spread_base_prob: 0.2,
         plague_base_lethality_speed: 0.01,
+        vehicle_spawn_prob: 0.01,
+        vehicle_move_interval_cycles: 16,
+        vehicle_ns_move_prob: 0.25,
+        vehicle_settlement_penalty: 0.8,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

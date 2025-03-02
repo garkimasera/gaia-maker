@@ -90,6 +90,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             planet.atmo.aerosol += params.event.aerosol_injection_amount;
         }
     }
+
+    advance_vehicle(planet, sim, params);
 }
 
 pub fn cause_tile_event(
@@ -113,7 +115,95 @@ pub fn cause_tile_event(
             }
             return;
         }
+        _ => unreachable!(),
     };
 
     planet.map[p].tile_events.insert(event);
+}
+
+fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    if planet.cycles % params.event.vehicle_move_interval_cycles == 0 {
+        return;
+    }
+
+    let mut moved_vehicles = Vec::new();
+
+    for p_prev in planet.map.iter_idx() {
+        let Some(TileEvent::Vehicle {
+            kind,
+            id,
+            age,
+            direction,
+        }) = planet.map[p_prev]
+            .tile_events
+            .get(TileEventKind::Vehicle)
+            .copied()
+        else {
+            continue;
+        };
+        planet.map[p_prev]
+            .tile_events
+            .remove(TileEventKind::Vehicle);
+        let dy = if sim.rng.random_bool(params.event.vehicle_ns_move_prob) {
+            direction.1
+        } else {
+            0
+        };
+        let Some(p) = sim.convert_p_cyclic(p_prev + (direction.0 as i32, dy as i32)) else {
+            continue;
+        };
+        if planet.map[p].structure.is_some() {
+            continue;
+        }
+
+        let animal_attr = &params.animals[&id];
+
+        if !animal_attr.habitat.match_biome(planet.map[p].biome) {
+            moved_vehicles.push((
+                p,
+                TileEvent::Vehicle {
+                    kind,
+                    id,
+                    age,
+                    direction,
+                },
+            ));
+        } else {
+            // Build settlement if habitable
+            let cap_animal = super::animal::calc_cap_by_atmo_temp(
+                planet,
+                p,
+                animal_attr,
+                params,
+                params.sim.civ_temp_bonus[age as usize],
+            );
+            if sim.settlement_cr[p]
+                < params.sim.base_settlement_spreading_threshold
+                    * (planet.map[p].fertility / 100.0)
+                    * cap_animal
+                    * params.event.vehicle_settlement_penalty
+            {
+                planet.map[p].structure = Some(Structure::Settlement(Settlement {
+                    id,
+                    pop: params.sim.settlement_init_pop[age as usize],
+                    age,
+                    tech_exp: 0.0,
+                }));
+            } else if kind == VehicleKind::AirPlane {
+                moved_vehicles.push((
+                    p,
+                    TileEvent::Vehicle {
+                        kind,
+                        id,
+                        age,
+                        direction,
+                    },
+                ));
+            }
+        }
+    }
+
+    for (p, vehicle) in moved_vehicles {
+        planet.map[p].tile_events.insert(vehicle);
+    }
 }
