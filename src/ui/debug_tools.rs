@@ -200,8 +200,8 @@ impl MapPanel {
 
         ui.separator();
 
-        if ui.button("delete all settlements").clicked() {
-            planet.delete_settlement();
+        if ui.button("delete all civilization").clicked() {
+            planet.delete_civilization();
         }
 
         ui.separator();

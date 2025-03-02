@@ -88,7 +88,7 @@ pub trait PlanetDebug {
     fn edit_biome(&mut self, p: Coords, biome: Biome);
     fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params);
     fn place_settlement(&mut self, p: Coords, settlement: Settlement);
-    fn delete_settlement(&mut self);
+    fn delete_civilization(&mut self);
     fn height_map_as_string(&self) -> String;
 }
 
@@ -107,11 +107,12 @@ impl PlanetDebug for Planet {
         self.map[p].structure = Some(Structure::Settlement(settlement));
     }
 
-    fn delete_settlement(&mut self) {
+    fn delete_civilization(&mut self) {
         for p in self.map.iter_idx() {
             if matches!(self.map[p].structure, Some(Structure::Settlement(_))) {
                 self.map[p].structure = None;
             }
+            self.map[p].tile_events.remove(TileEventKind::Vehicle);
         }
     }
 
