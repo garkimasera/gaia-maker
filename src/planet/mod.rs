@@ -132,7 +132,7 @@ impl Planet {
         self.res.apply_diff();
 
         self::atmo::sim_atmosphere(self, sim, params);
-        self::civ_energy::sim_energy_source(self, sim, params);
+        self::civ_energy::update_civ_energy(self, sim, params);
         self::tile_event::advance(self, sim, params);
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);

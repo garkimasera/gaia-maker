@@ -3,24 +3,11 @@ use geom::Coords;
 use num_traits::FromPrimitive;
 use rand::{Rng, seq::IndexedRandom};
 
-use super::{Planet, ReportContent, Sim, defs::*, misc::calc_congestion_rate};
+use super::{Planet, ReportContent, Sim, defs::*};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    let planet_size = planet.map.size();
-
-    // Update settlement congestion rate
-    for p in planet.map.iter_idx() {
-        sim.settlement_cr[p] = calc_congestion_rate(p, planet_size, |p| {
-            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
-                1.0
-            } else {
-                0.0
-            }
-        });
-    }
-
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;

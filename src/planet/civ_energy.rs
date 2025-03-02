@@ -3,9 +3,21 @@ use arrayvec::ArrayVec;
 use super::misc::linear_interpolation;
 use super::*;
 
-pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+/// Update some prerequired calculation results in Sim for civilization simulation
+pub fn update_civ_energy(planet: &Planet, sim: &mut Sim, params: &Params) {
     sim.civ_sum.reset(planet.civs.keys().copied());
     update_civ_domain(planet, sim);
+
+    // Update settlement congestion rate
+    for p in planet.map.iter_idx() {
+        sim.settlement_cr[p] = super::misc::calc_congestion_rate(p, planet.map.size(), |p| {
+            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
+                1.0
+            } else {
+                0.0
+            }
+        });
+    }
 
     // Update sparse energy source
     sim.energy_wind_solar = linear_interpolation(
