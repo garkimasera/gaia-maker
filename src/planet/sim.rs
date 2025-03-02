@@ -16,6 +16,8 @@ pub struct Sim {
     pub tile_area: f32,
     /// The number of tiles
     pub n_tiles: u32,
+    /// Area factor relative to a planet of default size
+    pub planet_area_factor: f32,
     /// Geothermal power per tile [W]
     pub geothermal_power_per_tile: f32,
     /// Tile insolation [J/m^2]
@@ -59,12 +61,14 @@ pub struct Sim {
 }
 
 impl Sim {
-    pub fn new(planet: &Planet) -> Self {
+    pub fn new(planet: &Planet, params: &Params) -> Self {
         let size = planet.map.size();
         let n_tiles = size.0 * size.1;
         let map_iter_idx = planet.map.iter_idx();
         let tile_area = 4.0 * PI * planet.basics.radius * planet.basics.radius
             / (size.0 as f32 * size.1 as f32);
+        let planet_area_factor =
+            (planet.basics.radius / params.default_start_params.basics.radius).powi(2);
 
         let mut atemp = Array2d::new(size.0, size.1, 0.0);
         let mut vapor = Array2d::new(size.0, size.1, 0.0);
@@ -80,6 +84,7 @@ impl Sim {
             size,
             tile_area,
             n_tiles,
+            planet_area_factor,
             geothermal_power_per_tile: planet.basics.geothermal_power / n_tiles as f32,
             insolation: Array2d::new(size.0, size.1, 0.0),
             solar_constant_before: 0.0,

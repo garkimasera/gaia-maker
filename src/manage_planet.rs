@@ -363,7 +363,7 @@ fn manage_planet(
             new_planet.map.size().1 as f32 * TILE_SIZE / 2.0,
         )));
 
-        let sim = Sim::new(&new_planet);
+        let sim = Sim::new(&new_planet, &params);
         command.insert_resource(sim);
         if let Some(planet) = &mut planet {
             **planet = new_planet;

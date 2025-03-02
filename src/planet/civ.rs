@@ -53,6 +53,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let cap_animal =
             super::animal::calc_cap_by_atmo_temp(planet, p, animal_attr, params, civ_temp_bonus);
         let cap = params.sim.settlement_max_pop[settlement.age as usize]
+            * sim.planet_area_factor
             * cap_animal
             * resource_availability;
 

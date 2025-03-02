@@ -203,7 +203,7 @@
         coef_gene_point_income: 3000000.0,
         base_pop_growth_speed: 0.1,
         settlement_init_pop: (1.0, 5.0, 10.0, 30.0, 50.0, 80.0),
-        settlement_max_pop: (4.0, 30.0, 100.0, 600.0, 800.0, 1000.0),
+        settlement_max_pop: (16.0, 120.0, 400.0, 2400.0, 3200.0, 4000.0),
         civ_temp_bonus: (0.0, 1.5, 3.0, 4.5, 6.0, 7.5),
         settlement_spread_interval_cycles: 7,
         settlement_spread_pop: (2.0, 4.0, 5.0, 10.0, 20.0, 30.0),

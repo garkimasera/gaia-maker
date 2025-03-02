@@ -40,7 +40,7 @@ impl Planet {
 
         // Adjust water volume
         if start_params.target_sea_level.is_some() || start_params.target_sea_area.is_some() {
-            let sim = Sim::new(&planet);
+            let sim = Sim::new(&planet, params);
             let target_sea_level = start_params
                 .target_sea_level
                 .map(|target_sea_level| target_sea_level * start_params.difference_in_elevation);
@@ -73,7 +73,7 @@ impl Planet {
         }
 
         // Simulate before start
-        let mut sim = Sim::new(&planet);
+        let mut sim = Sim::new(&planet, params);
         sim.before_start = true;
         planet.advance(&mut sim, params);
         heat_transfer::init_temp(&mut planet, &mut sim, params);
