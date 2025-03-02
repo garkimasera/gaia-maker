@@ -79,7 +79,8 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     super::civ_energy::consume_buried_carbon(planet, sim, params);
 
     for (id, sum_values) in sim.civ_sum.iter() {
-        if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 {
+        if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 && sum_values.n_moving == 0
+        {
             let _ = planet.civs.remove(&id);
             continue;
         }

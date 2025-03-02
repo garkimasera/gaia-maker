@@ -93,9 +93,7 @@ pub fn update_civ_domain(planet: &Planet, sim: &mut Sim) {
             continue;
         };
         sim.domain[p] = Some((settlement.id, f32::INFINITY));
-        sim.civ_sum
-            .get_mut(settlement.id)
-            .total_pop_for_energy_distribution += settlement.pop as f64;
+        sim.civ_sum.get_mut(settlement.id).total_pop_prev += settlement.pop as f64;
 
         for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
             if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
@@ -145,7 +143,7 @@ pub fn process_settlement_energy(
 
     // Calculate fossil fuel & gift energy supply
     let sum_values = sim.civ_sum.get_mut(animal_id);
-    let a = settlement.pop / sum_values.total_pop_for_energy_distribution as f32;
+    let a = settlement.pop / sum_values.total_pop_prev as f32;
     supply[EnergySource::FossilFuel as usize] = sum_values.fossil_fuel_supply * a;
     supply[EnergySource::Gift as usize] = sum_values.gift_supply * a;
 

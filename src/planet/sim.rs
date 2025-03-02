@@ -149,10 +149,11 @@ impl CivSum {
 #[derive(Clone, Default, Debug)]
 pub struct CivSumValues {
     pub total_pop: f64,
-    pub total_pop_for_energy_distribution: f64,
+    pub total_pop_prev: f64,
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f64; EnergySource::LEN],
     pub fossil_fuel_src_tiles: BTreeMap<ordered_float::NotNan<f32>, Coords>,
     pub fossil_fuel_supply: f32,
     pub gift_supply: f32,
+    pub n_moving: u32,
 }

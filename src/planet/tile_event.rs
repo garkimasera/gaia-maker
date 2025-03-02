@@ -157,6 +157,7 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
 
         let animal_attr = &params.animals[&id];
+        let civ_sum_values = sim.civ_sum.get_mut(id);
 
         if !animal_attr.habitat.match_biome(planet.map[p].biome) {
             moved_vehicles.push((
@@ -168,6 +169,8 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     direction,
                 },
             ));
+            civ_sum_values.total_pop_prev += 1.0;
+            civ_sum_values.n_moving += 1;
         } else {
             // Build settlement if habitable
             let cap_animal = super::animal::calc_cap_by_atmo_temp(
@@ -199,6 +202,8 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                         direction,
                     },
                 ));
+                civ_sum_values.total_pop_prev += 1.0;
+                civ_sum_values.n_moving += 1;
             }
         }
     }
