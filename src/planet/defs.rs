@@ -751,6 +751,8 @@ pub struct SimParams {
     pub high_efficiency_limit_by_demand: [f32; EnergySource::LEN],
     /// Factor to calculate impact on biomass by energy source
     pub energy_source_biomass_impact: [f32; EnergySource::LEN],
+    /// Biomass impact of high efficiency wind solar energy source
+    pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Soil erosion effect by settlement
     pub soil_erosion_effect_by_settlement: [f32; CivilizationAge::LEN],
     /// Duration of events

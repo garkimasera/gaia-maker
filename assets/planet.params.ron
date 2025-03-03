@@ -261,6 +261,7 @@
         high_efficiency_limit_by_supply: (0, 0.4, 0.3, 0, 1.0, 0),
         high_efficiency_limit_by_demand: (0, 0.1, 1.0, 0, 0.5, 0),
         energy_source_biomass_impact: (1.00, 0.03, 8.0e-5, 4.0e-5, 2.0e-5, 0.00),
+        high_efficiency_wind_solar_biomass_impact: 6.0e-5,
         soil_erosion_effect_by_settlement: (0.0, 1e-4, 8e-4, 16e-4, 8e-4, 6e-4),
         event_duration: {civilize: 108},
     ),

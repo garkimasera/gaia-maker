@@ -166,6 +166,7 @@ pub fn process_settlement_energy(
         EnergySource::WindSolar,
     ];
     let mut v: ArrayVec<(usize, f32, f32), { (EnergySource::LEN - 1) * 2 }> = ArrayVec::new();
+    let mut high_eff_wind_solar = 0.0;
     for src in src_without_biomass {
         let src = src as usize;
         debug_assert!(supply[src] >= 0.0);
@@ -177,6 +178,9 @@ pub fn process_settlement_energy(
             let normal_supply = supply[src] - high_eff_supply;
             v.push((src, high_eff, high_eff_supply));
             v.push((src, eff, normal_supply));
+            if src == EnergySource::WindSolar as usize {
+                high_eff_wind_solar = high_eff_supply;
+            }
         } else {
             v.push((src, eff, supply[src]));
         }
@@ -222,7 +226,15 @@ pub fn process_settlement_energy(
         .energy_source_biomass_impact
         .iter()
         .enumerate()
-        .map(|(src, a)| a * consume[src])
+        .map(|(src, a)| {
+            if src == EnergySource::WindSolar as usize {
+                params.sim.high_efficiency_wind_solar_biomass_impact
+                    * high_eff_wind_solar.max(consume[src])
+                    + a * (consume[src] - high_eff_wind_solar).max(0.0)
+            } else {
+                a * consume[src]
+            }
+        })
         .sum();
     if impact_on_biomass <= 0.0 {
         return 1.0;
