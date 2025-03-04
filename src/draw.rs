@@ -527,6 +527,7 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
             }
         }
         TileEvent::Vehicle { .. } => 3000,
+        TileEvent::War { .. } => 4000,
     }
 }
 

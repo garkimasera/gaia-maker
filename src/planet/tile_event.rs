@@ -39,6 +39,8 @@ impl TileEvents {
 }
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    sim.war_counter.clear();
+
     for p in planet.map.iter_idx() {
         let tile = &mut planet.map[p];
         let tile_events = &mut tile.tile_events;
@@ -88,6 +90,28 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 tile_events.remove(TileEventKind::AerosolInjection);
             }
             planet.atmo.aerosol += params.event.aerosol_injection_amount;
+        }
+
+        if let Some(TileEvent::War {
+            i: id,
+            defence_power,
+            offence_power,
+            ..
+        }) = tile_events.get_mut(TileEventKind::War)
+        {
+            if let Some(Structure::Settlement(settlement)) = &mut tile.structure {
+                let (damage, finished) =
+                    super::war::exec_combat(defence_power, offence_power, params);
+                settlement.pop = (settlement.pop
+                    - damage * params.event.coef_pop_decrease_by_combat_damage)
+                    .max(0.0);
+                *sim.war_counter.entry(*id).or_default() += 1;
+                if finished {
+                    tile_events.remove(TileEventKind::War);
+                }
+            } else {
+                tile_events.remove(TileEventKind::War);
+            }
         }
     }
 

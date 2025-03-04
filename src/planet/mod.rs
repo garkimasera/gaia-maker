@@ -21,6 +21,7 @@ mod serde_with_types;
 mod sim;
 mod stat;
 mod tile_event;
+mod war;
 mod water;
 
 pub mod debug;

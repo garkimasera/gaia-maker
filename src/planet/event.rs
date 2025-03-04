@@ -77,7 +77,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             PlanetEventKind::Plague => {
                 plague_ended = super::plague::sim_plague(planet, sim, params);
             }
-            PlanetEventKind::War => todo!(),
+            PlanetEventKind::War => (),
             _ => (),
         }
     }
@@ -102,6 +102,13 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         // Check plague event is ended
         if plague_ended && ein.event.kind() == PlanetEventKind::Plague {
             return false;
+        }
+
+        // Check civil war is ended
+        if let PlanetEvent::War(WarEvent { i, kind, .. }) = &ein.event {
+            if *kind == WarKind::CivilWar && *i == 0 {
+                return false;
+            }
         }
 
         true

@@ -209,6 +209,12 @@ pub enum TileEvent {
         age: CivilizationAge,
         direction: (i8, i8),
     },
+    War {
+        i: u32,
+        defence_power: f32,
+        offence_power: f32,
+        offence: AnimalId,
+    },
 }
 
 #[derive(
@@ -509,7 +515,17 @@ pub struct PlagueEvent {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct WarEvent {}
+pub struct WarEvent {
+    pub i: u32,
+    pub kind: WarKind,
+    pub start_at: Option<Coords>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum WarKind {
+    CivilWar,
+    InterCity,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
@@ -797,6 +813,14 @@ pub struct EventParams {
     pub vehicle_ns_move_prob: f64,
     /// Penalty to vehicle settlement probability
     pub vehicle_settlement_penalty: f32,
+    /// Base probability to ca
+    pub base_civil_war_prob: f32,
+    /// Base speed of combat
+    pub base_combat_speed: f32,
+    /// Coefficent of pop decrease by combat damage
+    pub coef_pop_decrease_by_combat_damage: f32,
+    /// Offence power factor when starting civil war
+    pub civil_war_offence_factor: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

@@ -170,6 +170,7 @@ fn cause_random_events(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     match planet.cycles % params.event.settlement_random_event_interval_cycles {
         1 => spawn_vehicles(planet, sim, params),
         2 => super::plague::cause_plague_random(planet, sim, params),
+        3 => super::war::cause_war_random(planet, sim, params),
         _ => (),
     }
 }
@@ -298,7 +299,7 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
 
 fn growth_blocked_by_tile_event(tile_event: &TileEvent) -> bool {
     match tile_event {
-        TileEvent::Fire | TileEvent::BlackDust { .. } => true,
+        TileEvent::Fire | TileEvent::BlackDust { .. } | TileEvent::War { .. } => true,
         TileEvent::Plague { cured, .. } => !cured,
         _ => false,
     }

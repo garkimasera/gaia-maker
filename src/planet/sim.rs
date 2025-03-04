@@ -58,6 +58,8 @@ pub struct Sim {
     pub energy_eff: Array2d<f32>,
     /// Settlement congestion rate
     pub settlement_cr: Array2d<f32>,
+    /// Count the number of settlements in war
+    pub war_counter: FnvHashMap<u32, u32>,
 }
 
 impl Sim {
@@ -105,6 +107,7 @@ impl Sim {
             domain: Array2d::new(size.0, size.1, None),
             energy_eff: Array2d::new(size.0, size.1, 0.0),
             settlement_cr: Array2d::new(size.0, size.1, 0.0),
+            war_counter: FnvHashMap::default(),
         }
     }
 
