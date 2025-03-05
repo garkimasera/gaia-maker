@@ -167,13 +167,17 @@ fn update(
     time: Res<Time<Real>>,
     wos: Res<WindowsOpenState>,
     conf: Res<Conf>,
-    (mut last_advance_planet, mut last_update_draw): (Local<Duration>, Local<Duration>),
+    (mut last_advance_planet, mut last_update_draw, mut last_frame): (
+        Local<Duration>,
+        Local<Duration>,
+        Local<Duration>,
+    ),
 ) {
     if wos.save || wos.load {
         return;
     }
 
-    if er_switch_planet.read().fold(false, |_, _| true) {
+    if er_switch_planet.read().last().is_some() {
         *speed = GameSpeed::Paused;
     }
 
@@ -189,6 +193,11 @@ fn update(
                 > Duration::from_millis(params.sim.sim_medium_loop_duration_ms)
         }
         GameSpeed::Fast => true,
+    };
+    let advance_planet = if advance_planet {
+        now - *last_frame < Duration::from_millis(1000 / 30)
+    } else {
+        advance_planet
     };
 
     if advance_planet {
@@ -218,6 +227,7 @@ fn update(
         *last_update_draw = now;
         update_draw.update();
     }
+    *last_frame = now;
 }
 
 fn start_event(
