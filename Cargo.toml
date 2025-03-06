@@ -65,9 +65,13 @@ getrandom = { version = "0.3", features = ["wasm_js"] } # For rand v0.9
 [profile.dev]
 opt-level = 1
 
-[profile.release-debug]
+[profile.release]
+strip = true
+
+[profile.profiling]
 inherits = "release"
 debug = true
+strip = false
 
 [package.metadata.deb]
 depends = "$auto"
