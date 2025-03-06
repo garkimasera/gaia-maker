@@ -84,6 +84,8 @@ fn cursor_action(
                         age,
                         pop: params.sim.settlement_init_pop[age as usize],
                         tech_exp: 0.0,
+                        state: SettlementState::Growing,
+                        since_state_changed: 0,
                     },
                 );
             }

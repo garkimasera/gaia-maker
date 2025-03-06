@@ -215,6 +215,8 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     pop: params.sim.settlement_init_pop[age as usize],
                     age,
                     tech_exp: 0.0,
+                    state: SettlementState::Growing,
+                    since_state_changed: 0,
                 }));
             } else if kind == VehicleKind::AirPlane {
                 moved_vehicles.push((

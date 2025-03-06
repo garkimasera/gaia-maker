@@ -305,6 +305,8 @@ pub struct Settlement {
     pub age: CivilizationAge,
     pub pop: f32,
     pub tech_exp: f32,
+    pub state: SettlementState,
+    pub since_state_changed: u16,
 }
 
 #[derive(
@@ -334,6 +336,17 @@ pub enum CivilizationAge {
     Industrial,
     Atomic,
     EarlySpace,
+}
+
+#[derive(
+    Clone, Copy, PartialEq, Eq, Debug, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
+)]
+#[repr(u8)]
+pub enum SettlementState {
+    Growing = 0,
+    Stable,
+    Declining,
+    Deserted,
 }
 
 impl CivilizationAge {
