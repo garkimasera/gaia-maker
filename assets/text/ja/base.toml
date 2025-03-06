@@ -138,6 +138,8 @@ aerosol-injection = "エアロゾル注入"
 black-dust = "黒色塵"
 fire = "火災"
 plague = "疫病"
+vehicle = "乗り物"
+war = "戦争"
 
 # Civilization Ages
 [age]

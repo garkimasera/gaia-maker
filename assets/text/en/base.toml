@@ -139,6 +139,8 @@ aerosol-injection = "Aerosol Injection"
 black-dust = "Black Dust"
 fire = "Fire"
 plague = "Plague"
+vehicle = "Vehicle"
+war = "War"
 
 # Civilization Ages
 [age]
