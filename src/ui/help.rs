@@ -4,7 +4,8 @@ use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::planet::{
-    BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
+    Biome, BuildingAttrs, BuildingEffect, CivilizationAge, Cost, EnergySource, Params,
+    SpaceBuildingKind, StructureKind, TileEventKind,
 };
 use crate::screen::OccupiedScreenSpace;
 use crate::text::WithUnitDisplay;
@@ -20,7 +21,10 @@ pub enum HelpItem {
     Basics(BasicsItem),
     Structures(StructureKind),
     SpaceBuildings(SpaceBuildingKind),
-    TileEvent(TileEventKind),
+    TileEvents(TileEventKind),
+    Biomes(Biome),
+    CivilizationAges(CivilizationAge),
+    EnergySources(EnergySource),
 }
 
 impl AsRef<str> for HelpItem {
@@ -29,7 +33,24 @@ impl AsRef<str> for HelpItem {
             HelpItem::Basics(basic_items) => basic_items.as_ref(),
             HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
             HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
-            HelpItem::TileEvent(tile_event_kind) => tile_event_kind.as_ref(),
+            HelpItem::TileEvents(tile_event_kind) => tile_event_kind.as_ref(),
+            HelpItem::Biomes(biome) => biome.as_ref(),
+            HelpItem::CivilizationAges(age) => match age {
+                CivilizationAge::Stone => "age/stone",
+                CivilizationAge::Bronze => "age/bronze",
+                CivilizationAge::Iron => "age/iron",
+                CivilizationAge::Industrial => "age/industrial",
+                CivilizationAge::Atomic => "age/atomic",
+                CivilizationAge::EarlySpace => "age/early-space",
+            },
+            HelpItem::EnergySources(energy_source) => match energy_source {
+                EnergySource::Biomass => "energy_source/biomass",
+                EnergySource::WindSolar => "energy_source/wind-solar",
+                EnergySource::HydroGeothermal => "energy_source/hydro-geothermal",
+                EnergySource::FossilFuel => "energy_source/fossil-fuel",
+                EnergySource::Nuclear => "energy_source/nuclear",
+                EnergySource::Gift => "energy_source/gift",
+            },
         }
     }
 }
@@ -88,8 +109,22 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
             .collect(),
     );
     map.insert(
-        ItemGroup::TileEvent,
-        TileEventKind::iter().map(HelpItem::TileEvent).collect(),
+        ItemGroup::TileEvents,
+        TileEventKind::iter().map(HelpItem::TileEvents).collect(),
+    );
+    map.insert(
+        ItemGroup::Biomes,
+        Biome::iter().map(HelpItem::Biomes).collect(),
+    );
+    map.insert(
+        ItemGroup::CivilizationAges,
+        CivilizationAge::iter()
+            .map(HelpItem::CivilizationAges)
+            .collect(),
+    );
+    map.insert(
+        ItemGroup::EnergySources,
+        EnergySource::iter().map(HelpItem::EnergySources).collect(),
     );
 
     map
@@ -151,7 +186,7 @@ impl HelpItem {
         } {
             ui_building_attr(ui, textures, building_attrs);
             ui.separator();
-        } else if let HelpItem::TileEvent(kind) = self {
+        } else if let HelpItem::TileEvents(kind) = self {
             if let Some(cost) = &params.event.tile_event_costs.get(kind) {
                 let (icon, s) = match **cost {
                     Cost::Material(value) => (

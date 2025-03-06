@@ -428,7 +428,7 @@ fn action_menu(
                 pos_tooltip,
                 |ui| {
                     ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
-                    HelpItem::TileEvent(kind).ui(ui, textures, params);
+                    HelpItem::TileEvents(kind).ui(ui, textures, params);
                 },
             );
         }
