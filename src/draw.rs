@@ -301,8 +301,9 @@ fn spawn_animal_textures(
 
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
+        let tile = &planet.map[p];
 
-        if planet.map[p].structure.is_some() {
+        if tile.structure.is_some() {
             if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
                 if display_opts.cities {
                     continue;
@@ -311,9 +312,17 @@ fn spawn_animal_textures(
                 continue;
             }
         }
+        if tile
+            .tile_events
+            .list()
+            .iter()
+            .any(|te| matches!(te, TileEvent::Vehicle { .. }))
+        {
+            continue;
+        }
 
         // Select the largest animal at this tile
-        let Some(animal) = planet.map[p].largest_animal() else {
+        let Some(animal) = tile.largest_animal() else {
             continue;
         };
 
