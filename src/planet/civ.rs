@@ -259,9 +259,7 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
             id: animal_id,
             age: CivilizationAge::Stone,
             pop: params.sim.settlement_init_pop[CivilizationAge::Stone as usize],
-            tech_exp: 0.0,
-            state: SettlementState::Growing,
-            since_state_changed: 0,
+            ..Default::default()
         };
         let mut p_settlement = None;
         for p in tile_geom::SpiralIter::new(p).take(0xFF) {

@@ -3,6 +3,7 @@ use std::collections::{BTreeMap, HashMap};
 use fnv::FnvHashMap;
 use geom::Coords;
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
@@ -57,8 +58,8 @@ impl Default for State {
     Hash,
     Default,
     Debug,
-    serde_repr::Serialize_repr,
-    serde_repr::Deserialize_repr,
+    Serialize_repr,
+    Deserialize_repr,
     EnumString,
     Display,
     EnumIter,
@@ -217,9 +218,7 @@ pub enum TileEvent {
     },
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, Debug, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum VehicleKind {
     Ship = 1,
@@ -299,13 +298,14 @@ pub struct Civilization {
     pub total_energy_consumption: [f32; EnergySource::LEN],
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Default, Debug, Serialize, Deserialize)]
 pub struct Settlement {
     pub id: AnimalId,
     pub age: CivilizationAge,
     pub pop: f32,
     pub tech_exp: f32,
     pub state: SettlementState,
+    pub kind: SettlementKind,
     pub since_state_changed: u16,
 }
 
@@ -319,8 +319,8 @@ pub struct Settlement {
     Default,
     Hash,
     Debug,
-    serde_repr::Serialize_repr,
-    serde_repr::Deserialize_repr,
+    Serialize_repr,
+    Deserialize_repr,
     AsRefStr,
     Display,
     EnumIter,
@@ -338,19 +338,27 @@ pub enum CivilizationAge {
     EarlySpace,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, Debug, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
-)]
+impl CivilizationAge {
+    pub const LEN: usize = Self::EarlySpace as usize + 1;
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum SettlementState {
+    #[default]
     Growing = 0,
     Stable,
     Declining,
     Deserted,
 }
 
-impl CivilizationAge {
-    pub const LEN: usize = Self::EarlySpace as usize + 1;
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum SettlementKind {
+    #[default]
+    Normal = 0,
+    Aquatic,
+    Shelter,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter)]
