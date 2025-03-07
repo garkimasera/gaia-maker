@@ -848,6 +848,8 @@ pub struct PlagueParams {
     pub distant_infectivity: f32,
     /// Plague lethality
     pub lethality: f32,
+    /// Infection limit by elapsed cycles
+    pub infection_limit_cycles: u64,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

@@ -287,6 +287,7 @@
                 w: 0.01, w_manual: 0.5,
                 infectivity: 0.4, distant_infectivity: 0.2,
                 lethality: 0.5,
+                infection_limit_cycles: 1200,
             ),
         ],
         plague_spread_base_prob: 0.2,

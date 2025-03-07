@@ -36,6 +36,11 @@ pub fn cause_plague_random(_planet: &mut Planet, _sim: &mut Sim, _params: &Param
 
 /// Simutate plague, return true if the processing plague is completed
 pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
+    let elapsed_cycles = planet
+        .events
+        .in_progress_event_cycles(PlanetEventKind::Plague)
+        .next()
+        .unwrap();
     let plague_event: &mut PlagueEvent = 'a: {
         for event in planet.events.in_progress_iter_mut(PlanetEventKind::Plague) {
             if let PlanetEvent::Plague(plague_event) = &mut *event {
@@ -45,6 +50,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         unreachable!();
     };
     let plague_params = &params.event.plague_list[plague_event.i];
+    let infection_enabled_by_cycles = elapsed_cycles <= plague_params.infection_limit_cycles;
     let mut count_infected = 0;
 
     let mut pop_max_uninfected_settlement = 0.0;
@@ -84,11 +90,13 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
             }
 
             // Spread plague
-            if sim.rng.random_bool(
-                (params.event.plague_spread_base_prob * plague_params.infectivity)
-                    .min(1.0)
-                    .into(),
-            ) {
+            if infection_enabled_by_cycles
+                && sim.rng.random_bool(
+                    (params.event.plague_spread_base_prob * plague_params.infectivity)
+                        .min(1.0)
+                        .into(),
+                )
+            {
                 let mut target_tiles: ArrayVec<(Coords, f32), 8> = ArrayVec::new();
                 for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
                     if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
@@ -120,16 +128,18 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         true
     } else {
         // Spread to distant settlement
-        if let Some(p) = p_pop_max_uninfected_settlement {
-            if sim.rng.random_bool(
-                (params.event.plague_spread_base_prob * plague_params.distant_infectivity)
-                    .min(1.0)
-                    .into(),
-            ) {
-                planet.map[p].tile_events.insert(TileEvent::Plague {
-                    cured: false,
-                    target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
-                });
+        if infection_enabled_by_cycles {
+            if let Some(p) = p_pop_max_uninfected_settlement {
+                if sim.rng.random_bool(
+                    (params.event.plague_spread_base_prob * plague_params.distant_infectivity)
+                        .min(1.0)
+                        .into(),
+                ) {
+                    planet.map[p].tile_events.insert(TileEvent::Plague {
+                        cured: false,
+                        target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
+                    });
+                }
             }
         }
         false

@@ -41,6 +41,16 @@ impl Events {
         })
     }
 
+    pub fn in_progress_event_cycles(&mut self, kind: PlanetEventKind) -> impl Iterator<Item = u64> {
+        self.in_progress.iter_mut().filter_map(move |e| {
+            if e.event.kind() == kind {
+                Some(e.progress)
+            } else {
+                None
+            }
+        })
+    }
+
     pub fn in_progress_civilize_event(&self, animal_id: AnimalId) -> bool {
         self.in_progress_iter(PlanetEventKind::Civilize)
             .any(|event| {
