@@ -65,10 +65,23 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
             Some(Structure::Settlement(settlement)) => {
                 format!(
                     "{}: {:.2}, {:+.1}",
-                    settlement.id, settlement.pop, settlement.tech_exp
+                    settlement.id, settlement.pop, settlement.tech_exp,
                 )
             }
-            _ => "0".into(),
+            _ => "-".into(),
+        },
+    ));
+    v.push((
+        "settlement state",
+        match &planet.map[p].structure {
+            Some(Structure::Settlement(settlement)) => {
+                format!(
+                    "{} {}",
+                    settlement.state.as_ref(),
+                    settlement.since_state_changed,
+                )
+            }
+            _ => "-".into(),
         },
     ));
     v.push(("energy efficiency", format!("{:.1}", sim.energy_eff[p])));
@@ -78,7 +91,7 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
 
 fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
     let Some(animal) = animal else {
-        return "Empty".into();
+        return "-".into();
     };
 
     format!("{}(n={:.3})", animal.id, animal.n)

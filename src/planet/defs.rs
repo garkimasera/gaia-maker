@@ -342,7 +342,10 @@ impl CivilizationAge {
     pub const LEN: usize = Self::EarlySpace as usize + 1;
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr)]
+#[derive(
+    Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr, AsRefStr,
+)]
+#[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum SettlementState {
     #[default]

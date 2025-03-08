@@ -7,6 +7,8 @@ use super::{Planet, ReportContent, Sim, defs::*};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
+const SETTLEMENT_STATE_UPDATE_INTERVAL_CYCLES: u16 = 8;
+
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
@@ -20,6 +22,12 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if !animal_attr.habitat.match_biome(planet.map[p].biome) {
             planet.map[p].structure = None;
             continue;
+        }
+
+        // Settlement state update
+        settlement.since_state_changed = settlement.since_state_changed.saturating_add(1);
+        if settlement.since_state_changed % SETTLEMENT_STATE_UPDATE_INTERVAL_CYCLES == 0 {
+            update_state(planet, sim, p, &mut settlement, params, animal_attr);
         }
 
         // Energy
@@ -94,6 +102,16 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Cause settlement random events
     cause_random_events(planet, sim, params);
+}
+
+fn update_state(
+    _planet: &Planet,
+    _sim: &mut Sim,
+    _p: Coords,
+    _settlement: &mut Settlement,
+    _params: &Params,
+    _animal_attr: &AnimalAttr,
+) {
 }
 
 fn spread_settlement(
