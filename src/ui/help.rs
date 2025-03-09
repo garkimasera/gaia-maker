@@ -4,7 +4,7 @@ use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::planet::{
-    Biome, BuildingAttrs, BuildingEffect, CivilizationAge, Cost, EnergySource, Params,
+    Biome, BuildingAttrs, BuildingEffect, CivilizationAge, Cost, EnergySource, GasKind, Params,
     SpaceBuildingKind, StructureKind, TileEventKind,
 };
 use crate::screen::OccupiedScreenSpace;
@@ -18,23 +18,26 @@ use std::sync::LazyLock;
 #[strum_discriminants(derive(PartialOrd, Ord, Hash, EnumIter, AsRefStr))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum HelpItem {
-    Basics(BasicsItem),
+    Basics(&'static str),
     Structures(StructureKind),
     SpaceBuildings(SpaceBuildingKind),
     TileEvents(TileEventKind),
     Biomes(Biome),
+    Atmosphere(GasKind),
     CivilizationAges(CivilizationAge),
     EnergySources(EnergySource),
+    Glossary(&'static str),
 }
 
 impl AsRef<str> for HelpItem {
     fn as_ref(&self) -> &str {
         match self {
-            HelpItem::Basics(basic_items) => basic_items.as_ref(),
+            HelpItem::Basics(basic_items) => basic_items,
             HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
             HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
             HelpItem::TileEvents(tile_event_kind) => tile_event_kind.as_ref(),
             HelpItem::Biomes(biome) => biome.as_ref(),
+            HelpItem::Atmosphere(gas_kind) => gas_kind.as_ref(),
             HelpItem::CivilizationAges(age) => match age {
                 CivilizationAge::Stone => "age/stone",
                 CivilizationAge::Bronze => "age/bronze",
@@ -51,18 +54,13 @@ impl AsRef<str> for HelpItem {
                 EnergySource::Nuclear => "energy_source/nuclear",
                 EnergySource::Gift => "energy_source/gift",
             },
+            HelpItem::Glossary(word) => word,
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
-#[strum(serialize_all = "kebab-case")]
-pub enum BasicsItem {
-    #[default]
-    Concept,
-    Player,
-    Terraforming,
-}
+const BASIC_ITEMS: &[&str] = &["concept", "player", "terraforming"];
+const GLOSSARY_ITEMS: &[&str] = &["fertility"];
 
 #[allow(clippy::derivable_impls)]
 impl Default for ItemGroup {
@@ -73,7 +71,7 @@ impl Default for ItemGroup {
 
 impl Default for HelpItem {
     fn default() -> Self {
-        HelpItem::Basics(BasicsItem::Concept)
+        HelpItem::Basics("concept")
     }
 }
 
@@ -88,7 +86,10 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
 
     map.insert(
         ItemGroup::Basics,
-        BasicsItem::iter().map(HelpItem::Basics).collect(),
+        BASIC_ITEMS
+            .iter()
+            .map(|item| HelpItem::Basics(item))
+            .collect(),
     );
     map.insert(
         ItemGroup::Structures,
@@ -117,6 +118,10 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
         Biome::iter().map(HelpItem::Biomes).collect(),
     );
     map.insert(
+        ItemGroup::Atmosphere,
+        GasKind::iter().map(HelpItem::Atmosphere).collect(),
+    );
+    map.insert(
         ItemGroup::CivilizationAges,
         CivilizationAge::iter()
             .map(HelpItem::CivilizationAges)
@@ -125,6 +130,13 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
     map.insert(
         ItemGroup::EnergySources,
         EnergySource::iter().map(HelpItem::EnergySources).collect(),
+    );
+    map.insert(
+        ItemGroup::Glossary,
+        GLOSSARY_ITEMS
+            .iter()
+            .map(|item| HelpItem::Glossary(item))
+            .collect(),
     );
 
     map
