@@ -355,6 +355,10 @@ pub enum SettlementState {
     Deserted,
 }
 
+impl SettlementState {
+    pub const LEN: usize = Self::Deserted as usize + 1;
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum SettlementKind {
@@ -731,6 +735,8 @@ pub struct SimParams {
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
+    /// Population capacity factor by settlement state
+    pub pop_factor_by_settlement_state: [f32; SettlementState::LEN],
     /// Livable temperature bonus by civilization
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
     /// Settlement spread simulation interval cycles

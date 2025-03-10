@@ -51,6 +51,14 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             * sim.planet_area_factor
             * cap_animal
             * resource_availability;
+        let cap = match settlement.state {
+            SettlementState::Growing => cap,
+            SettlementState::Stable => settlement.pop.min(cap),
+            SettlementState::Declining | SettlementState::Deserted => {
+                settlement.pop
+                    * params.sim.pop_factor_by_settlement_state[settlement.state as usize]
+            }
+        };
 
         let growth_speed = params.sim.base_pop_growth_speed;
         let ratio = settlement.pop / cap.max(1e-10);
