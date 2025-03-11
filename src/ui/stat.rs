@@ -80,6 +80,13 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
                 planet.basics.solar_constant,
                 (planet.state.solar_power_multiplier - 1.0) * 100.0
             ));
+            ui.end_row();
+            ui.label(t!("biomass"));
+            ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
+            ui.end_row();
+            let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
+            ui.label(t!("population"));
+            ui.label(format!("{:.0}", sum_pop.abs()));
         });
 
     if debug_mode_enabled {
