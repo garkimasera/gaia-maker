@@ -65,6 +65,7 @@ fn cursor_action(
                 if planet.animal_spawnable(coords, animal_id, &params) {
                     update_draw.update();
                     planet.spawn_animal(coords, animal_id, &params);
+                    audio_player.play_se("spawn-animal");
                 }
             }
             CursorMode::EditBiome(biome) => {
