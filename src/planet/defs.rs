@@ -304,6 +304,7 @@ pub struct Settlement {
     pub age: CivilizationAge,
     pub pop: f32,
     pub tech_exp: f32,
+    pub biomass_consumption: f32,
     pub state: SettlementState,
     pub kind: SettlementKind,
     pub since_state_changed: u16,

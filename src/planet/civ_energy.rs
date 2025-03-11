@@ -113,10 +113,10 @@ pub fn process_settlement_energy(
     planet: &mut Planet,
     sim: &mut Sim,
     p: Coords,
-    settlement: &Settlement,
+    settlement: &mut Settlement,
     params: &Params,
     cr: f32,
-) -> f32 {
+) {
     let age = settlement.age as usize;
     let animal_id = settlement.id;
 
@@ -220,7 +220,7 @@ pub fn process_settlement_energy(
         sum_values.total_energy_consumption[src as usize] += consume[src as usize] as f64;
     }
 
-    // Consume biomass from a tile that has maximum biomass
+    // Calculate biomass consumption
     let impact_on_biomass: f32 = params
         .sim
         .energy_source_biomass_impact
@@ -236,10 +236,11 @@ pub fn process_settlement_energy(
             }
         })
         .sum();
-    if impact_on_biomass <= 0.0 {
-        return 1.0;
-    }
-    let biomass_to_consume = impact_on_biomass / params.sim.biomass_energy_factor;
+    debug_assert!(impact_on_biomass > 0.0);
+    let biomass_consumption = impact_on_biomass / params.sim.biomass_energy_factor;
+    settlement.biomass_consumption = biomass_consumption;
+
+    // Consume biomass from a tile that has maximum biomass
     let mut p_max_biomass = p;
     let mut total_biomass = planet.map[p].biomass;
     let mut max_biomass = total_biomass;
@@ -257,21 +258,14 @@ pub fn process_settlement_energy(
     }
 
     // Decrease biomass
-    let total_biomass = total_biomass * sim.biomass_density_to_mass();
     let max_biomass = max_biomass * sim.biomass_density_to_mass();
-    let available_biomass_ratio = if biomass_to_consume > 0.0 {
-        total_biomass / biomass_to_consume
-    } else {
-        return 1.0;
-    };
-
-    let new_biomass = (max_biomass - biomass_to_consume).max(0.0);
+    if biomass_consumption < 0.0 {
+        return;
+    }
+    let new_biomass = (max_biomass - biomass_consumption).max(0.0);
     let diff_biomass = max_biomass - new_biomass;
     planet.map[p_max_biomass].biomass = new_biomass / sim.biomass_density_to_mass();
     planet.atmo.release_carbon(diff_biomass);
-
-    let x = available_biomass_ratio * params.sim.resource_availability_factor;
-    if x < 1.0 { x * x } else { x.min(1.0) }
 }
 
 pub fn consume_buried_carbon(planet: &mut Planet, sim: &mut Sim, params: &Params) {

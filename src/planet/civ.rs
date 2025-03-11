@@ -31,8 +31,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
 
         // Energy
-        let resource_availability =
-            super::civ_energy::process_settlement_energy(planet, sim, p, &settlement, params, cr);
+        super::civ_energy::process_settlement_energy(planet, sim, p, &mut settlement, params, cr);
 
         // Soil erosion
         planet.map[p].fertility *=
@@ -49,8 +48,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             super::animal::calc_cap_by_atmo_temp(planet, p, animal_attr, params, civ_temp_bonus);
         let cap = params.sim.settlement_max_pop[settlement.age as usize]
             * sim.planet_area_factor
-            * cap_animal
-            * resource_availability;
+            * cap_animal;
         let cap = match settlement.state {
             SettlementState::Growing => cap,
             SettlementState::Stable => settlement.pop.min(cap),
