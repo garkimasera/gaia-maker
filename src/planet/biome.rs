@@ -91,6 +91,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     );
 
     // Biomass
+    calc_biomass_consumption_dist_by_settlements(planet, sim);
     let mut sum_biomass = 0.0;
     let mut sum_buried_carbon = 0.0;
     let density_to_mass = sim.biomass_density_to_mass();
@@ -121,24 +122,26 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             max_biomass_density_planet_factor,
         );
         let biomass = &mut planet.map[p].biomass;
-        let diff = max - *biomass;
-        let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
+        let diff_to_max = max - *biomass;
+        let diff = if diff_to_max > 0.0 && speed_factor_by_atmo > 0.0 {
             params.sim.base_biomass_increase_speed * speed_factor_by_atmo
         } else {
-            diff * params.sim.base_biomass_decrease_speed
+            diff_to_max * params.sim.base_biomass_decrease_speed
         };
+        let diff = (diff - sim.biomass_consumption[p] / density_to_mass).max(-*biomass);
+        sim.diff_biomass[p] = diff;
 
-        let carbon_weight = density_to_mass * v.abs();
-        if v > 0.0 {
+        let carbon_weight = density_to_mass * diff.abs();
+        if diff > 0.0 {
             if planet.atmo.remove_carbon(carbon_weight) {
-                *biomass += v;
+                *biomass += diff;
             }
             sum_biomass += *biomass as f64;
         } else {
             planet
                 .atmo
                 .release_carbon(carbon_weight * (1.0 - biomass_to_buried_carbon_ratio));
-            *biomass += v;
+            *biomass += diff;
             sum_biomass += *biomass as f64;
             planet.map[p].buried_carbon += carbon_weight * biomass_to_buried_carbon_ratio;
         }
@@ -266,4 +269,36 @@ fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f
         &params.sim.max_biomass_factor_o2_table,
         planet.atmo.partial_pressure(GasKind::Oxygen),
     )
+}
+
+fn calc_biomass_consumption_dist_by_settlements(planet: &Planet, sim: &mut Sim) {
+    sim.biomass_consumption.fill(0.0);
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(Settlement {
+            biomass_consumption,
+            ..
+        })) = planet.map[p].structure
+        else {
+            continue;
+        };
+
+        // Consume biomass from a tile that has maximum biomass
+        let mut p_max_biomass = p;
+        let mut total_biomass = planet.map[p].biomass;
+        let mut max_biomass = total_biomass;
+        for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+            if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
+                if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
+                    let biomass = planet.map[p_adj].biomass;
+                    if biomass > max_biomass {
+                        max_biomass = biomass;
+                        total_biomass += biomass;
+                        p_max_biomass = p_adj;
+                    }
+                }
+            }
+        }
+        sim.biomass_consumption[p_max_biomass] += biomass_consumption;
+    }
 }

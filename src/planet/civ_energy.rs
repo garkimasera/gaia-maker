@@ -237,35 +237,7 @@ pub fn process_settlement_energy(
         })
         .sum();
     debug_assert!(impact_on_biomass > 0.0);
-    let biomass_consumption = impact_on_biomass / params.sim.biomass_energy_factor;
-    settlement.biomass_consumption = biomass_consumption;
-
-    // Consume biomass from a tile that has maximum biomass
-    let mut p_max_biomass = p;
-    let mut total_biomass = planet.map[p].biomass;
-    let mut max_biomass = total_biomass;
-    for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
-            if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
-                let biomass = planet.map[p_adj].biomass;
-                if biomass > max_biomass {
-                    max_biomass = biomass;
-                    total_biomass += biomass;
-                    p_max_biomass = p_adj;
-                }
-            }
-        }
-    }
-
-    // Decrease biomass
-    let max_biomass = max_biomass * sim.biomass_density_to_mass();
-    if biomass_consumption < 0.0 {
-        return;
-    }
-    let new_biomass = (max_biomass - biomass_consumption).max(0.0);
-    let diff_biomass = max_biomass - new_biomass;
-    planet.map[p_max_biomass].biomass = new_biomass / sim.biomass_density_to_mass();
-    planet.atmo.release_carbon(diff_biomass);
+    settlement.biomass_consumption = impact_on_biomass / params.sim.biomass_energy_factor;
 }
 
 pub fn consume_buried_carbon(planet: &mut Planet, sim: &mut Sim, params: &Params) {

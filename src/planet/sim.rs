@@ -44,6 +44,8 @@ pub struct Sim {
     pub humidity: Array2d<f32>,
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,
+    /// Biomass difference in the cycle
+    pub diff_biomass: Array2d<f32>,
     /// The number of working buildings
     pub working_buildings: fnv::FnvHashMap<BuildingKind, u32>,
     /// Hydro and geothermal energy source [GJ]
@@ -58,6 +60,8 @@ pub struct Sim {
     pub energy_eff: Array2d<f32>,
     /// Settlement congestion rate
     pub settlement_cr: Array2d<f32>,
+    /// Biomass consumption by settlements
+    pub biomass_consumption: Array2d<f32>,
     /// Count the number of settlements in war
     pub war_counter: FnvHashMap<u32, u32>,
 }
@@ -100,6 +104,7 @@ impl Sim {
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             humidity: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
+            diff_biomass: Array2d::new(size.0, size.1, 0.0),
             working_buildings: HashMap::default(),
             energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),
             energy_wind_solar: 0.0,
@@ -107,6 +112,7 @@ impl Sim {
             domain: Array2d::new(size.0, size.1, None),
             energy_eff: Array2d::new(size.0, size.1, 0.0),
             settlement_cr: Array2d::new(size.0, size.1, 0.0),
+            biomass_consumption: Array2d::new(size.0, size.1, 0.0),
             war_counter: FnvHashMap::default(),
         }
     }
