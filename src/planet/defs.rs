@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, HashMap};
 
 use fnv::FnvHashMap;
 use geom::Coords;
+use num_derive::FromPrimitive;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{DisplayFromStr, Same, serde_as};
@@ -325,7 +326,7 @@ pub struct Settlement {
     AsRefStr,
     Display,
     EnumIter,
-    num_derive::FromPrimitive,
+    FromPrimitive,
 )]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
@@ -344,7 +345,16 @@ impl CivilizationAge {
 }
 
 #[derive(
-    Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr, AsRefStr,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Default,
+    Debug,
+    Serialize_repr,
+    Deserialize_repr,
+    AsRefStr,
+    num_derive::FromPrimitive,
 )]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
@@ -740,6 +750,16 @@ pub struct SimParams {
     pub pop_factor_by_settlement_state: [f32; SettlementState::LEN],
     /// Livable temperature bonus by civilization
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
+    /// The number of cycles until settlement state becomes changeable
+    pub settlement_state_changeable_cycles: u16,
+    /// Threshold to stop growing by biomass decrease
+    pub settlement_stop_growing_biomass_threshold: f32,
+    /// Probability to stop growing by biomass decrease
+    pub settlement_stop_growing_biomass_prob: f32,
+    /// Settlement state change weight table
+    pub settlement_state_change_weight_table: [[u32; SettlementState::LEN]; SettlementState::LEN],
+    /// Settlement in stable state population fluctuation
+    pub settlement_stable_pop_fluctuation: f32,
     /// Settlement spread simulation interval cycles
     pub settlement_spread_interval_cycles: u64,
     /// Population of settlements to calculate spread probability
@@ -764,6 +784,8 @@ pub struct SimParams {
     pub advance_tech_interval_cycles: u64,
     /// Base tech exp
     pub base_tech_exp: f32,
+    /// Tech exp declining speed at settlement that has bad state
+    pub tech_exp_declining_speed: f32,
     /// Required tech exp to evolve the age
     pub tech_exp_evolution: [f32; CivilizationAge::LEN - 1],
     /// Rainfall to hydro energy source table [mm] - [GJ/m^2]

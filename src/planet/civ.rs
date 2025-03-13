@@ -1,7 +1,9 @@
+use std::sync::OnceLock;
+
 use arrayvec::ArrayVec;
 use geom::Coords;
 use num_traits::FromPrimitive;
-use rand::{Rng, seq::IndexedRandom};
+use rand::{Rng, distr::Distribution, seq::IndexedRandom};
 
 use super::{Planet, ReportContent, Sim, defs::*};
 
@@ -51,7 +53,10 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             * cap_animal;
         let cap = match settlement.state {
             SettlementState::Growing => cap,
-            SettlementState::Stable => settlement.pop.min(cap),
+            SettlementState::Stable => {
+                let fluct = params.sim.settlement_stable_pop_fluctuation;
+                settlement.pop.min(cap) * sim.rng.random_range((1.0 - fluct)..(1.0 + fluct))
+            }
             SettlementState::Declining | SettlementState::Deserted => {
                 settlement.pop
                     * params.sim.pop_factor_by_settlement_state[settlement.state as usize]
@@ -112,12 +117,42 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
 fn update_state(
     _planet: &Planet,
-    _sim: &mut Sim,
-    _p: Coords,
-    _settlement: &mut Settlement,
-    _params: &Params,
+    sim: &mut Sim,
+    p: Coords,
+    settlement: &mut Settlement,
+    params: &Params,
     _animal_attr: &AnimalAttr,
 ) {
+    use rand::distr::weighted::WeightedIndex;
+
+    if settlement.state == SettlementState::Growing
+        && sim.diff_biomass[p] < params.sim.settlement_stop_growing_biomass_threshold
+        && sim
+            .rng
+            .random_bool(params.sim.settlement_stop_growing_biomass_prob as f64)
+    {
+        settlement.change_state(SettlementState::Stable);
+        return;
+    }
+    if settlement.since_state_changed < params.sim.settlement_state_changeable_cycles {
+        return;
+    }
+
+    static CHANGE_WEIGHT: OnceLock<Vec<WeightedIndex<u32>>> = OnceLock::new();
+    let change_weight = CHANGE_WEIGHT.get_or_init(|| {
+        params
+            .sim
+            .settlement_state_change_weight_table
+            .iter()
+            .map(|v| WeightedIndex::new(v).expect("invalid settlement_state_change_weight_table"))
+            .collect()
+    });
+    let new_state =
+        SettlementState::from_usize(change_weight[settlement.state as usize].sample(&mut sim.rng))
+            .unwrap();
+    if new_state != settlement.state {
+        settlement.change_state(new_state);
+    }
 }
 
 fn spread_settlement(
@@ -178,15 +213,26 @@ fn spread_settlement(
 fn tech_exp(settlement: &mut Settlement, params: &Params) {
     let age = settlement.age as usize;
     let normalized_pop = settlement.pop / params.sim.settlement_init_pop[age];
-    settlement.tech_exp += (normalized_pop - 0.5) * params.sim.base_tech_exp;
+
+    let diff = match settlement.state {
+        SettlementState::Growing | SettlementState::Stable => {
+            (normalized_pop - 0.5) * params.sim.base_tech_exp
+        }
+        SettlementState::Declining | SettlementState::Deserted => {
+            -params.sim.tech_exp_declining_speed
+        }
+    };
+    settlement.tech_exp += diff;
 
     if age < (CivilizationAge::LEN - 1) && settlement.tech_exp > params.sim.tech_exp_evolution[age]
     {
         settlement.age = CivilizationAge::from_usize(age + 1).unwrap();
         settlement.tech_exp = 0.0;
+        settlement.change_state(SettlementState::Growing);
     } else if age > 0 && settlement.tech_exp < -100.0 {
         settlement.age = CivilizationAge::from_usize(age - 1).unwrap();
         settlement.tech_exp = 0.0;
+        settlement.change_state(SettlementState::Stable);
     }
 }
 
@@ -353,5 +399,12 @@ impl Planet {
         }
 
         Ok(())
+    }
+}
+
+impl Settlement {
+    fn change_state(&mut self, new_state: SettlementState) {
+        self.state = new_state;
+        self.since_state_changed = 0;
     }
 }
