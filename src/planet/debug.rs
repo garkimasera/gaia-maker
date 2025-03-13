@@ -25,10 +25,7 @@ pub(super) fn tile_log<F: FnOnce(Coords) -> T, T: ToString>(
     f: F,
 ) {
     if *POS_FOR_LOG.read().unwrap() == Some(target) {
-        TILE_LOGS
-            .write()
-            .unwrap()
-            .insert(name, f(target).to_string());
+        TILE_LOGS.write().unwrap().insert(name, f(target).to_string());
     }
 }
 

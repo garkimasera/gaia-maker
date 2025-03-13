@@ -92,23 +92,21 @@ fn info_ui(ui: &mut egui::Ui, planet: &Planet, sim: &Sim, p: Coords) {
     let tile_debug_info = crate::planet::debug::tile_debug_info(planet, sim, p);
     let tile_logs = crate::planet::debug::tile_logs();
 
-    egui::Grid::new("tile_info_grid")
-        .striped(true)
-        .show(ui, |ui| {
-            for (name, data) in tile_debug_info.iter() {
-                ui.label(*name);
-                ui.label(data);
-                ui.end_row();
-            }
-            ui.separator();
-            ui.separator();
+    egui::Grid::new("tile_info_grid").striped(true).show(ui, |ui| {
+        for (name, data) in tile_debug_info.iter() {
+            ui.label(*name);
+            ui.label(data);
             ui.end_row();
-            for (name, data) in tile_logs.iter() {
-                ui.label(*name);
-                ui.label(data);
-                ui.end_row();
-            }
-        });
+        }
+        ui.separator();
+        ui.separator();
+        ui.end_row();
+        for (name, data) in tile_logs.iter() {
+            ui.label(*name);
+            ui.label(data);
+            ui.end_row();
+        }
+    });
 }
 
 fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet) {

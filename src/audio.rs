@@ -31,7 +31,6 @@ impl AudioPlayer<'_> {
 
 impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(AudioPlugin)
-            .add_audio_channel::<SEChannel>();
+        app.add_plugins(AudioPlugin).add_audio_channel::<SEChannel>();
     }
 }

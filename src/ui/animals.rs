@@ -141,11 +141,7 @@ fn contents(
                     } else {
                         String::new()
                     };
-                    if ui
-                        .button(t!("civilize"))
-                        .on_disabled_hover_text(s)
-                        .clicked()
-                    {
+                    if ui.button(t!("civilize")).on_disabled_hover_text(s).clicked() {
                         planet.civilize_animal(state.current, sim, params);
                     }
                 }

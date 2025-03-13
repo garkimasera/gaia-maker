@@ -51,21 +51,8 @@ impl Default for State {
     }
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    Debug,
-    Serialize_repr,
-    Deserialize_repr,
-    EnumString,
-    Display,
-    EnumIter,
-    AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, EnumString, Display, EnumIter, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum Biome {
@@ -311,23 +298,8 @@ pub struct Settlement {
     pub since_state_changed: u16,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Default,
-    Hash,
-    Debug,
-    Serialize_repr,
-    Deserialize_repr,
-    AsRefStr,
-    Display,
-    EnumIter,
-    FromPrimitive,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Hash, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, AsRefStr, Display, EnumIter, FromPrimitive)]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum CivilizationAge {
@@ -344,18 +316,8 @@ impl CivilizationAge {
     pub const LEN: usize = Self::EarlySpace as usize + 1;
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    Debug,
-    Serialize_repr,
-    Deserialize_repr,
-    AsRefStr,
-    num_derive::FromPrimitive,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, AsRefStr, FromPrimitive)]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum SettlementState {
@@ -409,7 +371,7 @@ impl EnergySource {
     Deserialize,
     EnumString,
     EnumIter,
-    AsRefStr,
+    AsRefStr
 )]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
@@ -434,9 +396,8 @@ pub struct BuildingAttrs {
     pub control: BuildingControl,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Serialize, Deserialize, AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
+#[derive(Serialize, Deserialize, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingControl {
@@ -445,21 +406,8 @@ pub enum BuildingControl {
     IncreaseRate,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Debug,
-    Serialize,
-    Deserialize,
-    EnumString,
-    EnumIter,
-    AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Serialize, Deserialize, EnumString, EnumIter, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum SpaceBuildingKind {
@@ -958,9 +906,8 @@ pub struct StartPlanet {
     pub height_map: Vec<f32>,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize, EnumString, AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Serialize, Deserialize, EnumString, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum PlanetHabitability {

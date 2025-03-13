@@ -62,32 +62,30 @@ pub fn stat_window(
 }
 
 fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
-    egui::Grid::new("table_planet")
-        .striped(true)
-        .show(ui, |ui| {
-            ui.label(t!("planet-name"));
-            ui.label(&planet.basics.name);
-            ui.end_row();
-            ui.label(t!("cycles"));
-            ui.label(format!("{}", planet.cycles));
-            ui.end_row();
-            ui.label(t!("radius"));
-            ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
-            ui.end_row();
-            ui.label(t!("solar-constant"));
-            ui.label(format!(
-                "{:.0} W/m² ({:+.0}%)",
-                planet.basics.solar_constant,
-                (planet.state.solar_power_multiplier - 1.0) * 100.0
-            ));
-            ui.end_row();
-            ui.label(t!("biomass"));
-            ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
-            ui.end_row();
-            let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
-            ui.label(t!("population"));
-            ui.label(format!("{:.0}", sum_pop.abs()));
-        });
+    egui::Grid::new("table_planet").striped(true).show(ui, |ui| {
+        ui.label(t!("planet-name"));
+        ui.label(&planet.basics.name);
+        ui.end_row();
+        ui.label(t!("cycles"));
+        ui.label(format!("{}", planet.cycles));
+        ui.end_row();
+        ui.label(t!("radius"));
+        ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
+        ui.end_row();
+        ui.label(t!("solar-constant"));
+        ui.label(format!(
+            "{:.0} W/m² ({:+.0}%)",
+            planet.basics.solar_constant,
+            (planet.state.solar_power_multiplier - 1.0) * 100.0
+        ));
+        ui.end_row();
+        ui.label(t!("biomass"));
+        ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
+        ui.end_row();
+        let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
+        ui.label(t!("population"));
+        ui.label(format!("{:.0}", sum_pop.abs()));
+    });
 
     if debug_mode_enabled {
         ui.label(
@@ -281,9 +279,7 @@ impl GraphItem {
             Self::AverageRainfall => record
                 .map(|record| record.average_rainfall as f64)
                 .unwrap_or(0.0),
-            Self::Biomass => record
-                .map(|record| record.biomass as f64 * 1e-3)
-                .unwrap_or(0.0),
+            Self::Biomass => record.map(|record| record.biomass as f64 * 1e-3).unwrap_or(0.0),
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),

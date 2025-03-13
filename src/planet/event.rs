@@ -52,14 +52,13 @@ impl Events {
     }
 
     pub fn in_progress_civilize_event(&self, animal_id: AnimalId) -> bool {
-        self.in_progress_iter(PlanetEventKind::Civilize)
-            .any(|event| {
-                if let PlanetEvent::Civilize { target } = event {
-                    *target == animal_id
-                } else {
-                    false
-                }
-            })
+        self.in_progress_iter(PlanetEventKind::Civilize).any(|event| {
+            if let PlanetEvent::Civilize { target } = event {
+                *target == animal_id
+            } else {
+                false
+            }
+        })
     }
 }
 

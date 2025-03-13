@@ -148,9 +148,7 @@ fn setup_fonts(
     let mut fonts = FontDefinitions::default();
     let mut font_data = FontData::from_owned(font_data.0);
     font_data.tweak.scale = conf.ui.font_scale;
-    fonts
-        .font_data
-        .insert("m+_font".to_owned(), font_data.into());
+    fonts.font_data.insert("m+_font".to_owned(), font_data.into());
     fonts
         .families
         .get_mut(&FontFamily::Proportional)

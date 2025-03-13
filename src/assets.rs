@@ -154,9 +154,7 @@ fn create_assets_list(
     mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // Biomes
-    let biome_asset_list = biome_asset_list
-        .get(&planet_asset_collection.biomes)
-        .unwrap();
+    let biome_asset_list = biome_asset_list.get(&planet_asset_collection.biomes).unwrap();
     let mut biome_texture_rects = HashMap::new();
     for j in 0..4 {
         for i in 0..3 {

@@ -86,10 +86,7 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
 
     map.insert(
         ItemGroup::Basics,
-        BASIC_ITEMS
-            .iter()
-            .map(|item| HelpItem::Basics(item))
-            .collect(),
+        BASIC_ITEMS.iter().map(|item| HelpItem::Basics(item)).collect(),
     );
     map.insert(
         ItemGroup::Structures,

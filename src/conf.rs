@@ -71,16 +71,16 @@ pub struct UiConf {
     pub min_sidebar_width: f32,
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Asset, Resource, TypePath)]
+#[derive(Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Asset, Resource, TypePath)]
 pub struct WindowConf {
     pub size: (u32, u32),
     #[serde(default)]
     pub maximized: bool,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize, AsRefStr, EnumIter,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Serialize, Deserialize, AsRefStr, EnumIter)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum HighLow3 {

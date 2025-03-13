@@ -388,10 +388,7 @@ fn spawn_tile_animation_textures(
         };
         let animated_texture = tile_event_texture(tile_event);
         let index = animated_texture.index(counter.fast, monochrome);
-        let Some(t) = texture_handles
-            .tile_animations
-            .get(tile_event.kind().as_ref())
-        else {
+        let Some(t) = texture_handles.tile_animations.get(tile_event.kind().as_ref()) else {
             continue;
         };
 

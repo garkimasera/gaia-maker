@@ -136,9 +136,7 @@ impl CivSum {
     }
 
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (AnimalId, &mut CivSumValues)> {
-        self.0
-            .iter_mut()
-            .map(|(key, sum_values)| (*key, sum_values))
+        self.0.iter_mut().map(|(key, sum_values)| (*key, sum_values))
     }
 
     pub fn get_mut(&mut self, animal_id: AnimalId) -> &mut CivSumValues {

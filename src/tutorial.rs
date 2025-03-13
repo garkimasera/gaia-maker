@@ -125,11 +125,7 @@ impl TutorialStep {
     ];
 
     fn next(&self) -> Option<Self> {
-        if let Some((i, _)) = Self::ORDER
-            .iter()
-            .enumerate()
-            .find(|(_, value)| self == *value)
-        {
+        if let Some((i, _)) = Self::ORDER.iter().enumerate().find(|(_, value)| self == *value) {
             Self::ORDER.get(i + 1).copied()
         } else {
             None
@@ -137,11 +133,7 @@ impl TutorialStep {
     }
 
     fn back(&self) -> Option<Self> {
-        if let Some((i, _)) = Self::ORDER
-            .iter()
-            .enumerate()
-            .find(|(_, value)| self == *value)
-        {
+        if let Some((i, _)) = Self::ORDER.iter().enumerate().find(|(_, value)| self == *value) {
             if i > 0 {
                 Self::ORDER.get(i - 1).copied()
             } else {

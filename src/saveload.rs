@@ -65,19 +65,9 @@ pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Resul
     .to_bytes();
 
     let n = if auto {
-        save_state
-            .auto_save_files
-            .last()
-            .copied()
-            .unwrap_or_default()
-            + 1
+        save_state.auto_save_files.last().copied().unwrap_or_default() + 1
     } else {
-        save_state
-            .manual_save_files
-            .last()
-            .copied()
-            .unwrap_or_default()
-            + 1
+        save_state.manual_save_files.last().copied().unwrap_or_default() + 1
     };
     let file_name = save_file_name(auto, n);
 

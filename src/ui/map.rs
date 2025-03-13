@@ -356,9 +356,7 @@ impl Legend {
                 self.ui_color_legend(ui, legend_items);
             }
             MapLayer::Structures => {
-                let legend_items = STRUCTURE_COLORS
-                    .iter()
-                    .map(|(kind, color)| (*color, t!(kind)));
+                let legend_items = STRUCTURE_COLORS.iter().map(|(kind, color)| (*color, t!(kind)));
                 self.ui_color_legend(ui, legend_items);
             }
         }

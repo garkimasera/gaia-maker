@@ -256,9 +256,7 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 continue;
             };
 
-            if planet.map[p_adj]
-                .tile_events
-                .contains(TileEventKind::Vehicle)
+            if planet.map[p_adj].tile_events.contains(TileEventKind::Vehicle)
                 || !sim.rng.random_bool(params.event.vehicle_spawn_prob as f64)
             {
                 continue;

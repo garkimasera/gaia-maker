@@ -202,10 +202,7 @@ fn update(
 
     if advance_planet {
         crate::planet::debug::clear_logs(
-            hover_tile
-                .get_single()
-                .ok()
-                .and_then(|hover_tile| hover_tile.0),
+            hover_tile.get_single().ok().and_then(|hover_tile| hover_tile.0),
         );
         planet.advance(&mut sim, &params);
         *last_advance_planet = now;

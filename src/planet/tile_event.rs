@@ -165,9 +165,7 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         else {
             continue;
         };
-        planet.map[p_prev]
-            .tile_events
-            .remove(TileEventKind::Vehicle);
+        planet.map[p_prev].tile_events.remove(TileEventKind::Vehicle);
         let dy = if sim.rng.random_bool(params.event.vehicle_ns_move_prob) {
             direction.1
         } else {

@@ -112,11 +112,7 @@ impl ColorMaterials {
     }
 
     pub fn color_list(&self) -> Vec<Vec<Color>> {
-        let high_low = self
-            .white_yellow_red
-            .iter()
-            .map(|(color, _)| *color)
-            .collect();
+        let high_low = self.white_yellow_red.iter().map(|(color, _)| *color).collect();
 
         let depth_height = self
             .blue_dark_blue
