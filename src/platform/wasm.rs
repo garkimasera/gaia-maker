@@ -238,3 +238,7 @@ impl super::PreferredWindowResolution {
         Self::Size(width as u32, height as u32)
     }
 }
+
+pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
+    None
+}

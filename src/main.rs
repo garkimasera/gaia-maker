@@ -61,10 +61,17 @@ fn main() {
 
     App::new()
         .add_plugins(AssetPlugin)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(window),
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .set(bevy::log::LogPlugin {
+                    custom_layer: crate::platform::log_plugin_custom_layer,
+                    ..default()
+                })
+                .set(WindowPlugin {
+                    primary_window: Some(window),
+                    ..default()
+                }),
+        )
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(gz::GzPlugin)
         .add_plugins(text_assets::TextAssetsPlugin)

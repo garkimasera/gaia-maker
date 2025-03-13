@@ -229,3 +229,59 @@ impl super::PreferredWindowResolution {
         }
     }
 }
+
+const LOG_FILE_NAME: &str = "log";
+
+pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
+    use bevy::log::tracing_subscriber::Layer;
+    use bevy::utils::tracing;
+    use std::fs::File;
+    use std::sync::{Arc, LazyLock};
+
+    static LOG_FILE: LazyLock<Arc<File>> = LazyLock::new(|| {
+        let data_dir = crate::platform::data_dir().expect("cannot get data dir");
+        std::fs::create_dir_all(data_dir).expect("cannot create data dir");
+        let file =
+            std::fs::File::create(data_dir.join(LOG_FILE_NAME)).expect("cannot create log file");
+        Arc::new(file)
+    });
+
+    struct CaptureLayerVisitor<'a>(&'a mut Option<String>);
+    impl tracing::field::Visit for CaptureLayerVisitor<'_> {
+        fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
+            if field.name() == "message" {
+                *self.0 = Some(format!("{:?}", value));
+            }
+        }
+    }
+
+    struct CustomLayer;
+    impl<S: tracing::Subscriber> Layer<S> for CustomLayer {
+        fn on_event(
+            &self,
+            event: &bevy::utils::tracing::Event<'_>,
+            _ctx: bevy::log::tracing_subscriber::layer::Context<'_, S>,
+        ) {
+            if *event.metadata().level() > bevy::log::Level::WARN {
+                return;
+            }
+            let mut file = LOG_FILE.clone();
+            let mut message = None;
+            event.record(&mut CaptureLayerVisitor(&mut message));
+            let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
+            let _ = write!(file, "{}", now.format("%Y-%m-%dT%H:%M:%S"));
+            let _ = write!(file, " {}", event.metadata().level());
+            if let Some(message) = message {
+                let _ = write!(file, " {}", message);
+            }
+            let _ = writeln!(file);
+        }
+    }
+
+    Some(Box::new(vec![
+        bevy::log::tracing_subscriber::fmt::layer()
+            .with_file(true)
+            .boxed(),
+        CustomLayer.boxed(),
+    ]))
+}
