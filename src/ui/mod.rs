@@ -34,8 +34,6 @@ use crate::{
     screen::{CursorMode, OccupiedScreenSpace},
 };
 
-use self::report::ReportUi;
-
 const HELP_TOOLTIP_WIDTH: f32 = 256.0;
 
 #[derive(Clone, Copy, Debug)]
@@ -59,7 +57,6 @@ pub struct WindowsOpenState {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Dialog {
-    Report(ReportUi),
     _Dummy,
 }
 
@@ -77,6 +74,9 @@ impl UiTextures {
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
 pub struct UiWindowsSystemSet;
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct MainPanelsSystemSet;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
@@ -99,6 +99,14 @@ impl Plugin for UiPlugin {
                 Update,
                 panels::panels
                     .run_if(in_state(GameState::Running))
+                    .in_set(MainPanelsSystemSet)
+                    .before(UiWindowsSystemSet),
+            )
+            .add_systems(
+                Update,
+                report::report_ui
+                    .run_if(in_state(GameState::Running))
+                    .after(MainPanelsSystemSet)
                     .before(UiWindowsSystemSet),
             )
             .add_systems(
@@ -109,7 +117,6 @@ impl Plugin for UiPlugin {
                     map::map_window,
                     stat::stat_window,
                     layers_window,
-                    report::report_windows,
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,

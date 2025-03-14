@@ -31,7 +31,7 @@ impl Reports {
     pub fn iter(&self) -> impl Iterator<Item = &Report> {
         ReportIter {
             reports: self.reports.values().peekable(),
-            temp_reports: self.persistent_warns.iter().peekable(),
+            persistent_warn_reports: self.persistent_warns.iter().peekable(),
         }
     }
 
@@ -66,23 +66,23 @@ impl Reports {
 
 struct ReportIter<'a> {
     reports: std::iter::Peekable<std::collections::btree_map::Values<'a, Reverse<u64>, Report>>,
-    temp_reports: std::iter::Peekable<std::slice::Iter<'a, Report>>,
+    persistent_warn_reports: std::iter::Peekable<std::slice::Iter<'a, Report>>,
 }
 
 impl<'a> Iterator for ReportIter<'a> {
     type Item = &'a Report;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match (self.reports.peek(), self.temp_reports.peek()) {
+        match (self.reports.peek(), self.persistent_warn_reports.peek()) {
             (Some(report), Some(temp_report)) => {
                 if report.cycles > temp_report.cycles {
                     self.reports.next()
                 } else {
-                    self.temp_reports.next()
+                    self.persistent_warn_reports.next()
                 }
             }
             (Some(_), None) => self.reports.next(),
-            (None, Some(_)) => self.temp_reports.next(),
+            (None, Some(_)) => self.persistent_warn_reports.next(),
             (None, None) => None,
         }
     }

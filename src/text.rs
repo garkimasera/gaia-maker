@@ -62,14 +62,6 @@ impl MsgStyle {
     }
 }
 
-pub fn split_to_head_body(s: &str) -> (&str, Option<&str>) {
-    if let Some((head, body)) = s.split_once('\n') {
-        (head, Some(body))
-    } else {
-        (s, None)
-    }
-}
-
 pub fn format_float_1000(value: f32, precision: usize) -> compact_str::CompactString {
     if value > 1000.0 || precision == 0 {
         format_compact!("{:.0}", value)

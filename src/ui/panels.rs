@@ -21,11 +21,8 @@ pub fn panels(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
-    (mut app_exit_events, mut ew_manage_planet, mut next_game_state): (
-        EventWriter<AppExit>,
-        EventWriter<ManagePlanet>,
-        ResMut<NextState<GameState>>,
-    ),
+    (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
+    mut next_game_state: ResMut<NextState<GameState>>,
     (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
     diagnostics_store: Res<DiagnosticsStore>,
     mut last_hover_tile: Local<Option<Coords>>,
@@ -38,7 +35,6 @@ pub fn panels(
         .show(egui_ctxs.ctx_mut(), |ui| {
             sidebar(
                 ui,
-                &mut wos,
                 &cursor_mode,
                 &planet,
                 &params,
@@ -191,7 +187,6 @@ fn toolbar(
 
 fn sidebar(
     ui: &mut egui::Ui,
-    wos: &mut WindowsOpenState,
     cursor_mode: &CursorMode,
     planet: &Planet,
     params: &Params,
@@ -367,10 +362,6 @@ fn sidebar(
         "".into()
     };
     ui.label(s);
-
-    ui.separator();
-
-    super::report::report_list(ui, wos, planet, conf);
 }
 
 fn build_menu(
