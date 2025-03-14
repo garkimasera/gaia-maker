@@ -116,7 +116,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 fn update_state(
-    _planet: &Planet,
+    planet: &Planet,
     sim: &mut Sim,
     p: Coords,
     settlement: &mut Settlement,
@@ -125,6 +125,16 @@ fn update_state(
 ) {
     use rand::distr::weighted::WeightedIndex;
 
+    let density_to_mass = sim.biomass_density_to_mass();
+    if settlement.state != SettlementState::Deserted
+        && settlement.biomass_consumption
+            > planet.map[p].biomass
+                * density_to_mass
+                * params.sim.settlement_deserted_by_biomass_factor
+    {
+        settlement.change_state(SettlementState::Deserted);
+        return;
+    }
     if settlement.state == SettlementState::Growing
         && sim.diff_biomass[p] < params.sim.settlement_stop_growing_biomass_threshold
         && sim

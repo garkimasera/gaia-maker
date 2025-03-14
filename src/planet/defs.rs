@@ -704,6 +704,8 @@ pub struct SimParams {
     pub settlement_stop_growing_biomass_threshold: f32,
     /// Probability to stop growing by biomass decrease
     pub settlement_stop_growing_biomass_prob: f32,
+    /// Settlement becomes deserted when the tile biomass is under this factor
+    pub settlement_deserted_by_biomass_factor: f32,
     /// Settlement state change weight table
     pub settlement_state_change_weight_table: [[u32; SettlementState::LEN]; SettlementState::LEN],
     /// Settlement in stable state population fluctuation
