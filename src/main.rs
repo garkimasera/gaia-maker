@@ -26,6 +26,8 @@ mod title_screen;
 mod tutorial;
 mod ui;
 
+use std::path::PathBuf;
+
 use bevy::{
     prelude::*,
     window::{PresentMode, WindowResolution},
@@ -37,11 +39,19 @@ const APP_NAME: &str = concat!("Gaia Maker v", env!("CARGO_PKG_VERSION"));
 
 #[derive(Clone, Parser, Debug)]
 #[clap(author, version)]
-struct Args {}
+struct Args {
+    #[arg(long, default_value_t = 4)]
+    num_threads: u8,
+    #[arg(long)]
+    log_file: Option<PathBuf>,
+}
 
 fn main() {
-    let _args = Args::parse();
-
+    let args = Args::parse();
+    crate::platform::init_rayon(args.num_threads as usize);
+    if let Some(log_file) = args.log_file {
+        crate::platform::init_log_file(log_file);
+    }
     crate::platform::window_open();
 
     let mut window = Window {

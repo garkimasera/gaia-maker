@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, path::PathBuf, sync::Arc};
 
 use anyhow::{Context, Result, anyhow};
 
@@ -182,12 +182,14 @@ pub fn modify_conf(conf: Conf) -> Conf {
     conf
 }
 
-pub fn window_open() {
+pub fn init_rayon(num_threads: usize) {
     rayon::ThreadPoolBuilder::new()
-        .num_threads(4)
+        .num_threads(num_threads)
         .build_global()
         .unwrap();
 }
+
+pub fn window_open() {}
 
 pub fn window_close() {}
 
@@ -235,21 +237,21 @@ impl super::PreferredWindowResolution {
     }
 }
 
-const LOG_FILE_NAME: &str = "log";
+static LOG_FILE: std::sync::OnceLock<Arc<std::fs::File>> = std::sync::OnceLock::new();
+
+pub fn init_log_file(path: PathBuf) {
+    LOG_FILE
+        .set(Arc::new(
+            std::fs::File::create(path).expect("cannot create log file"),
+        ))
+        .unwrap();
+}
 
 pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
+    LOG_FILE.get()?;
+
     use bevy::log::tracing_subscriber::Layer;
     use bevy::utils::tracing;
-    use std::fs::File;
-    use std::sync::{Arc, LazyLock};
-
-    static LOG_FILE: LazyLock<Arc<File>> = LazyLock::new(|| {
-        let data_dir = crate::platform::data_dir().expect("cannot get data dir");
-        std::fs::create_dir_all(data_dir).expect("cannot create data dir");
-        let file =
-            std::fs::File::create(data_dir.join(LOG_FILE_NAME)).expect("cannot create log file");
-        Arc::new(file)
-    });
 
     struct CaptureLayerVisitor<'a>(&'a mut Option<String>);
     impl tracing::field::Visit for CaptureLayerVisitor<'_> {
@@ -267,10 +269,10 @@ pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::lo
             event: &bevy::utils::tracing::Event<'_>,
             _ctx: bevy::log::tracing_subscriber::layer::Context<'_, S>,
         ) {
-            if *event.metadata().level() > bevy::log::Level::WARN {
+            if *event.metadata().level() > bevy::log::Level::INFO {
                 return;
             }
-            let mut file = LOG_FILE.clone();
+            let mut file = LOG_FILE.get().unwrap().clone();
             let mut message = None;
             event.record(&mut CaptureLayerVisitor(&mut message));
             let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
