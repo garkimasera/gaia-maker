@@ -2516,6 +2516,7 @@ dependencies = [
  "num-traits",
  "ordered-float",
  "rand 0.9.0",
+ "rayon",
  "regex",
  "rmp-serde",
  "ron",
@@ -4926,8 +4927,9 @@ dependencies = [
 [[package]]
 name = "tile-geom"
 version = "0.1.0"
-source = "git+https://github.com/garkimasera/tile-geom.git#f40494aedd5eb727bed8fcb53fb5584e0705e799"
+source = "git+https://github.com/garkimasera/tile-geom.git#89c7fc948c5340a4c1994c84dc9127a9686ea47d"
 dependencies = [
+ "rayon",
  "serde",
  "thiserror 1.0.69",
 ]

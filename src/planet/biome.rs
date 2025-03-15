@@ -1,5 +1,6 @@
 use geom::{CDistRangeIter, Direction};
 use rand::Rng;
+use rayon::prelude::*;
 
 use super::misc::linear_interpolation;
 use super::*;
@@ -154,11 +155,9 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     process_biome_transition(planet, sim, params);
 }
 
-fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    let rng = &mut sim.rng;
-
-    for p in planet.map.iter_idx() {
-        let tile = &planet.map[p];
+fn process_biome_transition(planet: &mut Planet, sim: &Sim, params: &Params) {
+    planet.map.par_iter_mut().for_each(|tile| {
+        let mut rng = misc::get_rng();
         let current_biome = tile.biome;
         let current_priority = if check_requirements(tile, current_biome, params) {
             params.biomes[&current_biome].priority
@@ -180,17 +179,17 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
                     1.0 / params.biomes[&next_biome].mean_transition_time
                 };
                 if rng.random_bool(transition_probability as f64) {
-                    planet.map[p].biome = next_biome;
+                    tile.biome = next_biome;
                 }
             }
-            continue;
+            return;
         }
 
         if tile.ice >= params.sim.ice_thickness_of_ice_sheet {
             if current_biome != Biome::IceSheet {
-                planet.map[p].biome = Biome::IceSheet;
+                tile.biome = Biome::IceSheet;
             }
-            continue;
+            return;
         }
 
         let Some((_, next_biome)) = Biome::iter()
@@ -207,12 +206,11 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             })
             .max_by_key(|(priority, _)| *priority)
         else {
-            continue;
+            return;
         };
 
         // Specific tile events cause biome transition
-        let transition_probability = if planet.map[p].tile_events.get(TileEventKind::Fire).is_some()
-        {
+        let transition_probability = if tile.tile_events.get(TileEventKind::Fire).is_some() {
             1.0
         } else if sim.before_start {
             params.sim.before_start_biome_transition_probability
@@ -220,9 +218,9 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             1.0 / params.biomes[&next_biome].mean_transition_time
         };
         if rng.random_bool(transition_probability as f64) {
-            planet.map[p].biome = next_biome;
+            tile.biome = next_biome;
         }
-    }
+    });
 }
 
 fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {

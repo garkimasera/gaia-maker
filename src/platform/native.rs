@@ -182,7 +182,12 @@ pub fn modify_conf(conf: Conf) -> Conf {
     conf
 }
 
-pub fn window_open() {}
+pub fn window_open() {
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(4)
+        .build_global()
+        .unwrap();
+}
 
 pub fn window_close() {}
 

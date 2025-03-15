@@ -123,7 +123,20 @@ impl Sim {
     }
 
     pub fn convert_p_cyclic(&self, p: Coords) -> Option<Coords> {
-        geom::CyclicMode::X.convert_coords(self.size, p)
+        self.coords_converter().conv(p)
+    }
+
+    pub fn coords_converter(&self) -> CoordsConverter {
+        CoordsConverter(self.size)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct CoordsConverter((u32, u32));
+
+impl CoordsConverter {
+    pub fn conv(&self, p: Coords) -> Option<Coords> {
+        geom::CyclicMode::X.convert_coords(self.0, p)
     }
 }
 
