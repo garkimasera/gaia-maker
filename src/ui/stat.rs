@@ -182,7 +182,7 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
             let s = if max < 1000.0 {
                 format!("{} GJ", crate::text::format_float_1000(e, 0))
             } else {
-                format!("{} PJ", crate::text::format_float_1000(e / 1000.0, 3))
+                format!("{} TJ", crate::text::format_float_1000(e * 1e-3, 3))
             };
             ui.label(s);
             ui.end_row();
