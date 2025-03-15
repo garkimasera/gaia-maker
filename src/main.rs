@@ -77,6 +77,9 @@ fn main() {
                     custom_layer: crate::platform::log_plugin_custom_layer,
                     ..default()
                 })
+                .set(TaskPoolPlugin {
+                    task_pool_options: TaskPoolOptions::with_num_threads(args.num_threads as usize),
+                })
                 .set(WindowPlugin {
                     primary_window: Some(window),
                     ..default()
