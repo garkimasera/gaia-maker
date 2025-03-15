@@ -1,4 +1,5 @@
 use arrayvec::ArrayVec;
+use rayon::prelude::*;
 
 use super::misc::linear_interpolation;
 use super::*;
@@ -9,15 +10,18 @@ pub fn update_civ_energy(planet: &Planet, sim: &mut Sim, params: &Params) {
     update_civ_domain(planet, sim);
 
     // Update settlement congestion rate
-    for p in planet.map.iter_idx() {
-        sim.settlement_cr[p] = super::misc::calc_congestion_rate(p, planet.map.size(), |p| {
+    let size = planet.map.size();
+    let par_iter = sim.settlement_cr.par_iter_mut().enumerate();
+    par_iter.for_each(|(i, settlement_cr)| {
+        let p = Coords::from_index_size(i, size);
+        *settlement_cr = super::misc::calc_congestion_rate(p, planet.map.size(), |p| {
             if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
                 1.0
             } else {
                 0.0
             }
         });
-    }
+    });
 
     // Update sparse energy source
     sim.energy_wind_solar = linear_interpolation(
@@ -84,9 +88,7 @@ pub fn update_civ_energy(planet: &Planet, sim: &mut Sim, params: &Params) {
 }
 
 pub fn update_civ_domain(planet: &Planet, sim: &mut Sim) {
-    for p in planet.map.iter_idx() {
-        sim.domain[p] = None;
-    }
+    sim.domain.fill(None);
 
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(settlement)) = &planet.map[p].structure else {
