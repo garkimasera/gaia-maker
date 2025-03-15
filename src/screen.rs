@@ -441,6 +441,22 @@ fn keyboard_input(
             }
         }
     }
+    // Windows
+    if keys.just_pressed(KeyCode::F1) {
+        wos.space_building = !wos.space_building;
+    }
+    if keys.just_pressed(KeyCode::F2) {
+        wos.animals = !wos.animals;
+    }
+    if keys.just_pressed(KeyCode::F3) {
+        wos.map = !wos.map;
+    }
+    if keys.just_pressed(KeyCode::F4) {
+        wos.layers = !wos.layers;
+    }
+    if keys.just_pressed(KeyCode::F5) {
+        wos.stat = !wos.stat;
+    }
     // Debug by Alt+F12
     if keys.just_pressed(KeyCode::F12)
         && (keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight))
