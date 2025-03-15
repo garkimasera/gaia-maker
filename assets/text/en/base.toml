@@ -180,11 +180,3 @@ loading-failed-desc-not-found = "Loading failed. Cannot find saved data."
 delete-save-data = "Delete the following save data?"
 save-limit = "Due to storage limitations, you cannot create multiple save data files when playing on the web."
 save-limit-strong = "Do you want to delete the following save data and start a new game? This action cannot be undone."
-
-# Reports
-[report]
-warn-high-temp = "Too high temperature\nAn effective way to lower the temperature is to operate the orbital mirrors, an orbital structure, to block sunlight from reaching the ground surface."
-warn-low-carbon-dioxide = "Too low carbon dioxide\nThere is not enough carbon dioxide in the atmosphere. This can inhibit plant growth and may even cause a cooling effect. It is necessary to either start up Carbon Importers or burn buried carbon."
-warn-low-oxygen = "Too low oxygen\nThere is not enough oxygen in the air. It is necessary to install an oxygen generator or to produce oxygen through photosynthesis by plants."
-warn-low-temp = "Too low temperature\nAn effective way to raise the temperature is to operate the orbital mirrors, to increase the amount of sunlight reaching the surface."
-civilized = "Civilization complete\nThe process of civilizing {$animal} has been completed."
