@@ -9,6 +9,7 @@ const FERTILITY_MAX: f32 = 100.0;
 const FERTILITY_MIN: f32 = 0.0;
 
 pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let size = planet.map.size();
     let map_iter_idx = planet.map.iter_idx();
 
     // Fertility
@@ -114,24 +115,37 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     ));
     let max_biomass_density_planet_factor = calc_max_biomass_density_planet_factor(planet, params);
 
-    for p in map_iter_idx {
+    // Calculate biomass diff map
+    let par_iter = sim.diff_biomass.par_iter_mut().enumerate();
+    par_iter.for_each(|(i, diff_biomass)| {
+        let p = Coords::from_index_size(i, size);
         let max = calc_tile_max_biomass_density(
             planet,
-            sim,
+            &sim.humidity,
             params,
             p,
             max_biomass_density_planet_factor,
         );
-        let biomass = &mut planet.map[p].biomass;
-        let diff_to_max = max - *biomass;
+        let biomass = planet.map[p].biomass;
+        let diff_to_max = max - biomass;
         let diff = if diff_to_max > 0.0 && speed_factor_by_atmo > 0.0 {
             params.sim.base_biomass_increase_speed * speed_factor_by_atmo
         } else {
             diff_to_max * params.sim.base_biomass_decrease_speed
         };
-        let diff = (diff - sim.biomass_consumption[p] / density_to_mass).max(-*biomass);
-        sim.diff_biomass[p] = diff;
+        let diff = (diff - sim.biomass_consumption[p] / density_to_mass).max(-biomass);
+        let diff = if diff > 0.0 && sim.domain[p].is_some() {
+            diff * params.sim.biomass_increase_speed_factor_by_settlements
+        } else {
+            diff
+        };
+        *diff_biomass = diff;
+    });
 
+    // Apply biomass diff and carbon exchange with atmosphere
+    for p in map_iter_idx {
+        let diff = sim.diff_biomass[p];
+        let biomass = &mut planet.map[p].biomass;
         let carbon_weight = density_to_mass * diff.abs();
         if diff > 0.0 {
             if planet.atmo.remove_carbon(carbon_weight) {
@@ -242,7 +256,7 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
 
 fn calc_tile_max_biomass_density(
     planet: &Planet,
-    sim: &Sim,
+    humidity: &Array2d<f32>,
     params: &Params,
     p: Coords,
     planet_factor: f32,
@@ -251,15 +265,22 @@ fn calc_tile_max_biomass_density(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,
     );
-    let max_by_humidity =
-        linear_interpolation(&params.sim.max_biomass_humidity_table, sim.humidity[p]);
+    let max_by_humidity = linear_interpolation(&params.sim.max_biomass_humidity_table, humidity[p]);
     let land_or_sea_factor = if planet.map[p].biome.is_land() {
         1.0
     } else {
         params.sim.sea_biomass_factor
     };
+    let max_by_pop =
+        if let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p].structure {
+            linear_interpolation(&params.sim.max_biomass_pop_table, pop)
+        } else {
+            f32::MAX
+        };
 
-    (max_by_fertility * planet_factor * land_or_sea_factor).min(max_by_humidity)
+    (max_by_fertility * planet_factor * land_or_sea_factor)
+        .min(max_by_humidity)
+        .min(max_by_pop)
 }
 
 fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f32 {

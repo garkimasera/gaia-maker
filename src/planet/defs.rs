@@ -638,6 +638,8 @@ pub struct SimParams {
     pub max_biomass_humidity_table: Vec<(f32, f32)>,
     /// Max biomass by O2
     pub max_biomass_factor_o2_table: Vec<(f32, f32)>,
+    /// Max biomass by settlement population
+    pub max_biomass_pop_table: Vec<(f32, f32)>,
     /// Base biomass increase speed
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed
@@ -646,6 +648,8 @@ pub struct SimParams {
     pub biomass_growth_speed_atm_table: Vec<(f32, f32)>,
     /// Biomass growth speed factor by CO2
     pub biomass_growth_speed_co2_table: Vec<(f32, f32)>,
+    /// Biomass increase penalty by adjacent settlements
+    pub biomass_increase_speed_factor_by_settlements: f32,
     /// Table of decreased biomass to buried carbon ratio by oxygen atm
     pub biomass_to_buried_carbon_ratio_o2_table: Vec<(f32, f32)>,
     /// Table of decreased biomass to buried carbon ratio by carbon dioxide atm
