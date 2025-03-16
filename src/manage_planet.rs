@@ -337,11 +337,13 @@ fn manage_planet(
             auto,
             n,
         } => {
-            log::info!("delete {}, all={},auto={} {}", sub_dir_name, all, auto, n);
+            log::info!("delete {}, all={}, auto={} #{}", sub_dir_name, all, auto, n);
             if *all {
                 if let Err(e) = crate::platform::delete_save_sub_dir(sub_dir_name) {
                     log::warn!("cannot delete save sub dir: {:?}", e);
                 }
+                save_state.auto_save_files.clear();
+                save_state.manual_save_files.clear();
             } else {
                 let file_name = crate::saveload::save_file_name(*auto, *n);
                 log::info!("delete save file \"{}/{}\"", sub_dir_name, file_name);
@@ -357,8 +359,8 @@ fn manage_planet(
                 }
             }
 
-            // If the sub dir has been deleted
-            if save_state.auto_save_files.is_empty() && save_state.auto_save_files.is_empty() {
+            // If the sub dir has been deleted, remove from dirs list
+            if save_state.auto_save_files.is_empty() && save_state.manual_save_files.is_empty() {
                 save_state.dirs.retain(|(_, s)| s != sub_dir_name);
             }
             None
