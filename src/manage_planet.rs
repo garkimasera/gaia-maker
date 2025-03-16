@@ -292,6 +292,10 @@ fn manage_planet(
             if let Err(e) = crate::saveload::save_to(&planet, &mut save_state, true) {
                 log::warn!("cannot save: {:?}", e);
             }
+
+            global_data.latest_save_dir_file = Some((sub_dir_name, true, 1));
+            ew_global_data_changed.send_default();
+
             Some(planet)
         }
         ManagePlanet::Save { auto, .. } => {
