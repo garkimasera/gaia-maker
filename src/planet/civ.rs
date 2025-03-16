@@ -416,3 +416,17 @@ impl Settlement {
         self.since_state_changed = 0;
     }
 }
+
+impl Planet {
+    pub fn civ_name(&self, id: AnimalId) -> Option<String> {
+        if let Some(civ) = self.civs.get(&id) {
+            if let Some(name) = &civ.name {
+                Some(name.into())
+            } else {
+                Some(t!("civ", id))
+            }
+        } else {
+            None
+        }
+    }
+}
