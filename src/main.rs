@@ -14,7 +14,6 @@ mod conf;
 mod draw;
 mod gz;
 mod image_assets;
-mod info;
 mod manage_planet;
 mod overlay;
 mod planet;
@@ -38,10 +37,12 @@ use clap::Parser;
 const APP_NAME: &str = concat!("Gaia Maker v", env!("CARGO_PKG_VERSION"));
 
 #[derive(Clone, Parser, Debug)]
-#[clap(author, version)]
+#[clap(author, about, version)]
 struct Args {
+    /// Specify the number of threads used to run this game
     #[arg(long, default_value_t = 4)]
     num_threads: u8,
+    /// Log file path
     #[arg(long)]
     log_file: Option<PathBuf>,
 }
