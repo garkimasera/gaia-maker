@@ -4,7 +4,7 @@ use std::sync::LazyLock;
 use bevy::prelude::*;
 use bevy_egui::egui::epaint;
 use bevy_egui::{EguiContexts, egui};
-use geom::RectIter;
+use geom::{Coords, RectIter};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
@@ -25,6 +25,7 @@ pub enum MapLayer {
     Rainfall,
     Fertility,
     Biomass,
+    BuriedCarbon,
     Cities,
     Structures,
 }
@@ -198,6 +199,7 @@ fn map_img(
         .map(|coords| {
             let x = coords.0 / m as i32;
             let y = h as i32 - 1 - coords.1 / m as i32;
+            let p = Coords::new(x, y);
 
             let color = match map_layer {
                 MapLayer::Biome => {
@@ -205,19 +207,22 @@ fn map_img(
                     params.biomes[&biome].color
                 }
                 MapLayer::Height => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Height)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Height, params)
                 }
                 MapLayer::AirTemperature => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::AirTemperature)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::AirTemperature, params)
                 }
                 MapLayer::Rainfall => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Rainfall)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Rainfall, params)
                 }
                 MapLayer::Fertility => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Fertility)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Fertility, params)
                 }
                 MapLayer::Biomass => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Biomass)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Biomass, params)
+                }
+                MapLayer::BuriedCarbon => {
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::BuriedCarbon, params)
                 }
                 MapLayer::Cities => {
                     if let Some(Structure::Settlement(settlement)) = &planet.map[(x, y)].structure {
@@ -337,7 +342,8 @@ impl Legend {
             MapLayer::AirTemperature
             | MapLayer::Rainfall
             | MapLayer::Fertility
-            | MapLayer::Biomass => {
+            | MapLayer::Biomass
+            | MapLayer::BuriedCarbon => {
                 ui_high_low(ui, self.gradation_images[0].1);
             }
             MapLayer::Height => {

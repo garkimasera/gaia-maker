@@ -418,7 +418,7 @@ fn spawn_overlay_meshes(
     mut meshes: ResMut<Assets<Mesh>>,
     color_materials: Res<ColorMaterials>,
     in_screen_tile_range: Res<InScreenTileRange>,
-    planet: Res<Planet>,
+    (planet, params): (Res<Planet>, Res<Params>),
     current_layer: Res<OverlayLayerKind>,
     mut prev_layer: Local<OverlayLayerKind>,
     mut tile_mesh: Local<Option<Handle<Mesh>>>,
@@ -454,7 +454,7 @@ fn spawn_overlay_meshes(
         let id = commands
             .spawn((
                 Mesh2d(tile_mesh.clone()),
-                MeshMaterial2d(color_materials.get_handle(&planet, p, *current_layer)),
+                MeshMaterial2d(color_materials.get_handle(&planet, p, *current_layer, &params)),
                 Transform::from_xyz(x, y, 800.0),
             ))
             .id();

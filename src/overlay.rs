@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use geom::Coords;
 use strum::{AsRefStr, EnumIter};
 
-use crate::planet::{Biome, Planet};
+use crate::planet::{Biome, Params, Planet};
 
 #[derive(Clone, Copy, Debug)]
 pub struct OverlayPlugin;
@@ -23,6 +23,7 @@ pub enum OverlayLayerKind {
     Rainfall,
     Fertility,
     Biomass,
+    BuriedCarbon,
 }
 
 pub const N_POINTS: usize = 64;
@@ -40,6 +41,7 @@ impl ColorMaterials {
         planet: &Planet,
         p: Coords,
         kind: OverlayLayerKind,
+        params: &Params,
     ) -> &(Color, Handle<ColorMaterial>) {
         match kind {
             OverlayLayerKind::None => unreachable!(),
@@ -89,6 +91,17 @@ impl ColorMaterials {
                     .clamp(0.0, N_POINTS as f32 - 1.0) as usize;
                 &self.white_yellow_red[i]
             }
+            OverlayLayerKind::BuriedCarbon => {
+                let x = planet.map[p].buried_carbon / params.sim.buried_carbon_energy_threshold;
+                let y = if x < 1.0 {
+                    0.5 * x * x
+                } else {
+                    let n = 16.0;
+                    (x - 1.0) / (2.0 * (n - 1.0)) + 0.5
+                };
+                let i = (y * (N_POINTS as f32)).clamp(0.0, N_POINTS as f32 - 1.0) as usize;
+                &self.white_yellow_red[i]
+            }
         }
     }
 
@@ -97,12 +110,19 @@ impl ColorMaterials {
         planet: &Planet,
         p: Coords,
         kind: OverlayLayerKind,
+        params: &Params,
     ) -> Handle<ColorMaterial> {
-        self.get(planet, p, kind).1.clone()
+        self.get(planet, p, kind, params).1.clone()
     }
 
-    pub fn get_rgb(&self, planet: &Planet, p: Coords, kind: OverlayLayerKind) -> [u8; 3] {
-        let color: Srgba = self.get(planet, p, kind).0.into();
+    pub fn get_rgb(
+        &self,
+        planet: &Planet,
+        p: Coords,
+        kind: OverlayLayerKind,
+        params: &Params,
+    ) -> [u8; 3] {
+        let color: Srgba = self.get(planet, p, kind, params).0.into();
 
         [
             (color.red * 255.0) as u8,
