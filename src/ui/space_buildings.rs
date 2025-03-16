@@ -70,7 +70,13 @@ pub fn buildng_row(
     window_width: f32,
 ) {
     let build_max = attrs.build_max.unwrap();
-    let buildable = planet.buildable(attrs) && build_max > planet.space_building(kind).n;
+    let cannot_build_reason = if build_max <= planet.space_building(kind).n {
+        Some(CannotBuildReason::Limit)
+    } else if let Err(cost) = planet.buildable(attrs) {
+        Some(CannotBuildReason::Cost(cost))
+    } else {
+        None
+    };
     let building = planet.space_building_mut(kind);
     let n = building.n;
 
@@ -102,15 +108,25 @@ pub fn buildng_row(
     }
 
     ui.horizontal(|ui| {
-        if ui.add_enabled(buildable, egui::Button::new("+1")).clicked() {
+        if let Some(cannot_build_reason) = cannot_build_reason {
+            ui.add_enabled(false, egui::Button::new("+1"))
+                .on_disabled_hover_ui(|ui| cannot_build_reason.ui(ui, textures));
+        } else if ui.button("+1").clicked() {
             planet.build_space_building(kind, sim, params);
         }
-        if build_max >= 5 && ui.add_enabled(buildable, egui::Button::new("+5")).clicked() {
-            for _ in 0..5 {
-                if planet.buildable(attrs) && build_max > planet.space_building(kind).n {
-                    planet.build_space_building(kind, sim, params);
-                } else {
-                    break;
+
+        if build_max >= 5 {
+            if let Some(cannot_build_reason) = cannot_build_reason {
+                ui.add_enabled(false, egui::Button::new("+5"))
+                    .on_disabled_hover_ui(|ui| cannot_build_reason.ui(ui, textures));
+            } else if ui.button("+5").clicked() {
+                for _ in 0..5 {
+                    if planet.buildable(attrs).is_ok() && build_max > planet.space_building(kind).n
+                    {
+                        planet.build_space_building(kind, sim, params);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
@@ -224,5 +240,34 @@ impl egui::Widget for BuildingImage {
             }
         }
         response
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+enum CannotBuildReason {
+    Limit,
+    Cost(Cost),
+}
+
+impl CannotBuildReason {
+    fn ui(&self, ui: &mut egui::Ui, textures: &UiTextures) {
+        match self {
+            Self::Limit => {
+                ui.label(
+                    egui::RichText::new(t!("building-limit-reached")).color(egui::Color32::RED),
+                );
+            }
+            Self::Cost(cost) => {
+                ui.horizontal_centered(|ui| {
+                    ui.label(egui::RichText::new(t!("not-enough")).color(egui::Color32::RED));
+                    let image = match cost {
+                        Cost::Power(_, _) => "ui/icon-power",
+                        Cost::Material(_) => "ui/icon-material",
+                        Cost::GenePoint(_) => "ui/icon-gene",
+                    };
+                    ui.image(textures.get(image));
+                });
+            }
+        }
     }
 }

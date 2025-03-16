@@ -49,7 +49,7 @@ fn cursor_action(
                 }
             }
             CursorMode::Build(kind) => {
-                if planet.buildable(params.structures[&kind].as_ref()) {
+                if planet.buildable(params.structures[&kind].as_ref()).is_ok() {
                     update_draw.update();
                     if planet.placeable(coords) {
                         planet.place(coords, new_structure(kind), &mut sim, &params);

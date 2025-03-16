@@ -1,14 +1,14 @@
 use super::*;
 
 impl Planet {
-    pub fn buildable(&self, building: &BuildingAttrs) -> bool {
+    pub fn buildable(&self, building: &BuildingAttrs) -> Result<(), Cost> {
         if self.res.surplus_power() < -building.power {
-            return false;
+            return Err(Cost::Power(building.power, 0));
         }
         if building.cost > self.res.material {
-            return false;
+            return Err(Cost::Material(building.cost));
         }
-        true
+        Ok(())
     }
 
     pub fn placeable(&self, p: Coords) -> bool {
