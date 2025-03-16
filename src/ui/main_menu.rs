@@ -100,6 +100,7 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+            display_web_limit_warning(&mut egui_ctxs);
         }
         MainMenuMode::Tutorial => {
             if let Some(cancelled) = super::saveload::check_save_limit(
@@ -192,4 +193,20 @@ fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
     } else {
         None
     }
+}
+
+fn display_web_limit_warning(egui_ctxs: &mut EguiContexts) {
+    if !crate::platform::SAVE_DIRS_LIMIT {
+        return;
+    }
+
+    egui::Window::new(t!("warn_web_limit"))
+        .title_bar(false)
+        .anchor(egui::Align2::CENTER_BOTTOM, egui::Vec2::new(0.0, -10.0))
+        .default_width(600.0)
+        .resizable(false)
+        .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.label(t!("msg", "web-limit-warning"));
+        })
+        .unwrap();
 }

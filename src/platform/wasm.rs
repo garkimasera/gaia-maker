@@ -241,7 +241,7 @@ impl super::PreferredWindowResolution {
     }
 }
 
-pub fn init_log_file(_path: PathBuf) {}
+pub fn init_log_file(_path: std::path::PathBuf) {}
 
 pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
     None
