@@ -19,8 +19,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: "--cfg=web_sys_unstable_apis" # for bevy_egui
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -33,17 +31,16 @@ jobs:
         with:
           command: install
           args: wasm-bindgen-cli
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target wasm32-unknown-unknown --features asset_tar
+      - run: |
+          RUSTFLAGS='--cfg=getrandom_backend="wasm_js"' /home/runner/.cargo/bin/cargo build --release --target wasm32-unknown-unknown --features asset_tar
+          echo $RUSTFLAGS
       - run: |
           wasm-bindgen --target web --out-dir ./out --no-typescript target/wasm32-unknown-unknown/release/gaia-maker.wasm
           mv index.html -t ./out/
           tar czf ./assets.tar.gz -C ./assets .
           mv assets.tar.gz -t ./out/
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
@@ -57,4 +54,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
