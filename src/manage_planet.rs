@@ -337,6 +337,7 @@ fn manage_planet(
             auto,
             n,
         } => {
+            log::info!("delete {}, all={},auto={} {}", sub_dir_name, all, auto, n);
             if *all {
                 if let Err(e) = crate::platform::delete_save_sub_dir(sub_dir_name) {
                     log::warn!("cannot delete save sub dir: {:?}", e);

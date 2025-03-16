@@ -74,7 +74,7 @@ pub fn main_menu(
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                        resume_ui(ui, &global_data, &mut ew_manage_planet);
+                        resume_ui(ui, &global_data, &mut ew_manage_planet, &save_state);
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
                         }
@@ -166,8 +166,13 @@ fn resume_ui(
     ui: &mut egui::Ui,
     global_data: &GlobalData,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
+    save_state: &SaveState,
 ) {
     if let Some((save_sub_dir, auto, n)) = &global_data.latest_save_dir_file {
+        if !save_state.dirs.iter().any(|(_, name)| save_sub_dir == name) {
+            // If the save dir is deleted
+            return;
+        }
         if ui.button(t!("resume")).clicked() {
             ew_manage_planet.send(ManagePlanet::Load {
                 sub_dir_name: save_sub_dir.clone(),
