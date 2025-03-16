@@ -1,8 +1,11 @@
 use std::collections::{BTreeMap, HashMap};
 
 use fnv::FnvHashMap;
+use geom::Coords;
+use num_derive::FromPrimitive;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, Same};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
 
 use super::serde_with_types::*;
@@ -48,34 +51,24 @@ impl Default for State {
     }
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Default,
-    Debug,
-    Serialize,
-    Deserialize,
-    EnumString,
-    EnumIter,
-    AsRefStr,
-)]
-#[serde(rename_all = "snake_case")]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, EnumString, Display, EnumIter, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
+#[repr(u8)]
 pub enum Biome {
     #[default]
-    Rock,
-    Ocean,
-    SeaIce,
+    // Barren
+    Rock = 1,
+    IceSheet,
     Desert,
-    IceField,
+    // Water
+    Ocean = 21,
+    SeaIce,
+    // Grassland
+    Grassland = 41,
     Tundra,
-    Grassland,
-    BorealForest,
+    // Forest
+    BorealForest = 61,
     TemperateForest,
     TropicalRainforest,
 }
@@ -173,7 +166,7 @@ pub enum StructureBuildingState {
     Disabled,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(TileEventKind))]
 #[strum_discriminants(derive(
     PartialOrd,
@@ -189,9 +182,35 @@ pub enum StructureBuildingState {
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum TileEvent {
     Fire,
-    BlackDust { remaining_cycles: u32 },
-    AerosolInjection { remaining_cycles: u32 },
-    Plague,
+    BlackDust {
+        remaining_cycles: u32,
+    },
+    AerosolInjection {
+        remaining_cycles: u32,
+    },
+    Plague {
+        cured: bool,
+        target_pop: f32,
+    },
+    Vehicle {
+        kind: VehicleKind,
+        id: AnimalId,
+        age: CivilizationAge,
+        direction: (i8, i8),
+    },
+    War {
+        i: u32,
+        defence_power: f32,
+        offence_power: f32,
+        offence: AnimalId,
+    },
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum VehicleKind {
+    Ship = 1,
+    AirPlane,
 }
 
 impl TileEvent {
@@ -212,6 +231,8 @@ pub struct AnimalAttr {
     /// Livable temperature range
     #[serde_as(as = "(Celsius, Celsius)")]
     pub temp: (f32, f32),
+    /// Settlement effect to livability
+    pub settlement_effect: f32,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub civ: Option<AnimalCivParams>,
 }
@@ -243,12 +264,13 @@ impl AnimalSize {
     }
 }
 
+#[serde_as]
 #[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AnimalHabitat {
     Land,
     Sea,
-    Biomes(Vec<Biome>),
+    Biomes(#[serde_as(as = "Vec<DisplayFromStr>")] Vec<Biome>),
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
@@ -259,34 +281,26 @@ pub struct Animal {
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Civilization {
+    pub name: Option<String>,
     pub total_pop: f32,
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f32; EnergySource::LEN],
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Default, Debug, Serialize, Deserialize)]
 pub struct Settlement {
     pub id: AnimalId,
     pub age: CivilizationAge,
     pub pop: f32,
     pub tech_exp: f32,
+    pub biomass_consumption: f32,
+    pub state: SettlementState,
+    pub kind: SettlementKind,
+    pub since_state_changed: u16,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    Hash,
-    Debug,
-    Serialize,
-    Deserialize,
-    AsRefStr,
-    EnumIter,
-    num_derive::FromPrimitive,
-)]
-#[serde(rename_all = "kebab-case")]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Hash, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, AsRefStr, Display, EnumIter, FromPrimitive)]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]
 pub enum CivilizationAge {
@@ -301,6 +315,31 @@ pub enum CivilizationAge {
 
 impl CivilizationAge {
     pub const LEN: usize = Self::EarlySpace as usize + 1;
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, AsRefStr, FromPrimitive)]
+#[strum(serialize_all = "kebab-case")]
+#[repr(u8)]
+pub enum SettlementState {
+    #[default]
+    Growing = 0,
+    Stable,
+    Declining,
+    Deserted,
+}
+
+impl SettlementState {
+    pub const LEN: usize = Self::Deserted as usize + 1;
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum SettlementKind {
+    #[default]
+    Normal = 0,
+    Aquatic,
+    Shelter,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter)]
@@ -333,7 +372,7 @@ impl EnergySource {
     Deserialize,
     EnumString,
     EnumIter,
-    AsRefStr,
+    AsRefStr
 )]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
@@ -347,7 +386,7 @@ pub enum GasKind {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BuildingAttrs {
     #[serde(default)]
-    pub energy: f32,
+    pub power: f32,
     #[serde(default)]
     pub cost: f32,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
@@ -358,9 +397,8 @@ pub struct BuildingAttrs {
     pub control: BuildingControl,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Serialize, Deserialize, AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
+#[derive(Serialize, Deserialize, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum BuildingControl {
@@ -369,21 +407,8 @@ pub enum BuildingControl {
     IncreaseRate,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Debug,
-    Serialize,
-    Deserialize,
-    EnumString,
-    EnumIter,
-    AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Serialize, Deserialize, EnumString, EnumIter, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum SpaceBuildingKind {
@@ -454,18 +479,9 @@ pub enum BuildingEffect {
     },
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(PlanetEventKind))]
-#[strum_discriminants(derive(
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    EnumIter,
-    AsRefStr,
-    Display
-))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize, EnumIter, AsRefStr))]
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum PlanetEvent {
@@ -480,11 +496,24 @@ impl PlanetEvent {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PlagueEvent {}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PlagueEvent {
+    pub i: usize,
+    pub start_at: Coords,
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct WarEvent {}
+pub struct WarEvent {
+    pub i: u32,
+    pub kind: WarKind,
+    pub start_at: Option<Coords>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum WarKind {
+    CivilWar,
+    InterCity,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
@@ -527,14 +556,18 @@ pub struct StartParams {
     pub initial_conditions: Vec<InitialCondition>,
     pub height_table: Vec<(f32, f32)>,
     pub target_sea_level: Option<f32>,
+    pub target_sea_area: Option<f32>,
+    #[serde(default)]
+    pub height_map: Vec<f32>,
 }
 
 #[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SimParams {
-    pub sim_normal_loop_duration_ms: u64,
-    pub sim_fast_loop_duration_ms: u64,
-    pub total_mass_per_atm: f32,
+    pub sim_slow_loop_duration_ms: u64,
+    pub sim_medium_loop_duration_ms: u64,
+    /// Atm per 10^12 mol (10^12g = 1Mt)
+    pub mol_per_atm: f32,
     pub secs_per_cycle: f32,
     /// Heat capacity of air [J/(kg*K)]
     pub air_heat_cap: f32,
@@ -606,6 +639,8 @@ pub struct SimParams {
     pub max_biomass_humidity_table: Vec<(f32, f32)>,
     /// Max biomass by O2
     pub max_biomass_factor_o2_table: Vec<(f32, f32)>,
+    /// Max biomass by settlement population
+    pub max_biomass_pop_table: Vec<(f32, f32)>,
     /// Base biomass increase speed
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed
@@ -614,14 +649,16 @@ pub struct SimParams {
     pub biomass_growth_speed_atm_table: Vec<(f32, f32)>,
     /// Biomass growth speed factor by CO2
     pub biomass_growth_speed_co2_table: Vec<(f32, f32)>,
+    /// Biomass increase penalty by adjacent settlements
+    pub biomass_increase_speed_factor_by_settlements: f32,
     /// Table of decreased biomass to buried carbon ratio by oxygen atm
     pub biomass_to_buried_carbon_ratio_o2_table: Vec<(f32, f32)>,
     /// Table of decreased biomass to buried carbon ratio by carbon dioxide atm
     pub biomass_to_buried_carbon_ratio_co2_table: Vec<(f32, f32)>,
     /// Sea biomass factor compared to land
     pub sea_biomass_factor: f32,
-    /// Required thickness of ice for ice field [m]
-    pub ice_thickness_of_ice_field: f32,
+    /// Required thickness of ice for ice sheet [m]
+    pub ice_thickness_of_ice_sheet: f32,
     /// Ice melting temperature [K]
     pub ice_melting_temp: f32,
     /// Ice melting speed [m/K]
@@ -662,16 +699,34 @@ pub struct SimParams {
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements
     pub settlement_max_pop: [f32; CivilizationAge::LEN],
+    /// Population capacity factor by settlement state
+    pub pop_factor_by_settlement_state: [f32; SettlementState::LEN],
     /// Livable temperature bonus by civilization
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
+    /// The number of cycles until settlement state becomes changeable
+    pub settlement_state_changeable_cycles: u16,
+    /// Threshold to stop growing by biomass decrease
+    pub settlement_stop_growing_biomass_threshold: f32,
+    /// Probability to stop growing by biomass decrease
+    pub settlement_stop_growing_biomass_prob: f32,
+    /// Settlement becomes deserted when the tile biomass is under this factor
+    pub settlement_deserted_by_biomass_factor: f32,
+    /// Settlement state change weight table
+    pub settlement_state_change_weight_table: [[u32; SettlementState::LEN]; SettlementState::LEN],
+    /// Settlement in stable state population fluctuation
+    pub settlement_stable_pop_fluctuation: f32,
+    /// Settlement spread simulation interval cycles
+    pub settlement_spread_interval_cycles: u64,
     /// Population of settlements to calculate spread probability
     pub settlement_spread_pop: [f32; CivilizationAge::LEN],
     /// Base population growth speed
     pub base_pop_growth_speed: f32,
-    /// Coefficent to calculate settlement spreading probability
-    pub coef_settlement_spreading_a: f32,
-    /// Coefficent to calculate animal fission probability
-    pub coef_settlement_spreading_b: f32,
+    /// Base settlement spreading probability
+    pub base_settlement_spreading_prob: f32,
+    /// Base settlement spreading threshold by congestion rate and livability
+    pub base_settlement_spreading_threshold: f32,
+    /// Technology propagation probability by nearby settlements
+    pub technology_propagation_prob: f64,
     /// Settlement population to extinction
     pub settlement_extinction_threshold: f32,
     /// Energy demand per pop [GJ]
@@ -680,8 +735,12 @@ pub struct SimParams {
     pub biomass_energy_factor: f32,
     /// Resource availability factor
     pub resource_availability_factor: f32,
+    /// Advance tech inverval cycles
+    pub advance_tech_interval_cycles: u64,
     /// Base tech exp
     pub base_tech_exp: f32,
+    /// Tech exp declining speed at settlement that has bad state
+    pub tech_exp_declining_speed: f32,
     /// Required tech exp to evolve the age
     pub tech_exp_evolution: [f32; CivilizationAge::LEN - 1],
     /// Rainfall to hydro energy source table [mm] - [GJ/m^2]
@@ -704,10 +763,20 @@ pub struct SimParams {
     pub base_nuclear_ratio: f32,
     /// Energy source limit by settlement age
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
-    /// Energy source minimum required or waste by settlement age
-    pub energy_source_min_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Energy source waste by settlement age
+    pub energy_source_waste_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Base energy efficency
+    pub energy_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Energy efficency with high qualicty
+    pub energy_high_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// High efficiency energy limit by ratio to supply
+    pub high_efficiency_limit_by_supply: [f32; EnergySource::LEN],
+    /// High efficiency energy limit by ratio to demand
+    pub high_efficiency_limit_by_demand: [f32; EnergySource::LEN],
     /// Factor to calculate impact on biomass by energy source
     pub energy_source_biomass_impact: [f32; EnergySource::LEN],
+    /// Biomass impact of high efficiency wind solar energy source
+    pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Soil erosion effect by settlement
     pub soil_erosion_effect_by_settlement: [f32; CivilizationAge::LEN],
     /// Duration of events
@@ -716,6 +785,8 @@ pub struct SimParams {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EventParams {
+    /// Minimum required animal population to civilize
+    pub n_animal_to_civilize: f32,
     /// Resource cost for tile event
     pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
     /// The ratio of biomass burn at one cycle
@@ -734,12 +805,52 @@ pub struct EventParams {
     pub aerosol_injection_cycles: u32,
     /// Aerosol injection amount
     pub aerosol_injection_amount: f32,
+    /// Settlement random event start routine interval cycles
+    pub settlement_random_event_interval_cycles: u64,
+    /// Plague list
+    pub plague_list: Vec<PlagueParams>,
+    /// Base probability of plague spreading
+    pub plague_spread_base_prob: f32,
+    /// Base lethality speed of plague
+    pub plague_base_lethality_speed: f32,
+    /// Vehicle spawn probability
+    pub vehicle_spawn_prob: f32,
+    /// Vehicle move interval cycles
+    pub vehicle_move_interval_cycles: u64,
+    /// Probability of vehicle moving north or south
+    pub vehicle_ns_move_prob: f64,
+    /// Penalty to vehicle settlement probability
+    pub vehicle_settlement_penalty: f32,
+    /// Base probability to ca
+    pub base_civil_war_prob: f32,
+    /// Base speed of combat
+    pub base_combat_speed: f32,
+    /// Coefficent of pop decrease by combat damage
+    pub coef_pop_decrease_by_combat_damage: f32,
+    /// Offence power factor when starting civil war
+    pub civil_war_offence_factor: f32,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
+pub struct PlagueParams {
+    /// Weight to choose
+    pub w: f32,
+    /// Weight to choose when manual
+    pub w_manual: f32,
+    /// Plague infectivity
+    pub infectivity: f32,
+    /// Plague distant lethality
+    pub distant_infectivity: f32,
+    /// Plague lethality
+    pub lethality: f32,
+    /// Infection limit by elapsed cycles
+    pub infection_limit_cycles: u64,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Cost {
-    /// Needed surplus energy and cycles
-    Energy(f32, u32),
+    /// Needed surplus power and cycles
+    Power(f32, u32),
     Material(f32),
     GenePoint(f32),
 }
@@ -783,18 +894,27 @@ pub struct StartPlanet {
     pub geothermal_power: Option<(f32, f32)>,
     pub elevation: (f32, f32),
     pub water_volume: (f32, f32),
-    pub nitrogen: (f32, f32),
-    pub carbon_dioxide: (f32, f32),
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub nitrogen: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub oxygen: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub carbon_dioxide: Option<(f32, f32)>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub argon: Option<(f32, f32)>,
     pub initial_conditions: Vec<InitialCondition>,
     #[serde(default)]
     pub height_table: Vec<(f32, f32)>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     pub target_sea_level: Option<f32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub target_sea_area: Option<f32>,
+    #[serde(default)]
+    pub height_map: Vec<f32>,
 }
 
-#[derive(
-    Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize, EnumString, AsRefStr,
-)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Serialize, Deserialize, EnumString, AsRefStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum PlanetHabitability {
@@ -810,6 +930,7 @@ pub struct MonitoringParams {
     pub warn_high_temp_threshold: f32,
     pub warn_low_temp_threshold: f32,
     pub warn_low_oxygen_threshold: f32,
+    pub warn_low_carbon_dioxide_threshold: f32,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

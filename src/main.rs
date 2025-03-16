@@ -15,15 +15,18 @@ mod draw;
 mod gz;
 mod image_assets;
 mod info;
+mod manage_planet;
 mod overlay;
 mod planet;
 mod platform;
 mod saveload;
 mod screen;
-mod sim;
 mod text;
 mod title_screen;
+mod tutorial;
 mod ui;
+
+use std::path::PathBuf;
 
 use bevy::{
     prelude::*,
@@ -36,26 +39,53 @@ const APP_NAME: &str = concat!("Gaia Maker v", env!("CARGO_PKG_VERSION"));
 
 #[derive(Clone, Parser, Debug)]
 #[clap(author, version)]
-struct Args {}
+struct Args {
+    #[arg(long, default_value_t = 4)]
+    num_threads: u8,
+    #[arg(long)]
+    log_file: Option<PathBuf>,
+}
 
 fn main() {
-    let _args = Args::parse();
-
+    let args = Args::parse();
+    crate::platform::init_rayon(args.num_threads as usize);
+    if let Some(log_file) = args.log_file {
+        crate::platform::init_log_file(log_file);
+    }
     crate::platform::window_open();
-    let window_size = crate::platform::preferred_window_size();
+
+    let mut window = Window {
+        title: APP_NAME.into(),
+        present_mode: PresentMode::Fifo,
+        canvas: Some("#game-screen".into()),
+        ..default()
+    };
+    match crate::platform::PreferredWindowResolution::get() {
+        platform::PreferredWindowResolution::Size(w, h) => {
+            window.resolution = WindowResolution::new(w as f32, h as f32);
+        }
+        platform::PreferredWindowResolution::Maximized => {
+            window.set_maximized(true);
+        }
+    }
 
     App::new()
         .add_plugins(AssetPlugin)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: APP_NAME.into(),
-                present_mode: PresentMode::Fifo,
-                resolution: WindowResolution::new(window_size.0 as f32, window_size.1 as f32),
-                canvas: Some("#game-screen".into()),
-                ..default()
-            }),
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .set(bevy::log::LogPlugin {
+                    custom_layer: crate::platform::log_plugin_custom_layer,
+                    ..default()
+                })
+                .set(TaskPoolPlugin {
+                    task_pool_options: TaskPoolOptions::with_num_threads(args.num_threads as usize),
+                })
+                .set(WindowPlugin {
+                    primary_window: Some(window),
+                    ..default()
+                }),
+        )
+        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(gz::GzPlugin)
         .add_plugins(text_assets::TextAssetsPlugin)
         .add_plugins(image_assets::ImageAssetsPlugin)
@@ -69,7 +99,7 @@ fn main() {
         .add_plugins(title_screen::TitleScreenPlugin)
         .add_plugins(draw::DrawPlugin)
         .add_plugins(action::ActionPlugin)
-        .add_plugins(sim::SimPlugin)
+        .add_plugins(manage_planet::ManagePlanetPlugin)
         .insert_resource(WinitSettings::game())
         .init_resource::<GameSpeed>()
         .run();
@@ -87,7 +117,8 @@ pub enum GameState {
 pub enum GameSpeed {
     #[default]
     Paused,
-    Normal,
+    Slow,
+    Medium,
     Fast,
 }
 
@@ -103,9 +134,24 @@ struct AssetPlugin;
 impl Plugin for AssetPlugin {
     #[cfg(feature = "asset_tar")]
     fn build(&self, app: &mut App) {
-        let asset_file_path = option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz");
+        use std::path::PathBuf;
+        #[cfg(feature = "deb")]
+        fn asset_file_path() -> PathBuf {
+            let current_exe = std::env::current_exe().expect("cannot get current exe path");
+            let usr_dir = current_exe
+                .parent()
+                .expect("cannot get usr directory path")
+                .parent()
+                .expect("cannot get usr directory path");
+            usr_dir.join("share/games/gaia-maker/assets.tar.gz")
+        }
+        #[cfg(not(feature = "deb"))]
+        fn asset_file_path() -> PathBuf {
+            PathBuf::from(option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz"))
+        }
+
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
-            archive_files: vec![std::path::PathBuf::from(asset_file_path)],
+            archive_files: vec![asset_file_path()],
             addon_directories: platform::addon_directory(),
             ..Default::default()
         });

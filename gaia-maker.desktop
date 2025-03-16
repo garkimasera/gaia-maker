@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Gaia Maker
+Comment=Planet and terraforming simulation game
+Exec=gaia-maker
+TryExec=gaia-maker
+Icon=gaia-maker
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Game
+SingleMainWindow=true

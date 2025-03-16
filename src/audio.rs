@@ -24,13 +24,13 @@ impl AudioPlayer<'_> {
             log::warn!("unknown sound effect {}", path);
             return;
         };
+        self.channel_se.stop();
         self.channel_se.play(audio_source.clone());
     }
 }
 
 impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(AudioPlugin)
-            .add_audio_channel::<SEChannel>();
+        app.add_plugins(AudioPlugin).add_audio_channel::<SEChannel>();
     }
 }

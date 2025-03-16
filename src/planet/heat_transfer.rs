@@ -1,12 +1,14 @@
 use super::misc::linear_interpolation;
 use super::*;
 use geom::Direction;
+use rayon::prelude::*;
 
 /// Stefan-Boltzmann Constant [W/(m2*K4)]
 pub const STEFAN_BOLTZMANN_CONSTANT: f32 = 5.670E-8;
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let size = planet.map.size();
+    let coords_converter = sim.coords_converter();
     let map_iter_idx = planet.map.iter_idx();
     let atmo_mass_per_tile = planet.atmo.total_mass() / (size.0 as f32 * size.1 as f32);
     let air_heat_cap_per_tile = atmo_mass_per_tile * params.sim.air_heat_cap * 1.0E+9;
@@ -14,27 +16,28 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     calc_insolation(planet, sim, params);
 
     // Calculate heat capacity of tiles
-    for p in map_iter_idx {
+    let par_iter = sim
+        .atmo_heat_cap
+        .par_iter_mut()
+        .zip(&mut sim.sea_heat_cap)
+        .enumerate();
+    par_iter.for_each(|(i, (atmo_heat_cap, sea_heat_cap))| {
+        let p = Coords::from_index_size(i, size);
         let surface_heat_cap = match planet.map[p].biome {
             Biome::Ocean => params.sim.sea_heat_cap * params.sim.sea_surface_depth,
             _ => params.sim.land_surface_heat_cap,
         };
-        sim.atmo_heat_cap[p] = air_heat_cap_per_tile + surface_heat_cap * sim.tile_area;
+        *atmo_heat_cap = air_heat_cap_per_tile + surface_heat_cap * sim.tile_area;
 
         let deep_layer_thickness = deep_sea_layer_thickness(p, planet, params);
-        sim.sea_heat_cap[p] = params.sim.sea_heat_cap * deep_layer_thickness * sim.tile_area;
-    }
+        *sea_heat_cap = params.sim.sea_heat_cap * deep_layer_thickness * sim.tile_area;
+    });
 
     // Calculate albedo of tiles
     let cloud_albedo =
         linear_interpolation(&params.sim.cloud_albedo_table, planet.atmo.cloud_amount);
     for p in map_iter_idx {
-        if planet.map[p]
-            .event
-            .as_ref()
-            .map(|event| event.kind() == TileEventKind::BlackDust)
-            .unwrap_or_default()
-        {
+        if planet.map[p].tile_events.contains(TileEventKind::BlackDust) {
             sim.albedo[p] = params.event.black_dust_albedo;
         } else {
             let tile_albedo = params.biomes[&planet.map[p].biome].albedo;
@@ -48,7 +51,9 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     // Calculate new atmosphere temperature of tiles
     for _ in 0..params.sim.n_loop_atmo_heat_calc {
-        for p in map_iter_idx {
+        let par_iter = sim.atemp_new.par_iter_mut().enumerate();
+        par_iter.for_each(|(i, atemp_new)| {
+            let p = Coords::from_index_size(i, size);
             let old_heat_amount = sim.atmo_heat_cap[p] * sim.atemp[p];
 
             let insolation = sim.insolation[p] * (1.0 - sim.albedo[p]);
@@ -70,7 +75,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                 .into_iter()
                 .map(|dir| {
-                    if let Some(adjacent_tile) = sim.convert_p_cyclic(p + dir.as_coords()) {
+                    if let Some(adjacent_tile) = coords_converter.conv(p + dir.as_coords()) {
                         let delta_temp = sim.atemp[adjacent_tile] - sim.atemp[p];
                         0.5 * params.sim.air_diffusion_factor * air_heat_cap_per_tile * delta_temp
                     } else {
@@ -91,8 +96,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 + (inflow - outflow) * secs_per_loop
                 + adjacent_tile_flow
                 + structure_heat;
-            sim.atemp_new[p] = heat_amount / sim.atmo_heat_cap[p];
-        }
+            *atemp_new = heat_amount / sim.atmo_heat_cap[p];
+        });
         std::mem::swap(&mut sim.atemp, &mut sim.atemp_new);
     }
 
@@ -101,9 +106,10 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         sim.stemp[p] = planet.map[p].sea_temp;
     }
 
-    for p in map_iter_idx {
+    planet.map.par_iter_mut().enumerate().for_each(|(i, tile)| {
+        let p = Coords::from_index_size(i, size);
         if sim.sea_heat_cap[p] == 0.0 {
-            continue;
+            return;
         }
         let old_heat_amount = sim.sea_heat_cap[p] * sim.stemp[p];
         let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
@@ -123,8 +129,8 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             })
             .sum();
         let heat_amount = old_heat_amount + adjacent_tile_flow;
-        planet.map[p].sea_temp = heat_amount / sim.sea_heat_cap[p];
-    }
+        tile.sea_temp = heat_amount / sim.sea_heat_cap[p];
+    });
 
     // Heat transfer between atmosphere and sea
     let mut sum_sea_temp = 0.0;

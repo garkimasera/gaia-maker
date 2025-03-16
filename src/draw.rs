@@ -1,7 +1,7 @@
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::screen::InScreenTileRange;
-use crate::{assets::*, GameState};
-use crate::{planet::*, GameSystemSet};
+use crate::{GameState, assets::*};
+use crate::{GameSystemSet, planet::*};
 use arrayvec::ArrayVec;
 use bevy::prelude::*;
 use geom::{Array2d, Coords, Direction, RectIter};
@@ -10,7 +10,7 @@ use geom::{Array2d, Coords, Direction, RectIter};
 pub struct DrawPlugin;
 
 #[derive(Clone, Copy, Default, Debug, Resource, Event)]
-pub struct UpdateMap {
+pub struct UpdateDraw {
     need_update: bool,
 }
 
@@ -31,14 +31,17 @@ impl Default for DisplayOpts {
     }
 }
 
-impl UpdateMap {
+impl UpdateDraw {
     pub fn update(&mut self) {
         self.need_update = true;
     }
 }
 
 #[derive(Debug, Component)]
-struct FastAnimatedTexture;
+struct FastAnimatedTexture {
+    start: u8,
+    monochrome_shift: u8,
+}
 
 #[derive(Debug, Component)]
 struct SlowAnimatedTexture;
@@ -55,8 +58,8 @@ const CORNER_PIECE_GRID: [(usize, usize); 4] = [(0, 1), (0, 0), (1, 0), (1, 1)];
 
 impl Plugin for DrawPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<UpdateMap>()
-            .init_resource::<UpdateMap>()
+        app.add_event::<UpdateDraw>()
+            .init_resource::<UpdateDraw>()
             .init_resource::<DisplayOpts>()
             .init_resource::<LayeredTexMap>()
             .init_resource::<AnimationCounter>()
@@ -72,7 +75,7 @@ impl Plugin for DrawPlugin {
                     .in_set(GameSystemSet::Draw)
                     .run_if(in_state(GameState::Running)),
             )
-            .add_systems(Update, reset_update_map.after(GameSystemSet::Draw))
+            .add_systems(Update, reset_update_draw.after(GameSystemSet::Draw))
             .add_systems(
                 Update,
                 update_animation.run_if(bevy::time::common_conditions::on_timer(
@@ -96,12 +99,12 @@ impl Default for LayeredTexMap {
 }
 
 fn update_layered_tex_map(
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     params: Res<Params>,
     planet: Res<Planet>,
     mut ltm: ResMut<LayeredTexMap>,
 ) {
-    if !update_map.need_update && !planet.is_changed() {
+    if !update_draw.need_update && !planet.is_changed() {
         return;
     }
 
@@ -138,7 +141,7 @@ fn update_layered_tex_map(
 
 fn spawn_map_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     ltm: Res<LayeredTexMap>,
     params: Res<Params>,
     biome_textures: Res<BiomeTextures>,
@@ -147,7 +150,7 @@ fn spawn_map_textures(
     current_layer: Res<OverlayLayerKind>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
 
@@ -210,7 +213,7 @@ fn spawn_map_textures(
 
 fn spawn_structure_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     params: Res<Params>,
     structure_textures: Res<StructureTextures>,
     texture_handles: Res<TextureHandles>,
@@ -219,7 +222,7 @@ fn spawn_structure_textures(
     (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -275,7 +278,7 @@ fn spawn_structure_textures(
 
 fn spawn_animal_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
@@ -283,7 +286,7 @@ fn spawn_animal_textures(
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -298,8 +301,9 @@ fn spawn_animal_textures(
 
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
+        let tile = &planet.map[p];
 
-        if planet.map[p].structure.is_some() {
+        if tile.structure.is_some() {
             if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
                 if display_opts.cities {
                     continue;
@@ -308,13 +312,18 @@ fn spawn_animal_textures(
                 continue;
             }
         }
+        if tile
+            .tile_events
+            .list()
+            .iter()
+            .any(|te| matches!(te, TileEvent::Vehicle { .. }))
+        {
+            continue;
+        }
 
         // Select the largest animal at this tile
-        let animal = match planet.map[p].animal {
-            [_, _, Some(ref animal)] => animal,
-            [_, Some(ref animal), None] => animal,
-            [Some(ref animal), None, None] => animal,
-            _ => continue,
+        let Some(animal) = tile.largest_animal() else {
+            continue;
         };
 
         let index = counter.slow;
@@ -344,7 +353,7 @@ fn spawn_animal_textures(
 
 fn spawn_tile_animation_textures(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
@@ -352,7 +361,7 @@ fn spawn_tile_animation_textures(
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update {
+    if !update_draw.need_update {
         return;
     }
     for entity in tex_entities.iter() {
@@ -365,14 +374,21 @@ fn spawn_tile_animation_textures(
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
 
-        let Some(kind) = planet.map[p].event.as_ref().map(|event| event.kind()) else {
+        let Some((_, tile_event)) = planet.map[p]
+            .tile_events
+            .list()
+            .iter()
+            .filter_map(|e| {
+                let key = tile_event_order_key(e);
+                if key > 0 { Some((key, e)) } else { None }
+            })
+            .max_by_key(|(key, _)| *key)
+        else {
             continue;
         };
-
-        let index = counter.fast;
-        let index = if monochrome { index + 2 } else { index };
-
-        let Some(t) = texture_handles.tile_animations.get(kind.as_ref()) else {
+        let animated_texture = tile_event_texture(tile_event);
+        let index = animated_texture.index(counter.fast, monochrome);
+        let Some(t) = texture_handles.tile_animations.get(tile_event.kind().as_ref()) else {
             continue;
         };
 
@@ -389,7 +405,7 @@ fn spawn_tile_animation_textures(
                     ..default()
                 },
                 Transform::from_xyz(x, y, 500.0),
-                FastAnimatedTexture,
+                animated_texture,
             ))
             .id();
         tex_entities.push(id);
@@ -398,17 +414,17 @@ fn spawn_tile_animation_textures(
 
 fn spawn_overlay_meshes(
     mut commands: Commands,
-    update_map: Res<UpdateMap>,
+    update_draw: Res<UpdateDraw>,
     mut meshes: ResMut<Assets<Mesh>>,
     color_materials: Res<ColorMaterials>,
     in_screen_tile_range: Res<InScreenTileRange>,
-    planet: Res<Planet>,
+    (planet, params): (Res<Planet>, Res<Params>),
     current_layer: Res<OverlayLayerKind>,
     mut prev_layer: Local<OverlayLayerKind>,
     mut tile_mesh: Local<Option<Handle<Mesh>>>,
     mut mesh_entities: Local<Vec<Entity>>,
 ) {
-    if !update_map.need_update && *current_layer == *prev_layer {
+    if !update_draw.need_update && *current_layer == *prev_layer {
         return;
     }
 
@@ -438,7 +454,7 @@ fn spawn_overlay_meshes(
         let id = commands
             .spawn((
                 Mesh2d(tile_mesh.clone()),
-                MeshMaterial2d(color_materials.get_handle(&planet, p, *current_layer)),
+                MeshMaterial2d(color_materials.get_handle(&planet, p, *current_layer, &params)),
                 Transform::from_xyz(x, y, 800.0),
             ))
             .id();
@@ -449,17 +465,16 @@ fn spawn_overlay_meshes(
 fn update_animation(
     mut counter: ResMut<AnimationCounter>,
     current_layer: Res<OverlayLayerKind>,
-    mut query_fast: Query<(&mut FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
-    mut query_slow: Query<(&mut SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
+    mut query_fast: Query<(&FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
+    mut query_slow: Query<(&SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
     counter.fast ^= 1;
 
-    let new_index = counter.fast + if monochrome { 2 } else { 0 };
-
-    for (_a, mut sprite) in &mut query_fast {
-        sprite.texture_atlas.as_mut().unwrap().index = new_index;
+    for (animated_texture, mut sprite) in &mut query_fast {
+        sprite.texture_atlas.as_mut().unwrap().index =
+            animated_texture.index(counter.fast, monochrome);
     }
 
     if counter.fast == 1 {
@@ -489,8 +504,8 @@ fn corner_idx<F: Fn(Coords) -> bool>(f: F, pos: Coords, corner: Coords) -> usize
     }
 }
 
-fn reset_update_map(mut update_map: ResMut<UpdateMap>) {
-    update_map.need_update = false;
+fn reset_update_draw(mut update_draw: ResMut<UpdateDraw>) {
+    update_draw.need_update = false;
 }
 
 fn coord_rotation_x(size: (u32, u32), p: Coords) -> Coords {
@@ -503,4 +518,63 @@ fn coord_rotation_x(size: (u32, u32), p: Coords) -> Coords {
         p.0
     };
     Coords(new_x, p.1)
+}
+
+fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
+    match tile_event {
+        TileEvent::Fire => 9000,
+        TileEvent::BlackDust { .. } => 1000,
+        TileEvent::AerosolInjection { .. } => 2000,
+        TileEvent::Plague { cured, .. } => {
+            if *cured {
+                0
+            } else {
+                3000
+            }
+        }
+        TileEvent::Vehicle { .. } => 3000,
+        TileEvent::War { .. } => 4000,
+    }
+}
+
+fn tile_event_texture(tile_event: &TileEvent) -> FastAnimatedTexture {
+    match tile_event {
+        TileEvent::Vehicle {
+            kind,
+            age,
+            direction,
+            ..
+        } => {
+            let start = match kind {
+                VehicleKind::Ship => {
+                    if *age <= CivilizationAge::Iron {
+                        0
+                    } else {
+                        4
+                    }
+                }
+                VehicleKind::AirPlane => 8,
+            };
+            let start = if direction.0 < 0 { start } else { start + 2 };
+            FastAnimatedTexture {
+                monochrome_shift: 12,
+                start,
+            }
+        }
+        _ => FastAnimatedTexture {
+            monochrome_shift: 2,
+            start: 0,
+        },
+    }
+}
+
+impl FastAnimatedTexture {
+    fn index(&self, counter: usize, monochrome: bool) -> usize {
+        let index = self.start as usize + counter;
+        if monochrome {
+            index + self.monochrome_shift as usize
+        } else {
+            index
+        }
+    }
 }

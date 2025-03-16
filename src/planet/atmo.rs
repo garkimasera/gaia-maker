@@ -1,11 +1,27 @@
+use std::sync::LazyLock;
+
 use fnv::FnvHashMap;
 use serde::{Deserialize, Serialize};
 
 use super::misc::linear_interpolation;
 use super::*;
 
-pub const CO2_CARBON_WEIGHT_RATIO: f32 = 44.0 / 12.0;
-pub const CO2_OXYGEN_WEIGHT_RATIO: f32 = 44.0 / 32.0;
+const MOLECULAR_WEIGHT_N2: f32 = 28.0;
+const MOLECULAR_WEIGHT_O2: f32 = 32.0;
+const MOLECULAR_WEIGHT_CO2: f32 = 44.0;
+const MOLECULAR_WEIGHT_ARGON: f32 = 40.0;
+
+pub const CO2_CARBON_WEIGHT_RATIO: f32 = MOLECULAR_WEIGHT_CO2 / 12.0;
+pub const CO2_OXYGEN_WEIGHT_RATIO: f32 = MOLECULAR_WEIGHT_CO2 / MOLECULAR_WEIGHT_O2;
+
+static GAS_MOLECULAR_WEIGHT: LazyLock<FnvHashMap<GasKind, f32>> = LazyLock::new(|| {
+    let mut map = FnvHashMap::default();
+    map.insert(GasKind::Nitrogen, MOLECULAR_WEIGHT_N2);
+    map.insert(GasKind::Oxygen, MOLECULAR_WEIGHT_O2);
+    map.insert(GasKind::CarbonDioxide, MOLECULAR_WEIGHT_CO2);
+    map.insert(GasKind::Argon, MOLECULAR_WEIGHT_ARGON);
+    map
+});
 
 const AEROSOL_EQUILIBRIUM_TARGET: f32 = 1.0;
 
@@ -14,6 +30,8 @@ pub struct Atmosphere {
     atm: f32,
     /// Gases mass [Mt]
     mass: FnvHashMap<GasKind, f64>,
+    /// Gass mole ratio
+    pub mole_ratio: FnvHashMap<GasKind, f32>,
     /// Cloud amount [%]. The average is 50%
     pub cloud_amount: f32,
     /// Aerosol amount
@@ -25,12 +43,19 @@ impl Atmosphere {
         let mass = start_params
             .atmo
             .iter()
-            .map(|(gas_kind, atm)| (*gas_kind, atm * params.sim.total_mass_per_atm as f64))
+            .map(|(gas_kind, atm)| {
+                (
+                    *gas_kind,
+                    atm * params.sim.mol_per_atm as f64 * GAS_MOLECULAR_WEIGHT[gas_kind] as f64,
+                )
+            })
             .collect();
+        let mole_ratio = GasKind::iter().map(|gas_kind| (gas_kind, 0.0)).collect();
 
         Atmosphere {
             atm: 0.0,
             mass,
+            mole_ratio,
             cloud_amount: 50.0,
             aerosol: AEROSOL_EQUILIBRIUM_TARGET,
         }
@@ -45,7 +70,7 @@ impl Atmosphere {
     }
 
     pub fn partial_pressure(&self, kind: GasKind) -> f32 {
-        self.atm * self.mass[&kind] as f32 / self.total_mass()
+        self.atm * self.mole_ratio[&kind]
     }
 
     pub fn mass(&self, kind: GasKind) -> f32 {
@@ -90,9 +115,23 @@ impl Atmosphere {
     }
 }
 
-pub fn sim_atmosphere(planet: &mut Planet, params: &Params) {
-    planet.atmo.atm = planet.atmo.total_mass() / params.sim.total_mass_per_atm;
+pub fn sim_atmosphere(planet: &mut Planet, _sim: &mut Sim, params: &Params) {
+    let mut atmo_mole = FnvHashMap::default();
+    let mut sum_mole = 0.0;
+    for gas_kind in GasKind::iter() {
+        let mole = planet.atmo.mass[&gas_kind] as f32 / GAS_MOLECULAR_WEIGHT[&gas_kind];
+        atmo_mole.insert(gas_kind, mole);
+        sum_mole += mole;
+    }
+    for gas_kind in GasKind::iter() {
+        planet
+            .atmo
+            .mole_ratio
+            .insert(gas_kind, atmo_mole[&gas_kind] / sum_mole);
+    }
+    planet.atmo.atm = sum_mole / params.sim.mol_per_atm;
 
+    // Aerosol
     let base_supply = (1.0 - params.sim.aerosol_remaining_rate) * AEROSOL_EQUILIBRIUM_TARGET;
     planet.atmo.aerosol += base_supply;
     planet.atmo.aerosol *= params.sim.aerosol_remaining_rate;

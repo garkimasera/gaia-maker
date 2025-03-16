@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::sim::ManagePlanetError;
+use crate::manage_planet::ManagePlanetError;
 
 pub fn error_popup(
     mut egui_ctxs: EguiContexts,

@@ -34,10 +34,7 @@ impl AssetLoader for ImageLoader {
             image::load_from_memory_with_format(&bytes, image::ImageFormat::Png)?.into_rgba8();
 
         let path = load_context.path();
-        let image = if MONOCHROME_IMAGE_DIRS
-            .iter()
-            .any(|dir| path.starts_with(dir))
-        {
+        let image = if MONOCHROME_IMAGE_DIRS.iter().any(|dir| path.starts_with(dir)) {
             let width = image.width();
             let height = image.height();
             let mut new_image = image::RgbaImage::new(width, height * 2);

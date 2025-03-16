@@ -1,9 +1,27 @@
 use arrayvec::ArrayVec;
 use geom::Direction;
 use misc::{calc_congestion_rate, range_to_livability_trapezoid};
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::IndexedRandom};
 
 use super::*;
+
+impl Tile {
+    pub fn largest_animal(&self) -> Option<&Animal> {
+        match self.animal {
+            [_, _, Some(ref animal)] => Some(animal),
+            [_, Some(ref animal), None] => Some(animal),
+            [Some(ref animal), None, None] => Some(animal),
+            _ => None,
+        }
+    }
+
+    pub fn get_animal(&self, id: AnimalId, params: &Params) -> Option<&Animal> {
+        let size = params.animals[&id].size;
+        self.animal[size as usize]
+            .as_ref()
+            .filter(|animal| animal.id == id)
+    }
+}
 
 pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     if planet.cycles % params.sim.animal_sim_interval as u64 != 0 {
@@ -71,7 +89,7 @@ fn process_each_animal(
     });
     let prob = (params.sim.coef_animal_fisson_a * (params.sim.coef_animal_fisson_b * new_n - cr))
         .clamp(0.0, 1.0);
-    if sim.rng.gen_bool(prob.into()) {
+    if sim.rng.random_bool(prob.into()) {
         let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
         for d in Direction::EIGHT_DIRS {
             if let Some(p_next) = sim.convert_p_cyclic(p + d.as_coords()) {
@@ -94,20 +112,20 @@ fn process_each_animal(
     let prob = (params.sim.coef_animal_kill_by_congestion_a
         * (cr - params.sim.coef_animal_kill_by_congestion_b))
         .clamp(0.0, 1.0);
-    if sim.rng.gen_bool(prob.into()) {
+    if sim.rng.random_bool(prob.into()) {
         planet.map[p].animal[size as usize] = None;
         return;
     }
 
     // Random walk
-    if sim.rng.gen_bool(params.sim.animal_move_weight) {
+    if sim.rng.random_bool(params.sim.animal_move_weight) {
         let dir = *Direction::EIGHT_DIRS.choose(&mut sim.rng).unwrap();
         if let Some(p_dest) = sim.convert_p_cyclic(p + dir.as_coords()) {
             // If the destination is empty
             if planet.map[p_dest].animal[size as usize].is_none() {
                 let cap_dest = calc_cap(planet, p_dest, attr, params);
                 let move_probability = (cap_dest / (cap + 0.001)).clamp(0.0, 1.0);
-                if sim.rng.gen_bool(move_probability.into()) {
+                if sim.rng.random_bool(move_probability.into()) {
                     planet.map[p_dest].animal[size as usize] =
                         planet.map[p].animal[size as usize].take();
                 }
@@ -116,7 +134,7 @@ fn process_each_animal(
     }
 }
 
-pub fn calc_cap_without_biomass(
+pub fn calc_cap_by_atmo_temp(
     planet: &Planet,
     p: Coords,
     attr: &AnimalAttr,
@@ -153,7 +171,15 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
             / params.sim.animal_cap_max_fertility
     };
 
-    cap_biomass_or_fertility * calc_cap_without_biomass(planet, p, attr, params, 0.0)
+    let settlement_effect = if matches!(planet.map[p].structure, Some(Structure::Settlement(_))) {
+        attr.settlement_effect
+    } else {
+        1.0
+    };
+
+    cap_biomass_or_fertility
+        * calc_cap_by_atmo_temp(planet, p, attr, params, 0.0)
+        * settlement_effect
 }
 
 impl AnimalHabitat {

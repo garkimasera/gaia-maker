@@ -1,9 +1,10 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
-use crate::{screen::HoverTile, sim::SaveFileMetadata};
+use crate::saveload::SaveState;
+use crate::screen::HoverTile;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
@@ -24,7 +25,7 @@ pub fn debug_tools_window(
     mut planet: ResMut<Planet>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
-    mut save_file_metadata: ResMut<SaveFileMetadata>,
+    mut save_state: ResMut<SaveState>,
     params: Res<Params>,
     sim: Res<Sim>,
     hover_tile: Query<&HoverTile>,
@@ -38,11 +39,13 @@ pub fn debug_tools_window(
         return;
     }
 
-    if !save_file_metadata.debug_mode_enabled {
+    if !save_state.save_file_metadata.debug_mode_enabled {
         egui::Modal::new("use-debug-mode".into()).show(egui_ctxs.ctx_mut(), |ui| {
             ui.label("Enable Debug Mode?");
+            ui.strong("Debug mode flag is saved in the save data.");
+            ui.strong("Use of debug mode is at your own risk.");
             if ui.button("Yes").clicked() {
-                save_file_metadata.debug_mode_enabled = true;
+                save_state.save_file_metadata.debug_mode_enabled = true;
             }
             if ui.button("No").clicked() {
                 wos.debug_tools = false;
@@ -89,28 +92,24 @@ fn info_ui(ui: &mut egui::Ui, planet: &Planet, sim: &Sim, p: Coords) {
     let tile_debug_info = crate::planet::debug::tile_debug_info(planet, sim, p);
     let tile_logs = crate::planet::debug::tile_logs();
 
-    egui::Grid::new("tile_info_grid")
-        .striped(true)
-        .show(ui, |ui| {
-            for (name, data) in tile_debug_info.iter() {
-                ui.label(*name);
-                ui.label(data);
-                ui.end_row();
-            }
-            ui.separator();
-            ui.separator();
+    egui::Grid::new("tile_info_grid").striped(true).show(ui, |ui| {
+        for (name, data) in tile_debug_info.iter() {
+            ui.label(*name);
+            ui.label(data);
             ui.end_row();
-            for (name, data) in tile_logs.iter() {
-                ui.label(*name);
-                ui.label(data);
-                ui.end_row();
-            }
-        });
+        }
+        ui.separator();
+        ui.separator();
+        ui.end_row();
+        for (name, data) in tile_logs.iter() {
+            ui.label(*name);
+            ui.label(data);
+            ui.end_row();
+        }
+    });
 }
 
 fn sim_ui(ui: &mut egui::Ui, planet: &mut Planet) {
-    ui.label(format!("{} cycles", planet.cycles));
-
     if ui.button("max resources").clicked() {
         planet.res.debug_max();
     }
@@ -188,11 +187,25 @@ impl MapPanel {
                     CursorMode::PlaceSettlement(self.animal_id.unwrap(), self.settlement_age);
             }
         });
+        ui.horizontal(|ui| {
+            if ui.button("height +100").clicked() {
+                *cursor_mode = CursorMode::ChangeHeight(100.0);
+            }
+            if ui.button("height -100").clicked() {
+                *cursor_mode = CursorMode::ChangeHeight(-100.0);
+            }
+        });
 
         ui.separator();
 
-        if ui.button("delete all settlements").clicked() {
-            planet.delete_settlement();
+        if ui.button("delete all civilization").clicked() {
+            planet.delete_civilization();
+        }
+
+        ui.separator();
+        if ui.button("copy height map").clicked() {
+            let s = planet.height_map_as_string();
+            ui.output_mut(|o| o.commands.push(egui::OutputCommand::CopyText(s)));
         }
     }
 }

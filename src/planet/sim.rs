@@ -16,6 +16,8 @@ pub struct Sim {
     pub tile_area: f32,
     /// The number of tiles
     pub n_tiles: u32,
+    /// Area factor relative to a planet of default size
+    pub planet_area_factor: f32,
     /// Geothermal power per tile [W]
     pub geothermal_power_per_tile: f32,
     /// Tile insolation [J/m^2]
@@ -42,6 +44,8 @@ pub struct Sim {
     pub humidity: Array2d<f32>,
     /// Fertility effect to tile from structures or other factors
     pub fertility_effect: Array2d<f32>,
+    /// Biomass difference in the cycle
+    pub diff_biomass: Array2d<f32>,
     /// The number of working buildings
     pub working_buildings: fnv::FnvHashMap<BuildingKind, u32>,
     /// Hydro and geothermal energy source [GJ]
@@ -52,15 +56,25 @@ pub struct Sim {
     pub energy_wind_solar: f32,
     /// Civilization domain
     pub domain: Array2d<Option<(AnimalId, f32)>>,
+    /// Energy efficiency
+    pub energy_eff: Array2d<f32>,
+    /// Settlement congestion rate
+    pub settlement_cr: Array2d<f32>,
+    /// Biomass consumption by settlements
+    pub biomass_consumption: Array2d<f32>,
+    /// Count the number of settlements in war
+    pub war_counter: FnvHashMap<u32, u32>,
 }
 
 impl Sim {
-    pub fn new(planet: &Planet) -> Self {
+    pub fn new(planet: &Planet, params: &Params) -> Self {
         let size = planet.map.size();
         let n_tiles = size.0 * size.1;
         let map_iter_idx = planet.map.iter_idx();
         let tile_area = 4.0 * PI * planet.basics.radius * planet.basics.radius
             / (size.0 as f32 * size.1 as f32);
+        let planet_area_factor =
+            (planet.basics.radius / params.default_start_params.basics.radius).powi(2);
 
         let mut atemp = Array2d::new(size.0, size.1, 0.0);
         let mut vapor = Array2d::new(size.0, size.1, 0.0);
@@ -76,6 +90,7 @@ impl Sim {
             size,
             tile_area,
             n_tiles,
+            planet_area_factor,
             geothermal_power_per_tile: planet.basics.geothermal_power / n_tiles as f32,
             insolation: Array2d::new(size.0, size.1, 0.0),
             solar_constant_before: 0.0,
@@ -89,11 +104,16 @@ impl Sim {
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             humidity: Array2d::new(size.0, size.1, 0.0),
             fertility_effect: Array2d::new(size.0, size.1, 0.0),
+            diff_biomass: Array2d::new(size.0, size.1, 0.0),
             working_buildings: HashMap::default(),
             energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),
             energy_wind_solar: 0.0,
             civ_sum: CivSum::default(),
             domain: Array2d::new(size.0, size.1, None),
+            energy_eff: Array2d::new(size.0, size.1, 0.0),
+            settlement_cr: Array2d::new(size.0, size.1, 0.0),
+            biomass_consumption: Array2d::new(size.0, size.1, 0.0),
+            war_counter: FnvHashMap::default(),
         }
     }
 
@@ -103,7 +123,20 @@ impl Sim {
     }
 
     pub fn convert_p_cyclic(&self, p: Coords) -> Option<Coords> {
-        geom::CyclicMode::X.convert_coords(self.size, p)
+        self.coords_converter().conv(p)
+    }
+
+    pub fn coords_converter(&self) -> CoordsConverter {
+        CoordsConverter(self.size)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct CoordsConverter((u32, u32));
+
+impl CoordsConverter {
+    pub fn conv(&self, p: Coords) -> Option<Coords> {
+        geom::CyclicMode::X.convert_coords(self.0, p)
     }
 }
 
@@ -116,9 +149,7 @@ impl CivSum {
     }
 
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (AnimalId, &mut CivSumValues)> {
-        self.0
-            .iter_mut()
-            .map(|(key, sum_values)| (*key, sum_values))
+        self.0.iter_mut().map(|(key, sum_values)| (*key, sum_values))
     }
 
     pub fn get_mut(&mut self, animal_id: AnimalId) -> &mut CivSumValues {
@@ -138,10 +169,11 @@ impl CivSum {
 #[derive(Clone, Default, Debug)]
 pub struct CivSumValues {
     pub total_pop: f64,
-    pub total_pop_for_energy_distribution: f64,
+    pub total_pop_prev: f64,
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f64; EnergySource::LEN],
     pub fossil_fuel_src_tiles: BTreeMap<ordered_float::NotNan<f32>, Coords>,
     pub fossil_fuel_supply: f32,
     pub gift_supply: f32,
+    pub n_moving: u32,
 }

@@ -1,22 +1,23 @@
 [package]
 name = "gaia-maker"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["T. Okubo <t.okubo.rx78+devel@gmail.com>"]
 license = "GPL-3.0"
+description = "Planet and terraforming simulation game"
 
 [features]
 default = []
 asset_tar = ["dep:bevy_asset_tar"]
+deb = ["asset_tar"]
 
 [dependencies]
 anyhow = "1"
 arrayvec = { version = "0.7", features = ["serde"] }
-base64 = "0.22"
-bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "x11", "webgl2"] }
+bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "multi_threaded", "x11", "webgl2"] }
 bevy_asset_loader = "0.22"
 bevy_common_assets = { version = "0.12", features = ["ron", "toml"] }
-bevy_egui = "0.32"
+bevy_egui = "0.33"
 bevy_kira_audio = "0.22"
 byteorder = "1.5.0"
 bytes = "1.9.0"
@@ -25,8 +26,8 @@ clap = { version = "4", features = ["derive"] }
 compact_str = { version = "0.8.0", features = ["serde"] }
 crossbeam = "0.8"
 dirs = "6"
-egui_extras = "0.30"
-egui_plot = "0.30"
+egui_extras = "0.31"
+egui_plot = "0.31"
 flate2 = "1"
 fnv = "1"
 image = { version = "0.25.5", default-features = false, features = ["png", "rayon"] }
@@ -34,22 +35,54 @@ log = "0.4"
 noise = "0.9"
 num-derive = "0.4.2"
 num-traits = "0.2.19"
-ordered-float = { version = "4.6.0", default-features = false }
-rand = { version = "0.8", features = ["small_rng"] }
+ordered-float = { version = "5.0.0", default-features = false }
+rand = { version = "0.9.0", features = ["small_rng"] }
+rayon = "1.10.0"
 regex = "1"
 rmp-serde = "1.3.0"
 ron = "0.8"
+sanitize-filename = "0.6.0"
 serde = { version = "1", features = ["derive"] }
+serde_json = "1.0.138"
+serde_repr = "0.1.19"
 serde_with = "3"
-strum = { version = "0.26", features = ["derive"] }
+smallvec = { version = "1.13.2", features = ["serde"] }
+strum = { version = "0.27.1", features = ["derive"] }
 toml = "0.8.19"
+winit = { version = "0.30.9", default-features = false }
 
 bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+zstd = "0.13.2"
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+base64 = "0.22"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = ["Window", "Storage", "Location"] }
+getrandom = { version = "0.3", features = ["wasm_js"] } # For rand v0.9
 
 [profile.dev]
 opt-level = 1
+
+[profile.release]
+strip = true
+
+[profile.profiling]
+inherits = "release"
+debug = true
+strip = false
+
+[package.metadata.deb]
+depends = "$auto"
+extended-description = ""
+section = "games"
+priority = "optional"
+assets = [
+    ["target/release/gaia-maker", "usr/games/", "755"],
+    ["assets.tar.gz", "usr/share/games/gaia-maker/assets.tar.gz", "644"],
+    ["gaia-maker.desktop", "usr/share/applications/", "644"],
+    ["icon.png", "usr/share/pixmaps/gaia-maker.png", "644"],
+]
+features = ["deb"]

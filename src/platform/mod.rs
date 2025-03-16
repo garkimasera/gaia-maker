@@ -3,7 +3,18 @@ mod native;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
-const DEFAULT_WINDOW_SIZE: (u32, u32) = (1280, 720);
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum PreferredWindowResolution {
+    Size(u32, u32),
+    #[allow(unused)]
+    Maximized,
+}
+
+impl Default for PreferredWindowResolution {
+    fn default() -> Self {
+        Self::Size(1280, 720)
+    }
+}
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use native::*;

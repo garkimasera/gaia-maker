@@ -1,18 +1,18 @@
-use bevy::{app::AppExit, prelude::*};
-use bevy_egui::{egui, EguiContexts};
+use bevy::{app::AppExit, diagnostic::DiagnosticsStore, prelude::*};
+use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
 use strum::IntoEnumIterator;
 
 use crate::{
-    conf::Conf,
-    planet::{Cost, Params, Planet, StructureKind, KELVIN_CELSIUS},
-    screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    sim::{ManagePlanet, SaveFileMetadata},
-    text::WithUnitDisplay,
     GameSpeed, GameState,
+    conf::Conf,
+    manage_planet::ManagePlanet,
+    planet::{Cost, KELVIN_CELSIUS, Params, Planet, StructureKind},
+    screen::{CursorMode, HoverTile, OccupiedScreenSpace},
+    text::WithUnitDisplay,
 };
 
-use super::{help::HelpItem, EguiTextures, LabelWithIcon, WindowsOpenState};
+use super::{UiTextures, WindowsOpenState, help::HelpItem, misc::LabelWithIcon};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
@@ -21,18 +21,10 @@ pub fn panels(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
-    (mut app_exit_events, mut ew_manage_planet, mut next_game_state): (
-        EventWriter<AppExit>,
-        EventWriter<ManagePlanet>,
-        ResMut<NextState<GameState>>,
-    ),
-    (planet, textures, params, save_file_metadata, conf): (
-        Res<Planet>,
-        Res<EguiTextures>,
-        Res<Params>,
-        Res<SaveFileMetadata>,
-        Res<Conf>,
-    ),
+    (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
+    mut next_game_state: ResMut<NextState<GameState>>,
+    (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
+    diagnostics_store: Res<DiagnosticsStore>,
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
@@ -43,7 +35,6 @@ pub fn panels(
         .show(egui_ctxs.ctx_mut(), |ui| {
             sidebar(
                 ui,
-                &mut wos,
                 &cursor_mode,
                 &planet,
                 &params,
@@ -51,6 +42,7 @@ pub fn panels(
                 &textures,
                 &conf,
                 &mut last_hover_tile,
+                &diagnostics_store,
             );
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
@@ -68,7 +60,6 @@ pub fn panels(
                     &mut cursor_mode,
                     &mut wos,
                     &mut speed,
-                    &save_file_metadata,
                     (
                         &mut app_exit_events,
                         &mut ew_manage_planet,
@@ -91,15 +82,16 @@ fn toolbar(
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
     speed: &mut GameSpeed,
-    save_file_metadata: &SaveFileMetadata,
     (app_exit_events, ew_manage_planet, next_game_state): (
         &mut EventWriter<AppExit>,
         &mut EventWriter<ManagePlanet>,
         &mut NextState<GameState>,
     ),
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
+    // Menu buttons
+
     let button = |ui: &mut egui::Ui, path: &str, s: &str| {
         ui.add(egui::ImageButton::new(textures.get(path)))
             .on_hover_text(t!(s))
@@ -109,14 +101,7 @@ fn toolbar(
         |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
 
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
-        game_menu(
-            ui,
-            wos,
-            save_file_metadata,
-            app_exit_events,
-            ew_manage_planet,
-            next_game_state,
-        );
+        game_menu(ui, wos, app_exit_events, ew_manage_planet, next_game_state);
     });
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
@@ -130,6 +115,8 @@ fn toolbar(
     });
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+    // Window buttons
 
     if button(ui, "ui/icon-space-buildings", "space-buildings") {
         wos.space_building = !wos.space_building;
@@ -153,6 +140,8 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
+    // Game speed selector
+
     let texture = if *speed == GameSpeed::Paused {
         "ui/icon-speed-paused-selected"
     } else {
@@ -162,13 +151,22 @@ fn toolbar(
         *speed = GameSpeed::Paused;
     }
 
-    let texture = if *speed == GameSpeed::Normal {
-        "ui/icon-speed-normal-selected"
+    let texture = if *speed == GameSpeed::Slow {
+        "ui/icon-speed-slow-selected"
     } else {
-        "ui/icon-speed-normal"
+        "ui/icon-speed-slow"
     };
-    if button(ui, texture, "speed-normal") {
-        *speed = GameSpeed::Normal;
+    if button(ui, texture, "speed-slow") {
+        *speed = GameSpeed::Slow;
+    }
+
+    let texture = if *speed == GameSpeed::Medium {
+        "ui/icon-speed-medium-selected"
+    } else {
+        "ui/icon-speed-medium"
+    };
+    if button(ui, texture, "speed-medium") {
+        *speed = GameSpeed::Medium;
     }
 
     let texture = if *speed == GameSpeed::Fast {
@@ -189,43 +187,34 @@ fn toolbar(
 
 fn sidebar(
     ui: &mut egui::Ui,
-    wos: &mut WindowsOpenState,
     cursor_mode: &CursorMode,
     planet: &Planet,
     params: &Params,
     hover_tile: &HoverTile,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     conf: &Conf,
     last_hover_tile: &mut Option<Coords>,
+    diagnostics_store: &DiagnosticsStore,
 ) {
-    // Energy
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-energy");
-        ui.image(texture).on_hover_text(t!("energy"));
-        let used_energy = crate::text::format_float_1000(planet.res.used_energy, 1);
-        let energy = crate::text::format_float_1000(planet.res.energy, 1);
-        ui.label(format!("{} / {} TW", used_energy, energy));
-    });
-    // Material
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-material");
-        ui.image(texture).on_hover_text(t!("material"));
-        ui.label(WithUnitDisplay::Material(planet.res.material).to_string());
-        ui.label(
-            egui::RichText::new(format!(
-                "(+{})",
-                WithUnitDisplay::Material(planet.res.diff_material)
-            ))
-            .small(),
-        );
-    });
-    // Gene point
-    ui.horizontal(|ui| {
-        let texture = textures.get("ui/icon-gene");
-        ui.image(texture).on_hover_text(t!("gene-points"));
-        ui.label(WithUnitDisplay::GenePoint(planet.res.gene_point).to_string());
-        ui.label(egui::RichText::new(format!("({:+.2})", planet.res.diff_gene_point)).small());
-    });
+    // FPS indicator
+    const FPS: bevy::diagnostic::DiagnosticPath =
+        bevy::diagnostic::DiagnosticPath::const_new("fps");
+    if conf.show_fps {
+        if let Some(fps) = diagnostics_store.get(&FPS).and_then(|d| d.average()) {
+            ui.label(format!("FPS: {:.2}", fps));
+        }
+    }
+
+    // Resource indicators
+    super::misc::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
+    super::misc::material_indicator(ui, textures, planet.res.material, planet.res.diff_material);
+    super::misc::gene_point_indicator(
+        ui,
+        textures,
+        planet.res.gene_point,
+        planet.res.diff_gene_point,
+    );
+
     ui.separator();
 
     // Information about selected tool
@@ -256,11 +245,14 @@ fn sidebar(
             CursorMode::TileEvent(kind) => {
                 t!(kind)
             }
-            CursorMode::SpawnAnimal(ref animal_id) => {
+            CursorMode::SpawnAnimal(animal_id) => {
                 format!("{} {}", t!("animal"), t!("animal", animal_id))
             }
             CursorMode::EditBiome(biome) => {
                 format!("biome editing: {}", biome.as_ref())
+            }
+            CursorMode::ChangeHeight(value) => {
+                format!("change height: {}", value)
             }
             CursorMode::PlaceSettlement(id, age) => {
                 format!("settlement: {} {:?}", id, age)
@@ -270,9 +262,9 @@ fn sidebar(
         ui.horizontal(|ui| {
             for (lack, cost) in &cost_list {
                 let (texture, s) = match cost {
-                    Cost::Energy(value, _) => (
-                        textures.get("ui/icon-energy"),
-                        WithUnitDisplay::Energy(*value).to_string(),
+                    Cost::Power(value, _) => (
+                        textures.get("ui/icon-power"),
+                        WithUnitDisplay::Power(*value).to_string(),
                     ),
                     Cost::Material(value) => (
                         textures.get("ui/icon-material"),
@@ -362,21 +354,20 @@ fn sidebar(
 
     ui.label(t!(tile.biome));
 
-    if let Some(structure) = &tile.structure {
-        ui.label(crate::info::structure_info(structure));
+    let s = if let Some(structure) = &tile.structure {
+        crate::info::structure_info(structure)
+    } else if let Some(animal) = tile.largest_animal() {
+        t!("animal", animal.id)
     } else {
-        ui.label("");
-    }
-
-    ui.separator();
-
-    super::dialog::msg_list(ui, wos, planet, conf);
+        "".into()
+    };
+    ui.label(s);
 }
 
 fn build_menu(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
     if ui.button(t!("demolition")).clicked() {
@@ -397,7 +388,10 @@ fn build_menu(
                 response.layer_id,
                 response.id,
                 pos_tooltip,
-                |ui| HelpItem::Structures(kind).ui(ui, textures, params),
+                |ui| {
+                    ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
+                    HelpItem::Structures(kind).ui(ui, textures, params);
+                },
             );
         }
         ui.end_row();
@@ -407,7 +401,7 @@ fn build_menu(
 fn action_menu(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
 ) {
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
@@ -423,7 +417,10 @@ fn action_menu(
                 response.layer_id,
                 response.id,
                 pos_tooltip,
-                |ui| HelpItem::TileEvent(kind).ui(ui, textures, params),
+                |ui| {
+                    ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
+                    HelpItem::TileEvents(kind).ui(ui, textures, params);
+                },
             );
         }
         ui.end_row();
@@ -433,26 +430,21 @@ fn action_menu(
 fn game_menu(
     ui: &mut egui::Ui,
     wos: &mut WindowsOpenState,
-    save_file_metadata: &SaveFileMetadata,
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     next_game_state: &mut NextState<GameState>,
 ) {
-    ui.scope(|ui| {
-        if let Some(slot) = save_file_metadata.manual_slot {
-            if ui.button(t!("save-to-slot"; slot=slot)).clicked() {
-                ew_manage_planet.send(ManagePlanet::Save(slot));
-                ui.close_menu();
-            }
-        } else {
-            ui.disable();
-            let _ = ui.button(t!("save-to-slot-disabled"));
-        }
-    });
-    if ui.button(format!("{}...", t!("save"))).clicked() {
-        wos.save = true;
+    if ui.button(t!("save")).clicked() {
+        ew_manage_planet.send(ManagePlanet::Save {
+            auto: false,
+            _new_name: None,
+        });
         ui.close_menu();
     }
+    // if ui.button(format!("{}...", t!("save-as"))).clicked() {
+    //     wos.save = true;
+    //     ui.close_menu();
+    // }
     if ui.button(format!("{}...", t!("load"))).clicked() {
         wos.load = true;
         ui.close_menu();

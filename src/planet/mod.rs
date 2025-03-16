@@ -12,14 +12,16 @@ mod initial_conditions;
 mod map_generator;
 mod misc;
 mod monitoring;
-mod msg;
 mod new;
 mod plague;
+mod report;
+mod requirement;
 mod resources;
 mod serde_with_types;
 mod sim;
 mod stat;
 mod tile_event;
+mod war;
 mod water;
 
 pub mod debug;
@@ -28,10 +30,12 @@ pub use self::atmo::Atmosphere;
 use self::civ::Civs;
 pub use self::defs::*;
 pub use self::event::*;
-pub use self::msg::*;
+pub use self::report::*;
+pub use self::requirement::Requirement;
 pub use self::resources::*;
 pub use self::sim::Sim;
 pub use self::stat::{Record, Stat};
+pub use self::tile_event::TileEvents;
 pub use self::water::*;
 
 use fnv::FnvHashMap;
@@ -61,7 +65,7 @@ pub struct Tile {
     /// Buried carbon mass [Mt]
     pub buried_carbon: f32,
     pub ice: f32,
-    pub event: Option<Box<TileEvent>>,
+    pub tile_events: TileEvents,
 }
 
 impl Default for Tile {
@@ -79,7 +83,7 @@ impl Default for Tile {
             vapor: 0.0,
             buried_carbon: 0.0,
             ice: 0.0,
-            event: None,
+            tile_events: TileEvents::default(),
         }
     }
 }
@@ -119,7 +123,7 @@ pub struct Planet {
     pub events: Events,
     pub civs: Civs,
     pub stat: Stat,
-    pub msgs: MsgHolder,
+    pub reports: Reports,
 }
 
 impl Planet {
@@ -128,12 +132,11 @@ impl Planet {
         self.cycles += 1;
         self.res.apply_diff();
 
-        self::civ_energy::sim_energy_source(self, sim, params);
-
+        self::atmo::sim_atmosphere(self, sim, params);
+        self::civ_energy::update_civ_energy(self, sim, params);
         self::tile_event::advance(self, sim, params);
         self::buildings::advance(self, sim, params);
         self::heat_transfer::advance(self, sim, params);
-        self::atmo::sim_atmosphere(self, params);
         self::water::sim_water(self, sim, params);
         self::biome::sim_biome(self, sim, params);
         self::animal::sim_animal(self, sim, params);
@@ -158,8 +161,8 @@ impl Planet {
             (self.stat.sum_biomass / params.sim.coef_gene_point_income).sqrt();
     }
 
-    pub fn start_event(&mut self, event: PlanetEvent, sim: &mut Sim, params: &Params) {
-        self::event::start_event(self, event, sim, params);
+    pub fn start_event(&mut self, event: PlanetEvent, _sim: &mut Sim, params: &Params) {
+        self.events.start_event(event, params);
     }
 
     pub fn n_tile(&self) -> u32 {
@@ -195,12 +198,22 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
 
     let mut atmo = params.default_start_params.atmo.clone();
 
-    *atmo.get_mut(&GasKind::Nitrogen).unwrap() = rng
-        .sample(SymmetricalLinearDist::from(start_planet.nitrogen))
-        .into();
-    *atmo.get_mut(&GasKind::CarbonDioxide).unwrap() = rng
-        .sample(SymmetricalLinearDist::from(start_planet.carbon_dioxide))
-        .into();
+    if let Some(range) = start_planet.nitrogen {
+        *atmo.get_mut(&GasKind::Nitrogen).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.oxygen {
+        *atmo.get_mut(&GasKind::Oxygen).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.carbon_dioxide {
+        *atmo.get_mut(&GasKind::CarbonDioxide).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
+    if let Some(range) = start_planet.argon {
+        *atmo.get_mut(&GasKind::Argon).unwrap() =
+            rng.sample(SymmetricalLinearDist::from(range)).into();
+    }
 
     StartParams {
         basics: Basics {
@@ -225,6 +238,8 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
         initial_conditions: start_planet.initial_conditions.clone(),
         height_table: start_planet.height_table.clone(),
         target_sea_level: start_planet.target_sea_level,
+        target_sea_area: start_planet.target_sea_area,
+        height_map: start_planet.height_map.clone(),
         ..params.default_start_params.clone()
     }
 }

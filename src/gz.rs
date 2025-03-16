@@ -11,8 +11,7 @@ pub struct GunzipBin(pub Vec<u8>);
 
 impl Plugin for GzPlugin {
     fn build(&self, app: &mut App) {
-        app.init_asset::<GunzipBin>()
-            .register_asset_loader(GzLoader);
+        app.init_asset::<GunzipBin>().register_asset_loader(GzLoader);
     }
 }
 

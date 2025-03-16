@@ -1,0 +1,7 @@
+(
+    size: large,
+    cost: 30,
+    habitat: land,
+    temp: (12, 32),
+    settlement_effect: 0.0,
+)

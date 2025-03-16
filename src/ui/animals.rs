@@ -1,7 +1,7 @@
-use super::{label_with_icon, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use compact_str::format_compact;
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub fn animals_window(
     mut cursor_mode: ResMut<CursorMode>,
     (mut planet, mut sim): (ResMut<Planet>, ResMut<Sim>),
     params: Res<Params>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
 ) {
     if !wos.animals {
@@ -59,7 +59,7 @@ fn contents(
     planet: &mut Planet,
     sim: &mut Sim,
     params: &Params,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     cursor_mode: &mut CursorMode,
 ) {
     ui.horizontal(|ui| {
@@ -107,6 +107,17 @@ fn contents(
             attr.temp.1 - KELVIN_CELSIUS,
         ));
         ui.end_row();
+
+        if let Some(civ) = &attr.civ {
+            ui.label(t!("civilize-cost"));
+            label_with_icon(
+                ui,
+                textures,
+                "ui/icon-gene",
+                WithUnitDisplay::GenePoint(civ.civilize_cost).to_string(),
+            );
+            ui.end_row();
+        }
     });
 
     ui.separator();
@@ -115,25 +126,23 @@ fn contents(
             *cursor_mode = CursorMode::SpawnAnimal(state.current);
         }
 
-        if let Some(c) = &attr.civ {
+        if attr.civ.is_some() {
             ui.scope(|ui| {
-                let event = PlanetEvent::Civilize {
-                    target: state.current,
-                };
-                if planet.events.in_progress(&event) {
+                if planet.events.in_progress_civilize_event(state.current) {
                     ui.disable();
                     let _ = ui.button(t!("civilizing-in-progress"));
                 } else if planet.civs.contains_key(&state.current) {
                     ui.disable();
                     let _ = ui.button(t!("civilized"));
                 } else {
-                    let cost = Cost::GenePoint(c.civilize_cost);
-                    if !planet.res.enough_to_consume(cost) {
+                    let s = if let Err(s) = planet.can_civilize(state.current, params) {
                         ui.disable();
-                    }
-                    if ui.button(t!("civilize")).clicked() {
-                        planet.res.consume(cost);
-                        planet.start_event(event, sim, params);
+                        t!("msg", s)
+                    } else {
+                        String::new()
+                    };
+                    if ui.button(t!("civilize")).on_disabled_hover_text(s).clicked() {
+                        planet.civilize_animal(state.current, sim, params);
                     }
                 }
             });

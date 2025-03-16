@@ -1,15 +1,15 @@
 use bevy::prelude::EventWriter;
-use bevy_egui::{egui, EguiContexts};
-use rand::seq::SliceRandom;
+use bevy_egui::{EguiContexts, egui};
+use rand::seq::IndexedRandom;
 
 use crate::{
+    manage_planet::{ManagePlanet, SaveState},
     planet::{Basics, GasKind, Params, StartParams},
-    sim::ManagePlanet,
 };
 
 use super::{
+    UiTextures,
     main_menu::{MainMenuMode, MainMenuState},
-    EguiTextures,
 };
 
 #[derive(Clone, Debug)]
@@ -48,10 +48,20 @@ pub fn new_planet(
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: &Params,
     state: &mut MainMenuState,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     window: &mut bevy::window::Window,
     random_name_list_map: &crate::text_assets::RandomNameListMap,
+    save_state: &SaveState,
 ) {
+    if let Some(cancelled) =
+        super::saveload::check_save_limit(egui_ctxs.ctx_mut(), &mut ew_manage_planet, save_state)
+    {
+        if cancelled {
+            state.mode = MainMenuMode::Menu;
+        }
+        return;
+    }
+
     egui::Window::new(t!("search-new-planet"))
         .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
         .default_width(0.0)
@@ -65,6 +75,9 @@ pub fn new_planet(
                     ui.vertical(|ui| {
                         ui.set_min_height(200.0);
                         for planet in &params.start_planets {
+                            if planet.id == crate::tutorial::TUTORIAL_PLANET {
+                                continue;
+                            }
                             ui.selectable_value(
                                 &mut state.new_planet.planet,
                                 NewPlanetKind::Id(planet.id.clone()),
@@ -113,7 +126,7 @@ pub fn new_planet(
                             {
                                 state.new_planet.name = random_name_list
                                     .0
-                                    .choose(&mut rand::thread_rng())
+                                    .choose(&mut rand::rng())
                                     .map(|name| name.to_owned())
                                     .unwrap();
                             }
@@ -166,7 +179,7 @@ fn start(ew_manage_planet: &mut EventWriter<ManagePlanet>, params: &Params, stat
     ew_manage_planet.send(ManagePlanet::New(start_params));
 }
 
-fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &EguiTextures) {
+fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &UiTextures) {
     use crate::planet::PlanetHabitability;
 
     let start_planet = params

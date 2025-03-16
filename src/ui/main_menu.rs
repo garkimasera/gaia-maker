@@ -1,20 +1,22 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 
 use crate::conf::{Conf, ConfChange};
+use crate::manage_planet::{GlobalData, ManagePlanet, ManagePlanetError, SaveState};
 use crate::planet::Params;
-use crate::sim::{ManagePlanet, ManagePlanetError};
 use crate::text_assets::Lang;
+use crate::tutorial::TUTORIAL_PLANET;
 use strum::IntoEnumIterator;
 
+use super::UiTextures;
 use super::new_planet::NewPlanetState;
-use super::EguiTextures;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum MainMenuMode {
     #[default]
     Menu,
+    Tutorial,
     NewPlanet,
     Load,
     Error,
@@ -45,14 +47,14 @@ pub fn main_menu(
     mut egui_ctxs: EguiContexts,
     mut ew_manage_planet: EventWriter<ManagePlanet>,
     params: Res<Params>,
-    mut conf: ResMut<Conf>,
-    mut ew_conf_change: EventWriter<ConfChange>,
+    save_state: Res<SaveState>,
+    (mut conf, mut ew_conf_change): (ResMut<Conf>, EventWriter<ConfChange>),
     mut er_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
-    textures: Res<EguiTextures>,
+    (textures, global_data): (Res<UiTextures>, Res<GlobalData>),
     random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
@@ -68,12 +70,16 @@ pub fn main_menu(
             egui::Window::new(t!("menu"))
                 .title_bar(false)
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 127.0))
-                .default_width(0.0)
+                .default_width(150.0)
                 .resizable(false)
                 .show(egui_ctxs.ctx_mut(), |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                        resume_ui(ui, &global_data, &mut ew_manage_planet, &save_state);
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
+                        }
+                        if ui.button(t!(TUTORIAL_PLANET)).clicked() {
+                            state.mode = MainMenuMode::Tutorial;
                         }
                         if ui.button(t!("load")).clicked() {
                             state.mode = MainMenuMode::Load;
@@ -94,6 +100,23 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+            display_web_limit_warning(&mut egui_ctxs);
+        }
+        MainMenuMode::Tutorial => {
+            if let Some(cancelled) = super::saveload::check_save_limit(
+                egui_ctxs.ctx_mut(),
+                &mut ew_manage_planet,
+                &save_state,
+            ) {
+                if cancelled {
+                    state.mode = MainMenuMode::Menu;
+                }
+            } else {
+                let mut start_params =
+                    crate::planet::start_planet_to_start_params(TUTORIAL_PLANET, &params);
+                start_params.basics.name = t!(TUTORIAL_PLANET);
+                ew_manage_planet.send(ManagePlanet::New(start_params));
+            }
         }
         MainMenuMode::NewPlanet => {
             super::new_planet::new_planet(
@@ -104,16 +127,16 @@ pub fn main_menu(
                 &textures,
                 &mut window.single_mut(),
                 &random_name_list_map,
+                &save_state,
             );
         }
         MainMenuMode::Load => {
             let mut open_state = true;
-            super::saveload::show_saveload_window(
+            super::saveload::show_load_window(
                 egui_ctxs.ctx_mut(),
                 &mut ew_manage_planet,
                 &mut open_state,
-                None,
-                true,
+                &save_state.current_save_sub_dir,
             );
             if !open_state {
                 state.mode = MainMenuMode::Menu;
@@ -139,6 +162,27 @@ pub fn main_menu(
     }
 }
 
+fn resume_ui(
+    ui: &mut egui::Ui,
+    global_data: &GlobalData,
+    ew_manage_planet: &mut EventWriter<ManagePlanet>,
+    save_state: &SaveState,
+) {
+    if let Some((save_sub_dir, auto, n)) = &global_data.latest_save_dir_file {
+        if !save_state.dirs.iter().any(|(_, name)| save_sub_dir == name) {
+            // If the save dir is deleted
+            return;
+        }
+        if ui.button(t!("resume")).clicked() {
+            ew_manage_planet.send(ManagePlanet::Load {
+                sub_dir_name: save_sub_dir.clone(),
+                auto: *auto,
+                n: *n,
+            });
+        }
+    }
+}
+
 fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
     let mut selected = before;
     egui::ComboBox::from_label("")
@@ -154,4 +198,20 @@ fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
     } else {
         None
     }
+}
+
+fn display_web_limit_warning(egui_ctxs: &mut EguiContexts) {
+    if !crate::platform::SAVE_DIRS_LIMIT {
+        return;
+    }
+
+    egui::Window::new(t!("warn_web_limit"))
+        .title_bar(false)
+        .anchor(egui::Align2::CENTER_BOTTOM, egui::Vec2::new(0.0, -10.0))
+        .default_width(600.0)
+        .resizable(false)
+        .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.label(t!("msg", "web-limit-warning"));
+        })
+        .unwrap();
 }

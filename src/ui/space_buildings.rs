@@ -1,12 +1,14 @@
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, epaint, load::SizedTexture},
     EguiContexts,
+    egui::{self, epaint, load::SizedTexture},
 };
 use compact_str::format_compact;
 use strum::IntoEnumIterator;
 
-use super::{help::HelpItem, EguiTextures, OccupiedScreenSpace, WindowsOpenState};
+use super::{
+    HELP_TOOLTIP_WIDTH, OccupiedScreenSpace, UiTextures, WindowsOpenState, help::HelpItem,
+};
 use crate::planet::*;
 
 const BUILDING_BACKGROUND_SIZE: (u32, u32) = (336, 48);
@@ -17,12 +19,17 @@ pub fn space_buildings_window(
     mut wos: ResMut<WindowsOpenState>,
     mut planet: ResMut<Planet>,
     mut sim: ResMut<Sim>,
-    textures: Res<EguiTextures>,
+    window: bevy::prelude::Query<
+        &mut bevy::window::Window,
+        bevy::prelude::With<bevy::window::PrimaryWindow>,
+    >,
+    textures: Res<UiTextures>,
     params: Res<Params>,
 ) {
     if !wos.space_building {
         return;
     }
+    let window_width = window.get_single().unwrap().width();
 
     let rect = egui::Window::new(t!("space-buildings"))
         .open(&mut wos.space_building)
@@ -41,6 +48,7 @@ pub fn space_buildings_window(
                         &textures,
                         &params,
                         params.building_attrs(kind),
+                        window_width,
                     );
                 });
             }
@@ -56,9 +64,10 @@ pub fn buildng_row(
     kind: SpaceBuildingKind,
     planet: &mut Planet,
     sim: &mut Sim,
-    textures: &EguiTextures,
+    textures: &UiTextures,
     params: &Params,
     attrs: &BuildingAttrs,
+    window_width: f32,
 ) {
     let build_max = attrs.build_max.unwrap();
     let buildable = planet.buildable(attrs) && build_max > planet.space_building(kind).n;
@@ -73,12 +82,22 @@ pub fn buildng_row(
     let response = ui.add(BuildingImage::new(kind, building.n, textures));
     if response.hovered() {
         let help_item = HelpItem::SpaceBuildings(kind);
+        let right_top = response.rect.right_top();
+        let pos = if right_top.x + HELP_TOOLTIP_WIDTH < window_width {
+            right_top
+        } else {
+            response.rect.left_top() + egui::vec2(-HELP_TOOLTIP_WIDTH - 20.0, 0.0)
+        };
+
         egui::containers::show_tooltip_at(
             &response.ctx,
             response.layer_id,
             response.id,
-            response.rect.right_top(),
-            |ui| help_item.ui(ui, textures, params),
+            pos,
+            |ui| {
+                ui.set_max_width(HELP_TOOLTIP_WIDTH);
+                help_item.ui(ui, textures, params);
+            },
         );
     }
 
@@ -96,7 +115,7 @@ pub fn buildng_row(
             }
         }
 
-        if attrs.energy < 0.0 {
+        if attrs.power < 0.0 {
             if n > 0 {
                 if ui.button("-1").clicked() {
                     planet.demolish_space_building(kind, 1, sim, params);
@@ -131,7 +150,7 @@ struct BuildingImage {
 }
 
 impl BuildingImage {
-    fn new(kind: SpaceBuildingKind, n: u32, textures: &EguiTextures) -> Self {
+    fn new(kind: SpaceBuildingKind, n: u32, textures: &UiTextures) -> Self {
         let (background_star, left_padding) = match kind {
             SpaceBuildingKind::DysonSwarmUnit => {
                 let t = textures.get("ui/background-building-star");
@@ -169,26 +188,20 @@ impl egui::Widget for BuildingImage {
 
         if ui.is_rect_visible(response.rect) {
             let painter = ui.painter();
-            painter.add(epaint::RectShape {
-                rect,
-                rounding: egui::Rounding::ZERO,
-                fill: egui::Color32::WHITE,
-                stroke: egui::Stroke::NONE,
-                blur_width: 0.0,
-                fill_texture_id: self.background.id,
-                uv,
-            });
+            painter.add(
+                epaint::RectShape::filled(rect, 0, egui::Color32::WHITE)
+                    .with_texture(self.background.id, uv),
+            );
 
             if let Some(background_star) = &self.background_star {
-                painter.add(epaint::RectShape {
-                    rect: egui::Rect::from_min_size(rect.min, background_star.size),
-                    rounding: egui::Rounding::ZERO,
-                    fill: egui::Color32::WHITE,
-                    stroke: egui::Stroke::NONE,
-                    blur_width: 0.0,
-                    fill_texture_id: background_star.id,
-                    uv,
-                });
+                painter.add(
+                    epaint::RectShape::filled(
+                        egui::Rect::from_min_size(rect.min, background_star.size),
+                        0,
+                        egui::Color32::WHITE,
+                    )
+                    .with_texture(background_star.id, uv),
+                );
             }
 
             let n = std::cmp::min(
@@ -200,15 +213,14 @@ impl egui::Widget for BuildingImage {
                     self.building.size.x * i as f32 + self.left_padding,
                     0.5 * (rect.height() - self.building.size.y),
                 );
-                painter.add(epaint::RectShape {
-                    rect: egui::Rect::from_min_size(rect.min + v, self.building.size),
-                    rounding: egui::Rounding::ZERO,
-                    fill: egui::Color32::WHITE,
-                    stroke: egui::Stroke::NONE,
-                    blur_width: 0.0,
-                    fill_texture_id: self.building.id,
-                    uv,
-                });
+                painter.add(
+                    epaint::RectShape::filled(
+                        egui::Rect::from_min_size(rect.min + v, self.building.size),
+                        0,
+                        egui::Color32::WHITE,
+                    )
+                    .with_texture(self.building.id, uv),
+                );
             }
         }
         response

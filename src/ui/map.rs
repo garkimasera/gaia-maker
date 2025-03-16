@@ -1,12 +1,19 @@
+use std::collections::BTreeMap;
+use std::sync::LazyLock;
+
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
-use geom::RectIter;
+use bevy_egui::egui::epaint;
+use bevy_egui::{EguiContexts, egui};
+use geom::{Coords, RectIter};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
+use crate::manage_planet::SwitchPlanet;
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
 use crate::screen::{Centering, InScreenTileRange};
+
+pub const H_LEGEND_IMG: u32 = 8;
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, AsRefStr, EnumIter, Resource)]
 #[strum(serialize_all = "kebab-case")]
@@ -18,7 +25,9 @@ pub enum MapLayer {
     Rainfall,
     Fertility,
     Biomass,
+    BuriedCarbon,
     Cities,
+    Structures,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Resource)]
@@ -32,6 +41,7 @@ pub fn map_window(
     planet: Res<Planet>,
     params: Res<Params>,
     color_materials: Res<ColorMaterials>,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
     mut screen: (
         Res<InScreenTileRange>,
         ResMut<OccupiedScreenSpace>,
@@ -43,6 +53,7 @@ pub fn map_window(
         Local<MapLayer>,
         Local<MapLayer>,
     ),
+    mut legend: Local<Option<Legend>>,
 ) {
     *image_update_counter += 1;
 
@@ -53,6 +64,13 @@ pub fn map_window(
     let ctx = egui_ctxs.ctx_mut();
     let m = 3;
 
+    let legend = if let Some(legend) = &*legend {
+        legend
+    } else {
+        *legend = Some(Legend::new(ctx, &color_materials, &params));
+        legend.as_ref().unwrap()
+    };
+
     let map_tex_handle = if let Some(map_tex_handle) = &mut *map_tex_handle {
         map_tex_handle
     } else {
@@ -61,7 +79,8 @@ pub fn map_window(
         map_tex_handle.as_mut().unwrap()
     };
 
-    if *image_update_counter >= 60 || *map_layer != *before_map_layer || need_update.0 {
+    let switched = er_switch_planet.read().fold(false, |_, _| true);
+    if *image_update_counter >= 60 || *map_layer != *before_map_layer || need_update.0 || switched {
         let color_image = map_img(&planet, &params, *map_layer, &color_materials, m);
         map_tex_handle.set(color_image, egui::TextureOptions::NEAREST);
         *before_map_layer = *map_layer;
@@ -94,6 +113,7 @@ pub fn map_window(
                         ew_centering.send(Centering(pos));
                     }
                 }
+                legend.ui(ui, *map_layer);
             });
         })
         .unwrap()
@@ -154,28 +174,14 @@ fn map_ui(
     )
     .translate(rect.left_top().to_vec2());
     let r2 = egui::Rect::from_two_pos(r1.min + egui::vec2(1.0, 1.0), r1.max - egui::vec2(1.0, 1.0));
-    painter.rect_stroke(r1, egui::Rounding::ZERO, stroke1);
-    painter.rect_stroke(r2, egui::Rounding::ZERO, stroke2);
-    painter.rect_stroke(
-        r1.translate(egui::vec2(w as f32, 0.0)),
-        egui::Rounding::ZERO,
-        stroke1,
-    );
-    painter.rect_stroke(
-        r2.translate(egui::vec2(w as f32, 0.0)),
-        egui::Rounding::ZERO,
-        stroke2,
-    );
-    painter.rect_stroke(
-        r1.translate(egui::vec2(-(w as f32), 0.0)),
-        egui::Rounding::ZERO,
-        stroke1,
-    );
-    painter.rect_stroke(
-        r2.translate(egui::vec2(-(w as f32), 0.0)),
-        egui::Rounding::ZERO,
-        stroke2,
-    );
+    let cr = egui::CornerRadius::ZERO;
+    let sk = egui::StrokeKind::Middle;
+    painter.rect_stroke(r1, cr, stroke1, sk);
+    painter.rect_stroke(r2, cr, stroke2, sk);
+    painter.rect_stroke(r1.translate(egui::vec2(w as f32, 0.0)), cr, stroke1, sk);
+    painter.rect_stroke(r2.translate(egui::vec2(w as f32, 0.0)), cr, stroke2, sk);
+    painter.rect_stroke(r1.translate(egui::vec2(-(w as f32), 0.0)), cr, stroke1, sk);
+    painter.rect_stroke(r2.translate(egui::vec2(-(w as f32), 0.0)), cr, stroke2, sk);
 
     response
 }
@@ -193,6 +199,7 @@ fn map_img(
         .map(|coords| {
             let x = coords.0 / m as i32;
             let y = h as i32 - 1 - coords.1 / m as i32;
+            let p = Coords::new(x, y);
 
             let color = match map_layer {
                 MapLayer::Biome => {
@@ -200,23 +207,46 @@ fn map_img(
                     params.biomes[&biome].color
                 }
                 MapLayer::Height => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Height)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Height, params)
                 }
                 MapLayer::AirTemperature => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::AirTemperature)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::AirTemperature, params)
                 }
                 MapLayer::Rainfall => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Rainfall)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Rainfall, params)
                 }
                 MapLayer::Fertility => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Fertility)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Fertility, params)
                 }
                 MapLayer::Biomass => {
-                    color_materials.get_rgb(planet, (x, y).into(), OverlayLayerKind::Biomass)
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::Biomass, params)
+                }
+                MapLayer::BuriedCarbon => {
+                    color_materials.get_rgb(planet, p, OverlayLayerKind::BuriedCarbon, params)
                 }
                 MapLayer::Cities => {
                     if let Some(Structure::Settlement(settlement)) = &planet.map[(x, y)].structure {
                         CITY_COLORS[settlement.age as usize]
+                    } else if planet.map[(x, y)].biome.is_land() {
+                        params.biomes[&Biome::Rock].color
+                    } else {
+                        params.biomes[&Biome::Ocean].color
+                    }
+                }
+                MapLayer::Structures => {
+                    if let Some(kind) = planet.map[(x, y)]
+                        .structure
+                        .as_ref()
+                        .map(|s| s.kind())
+                        .and_then(|kind| {
+                            if matches!(kind, StructureKind::Settlement) {
+                                None
+                            } else {
+                                Some(kind)
+                            }
+                        })
+                    {
+                        STRUCTURE_COLORS[&kind]
                     } else if planet.map[(x, y)].biome.is_land() {
                         params.biomes[&Biome::Rock].color
                     } else {
@@ -234,6 +264,131 @@ fn map_img(
     }
 }
 
+pub struct Legend {
+    gradation_images: Vec<(egui::TextureHandle, egui::load::SizedTexture)>,
+    layout: egui::Layout,
+    biome_colors: Vec<(Biome, [u8; 3])>,
+}
+
+impl Legend {
+    fn new(ctx: &mut egui::Context, color_materials: &ColorMaterials, params: &Params) -> Self {
+        let h = H_LEGEND_IMG;
+
+        let gradation_images = color_materials
+            .color_list()
+            .iter()
+            .enumerate()
+            .map(|(i, colors)| {
+                let w = colors.len() as u32;
+                let pixels = RectIter::new((0, 0), (w - 1, h - 1))
+                    .map(|coords| {
+                        let color = colors[coords.0 as usize].to_srgba();
+                        egui::Color32::from_rgba_unmultiplied(
+                            (color.red * 255.0) as u8,
+                            (color.green * 255.0) as u8,
+                            (color.blue * 255.0) as u8,
+                            255,
+                        )
+                    })
+                    .collect();
+                let image = egui::ColorImage {
+                    size: [w as usize, h as usize],
+                    pixels,
+                };
+                let texture_handle = ctx.load_texture(
+                    format!("legend_gradation_image_{}", i),
+                    image,
+                    egui::TextureOptions::NEAREST,
+                );
+                let sized_texture = egui::load::SizedTexture::from_handle(&texture_handle);
+                (texture_handle, sized_texture)
+            })
+            .collect();
+
+        let layout = egui::Layout::from_main_dir_and_cross_align(
+            egui::Direction::LeftToRight,
+            egui::Align::Center,
+        )
+        .with_main_wrap(true);
+
+        // Biome order in map legend
+        let biomes = [
+            Biome::Rock,
+            Biome::Ocean,
+            Biome::IceSheet,
+            Biome::SeaIce,
+            Biome::Desert,
+            Biome::Tundra,
+            Biome::Grassland,
+            Biome::BorealForest,
+            Biome::TemperateForest,
+            Biome::TropicalRainforest,
+        ];
+        let biome_colors: Vec<_> = biomes
+            .iter()
+            .map(|biome| (*biome, params.biomes[biome].color))
+            .collect();
+
+        Self {
+            gradation_images,
+            layout,
+            biome_colors,
+        }
+    }
+
+    fn ui(&self, ui: &mut egui::Ui, map_layer: MapLayer) {
+        ui.add_space(3.0);
+        match map_layer {
+            MapLayer::AirTemperature
+            | MapLayer::Rainfall
+            | MapLayer::Fertility
+            | MapLayer::Biomass
+            | MapLayer::BuriedCarbon => {
+                ui_high_low(ui, self.gradation_images[0].1);
+            }
+            MapLayer::Height => {
+                ui_high_low(ui, self.gradation_images[1].1);
+            }
+            MapLayer::Biome => {
+                let legend_items = self
+                    .biome_colors
+                    .iter()
+                    .map(|&(biome, color)| (color, t!(biome)));
+                self.ui_color_legend(ui, legend_items);
+            }
+            MapLayer::Cities => {
+                let legend_items =
+                    CivilizationAge::iter().map(|age| (CITY_COLORS[age as usize], t!("age", age)));
+                self.ui_color_legend(ui, legend_items);
+            }
+            MapLayer::Structures => {
+                let legend_items = STRUCTURE_COLORS.iter().map(|(kind, color)| (*color, t!(kind)));
+                self.ui_color_legend(ui, legend_items);
+            }
+        }
+    }
+
+    fn ui_color_legend(&self, ui: &mut egui::Ui, items: impl Iterator<Item = ([u8; 3], String)>) {
+        ui.allocate_ui(egui::vec2(ui.available_size_before_wrap().x, 0.0), |ui| {
+            ui.with_layout(self.layout, |ui| {
+                for (color, s) in items {
+                    ui.add(ColorLegend::new(color, s));
+                }
+            })
+        });
+    }
+}
+
+fn ui_high_low(ui: &mut egui::Ui, texture: egui::load::SizedTexture) {
+    ui.vertical_centered(|ui| {
+        ui.horizontal(|ui| {
+            ui.label(t!("low"));
+            ui.image(texture);
+            ui.label(t!("high"));
+        });
+    });
+}
+
 const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
     [255, 0, 0],
     [255, 92, 0],
@@ -242,3 +397,77 @@ const CITY_COLORS: [[u8; 3]; CivilizationAge::LEN] = [
     [0, 204, 255],
     [190, 0, 255],
 ];
+
+static STRUCTURE_COLORS: LazyLock<BTreeMap<StructureKind, [u8; 3]>> = LazyLock::new(|| {
+    let mut map = BTreeMap::new();
+    map.insert(StructureKind::OxygenGenerator, [0, 128, 255]);
+    map.insert(StructureKind::Rainmaker, [0, 255, 255]);
+    map.insert(StructureKind::FertilizationPlant, [255, 160, 0]);
+    map.insert(StructureKind::Heater, [255, 0, 0]);
+    map.insert(StructureKind::CarbonCapturer, [192, 192, 192]);
+    map.insert(StructureKind::GiftTower, [190, 0, 255]);
+    map
+});
+
+struct ColorLegend {
+    color: egui::Color32,
+    text: egui::WidgetText,
+}
+
+impl ColorLegend {
+    fn new(color: [u8; 3], text: impl Into<egui::WidgetText>) -> Self {
+        Self {
+            color: egui::Color32::from_rgb(color[0], color[1], color[2]),
+            text: text.into(),
+        }
+    }
+}
+
+impl egui::Widget for ColorLegend {
+    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        let space = 3.0;
+        let left_space = 2.0;
+        let layout_job =
+            self.text
+                .into_layout_job(ui.style(), egui::FontSelection::Default, egui::Align::Min);
+        let galley = ui.fonts(|fonts| fonts.layout_job(layout_job));
+
+        let icon_size = egui::Vec2::new(H_LEGEND_IMG as f32, H_LEGEND_IMG as f32);
+        let galley_size = galley.rect.size();
+        let desired_size = egui::Vec2::new(
+            icon_size.x + galley_size.x + space,
+            icon_size.y.max(galley_size.y) + left_space,
+        );
+
+        let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
+        response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::WidgetType::Label, ui.is_enabled(), galley.text())
+        });
+
+        let (icon_pos_y, galley_pos_y) = if icon_size.y > galley_size.y {
+            (0.0, (icon_size.y - galley_size.y) / 2.0)
+        } else {
+            ((galley_size.y - icon_size.y) / 2.0, 0.0)
+        };
+
+        let icon_rect = egui::Rect::from_min_size(egui::Pos2::new(0.0, icon_pos_y), icon_size)
+            .translate(rect.left_top().to_vec2());
+        let galley_pos = rect.left_top() + egui::Vec2::new(icon_size.x + space, galley_pos_y);
+
+        if ui.is_rect_visible(response.rect) {
+            let painter = ui.painter();
+            painter.add(epaint::RectShape::filled(
+                icon_rect,
+                egui::CornerRadius::ZERO,
+                self.color,
+            ));
+            painter.add(epaint::TextShape::new(
+                galley_pos,
+                galley,
+                ui.style().visuals.text_color(),
+            ));
+        }
+        response
+    }
+}

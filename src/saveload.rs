@@ -1,95 +1,106 @@
+use std::collections::{BTreeSet, VecDeque};
 use std::io::Read;
 
 use anyhow::Result;
 use byteorder::ReadBytesExt;
 use bytes::BufMut;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::planet::Planet;
-pub use crate::platform::N_SAVE_FILES;
+use crate::{conf::Conf, planet::Planet, tutorial::TutorialState};
 
 pub const SAVE_FILE_EXTENSION: &str = "planet";
 
 const GAME_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub struct SaveFileList(Vec<Option<SaveFile>>);
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct SavedTime(String);
 
-impl SaveFileList {
-    pub fn name(&self, i: usize) -> Option<&str> {
-        self.0[i].as_ref().map(|save_file| save_file.name.as_ref())
-    }
+#[derive(Default, Debug)]
+pub struct SaveState {
+    pub current_save_sub_dir: String,
+    pub dirs: VecDeque<(SavedTime, String)>, // Latest saved time and directory name list
+    pub manual_save_files: BTreeSet<u32>,
+    pub auto_save_files: BTreeSet<u32>,
+    pub save_file_metadata: SaveFileMetadata,
+}
 
-    pub fn saved_time(&self, i: usize) -> Option<&str> {
-        self.0[i].as_ref().map(|save_file| save_file.time.as_ref())
+impl SaveState {
+    pub fn change_current(&mut self, name: &str, new_sub_dir: bool) {
+        log::info!(
+            "change current save sub dir to \"{}\", new = {}",
+            name,
+            new_sub_dir,
+        );
+        self.current_save_sub_dir = name.to_owned();
+        self.save_file_metadata = SaveFileMetadata::default();
+        self.manual_save_files.clear();
+        self.auto_save_files.clear();
+
+        if new_sub_dir {
+            return;
+        }
+
+        if !name.is_empty() {
+            for item in crate::saveload::read_save_sub_dir(name).0 {
+                if item.auto {
+                    self.auto_save_files.insert(item.n);
+                } else {
+                    self.manual_save_files.insert(item.n);
+                }
+            }
+        }
     }
 }
 
-pub fn save_to(slot: usize, planet: &Planet, save_file_metadata: &SaveFileMetadata) -> Result<()> {
+pub fn save_to(planet: &Planet, save_state: &mut SaveState, auto: bool) -> Result<(String, u32)> {
     let planet_data = rmp_serde::to_vec(planet)?;
 
-    let mut save_file_metadata = save_file_metadata.clone();
-    if slot != 0 {
-        save_file_metadata.manual_slot = None;
+    let bytes = SaveFile::new(
+        planet_data,
+        &planet.basics.name,
+        save_state.save_file_metadata.clone(),
+    )
+    .to_bytes();
+
+    let n = if auto {
+        save_state.auto_save_files.last().copied().unwrap_or_default() + 1
+    } else {
+        save_state.manual_save_files.last().copied().unwrap_or_default() + 1
+    };
+    let file_name = save_file_name(auto, n);
+
+    log::info!("save {}/{}", save_state.current_save_sub_dir, file_name);
+
+    crate::platform::write_savefile(&save_state.current_save_sub_dir, &file_name, &bytes)?;
+
+    if auto {
+        save_state.auto_save_files.insert(n);
+    } else {
+        save_state.manual_save_files.insert(n);
     }
 
-    log::info!("save to slot {}", slot);
-
-    let bytes =
-        SaveFile::new(planet_data, &planet.basics.name, save_file_metadata.clone()).to_bytes();
-    crate::platform::savefile_write(&format!("{:02}.{}", slot, SAVE_FILE_EXTENSION), &bytes)?;
-
-    Ok(())
+    Ok((save_state.current_save_sub_dir.clone(), n))
 }
 
-pub fn load_from(slot: usize) -> Result<(Planet, SaveFileMetadata)> {
-    let data = SaveFile::from_bytes(&crate::platform::savefile_read(&format!(
-        "{:02}.{}",
-        slot, SAVE_FILE_EXTENSION
-    ))?)?;
+pub fn load_from(save_state: &SaveState, auto: bool, n: u32) -> Result<(Planet, SaveFileMetadata)> {
+    let file_name = save_file_name(auto, n);
+    let reader = crate::platform::read_savefile(&save_state.current_save_sub_dir, &file_name)?;
+    let data = SaveFile::from_reader(reader, false)?;
     log::info!(
-        "load save from slot {} version={} time=\"{}\"",
-        slot,
+        "load save from {} version={} time=\"{}\"",
+        file_name,
         data.version,
-        data.time
+        data.time.0
     );
     let planet = rmp_serde::from_slice(&data.planet_data)?;
-    let mut metadata = data.metadata;
-    if metadata.manual_slot.is_none() && slot != 0 {
-        metadata.manual_slot = Some(slot);
-    }
-    Ok((planet, metadata))
+    Ok((planet, data.metadata))
 }
 
-pub fn load_save_file_list() -> SaveFileList {
-    SaveFileList(
-        (0..=N_SAVE_FILES)
-            .map(|i| {
-                match crate::platform::savefile_read(&format!("{:02}.{}", i, SAVE_FILE_EXTENSION)) {
-                    Ok(data) => match SaveFile::from_bytes(&data) {
-                        Ok(save_file) => Some(save_file),
-                        Err(e) => {
-                            log::warn!("slot {} save data broken: {}", i, e);
-                            None
-                        }
-                    },
-                    Err(e) => {
-                        if let Some(e) = e.downcast_ref::<std::io::Error>() {
-                            if e.kind() == std::io::ErrorKind::NotFound {
-                                return None;
-                            }
-                        }
-                        log::warn!("{}", e);
-                        None
-                    }
-                }
-            })
-            .collect(),
-    )
-}
-
-struct SaveFile {
+pub struct SaveFile {
     version: String,
-    time: String,
+    time: SavedTime,
     name: String,
     metadata: SaveFileMetadata,
     planet_data: Vec<u8>,
@@ -97,23 +108,17 @@ struct SaveFile {
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct SaveFileMetadata {
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        with = "serde_with::rust::unwrap_or_skip"
-    )]
-    pub manual_slot: Option<usize>,
     #[serde(default)]
     pub debug_mode_enabled: bool,
+    #[serde(default)]
+    pub tutorial_state: Option<TutorialState>,
 }
 
 impl SaveFile {
     fn new(planet_data: Vec<u8>, name: &str, metadata: SaveFileMetadata) -> Self {
-        let time = chrono::Local::now().to_string();
-        let time = time.split_once('.').unwrap().0.into(); // Get "YYYY-MM-DD hh:mm:ss"
         Self {
             version: GAME_VERSION.into(),
-            time,
+            time: SavedTime::now(),
             name: name.into(),
             metadata,
             planet_data,
@@ -126,8 +131,8 @@ impl SaveFile {
 
         buf.put_u8(self.version.len().try_into().unwrap());
         buf.put(self.version.as_bytes());
-        buf.put_u8(self.time.len().try_into().unwrap());
-        buf.put(self.time.as_bytes());
+        buf.put_u8(self.time.0.len().try_into().unwrap());
+        buf.put(self.time.0.as_bytes());
         buf.put_u8(self.name.len().try_into().unwrap());
         buf.put(self.name.as_bytes());
         buf.put_u16(metadata.len().try_into().unwrap());
@@ -137,30 +142,33 @@ impl SaveFile {
         buf
     }
 
-    fn from_bytes(data: &[u8]) -> Result<Self> {
-        let mut data = std::io::Cursor::new(data);
-
-        let len = data.read_u8()?;
+    fn from_reader<R: Read>(mut reader: R, header_only: bool) -> Result<Self> {
+        let len = reader.read_u8()?;
         let mut version = vec![0; len as usize];
-        data.read_exact(&mut version)?;
+        reader.read_exact(&mut version)?;
         let version = String::from_utf8(version)?;
 
-        let len = data.read_u8()?;
+        let len = reader.read_u8()?;
         let mut time = vec![0; len as usize];
-        data.read_exact(&mut time)?;
-        let time = String::from_utf8(time)?;
+        reader.read_exact(&mut time)?;
+        let time = SavedTime(String::from_utf8(time)?);
 
-        let len = data.read_u8()?;
+        let len = reader.read_u8()?;
         let mut name = vec![0; len as usize];
-        data.read_exact(&mut name)?;
+        reader.read_exact(&mut name)?;
         let name = String::from_utf8(name)?;
 
-        let len = data.read_u16::<byteorder::BigEndian>()?;
+        let len = reader.read_u16::<byteorder::BigEndian>()?;
         let mut metadata = vec![0; len as usize];
-        data.read_exact(&mut metadata)?;
+        reader.read_exact(&mut metadata)?;
 
-        let mut planet_data = Vec::new();
-        data.read_to_end(&mut planet_data)?;
+        let planet_data = if header_only {
+            Vec::new()
+        } else {
+            let mut planet_data = Vec::new();
+            reader.read_to_end(&mut planet_data)?;
+            planet_data
+        };
 
         let metadata = match rmp_serde::from_slice(&metadata) {
             Ok(metadata) => metadata,
@@ -177,5 +185,159 @@ impl SaveFile {
             metadata,
             planet_data,
         })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SaveSubDirItem {
+    pub time: SavedTime,
+    pub auto: bool,
+    pub n: u32,
+}
+
+static RE_SAVE_FILE: std::sync::LazyLock<Regex> =
+    std::sync::LazyLock::new(|| Regex::new(r"(autosave)?(\d+)\..+").unwrap());
+
+pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
+    let mut planet_name = String::new();
+    let mut list = Vec::new();
+
+    let save_sub_dir_files = match crate::platform::save_sub_dir_files(sub_dir_name) {
+        Ok(save_sub_dir_files) => save_sub_dir_files,
+        Err(e) => {
+            log::warn!("{:?}", e);
+            return (Vec::new(), planet_name);
+        }
+    };
+
+    let ext = format!(".{}", SAVE_FILE_EXTENSION);
+    for file_name in save_sub_dir_files {
+        if !file_name.ends_with(&ext) {
+            continue;
+        }
+
+        let Some(caps) = RE_SAVE_FILE.captures(&file_name) else {
+            log::warn!("invalid save file name: {}", file_name);
+            continue;
+        };
+
+        let reader = match crate::platform::read_savefile(sub_dir_name, &file_name) {
+            Ok(save_file_data) => save_file_data,
+            Err(e) => {
+                log::warn!("cannot read {}: {:?}", file_name, e);
+                continue;
+            }
+        };
+        let save_file = match SaveFile::from_reader(reader, true) {
+            Ok(save_file) => save_file,
+            Err(e) => {
+                log::warn!("cannot load {}: {:?}", file_name, e);
+                continue;
+            }
+        };
+
+        if planet_name.is_empty() {
+            planet_name = save_file.name.clone();
+        }
+
+        let auto = caps
+            .get(1)
+            .map(|prefix| prefix.as_str() == "autosave")
+            .unwrap_or_default();
+        let n: u32 = caps.get(2).unwrap().as_str().parse().unwrap();
+
+        list.push(SaveSubDirItem {
+            time: save_file.time,
+            auto,
+            n,
+        });
+    }
+
+    list.sort_by_key(|item| std::cmp::Reverse(item.time.clone()));
+
+    (list, planet_name)
+}
+
+pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
+    let mut max = 0;
+    let mut dup = false;
+    let prefix = format!("{} (", name);
+
+    for (_, s) in &save_state.dirs {
+        dup |= *s == name;
+        if let Some(s) = s.strip_prefix(&prefix) {
+            if let Some(s) = s.strip_suffix(")") {
+                if let Ok(i) = s.parse::<u32>() {
+                    if i > max {
+                        max = i;
+                    }
+                }
+            }
+        }
+    }
+
+    if dup {
+        format!("{} ({})", name, max + 1)
+    } else {
+        name
+    }
+}
+
+pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
+    if save_state.auto_save_files.len() > conf.autosave_max_files {
+        if let Some(min) = save_state.auto_save_files.pop_first() {
+            let file_name = save_file_name(true, min);
+            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+            if let Err(e) =
+                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+            {
+                log::warn!("cannot delete save file: {:?}", e);
+            }
+        }
+    }
+    if save_state.manual_save_files.len() > conf.manual_max_files {
+        if let Some(min) = save_state.manual_save_files.pop_first() {
+            let file_name = save_file_name(false, min);
+            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+            if let Err(e) =
+                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+            {
+                log::warn!("cannot delete save file: {:?}", e);
+            }
+        }
+    }
+}
+
+pub fn save_file_name(auto: bool, n: u32) -> String {
+    if auto {
+        format!("autosave{:06}.{}", n, SAVE_FILE_EXTENSION)
+    } else {
+        format!("{:06}.{}", n, SAVE_FILE_EXTENSION)
+    }
+}
+
+impl SavedTime {
+    pub fn now() -> Self {
+        let time = chrono::Local::now().to_string();
+        Self(time.split_once('.').unwrap().0.into()) // Get "YYYY-MM-DD hh:mm:ss"
+    }
+}
+
+impl std::fmt::Display for SavedTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<std::time::SystemTime> for SavedTime {
+    fn from(value: std::time::SystemTime) -> Self {
+        let time: chrono::DateTime<chrono::Local> = value.into();
+        Self::from(time)
+    }
+}
+
+impl From<chrono::DateTime<chrono::Local>> for SavedTime {
+    fn from(value: chrono::DateTime<chrono::Local>) -> Self {
+        Self(value.format("%Y-%m-%d %H:%M:%S").to_string())
     }
 }

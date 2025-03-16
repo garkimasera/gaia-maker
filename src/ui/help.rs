@@ -1,10 +1,11 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
-use super::{label_with_icon, EguiTextures, WindowsOpenState};
+use super::{UiTextures, WindowsOpenState, misc::label_with_icon};
 use crate::planet::{
-    BuildingAttrs, BuildingEffect, Cost, Params, SpaceBuildingKind, StructureKind, TileEventKind,
+    Biome, BuildingAttrs, BuildingEffect, CivilizationAge, Cost, EnergySource, GasKind, Params,
+    SpaceBuildingKind, StructureKind, TileEventKind,
 };
 use crate::screen::OccupiedScreenSpace;
 use crate::text::WithUnitDisplay;
@@ -17,31 +18,49 @@ use std::sync::LazyLock;
 #[strum_discriminants(derive(PartialOrd, Ord, Hash, EnumIter, AsRefStr))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum HelpItem {
-    Basics(BasicsItem),
+    Basics(&'static str),
     Structures(StructureKind),
     SpaceBuildings(SpaceBuildingKind),
-    TileEvent(TileEventKind),
+    TileEvents(TileEventKind),
+    Biomes(Biome),
+    Atmosphere(GasKind),
+    CivilizationAges(CivilizationAge),
+    EnergySources(EnergySource),
+    Glossary(&'static str),
 }
 
 impl AsRef<str> for HelpItem {
     fn as_ref(&self) -> &str {
         match self {
-            HelpItem::Basics(basic_items) => basic_items.as_ref(),
+            HelpItem::Basics(basic_items) => basic_items,
             HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
             HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
-            HelpItem::TileEvent(tile_event_kind) => tile_event_kind.as_ref(),
+            HelpItem::TileEvents(tile_event_kind) => tile_event_kind.as_ref(),
+            HelpItem::Biomes(biome) => biome.as_ref(),
+            HelpItem::Atmosphere(gas_kind) => gas_kind.as_ref(),
+            HelpItem::CivilizationAges(age) => match age {
+                CivilizationAge::Stone => "age/stone",
+                CivilizationAge::Bronze => "age/bronze",
+                CivilizationAge::Iron => "age/iron",
+                CivilizationAge::Industrial => "age/industrial",
+                CivilizationAge::Atomic => "age/atomic",
+                CivilizationAge::EarlySpace => "age/early-space",
+            },
+            HelpItem::EnergySources(energy_source) => match energy_source {
+                EnergySource::Biomass => "energy_source/biomass",
+                EnergySource::WindSolar => "energy_source/wind-solar",
+                EnergySource::HydroGeothermal => "energy_source/hydro-geothermal",
+                EnergySource::FossilFuel => "energy_source/fossil-fuel",
+                EnergySource::Nuclear => "energy_source/nuclear",
+                EnergySource::Gift => "energy_source/gift",
+            },
+            HelpItem::Glossary(word) => word,
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
-#[strum(serialize_all = "kebab-case")]
-pub enum BasicsItem {
-    #[default]
-    Concept,
-    Player,
-    Terraforming,
-}
+const BASIC_ITEMS: &[&str] = &["concept", "player", "terraforming"];
+const GLOSSARY_ITEMS: &[&str] = &["fertility"];
 
 #[allow(clippy::derivable_impls)]
 impl Default for ItemGroup {
@@ -52,7 +71,7 @@ impl Default for ItemGroup {
 
 impl Default for HelpItem {
     fn default() -> Self {
-        HelpItem::Basics(BasicsItem::Concept)
+        HelpItem::Basics("concept")
     }
 }
 
@@ -67,7 +86,7 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
 
     map.insert(
         ItemGroup::Basics,
-        BasicsItem::iter().map(HelpItem::Basics).collect(),
+        BASIC_ITEMS.iter().map(|item| HelpItem::Basics(item)).collect(),
     );
     map.insert(
         ItemGroup::Structures,
@@ -88,8 +107,33 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
             .collect(),
     );
     map.insert(
-        ItemGroup::TileEvent,
-        TileEventKind::iter().map(HelpItem::TileEvent).collect(),
+        ItemGroup::TileEvents,
+        TileEventKind::iter().map(HelpItem::TileEvents).collect(),
+    );
+    map.insert(
+        ItemGroup::Biomes,
+        Biome::iter().map(HelpItem::Biomes).collect(),
+    );
+    map.insert(
+        ItemGroup::Atmosphere,
+        GasKind::iter().map(HelpItem::Atmosphere).collect(),
+    );
+    map.insert(
+        ItemGroup::CivilizationAges,
+        CivilizationAge::iter()
+            .map(HelpItem::CivilizationAges)
+            .collect(),
+    );
+    map.insert(
+        ItemGroup::EnergySources,
+        EnergySource::iter().map(HelpItem::EnergySources).collect(),
+    );
+    map.insert(
+        ItemGroup::Glossary,
+        GLOSSARY_ITEMS
+            .iter()
+            .map(|item| HelpItem::Glossary(item))
+            .collect(),
     );
 
     map
@@ -99,7 +143,7 @@ pub fn help_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    textures: Res<EguiTextures>,
+    textures: Res<UiTextures>,
     params: Res<Params>,
     mut current_item: Local<HelpItem>,
 ) {
@@ -143,7 +187,7 @@ pub fn help_window(
 }
 
 impl HelpItem {
-    pub fn ui(&self, ui: &mut egui::Ui, textures: &EguiTextures, params: &Params) {
+    pub fn ui(&self, ui: &mut egui::Ui, textures: &UiTextures, params: &Params) {
         if let Some(building_attrs) = match self {
             HelpItem::Structures(kind) => Some(&params.structures[kind].building),
             HelpItem::SpaceBuildings(kind) => Some(&params.space_buildings[kind]),
@@ -151,7 +195,7 @@ impl HelpItem {
         } {
             ui_building_attr(ui, textures, building_attrs);
             ui.separator();
-        } else if let HelpItem::TileEvent(kind) = self {
+        } else if let HelpItem::TileEvents(kind) = self {
             if let Some(cost) = &params.event.tile_event_costs.get(kind) {
                 let (icon, s) = match **cost {
                     Cost::Material(value) => (
@@ -173,7 +217,7 @@ impl HelpItem {
     }
 }
 
-fn ui_building_attr(ui: &mut egui::Ui, textures: &EguiTextures, attrs: &BuildingAttrs) {
+fn ui_building_attr(ui: &mut egui::Ui, textures: &UiTextures, attrs: &BuildingAttrs) {
     // Cost
     if attrs.cost > 0.0 {
         ui.label(egui::RichText::new(t!("cost")).strong());
@@ -185,23 +229,23 @@ fn ui_building_attr(ui: &mut egui::Ui, textures: &EguiTextures, attrs: &Building
         );
     }
     // Upkeep
-    if attrs.energy < 0.0 {
+    if attrs.power < 0.0 {
         ui.label(egui::RichText::new(t!("upkeep")).strong());
         label_with_icon(
             ui,
             textures,
-            "ui/icon-energy",
-            WithUnitDisplay::Energy(-attrs.energy).to_string(),
+            "ui/icon-power",
+            WithUnitDisplay::Power(-attrs.power).to_string(),
         );
     }
     // Produce
-    if attrs.energy > 0.0 {
+    if attrs.power > 0.0 {
         ui.label(egui::RichText::new(t!("produce")).strong());
         label_with_icon(
             ui,
             textures,
-            "ui/icon-energy",
-            WithUnitDisplay::Energy(attrs.energy).to_string(),
+            "ui/icon-power",
+            WithUnitDisplay::Power(attrs.power).to_string(),
         );
     } else if let Some(BuildingEffect::ProduceMaterial { mass }) = &attrs.effect {
         ui.label(egui::RichText::new(t!("produce")).strong());

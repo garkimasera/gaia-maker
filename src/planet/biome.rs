@@ -1,5 +1,6 @@
 use geom::{CDistRangeIter, Direction};
 use rand::Rng;
+use rayon::prelude::*;
 
 use super::misc::linear_interpolation;
 use super::*;
@@ -8,6 +9,7 @@ const FERTILITY_MAX: f32 = 100.0;
 const FERTILITY_MIN: f32 = 0.0;
 
 pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let size = planet.map.size();
     let map_iter_idx = planet.map.iter_idx();
 
     // Fertility
@@ -91,6 +93,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     );
 
     // Biomass
+    calc_biomass_consumption_dist_by_settlements(planet, sim);
     let mut sum_biomass = 0.0;
     let mut sum_buried_carbon = 0.0;
     let density_to_mass = sim.biomass_density_to_mass();
@@ -112,33 +115,48 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     ));
     let max_biomass_density_planet_factor = calc_max_biomass_density_planet_factor(planet, params);
 
-    for p in map_iter_idx {
+    // Calculate biomass diff map
+    let par_iter = sim.diff_biomass.par_iter_mut().enumerate();
+    par_iter.for_each(|(i, diff_biomass)| {
+        let p = Coords::from_index_size(i, size);
         let max = calc_tile_max_biomass_density(
             planet,
-            sim,
+            &sim.humidity,
             params,
             p,
             max_biomass_density_planet_factor,
         );
-        let biomass = &mut planet.map[p].biomass;
-        let diff = max - *biomass;
-        let v = if diff > 0.0 && speed_factor_by_atmo > 0.0 {
+        let biomass = planet.map[p].biomass;
+        let diff_to_max = max - biomass;
+        let diff = if diff_to_max > 0.0 && speed_factor_by_atmo > 0.0 {
             params.sim.base_biomass_increase_speed * speed_factor_by_atmo
         } else {
-            diff * params.sim.base_biomass_decrease_speed
+            diff_to_max * params.sim.base_biomass_decrease_speed
         };
+        let diff = (diff - sim.biomass_consumption[p] / density_to_mass).max(-biomass);
+        let diff = if diff > 0.0 && sim.domain[p].is_some() {
+            diff * params.sim.biomass_increase_speed_factor_by_settlements
+        } else {
+            diff
+        };
+        *diff_biomass = diff;
+    });
 
-        let carbon_weight = density_to_mass * v.abs();
-        if v > 0.0 {
+    // Apply biomass diff and carbon exchange with atmosphere
+    for p in map_iter_idx {
+        let diff = sim.diff_biomass[p];
+        let biomass = &mut planet.map[p].biomass;
+        let carbon_weight = density_to_mass * diff.abs();
+        if diff > 0.0 {
             if planet.atmo.remove_carbon(carbon_weight) {
-                *biomass += v;
+                *biomass += diff;
             }
             sum_biomass += *biomass as f64;
         } else {
             planet
                 .atmo
                 .release_carbon(carbon_weight * (1.0 - biomass_to_buried_carbon_ratio));
-            *biomass += v;
+            *biomass += diff;
             sum_biomass += *biomass as f64;
             planet.map[p].buried_carbon += carbon_weight * biomass_to_buried_carbon_ratio;
         }
@@ -151,11 +169,9 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     process_biome_transition(planet, sim, params);
 }
 
-fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    let rng = &mut sim.rng;
-
-    for p in planet.map.iter_idx() {
-        let tile = &planet.map[p];
+fn process_biome_transition(planet: &mut Planet, sim: &Sim, params: &Params) {
+    planet.map.par_iter_mut().for_each(|tile| {
+        let mut rng = misc::get_rng();
         let current_biome = tile.biome;
         let current_priority = if check_requirements(tile, current_biome, params) {
             params.biomes[&current_biome].priority
@@ -176,18 +192,18 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
                 } else {
                     1.0 / params.biomes[&next_biome].mean_transition_time
                 };
-                if rng.gen_bool(transition_probability as f64) {
-                    planet.map[p].biome = next_biome;
+                if rng.random_bool(transition_probability as f64) {
+                    tile.biome = next_biome;
                 }
             }
-            continue;
+            return;
         }
 
-        if tile.ice >= params.sim.ice_thickness_of_ice_field {
-            if current_biome != Biome::IceField {
-                planet.map[p].biome = Biome::IceField;
+        if tile.ice >= params.sim.ice_thickness_of_ice_sheet {
+            if current_biome != Biome::IceSheet {
+                tile.biome = Biome::IceSheet;
             }
-            continue;
+            return;
         }
 
         let Some((_, next_biome)) = Biome::iter()
@@ -204,24 +220,25 @@ fn process_biome_transition(planet: &mut Planet, sim: &mut Sim, params: &Params)
             })
             .max_by_key(|(priority, _)| *priority)
         else {
-            continue;
+            return;
         };
 
-        let transition_probability = if planet.map[p].event.is_some() {
+        // Specific tile events cause biome transition
+        let transition_probability = if tile.tile_events.get(TileEventKind::Fire).is_some() {
             1.0
         } else if sim.before_start {
             params.sim.before_start_biome_transition_probability
         } else {
             1.0 / params.biomes[&next_biome].mean_transition_time
         };
-        if rng.gen_bool(transition_probability as f64) {
-            planet.map[p].biome = next_biome;
+        if rng.random_bool(transition_probability as f64) {
+            tile.biome = next_biome;
         }
-    }
+    });
 }
 
 fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
-    if biome == Biome::IceField && tile.ice <= params.sim.ice_thickness_of_ice_field {
+    if biome == Biome::IceSheet && tile.ice <= params.sim.ice_thickness_of_ice_sheet {
         return false;
     }
 
@@ -239,7 +256,7 @@ fn check_requirements(tile: &Tile, biome: Biome, params: &Params) -> bool {
 
 fn calc_tile_max_biomass_density(
     planet: &Planet,
-    sim: &Sim,
+    humidity: &Array2d<f32>,
     params: &Params,
     p: Coords,
     planet_factor: f32,
@@ -248,15 +265,22 @@ fn calc_tile_max_biomass_density(
         &params.sim.max_biomass_fertility_table,
         planet.map[p].fertility,
     );
-    let max_by_humidity =
-        linear_interpolation(&params.sim.max_biomass_humidity_table, sim.humidity[p]);
+    let max_by_humidity = linear_interpolation(&params.sim.max_biomass_humidity_table, humidity[p]);
     let land_or_sea_factor = if planet.map[p].biome.is_land() {
         1.0
     } else {
         params.sim.sea_biomass_factor
     };
+    let max_by_pop =
+        if let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p].structure {
+            linear_interpolation(&params.sim.max_biomass_pop_table, pop)
+        } else {
+            f32::MAX
+        };
 
-    (max_by_fertility * planet_factor * land_or_sea_factor).min(max_by_humidity)
+    (max_by_fertility * planet_factor * land_or_sea_factor)
+        .min(max_by_humidity)
+        .min(max_by_pop)
 }
 
 fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f32 {
@@ -264,4 +288,36 @@ fn calc_max_biomass_density_planet_factor(planet: &Planet, params: &Params) -> f
         &params.sim.max_biomass_factor_o2_table,
         planet.atmo.partial_pressure(GasKind::Oxygen),
     )
+}
+
+fn calc_biomass_consumption_dist_by_settlements(planet: &Planet, sim: &mut Sim) {
+    sim.biomass_consumption.fill(0.0);
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(Settlement {
+            biomass_consumption,
+            ..
+        })) = planet.map[p].structure
+        else {
+            continue;
+        };
+
+        // Consume biomass from a tile that has maximum biomass
+        let mut p_max_biomass = p;
+        let mut total_biomass = planet.map[p].biomass;
+        let mut max_biomass = total_biomass;
+        for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+            if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
+                if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
+                    let biomass = planet.map[p_adj].biomass;
+                    if biomass > max_biomass {
+                        max_biomass = biomass;
+                        total_biomass += biomass;
+                        p_max_biomass = p_adj;
+                    }
+                }
+            }
+        }
+        sim.biomass_consumption[p_max_biomass] += biomass_consumption;
+    }
 }

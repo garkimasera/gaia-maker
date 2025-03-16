@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use super::{misc::SymmetricalLinearDist, Biome, InitialCondition, Params, Planet, Sim};
+use super::{Biome, InitialCondition, Params, Planet, Sim, misc::SymmetricalLinearDist};
 
 pub fn apply_initial_condition(
     planet: &mut Planet,
@@ -14,7 +14,7 @@ pub fn apply_initial_condition(
                 let t = 250.0;
                 let tile = &mut planet.map[p];
                 if tile.biome.is_land() {
-                    tile.biome = Biome::IceField;
+                    tile.biome = Biome::IceSheet;
                 } else {
                     tile.biome = Biome::SeaIce;
                     tile.sea_temp = t;

@@ -39,10 +39,10 @@ pub fn update(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         } else {
             None
         };
-        if attrs.energy > 0.0 {
-            planet.res.energy += attrs.energy * n as f32;
+        if attrs.power > 0.0 {
+            planet.res.power += attrs.power * n as f32;
         } else {
-            planet.res.used_energy += -attrs.energy * n as f32;
+            planet.res.used_power += -attrs.power * n as f32;
         }
 
         match &attrs.effect {
@@ -82,7 +82,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 mass,
                 limit_atm,
             } => {
-                if planet.atmo.partial_pressure(GasKind::Oxygen) < *limit_atm {
+                if planet.atmo.partial_pressure(*kind) < *limit_atm {
                     planet.atmo.add(*kind, mass * n as f32);
                 }
             }
@@ -122,7 +122,7 @@ fn process_building_on_tile(planet: &mut Planet, p: Coords, sim: &mut Sim, param
         }
 
         loop {
-            let p_target = p + (sim.rng.gen_range(-3..=3), sim.rng.gen_range(-3..=3));
+            let p_target = p + (sim.rng.random_range(-3..=3), sim.rng.random_range(-3..=3));
             if planet.map.in_range(p_target) {
                 planet.map[p_target].buried_carbon += carbon_mass;
                 break;

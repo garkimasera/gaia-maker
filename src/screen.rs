@@ -1,9 +1,9 @@
 use crate::action::CursorAction;
 use crate::assets::UiAssets;
 use crate::conf::Conf;
-use crate::draw::UpdateMap;
+use crate::draw::UpdateDraw;
 use crate::ui::WindowsOpenState;
-use crate::{planet::*, GameSpeed, GameState, GameSystemSet};
+use crate::{GameSpeed, GameState, GameSystemSet, planet::*};
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::{
     math::{Rect, Vec3Swizzles},
@@ -25,6 +25,7 @@ pub enum CursorMode {
     TileEvent(TileEventKind),
     SpawnAnimal(AnimalId),
     EditBiome(Biome),
+    ChangeHeight(f32),
     PlaceSettlement(AnimalId, CivilizationAge),
 }
 
@@ -41,15 +42,10 @@ impl Plugin for ScreenPlugin {
             .init_resource::<OccupiedScreenSpace>()
             .init_resource::<InScreenTileRange>()
             .init_resource::<CursorMode>()
+            .add_systems(Startup, set_window_icon)
             .add_systems(
                 OnEnter(GameState::Running),
                 (setup_cursor, set_scale_factor_to_occupied_screen_space),
-            )
-            .add_systems(
-                Update,
-                on_enter_running
-                    .run_if(in_state(GameState::Running))
-                    .after(GameSystemSet::StartSim),
             )
             .add_systems(
                 Update,
@@ -70,8 +66,8 @@ impl Plugin for ScreenPlugin {
                     .run_if(in_state(GameState::Running))
                     .after(GameSystemSet::UpdateHoverTile),
             )
-            .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)))
-            .add_systems(Update, crate::platform::window_resize);
+            .add_systems(Update, crate::platform::window_resize)
+            .add_systems(Update, keyboard_input.run_if(in_state(GameState::Running)));
     }
 }
 
@@ -121,25 +117,6 @@ fn set_scale_factor_to_occupied_screen_space(
     conf: Res<Conf>,
 ) {
     occupied_screen_space.scale_factor = conf.ui.scale_factor;
-}
-
-fn on_enter_running(
-    planet: Option<Res<Planet>>,
-    mut ew_centering: EventWriter<Centering>,
-    mut done: Local<bool>,
-) {
-    let Some(planet) = planet else {
-        return;
-    };
-    if *done {
-        return;
-    }
-    *done = true;
-    let h = planet.map.size().1;
-    ew_centering.send(Centering(Vec2 {
-        x: 0.0,
-        y: h as f32 * TILE_SIZE / 2.0,
-    }));
 }
 
 fn mouse_event(
@@ -196,7 +173,7 @@ fn mouse_event(
         return;
     }
 
-    if let Some(coords) = hover_tile.get_single().unwrap().0 .0 {
+    if let Some(coords) = hover_tile.get_single().unwrap().0.0 {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             ew_cursor_action.send(CursorAction {
                 coords,
@@ -218,7 +195,7 @@ fn mouse_event(
 
 fn centering(
     mut er_centering: EventReader<Centering>,
-    mut update_map: ResMut<UpdateMap>,
+    mut update_draw: ResMut<UpdateDraw>,
     screen: Res<OccupiedScreenSpace>,
     window: Query<(&Window, &bevy_egui::EguiContextSettings), With<PrimaryWindow>>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
@@ -230,20 +207,20 @@ fn centering(
     };
 
     for e in er_centering.read() {
-        update_map.update();
-        let transform = &mut camera_query.get_single_mut().unwrap().1.translation;
+        update_draw.update();
+        let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
 
         let center = &e.0;
 
         // Change camera position
         let width = TILE_SIZE * planet.map.size().0 as f32;
         let x = center.x;
-        transform.x = if x < 0.0 {
+        cpos.x = if x < 0.0 {
             x + ((-x / width).trunc() + 1.0) * width
         } else {
             x - (x / width).trunc() * width
         };
-        transform.y = center
+        cpos.y = center
             .y
             .clamp(-TILE_SIZE, (planet.map.size().1 + 1) as f32 * TILE_SIZE);
 
@@ -252,16 +229,15 @@ fn centering(
             (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
             0.0,
         ) / 2.0;
-        *transform -= space_adjust;
+        *cpos -= space_adjust;
 
-        transform.x = transform.x.round();
-        transform.y = transform.y.round();
+        adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
 
         // Update in screen tile range
-        let x0 = ((transform.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
-        let y0 = ((transform.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
-        let x1 = ((transform.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
-        let y1 = ((transform.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
+        let x0 = ((cpos.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
+        let y0 = ((cpos.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
+        let x1 = ((cpos.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
+        let y1 = ((cpos.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
         in_screen_tile_range.y_to_from_not_clamped = (y0, y1);
         let y0 = y0.clamp(0, planet.map.size().1 as i32 - 1);
         let y1 = y1.clamp(0, planet.map.size().1 as i32 - 1);
@@ -297,7 +273,7 @@ fn update_hover_tile(
 
     // Check covered by ui or not
     if !occupied_screen_space.check(window.width(), window.height(), cursor_pos) {
-        hover_tile.0 .0 = None;
+        hover_tile.0.0 = None;
         *hover_tile.2 = Visibility::Hidden;
         return;
     }
@@ -320,13 +296,13 @@ fn update_hover_tile(
         } else {
             tile_i - (tile_i / planet_w) * planet_w
         };
-        hover_tile.0 .0 = Some(Coords(tile_i_rotated, tile_j));
+        hover_tile.0.0 = Some(Coords(tile_i_rotated, tile_j));
         hover_tile.1.translation.x = tile_i as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.y = tile_j as f32 * TILE_SIZE + TILE_SIZE / 2.0;
         hover_tile.1.translation.z = 950.0;
         Visibility::Inherited
     } else {
-        hover_tile.0 .0 = None;
+        hover_tile.0.0 = None;
         Visibility::Hidden
     };
 
@@ -368,7 +344,7 @@ pub struct OccupiedScreenSpace {
 }
 
 impl OccupiedScreenSpace {
-    fn check(&self, w: f32, h: f32, p: Vec2) -> bool {
+    pub fn check(&self, w: f32, h: f32, p: Vec2) -> bool {
         if self.opening_modal {
             return false;
         }
@@ -455,7 +431,7 @@ fn keyboard_input(
         match *speed {
             GameSpeed::Paused => {
                 if *old_gamespeed == GameSpeed::Paused {
-                    *old_gamespeed = GameSpeed::Normal;
+                    *old_gamespeed = GameSpeed::Slow;
                 }
                 std::mem::swap(&mut *speed, &mut *old_gamespeed);
             }
@@ -464,6 +440,22 @@ fn keyboard_input(
                 *speed = GameSpeed::Paused;
             }
         }
+    }
+    // Windows
+    if keys.just_pressed(KeyCode::F1) {
+        wos.space_building = !wos.space_building;
+    }
+    if keys.just_pressed(KeyCode::F2) {
+        wos.animals = !wos.animals;
+    }
+    if keys.just_pressed(KeyCode::F3) {
+        wos.map = !wos.map;
+    }
+    if keys.just_pressed(KeyCode::F4) {
+        wos.layers = !wos.layers;
+    }
+    if keys.just_pressed(KeyCode::F5) {
+        wos.stat = !wos.stat;
     }
     // Debug by Alt+F12
     if keys.just_pressed(KeyCode::F12)
@@ -499,5 +491,38 @@ fn keyboard_input(
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
         ew_centering.send(Centering(new_center));
+    }
+}
+
+/// Adjust camera position to prevent pixel blurring
+pub fn adjust_camera_pos(x: &mut f32, y: &mut f32, w: f32, h: f32) {
+    let (x_fract, y_fract) = (x.fract(), y.fract());
+    if (w as u32) % 2 == 0 {
+        if x_fract > 0.0 {
+            *x = x.floor();
+        }
+    } else if x_fract == 0.0 {
+        *x += 0.5;
+    };
+    if (h as u32) % 2 == 0 {
+        if y_fract > 0.0 {
+            *y = y.floor();
+        }
+    } else if y_fract == 0.0 {
+        *y += 0.5;
+    };
+}
+
+fn set_window_icon(windows: NonSend<bevy::winit::WinitWindows>) {
+    let image_bytes = include_bytes!("../icon.png");
+    let image = image::load_from_memory_with_format(image_bytes, image::ImageFormat::Png)
+        .unwrap()
+        .into_rgba8();
+    let (w, h) = image.dimensions();
+    let bytes = image.into_raw();
+    let icon = winit::window::Icon::from_rgba(bytes, w, h).unwrap();
+
+    for window in windows.windows.values() {
+        window.set_window_icon(Some(icon.clone()));
     }
 }

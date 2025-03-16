@@ -1,11 +1,12 @@
 use anyhow::Context;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use strum::{AsRefStr, EnumIter};
 
 use crate::GameState;
 use crate::{assets::UiAssets, text_assets::Lang};
 
-const CONF_FILE_NAME: &str = "conf.toml";
+pub const CONF_FILE_NAME: &str = "conf.toml";
 
 #[derive(Clone, Copy, Debug)]
 pub struct ConfPlugin;
@@ -17,7 +18,7 @@ impl Plugin for ConfPlugin {
                 "conf.toml",
             ]))
             .add_systems(Update, on_change)
-            .add_systems(OnExit(GameState::AssetLoading), set_conf);
+            .add_systems(OnExit(GameState::AssetLoading), load_conf);
     }
 }
 
@@ -33,7 +34,7 @@ fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>
     }
 }
 
-fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
+fn load_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Conf>>) {
     let conf = match crate::platform::read_data_file(CONF_FILE_NAME)
         .and_then(|data| toml::from_str(&data).context("deserialize conf"))
     {
@@ -43,6 +44,7 @@ fn set_conf(mut command: Commands, ui_assets: Res<UiAssets>, conf: Res<Assets<Co
             conf.get(&ui_assets.default_conf).unwrap().clone()
         }
     };
+    let conf = crate::platform::modify_conf(conf);
     crate::text_assets::set_lang(conf.lang);
     command.insert_resource(conf);
 }
@@ -54,16 +56,37 @@ pub struct Conf {
     pub ui: UiConf,
     pub autosave_enabled: bool,
     pub autosave_cycle_duration: u64,
-    #[serde(default)]
-    pub max_simulation_speed: bool,
+    pub autosave_max_files: usize,
+    pub manual_max_files: usize,
+    pub screen_refresh_rate: HighLow3,
+    pub show_fps: bool,
+    pub window: Option<WindowConf>,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Reflect)]
 pub struct UiConf {
     pub scale_factor: f32,
     pub font_scale: f32,
-    pub messages_in_list: usize,
+    pub reports_in_list: usize,
     pub min_sidebar_width: f32,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Asset, Resource, TypePath)]
+pub struct WindowConf {
+    pub size: (u32, u32),
+    #[serde(default)]
+    pub maximized: bool,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Serialize, Deserialize, AsRefStr, EnumIter)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum HighLow3 {
+    Low,
+    Medium,
+    High,
 }
 
 #[derive(Clone, Copy, Debug, Event)]

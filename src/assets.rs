@@ -1,9 +1,5 @@
 use std::cmp::Ordering;
 
-use crate::conf::Conf;
-use crate::gz::GunzipBin;
-use crate::planet::*;
-use crate::GameState;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_asset_loader::prelude::*;
@@ -12,7 +8,13 @@ use bevy_kira_audio::AudioSource;
 use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::Deserialize;
+use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::IntoEnumIterator;
+
+use crate::GameState;
+use crate::conf::Conf;
+use crate::gz::GunzipBin;
+use crate::planet::*;
 
 #[derive(Clone, Copy, Debug)]
 pub struct AssetsPlugin;
@@ -65,9 +67,12 @@ pub struct UiAssets {
 #[serde(transparent)]
 pub struct ParamsAsset(Params);
 
+#[serde_as]
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
-pub struct BiomeAssetList(FnvHashMap<Biome, BiomeAttrs>);
+pub struct BiomeAssetList(
+    #[serde_as(as = "FnvHashMap<DisplayFromStr, Same>")] FnvHashMap<Biome, BiomeAttrs>,
+);
 
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
@@ -149,9 +154,7 @@ fn create_assets_list(
     mut texture_atlas_assets: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // Biomes
-    let biome_asset_list = biome_asset_list
-        .get(&planet_asset_collection.biomes)
-        .unwrap();
+    let biome_asset_list = biome_asset_list.get(&planet_asset_collection.biomes).unwrap();
     let mut biome_texture_rects = HashMap::new();
     for j in 0..4 {
         for i in 0..3 {
@@ -315,10 +318,24 @@ fn create_assets_list(
                 .expect("unexpected tile animation asset path")
                 .0
                 .into();
+            let image = images.get(handle).unwrap();
+            let nw = image.width() / TILE_SIZE as u32;
+            let nh = image.height() / TILE_SIZE as u32;
+            let layout = if nw == 2 && nh == 2 {
+                tile_animation_layout.clone()
+            } else {
+                texture_atlas_assets.add(TextureAtlasLayout::from_grid(
+                    UVec2::new(TILE_SIZE as u32, TILE_SIZE as u32),
+                    nw,
+                    nh,
+                    None,
+                    None,
+                ))
+            };
             (
                 tile_animation_id,
                 LoadedTexture {
-                    layout: tile_animation_layout.clone(),
+                    layout,
                     image: handle.clone(),
                     _width: TILE_SIZE as u32,
                     _height: TILE_SIZE as u32,

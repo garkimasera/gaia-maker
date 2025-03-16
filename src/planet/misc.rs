@@ -1,5 +1,5 @@
 use geom::{Coords, CyclicMode};
-use rand::{rngs::SmallRng, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, rngs::SmallRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
     assert!(table.len() > 2);
@@ -109,9 +109,9 @@ pub struct ConstantDist {
     d: f32,
 }
 
-impl rand::distributions::Distribution<f32> for ConstantDist {
+impl rand::distr::Distribution<f32> for ConstantDist {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> f32 {
-        rng.gen_range((self.mean - self.d)..=(self.mean - self.d))
+        rng.random_range((self.mean - self.d)..=(self.mean - self.d))
     }
 }
 
@@ -147,13 +147,13 @@ impl From<(f32, f32)> for SymmetricalLinearDist {
 }
 
 pub fn get_rng() -> SmallRng {
-    let mut thread_rng = rand::thread_rng();
-    rand::rngs::SmallRng::from_rng(&mut thread_rng).unwrap()
+    let mut thread_rng = rand::rng();
+    rand::rngs::SmallRng::from_rng(&mut thread_rng)
 }
 
-impl rand::distributions::Distribution<f32> for SymmetricalLinearDist {
+impl rand::distr::Distribution<f32> for SymmetricalLinearDist {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> f32 {
-        let r: f32 = rng.gen_range(0.0..=1.0);
+        let r: f32 = rng.random_range(0.0..=1.0);
 
         let x = if r < 0.5 {
             (2.0 * r).sqrt() - 1.0

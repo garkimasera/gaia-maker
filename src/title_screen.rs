@@ -1,17 +1,18 @@
 use bevy::prelude::*;
-use rand::{seq::SliceRandom, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, seq::IndexedRandom};
 
-use crate::{draw::UpdateMap, GameState};
+use crate::{GameState, draw::UpdateDraw};
 
 #[derive(Clone, Copy, Debug)]
 pub struct TitleScreenPlugin;
 
 impl Plugin for TitleScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<UpdateMap>()
+        app.add_event::<UpdateDraw>()
             .add_systems(Startup, setup_title_screen)
             .add_systems(OnEnter(GameState::MainMenu), enter_title_screen)
-            .add_systems(OnExit(GameState::MainMenu), exit_title_screen);
+            .add_systems(OnExit(GameState::MainMenu), exit_title_screen)
+            .add_systems(Update, on_resize.run_if(in_state(GameState::MainMenu)));
     }
 }
 
@@ -91,8 +92,8 @@ fn setup_title_screen(
     let mesh = meshes.add(Mesh::from(Rectangle::new(2.0, 2.0)));
 
     for _ in 0..N_STARS {
-        let x = rng.gen_range(-2000.0..2000.0);
-        let y = rng.gen_range(-2000.0..2000.0);
+        let x = rng.random_range(-2000.0..2000.0);
+        let y = rng.random_range(-2000.0..2000.0);
         commands
             .spawn((
                 Mesh2d(mesh.clone()),
@@ -106,10 +107,15 @@ fn setup_title_screen(
 fn enter_title_screen(
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     mut meshes: Query<&mut Visibility, With<TitleScreen>>,
+    window: Query<&Window, With<bevy::window::PrimaryWindow>>,
 ) {
-    let translation = &mut camera_query.get_single_mut().unwrap().1.translation;
-    translation.x = 0.0;
-    translation.y = 0.0;
+    let Ok(window) = window.get_single() else {
+        return;
+    };
+    let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
+    cpos.x = 0.0;
+    cpos.y = 0.0;
+    crate::screen::adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
 
     for mut bg in meshes.iter_mut() {
         *bg = Visibility::Visible;
@@ -119,5 +125,15 @@ fn enter_title_screen(
 fn exit_title_screen(mut meshes: Query<&mut Visibility, With<TitleScreen>>) {
     for mut bg in meshes.iter_mut() {
         *bg = Visibility::Hidden;
+    }
+}
+
+fn on_resize(
+    mut er: EventReader<bevy::window::WindowResized>,
+    mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+) {
+    let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
+    if let Some(e) = er.read().last() {
+        crate::screen::adjust_camera_pos(&mut cpos.x, &mut cpos.y, e.width, e.height);
     }
 }

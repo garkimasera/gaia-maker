@@ -1,12 +1,12 @@
 use std::ops::RangeInclusive;
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
-use crate::{planet::*, sim::SaveFileMetadata};
+use crate::{manage_planet::SaveState, planet::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
 #[strum(serialize_all = "kebab-case")]
@@ -24,7 +24,7 @@ pub fn stat_window(
     mut wos: ResMut<WindowsOpenState>,
     planet: Res<Planet>,
     params: Res<Params>,
-    save_file_metadata: Res<SaveFileMetadata>,
+    save_state: Res<SaveState>,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
     mut current_graph_item: Local<GraphItem>,
@@ -45,7 +45,11 @@ pub fn stat_window(
             ui.separator();
 
             match *current_panel {
-                Panel::Planet => planet_stat(ui, &planet, save_file_metadata.debug_mode_enabled),
+                Panel::Planet => planet_stat(
+                    ui,
+                    &planet,
+                    save_state.save_file_metadata.debug_mode_enabled,
+                ),
                 Panel::Atmosphere => atmo_stat(ui, &planet),
                 Panel::Civilization => civ_stat(ui, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
@@ -58,25 +62,30 @@ pub fn stat_window(
 }
 
 fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
-    egui::Grid::new("table_planet")
-        .striped(true)
-        .show(ui, |ui| {
-            ui.label(t!("planet-name"));
-            ui.label(&planet.basics.name);
-            ui.end_row();
-            ui.label(t!("cycles"));
-            ui.label(format!("{}", planet.cycles));
-            ui.end_row();
-            ui.label(t!("radius"));
-            ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
-            ui.end_row();
-            ui.label(t!("solar-constant"));
-            ui.label(format!(
-                "{:.0} W/m² ({:+.0}%)",
-                planet.basics.solar_constant,
-                (planet.state.solar_power_multiplier - 1.0) * 100.0
-            ));
-        });
+    egui::Grid::new("table_planet").striped(true).show(ui, |ui| {
+        ui.label(t!("planet-name"));
+        ui.label(&planet.basics.name);
+        ui.end_row();
+        ui.label(t!("cycles"));
+        ui.label(format!("{}", planet.cycles));
+        ui.end_row();
+        ui.label(t!("radius"));
+        ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
+        ui.end_row();
+        ui.label(t!("solar-constant"));
+        ui.label(format!(
+            "{:.0} W/m² ({:+.0}%)",
+            planet.basics.solar_constant,
+            (planet.state.solar_power_multiplier - 1.0) * 100.0
+        ));
+        ui.end_row();
+        ui.label(t!("biomass"));
+        ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
+        ui.end_row();
+        let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
+        ui.label(t!("population"));
+        ui.label(format!("{:.0}", sum_pop.abs()));
+    });
 
     if debug_mode_enabled {
         ui.label(
@@ -105,15 +114,14 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
     ));
     ui.separator();
 
-    let total_mass = planet.atmo.total_mass();
-
-    egui::Grid::new("table_atmo").striped(true).show(ui, |ui| {
+    egui::Grid::new("grid_atmo").striped(true).show(ui, |ui| {
         for gas_kind in GasKind::iter() {
             ui.label(t!(gas_kind));
-            ui.label(format!(
-                "{:.2}%",
-                planet.atmo.mass(gas_kind) / total_mass * 100.0
-            ));
+            ui.label(format!("{:.2}%", planet.atmo.mole_ratio[&gas_kind] * 100.0));
+            ui.horizontal(|ui| {
+                ui.add_space(8.0);
+                ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)));
+            });
             ui.end_row();
         }
     });
@@ -133,15 +141,18 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
     let mut selected_civ_id = current_civ_id.unwrap();
 
     egui::ComboBox::from_id_salt("select-civilization")
-        .selected_text(t!("animal", selected_civ_id))
+        .selected_text(planet.civ_name(selected_civ_id).unwrap())
         .show_ui(ui, |ui| {
-            for id in &civ_ids {
-                ui.selectable_value(&mut selected_civ_id, *id, t!("animal", id));
+            for &id in &civ_ids {
+                ui.selectable_value(&mut selected_civ_id, id, planet.civ_name(id).unwrap());
             }
         });
 
     *current_civ_id = Some(selected_civ_id);
-    let c = &planet.civs[&selected_civ_id];
+    let Some(c) = planet.civs.get(&selected_civ_id) else {
+        *current_civ_id = None;
+        return;
+    };
 
     ui.label(format!("{}: {:.0}", t!("population"), c.total_pop));
     ui.separator();
@@ -171,7 +182,7 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
             let s = if max < 1000.0 {
                 format!("{} GJ", crate::text::format_float_1000(e, 0))
             } else {
-                format!("{} PJ", crate::text::format_float_1000(e / 1000.0, 3))
+                format!("{} TJ", crate::text::format_float_1000(e * 1e-3, 3))
             };
             ui.label(s);
             ui.end_row();
@@ -214,7 +225,7 @@ fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params
     let min_bound_margin = match item {
         GraphItem::AverageAirTemperature | GraphItem::AverageSeaTemperature => 1.0e-1,
         GraphItem::AverageRainfall => 1.0e+0,
-        GraphItem::Biomass | GraphItem::BuriedCarbon => 1.0e-2,
+        GraphItem::Biomass | GraphItem::BuriedCarbon => 1.0e+0,
         GraphItem::Oxygen | GraphItem::Nitrogen | GraphItem::CarbonDioxide => 1.0e-5,
         GraphItem::Population => 1.0e+1,
     };
@@ -268,9 +279,7 @@ impl GraphItem {
             Self::AverageRainfall => record
                 .map(|record| record.average_rainfall as f64)
                 .unwrap_or(0.0),
-            Self::Biomass => record
-                .map(|record| record.biomass as f64 * 1e-3)
-                .unwrap_or(0.0),
+            Self::Biomass => record.map(|record| record.biomass as f64 * 1e-3).unwrap_or(0.0),
             Self::Oxygen => record.map(|record| record.p_o2 as f64).unwrap_or(0.0),
             Self::Nitrogen => record.map(|record| record.p_n2 as f64).unwrap_or(0.0),
             Self::CarbonDioxide => record.map(|record| record.p_co2 as f64).unwrap_or(0.0),

@@ -1,8 +1,10 @@
-use geom::Coords;
-use std::sync::LazyLock;
-use std::{collections::BTreeMap, sync::RwLock};
+use std::collections::BTreeMap;
+use std::fmt::Write;
+use std::sync::{LazyLock, RwLock};
 
-use crate::planet::{Animal, Planet, Sim, Structure, KELVIN_CELSIUS};
+use geom::Coords;
+
+use crate::planet::*;
 
 static POS_FOR_LOG: LazyLock<RwLock<Option<Coords>>> = LazyLock::new(RwLock::default);
 static TILE_LOGS: LazyLock<RwLock<BTreeMap<&'static str, String>>> = LazyLock::new(RwLock::default);
@@ -23,10 +25,7 @@ pub(super) fn tile_log<F: FnOnce(Coords) -> T, T: ToString>(
     f: F,
 ) {
     if *POS_FOR_LOG.read().unwrap() == Some(target) {
-        TILE_LOGS
-            .write()
-            .unwrap()
-            .insert(name, f(target).to_string());
+        TILE_LOGS.write().unwrap().insert(name, f(target).to_string());
     }
 }
 
@@ -63,34 +62,79 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
             Some(Structure::Settlement(settlement)) => {
                 format!(
                     "{}: {:.2}, {:+.1}",
-                    settlement.id, settlement.pop, settlement.tech_exp
+                    settlement.id, settlement.pop, settlement.tech_exp,
                 )
             }
-            _ => "0".into(),
+            _ => "-".into(),
         },
     ));
+    v.push((
+        "settlement state",
+        match &planet.map[p].structure {
+            Some(Structure::Settlement(settlement)) => {
+                format!(
+                    "{} {}",
+                    settlement.state.as_ref(),
+                    settlement.since_state_changed,
+                )
+            }
+            _ => "-".into(),
+        },
+    ));
+    v.push(("energy efficiency", format!("{:.1}", sim.energy_eff[p])));
 
     v
 }
 
 fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
     let Some(animal) = animal else {
-        return "Empty".into();
+        return "-".into();
     };
 
     format!("{}(n={:.3})", animal.id, animal.n)
 }
 
 pub trait PlanetDebug {
-    fn delete_settlement(&mut self);
+    fn edit_biome(&mut self, p: Coords, biome: Biome);
+    fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params);
+    fn place_settlement(&mut self, p: Coords, settlement: Settlement);
+    fn delete_civilization(&mut self);
+    fn height_map_as_string(&self) -> String;
 }
 
 impl PlanetDebug for Planet {
-    fn delete_settlement(&mut self) {
+    fn edit_biome(&mut self, p: Coords, biome: Biome) {
+        self.map[p].biome = biome;
+    }
+
+    fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params) {
+        let h = &mut self.map[p].height;
+        *h = (*h + value).max(0.0);
+        super::water::update_sea_level(self, sim, params);
+    }
+
+    fn place_settlement(&mut self, p: Coords, settlement: Settlement) {
+        self.map[p].structure = Some(Structure::Settlement(settlement));
+    }
+
+    fn delete_civilization(&mut self) {
         for p in self.map.iter_idx() {
             if matches!(self.map[p].structure, Some(Structure::Settlement(_))) {
                 self.map[p].structure = None;
             }
+            self.map[p].tile_events.remove(TileEventKind::Vehicle);
         }
+    }
+
+    fn height_map_as_string(&self) -> String {
+        let mut s = String::new();
+        write!(s, "[").unwrap();
+        for (i, p) in self.map.iter_idx().enumerate() {
+            let separator = if i == 0 { "" } else { "," };
+            let newline = if i % 64 == 0 { "\n" } else { "" };
+            write!(s, "{}{}{:.2}", separator, newline, self.map[p].height).unwrap();
+        }
+        write!(s, "]").unwrap();
+        s
     }
 }

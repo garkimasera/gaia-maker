@@ -3,6 +3,7 @@
     cost: 20,
     habitat: land,
     temp: (10, 28),
+    settlement_effect: 0.5,
     civ: (
         civilize_cost: 100.0,
     ),

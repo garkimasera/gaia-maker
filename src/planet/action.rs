@@ -2,7 +2,7 @@ use super::*;
 
 impl Planet {
     pub fn buildable(&self, building: &BuildingAttrs) -> bool {
-        if self.res.surplus_energy() < -building.energy {
+        if self.res.surplus_power() < -building.power {
             return false;
         }
         if building.cost > self.res.material {
@@ -28,9 +28,17 @@ impl Planet {
         self.update(sim, params);
     }
 
-    pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
-        self.map[p].structure = None;
-        self.update(sim, params);
+    pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) -> bool {
+        if self.map[p].structure.is_some() {
+            self.map[p].structure = None;
+            self.update(sim, params);
+            self.map[p]
+                .tile_events
+                .retain(|e| e.kind() != TileEventKind::Plague);
+            true
+        } else {
+            false
+        }
     }
 
     pub fn build_space_building(
@@ -110,11 +118,12 @@ impl Planet {
         });
     }
 
-    pub fn edit_biome(&mut self, coords: Coords, biome: Biome) {
-        self.map[coords].biome = biome;
-    }
-
-    pub fn place_settlement(&mut self, coords: Coords, settlement: Settlement) {
-        self.map[coords].structure = Some(Structure::Settlement(settlement));
+    pub fn civilize_animal(&mut self, animal_id: AnimalId, sim: &mut Sim, params: &Params) {
+        let Some(civ) = &params.animals[&animal_id].civ else {
+            unreachable!()
+        };
+        self.res.consume(Cost::GenePoint(civ.civilize_cost));
+        let event = PlanetEvent::Civilize { target: animal_id };
+        self.start_event(event, sim, params);
     }
 }

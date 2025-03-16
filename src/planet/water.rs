@@ -1,6 +1,7 @@
 use super::misc::{bisection, linear_interpolation};
 use super::*;
 use geom::Direction;
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -24,15 +25,17 @@ impl Water {
 
     pub fn sea_water_volume(&self) -> f32 {
         let v = self.water_volume - self.ice_volume;
-        if v > 0.0 {
-            v
-        } else {
-            0.0
-        }
+        if v > 0.0 { v } else { 0.0 }
     }
 }
 
 pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    update_sea_level(planet, sim, params);
+    advance_rainfall_calc(planet, sim, params);
+    snow_calc(planet, sim, params);
+}
+
+pub fn update_sea_level(planet: &mut Planet, sim: &Sim, params: &Params) {
     planet.water.sea_level = bisection(|x| target_function(planet, sim, x), 0.0, 10000.0, 10, 10.0);
 
     for p in planet.map.iter_idx() {
@@ -46,9 +49,6 @@ pub fn sim_water(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             tile.biome = Biome::Rock;
         }
     }
-
-    advance_rainfall_calc(planet, sim, params);
-    snow_calc(planet, sim, params);
 }
 
 fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
@@ -67,24 +67,28 @@ fn target_function(planet: &Planet, sim: &Sim, assumed_sea_level: f32) -> f32 {
 
 pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let map_iter_idx = planet.map.iter_idx();
+    let size = planet.map.size();
+    let coords_converter = sim.coords_converter();
 
     // Calculate new vapor amount of tiles
     for _ in 0..params.sim.n_loop_vapor_calc {
-        for p in map_iter_idx {
+        let par_iter = sim.vapor_new.par_iter_mut().enumerate();
+        par_iter.for_each(|(i, vapor_new)| {
+            let p = Coords::from_index_size(i, size);
             let biome = planet.map[p].biome;
             let building_effect = planet.working_building_effect(p, params);
 
             if biome == Biome::Ocean {
-                sim.vapor_new[p] =
+                *vapor_new =
                     linear_interpolation(&params.sim.ocean_vaporization_table, planet.map[p].temp)
                         / RAINFALL_DURATION;
             } else if let Some(BuildingEffect::Vapor { value }) = building_effect {
-                sim.vapor_new[p] = value / RAINFALL_DURATION;
+                *vapor_new = value / RAINFALL_DURATION;
             } else {
                 let adjacent_tile_flow: f32 = Direction::FOUR_DIRS
                     .into_iter()
                     .map(|dir| {
-                        if let Some(adjacent_tile) = sim.convert_p_cyclic(p + dir.as_coords()) {
+                        if let Some(adjacent_tile) = coords_converter.conv(p + dir.as_coords()) {
                             let diff_height =
                                 (planet.map[adjacent_tile].height - planet.map[p].height).max(0.0);
                             let d = params.sim.vapor_diffusion_factor
@@ -101,9 +105,9 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
                 let loss = sim.vapor[p]
                     * params.sim.vapor_loss_ratio
                     * (1.0 - params.biomes[&biome].revaporization_ratio);
-                sim.vapor_new[p] = sim.vapor[p] + adjacent_tile_flow - loss;
+                *vapor_new = sim.vapor[p] + adjacent_tile_flow - loss;
             }
-        }
+        });
         std::mem::swap(&mut sim.vapor, &mut sim.vapor_new);
     }
 

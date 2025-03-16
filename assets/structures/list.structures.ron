@@ -5,9 +5,9 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -100,
-            cost: 200,
-            effect: SprayToAtmo( kind: oxygen, mass: 500, limit_atm: 0.25 ),
+            power: -200,
+            cost: 400,
+            effect: SprayToAtmo( kind: oxygen, mass: 1000, limit_atm: 0.25 ),
         ),
     ),
     rainmaker: (
@@ -16,7 +16,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -10,
+            power: -10,
             cost: 100,
             effect: Vapor ( value: 5000 ),
         ),
@@ -27,7 +27,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -0.05,
+            power: -0.05,
             cost: 50,
             effect: Fertilize ( increment: 0.1, max: 40.0, range: 2 ),
         ),
@@ -38,7 +38,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -10,
+            power: -10,
             cost: 100,
             effect: Heater ( heat: 1.0e+18 ),
         ),
@@ -49,7 +49,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -550,
+            power: -550,
             cost: 200,
             effect: CaptureCarbonDioxide ( mass: 2.0e+4, limit_atm: 0.3 ),
         ),
@@ -60,7 +60,7 @@
         columns: 1,
         rows: 2,
         building: (
-            energy: -1,
+            power: -1,
             cost: 150,
             effect: SupplyEnergy ( value: 8.0e+7 ),
         ),

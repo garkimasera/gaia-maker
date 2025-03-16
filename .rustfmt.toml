@@ -1,0 +1,4 @@
+attr_fn_like_width = 92
+chain_width = 64
+merge_derives = false
+newline_style = "Unix"

@@ -1,37 +1,40 @@
 mod animals;
 mod debug_tools;
-mod dialog;
 mod error_popup;
 mod help;
+mod hover_tile_tooltip;
 mod main_menu;
 mod map;
+mod misc;
 mod new_planet;
 mod panels;
 mod preferences;
+mod report;
 mod saveload;
 mod space_buildings;
 mod stat;
+mod tutorial;
 
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, epaint, load::SizedTexture, FontData, FontDefinitions, FontFamily},
     EguiContextSettings, EguiContexts, EguiPlugin,
+    egui::{self, FontData, FontDefinitions, FontFamily, load::SizedTexture},
 };
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 use crate::{
+    GameState,
     assets::UiAssets,
     conf::Conf,
-    draw::{DisplayOpts, UpdateMap},
+    draw::{DisplayOpts, UpdateDraw},
     gz::GunzipBin,
+    manage_planet::{ManagePlanetError, SwitchPlanet},
     overlay::OverlayLayerKind,
     screen::{CursorMode, OccupiedScreenSpace},
-    sim::ManagePlanetError,
-    GameState,
 };
 
-use self::dialog::MsgDialog;
+const HELP_TOOLTIP_WIDTH: f32 = 256.0;
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
@@ -54,14 +57,13 @@ pub struct WindowsOpenState {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Dialog {
-    Msg(MsgDialog),
     _Dummy,
 }
 
 #[derive(Clone, Default, Resource)]
-pub struct EguiTextures(HashMap<String, SizedTexture>);
+pub struct UiTextures(HashMap<String, SizedTexture>);
 
-impl EguiTextures {
+impl UiTextures {
     fn get(&self, path: impl AsRef<str>) -> SizedTexture {
         *self
             .0
@@ -72,6 +74,9 @@ impl EguiTextures {
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
 pub struct UiWindowsSystemSet;
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct MainPanelsSystemSet;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
@@ -94,6 +99,14 @@ impl Plugin for UiPlugin {
                 Update,
                 panels::panels
                     .run_if(in_state(GameState::Running))
+                    .in_set(MainPanelsSystemSet)
+                    .before(UiWindowsSystemSet),
+            )
+            .add_systems(
+                Update,
+                report::report_ui
+                    .run_if(in_state(GameState::Running))
+                    .after(MainPanelsSystemSet)
                     .before(UiWindowsSystemSet),
             )
             .add_systems(
@@ -104,15 +117,22 @@ impl Plugin for UiPlugin {
                     map::map_window,
                     stat::stat_window,
                     layers_window,
-                    dialog::dialogs,
                     help::help_window,
-                    saveload::saveload_window,
+                    saveload::load_window,
+                    tutorial::tutorial_popup,
                     error_popup::error_popup,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,
+                    reset_window_open_state,
                 )
                     .run_if(in_state(GameState::Running))
                     .in_set(UiWindowsSystemSet),
+            )
+            .add_systems(
+                Update,
+                hover_tile_tooltip::hover_tile_tooltip
+                    .run_if(in_state(GameState::Running))
+                    .after(UiWindowsSystemSet),
             );
     }
 }
@@ -135,9 +155,7 @@ fn setup_fonts(
     let mut fonts = FontDefinitions::default();
     let mut font_data = FontData::from_owned(font_data.0);
     font_data.tweak.scale = conf.ui.font_scale;
-    fonts
-        .font_data
-        .insert("m+_font".to_owned(), font_data.into());
+    fonts.font_data.insert("m+_font".to_owned(), font_data.into());
     fonts
         .families
         .get_mut(&FontFamily::Proportional)
@@ -156,19 +174,20 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     ctx.set_theme(egui::Theme::Dark);
     let mut style = (*ctx.style()).clone();
 
-    let rounding = egui::Rounding::same(2.0);
-    style.visuals.window_rounding = rounding;
-    style.visuals.menu_rounding = rounding;
-    style.visuals.widgets.noninteractive.rounding = rounding;
-    style.visuals.widgets.inactive.rounding = rounding;
-    style.visuals.widgets.hovered.rounding = rounding;
-    style.visuals.widgets.active.rounding = rounding;
-    style.visuals.widgets.open.rounding = rounding;
+    let cr = egui::CornerRadius::same(2);
+    style.visuals.window_corner_radius = cr;
+    style.visuals.menu_corner_radius = cr;
+    style.visuals.widgets.noninteractive.corner_radius = cr;
+    style.visuals.widgets.inactive.corner_radius = cr;
+    style.visuals.widgets.hovered.corner_radius = cr;
+    style.visuals.widgets.active.corner_radius = cr;
+    style.visuals.widgets.open.corner_radius = cr;
     let text_color = egui::Color32::from_rgb(208, 208, 208);
     style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
     style.visuals.widgets.inactive.fg_stroke.color = text_color;
     style.spacing.scroll = egui::style::ScrollStyle::solid();
     style.interaction.tooltip_delay = 0.2;
+    // style.debug.debug_on_hover = true;
 
     ctx.set_style(style);
 }
@@ -221,7 +240,7 @@ fn load_textures(
         texture_handles.push(texture_handle);
     }
 
-    commands.insert_resource(EguiTextures(egui_textures));
+    commands.insert_resource(UiTextures(egui_textures));
 }
 
 fn bevy_image_to_egui_texture(
@@ -269,7 +288,7 @@ fn layers_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut current_layer: ResMut<OverlayLayerKind>,
-    mut update_map: ResMut<UpdateMap>,
+    mut update_draw: ResMut<UpdateDraw>,
     mut display_opts: ResMut<DisplayOpts>,
 ) {
     if !wos.layers {
@@ -281,7 +300,7 @@ fn layers_window(
         .vscroll(false)
         .default_width(100.0)
         .show(egui_ctxs.ctx_mut(), |ui| {
-            layers_menu(ui, &mut current_layer, &mut update_map, &mut display_opts);
+            layers_menu(ui, &mut current_layer, &mut update_draw, &mut display_opts);
         })
         .unwrap()
         .response
@@ -292,7 +311,7 @@ fn layers_window(
 fn layers_menu(
     ui: &mut egui::Ui,
     current_layer: &mut OverlayLayerKind,
-    update_map: &mut UpdateMap,
+    update_draw: &mut UpdateDraw,
     display_opts: &mut DisplayOpts,
 ) {
     let mut new_layer = *current_layer;
@@ -303,7 +322,7 @@ fn layers_menu(
     }
     if new_layer != *current_layer {
         *current_layer = new_layer;
-        update_map.update();
+        update_draw.update();
     }
     ui.separator();
 
@@ -312,79 +331,15 @@ fn layers_menu(
     ui.checkbox(&mut display_opts.cities, t!("cities"));
     ui.checkbox(&mut display_opts.structures, t!("structures"));
     if *display_opts != old {
-        update_map.update();
+        update_draw.update();
     }
 }
 
-fn label_with_icon(
-    ui: &mut egui::Ui,
-    textures: &EguiTextures,
-    icon: &str,
-    s: impl Into<egui::WidgetText>,
+pub fn reset_window_open_state(
+    mut wos: ResMut<WindowsOpenState>,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
 ) {
-    let icon = textures.get(icon);
-    ui.add(LabelWithIcon::new(icon, s));
-}
-
-struct LabelWithIcon {
-    icon: SizedTexture,
-    text: egui::WidgetText,
-}
-
-impl LabelWithIcon {
-    fn new(icon: impl Into<SizedTexture>, text: impl Into<egui::WidgetText>) -> Self {
-        Self {
-            icon: icon.into(),
-            text: text.into(),
-        }
-    }
-}
-
-impl egui::Widget for LabelWithIcon {
-    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        let layout_job =
-            self.text
-                .into_layout_job(ui.style(), egui::FontSelection::Default, egui::Align::Min);
-        let galley = ui.fonts(|fonts| fonts.layout_job(layout_job));
-
-        let icon_size = self.icon.size;
-        let galley_size = galley.rect.size();
-        let desired_size =
-            egui::Vec2::new(icon_size.x + galley_size.x, icon_size.y.max(galley_size.y));
-
-        let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-
-        response.widget_info(|| {
-            egui::WidgetInfo::labeled(egui::WidgetType::Label, ui.is_enabled(), galley.text())
-        });
-
-        let (icon_pos_y, galley_pos_y) = if icon_size.y > galley_size.y {
-            (0.0, (icon_size.y - galley_size.y) / 2.0)
-        } else {
-            ((galley_size.y - icon_size.y) / 2.0, 0.0)
-        };
-
-        let icon_rect = egui::Rect::from_min_size(egui::Pos2::new(0.0, icon_pos_y), icon_size)
-            .translate(rect.left_top().to_vec2());
-        let galley_pos = rect.left_top() + egui::Vec2::new(icon_size.x, galley_pos_y);
-
-        if ui.is_rect_visible(response.rect) {
-            let painter = ui.painter();
-            painter.add(epaint::RectShape {
-                rect: icon_rect,
-                rounding: egui::Rounding::ZERO,
-                fill: egui::Color32::WHITE,
-                stroke: egui::Stroke::NONE,
-                blur_width: 0.0,
-                fill_texture_id: self.icon.id,
-                uv: egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-            });
-            painter.add(epaint::TextShape::new(
-                galley_pos,
-                galley,
-                ui.style().visuals.text_color(),
-            ));
-        }
-        response
+    if er_switch_planet.read().last().is_some() {
+        wos.dialogs.clear();
     }
 }

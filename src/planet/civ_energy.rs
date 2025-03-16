@@ -1,9 +1,27 @@
+use arrayvec::ArrayVec;
+use rayon::prelude::*;
+
 use super::misc::linear_interpolation;
 use super::*;
 
-pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+/// Update some prerequired calculation results in Sim for civilization simulation
+pub fn update_civ_energy(planet: &Planet, sim: &mut Sim, params: &Params) {
     sim.civ_sum.reset(planet.civs.keys().copied());
     update_civ_domain(planet, sim);
+
+    // Update settlement congestion rate
+    let size = planet.map.size();
+    let par_iter = sim.settlement_cr.par_iter_mut().enumerate();
+    par_iter.for_each(|(i, settlement_cr)| {
+        let p = Coords::from_index_size(i, size);
+        *settlement_cr = super::misc::calc_congestion_rate(p, planet.map.size(), |p| {
+            if matches!(planet.map[p].structure, Some(Structure::Settlement { .. })) {
+                1.0
+            } else {
+                0.0
+            }
+        });
+    });
 
     // Update sparse energy source
     sim.energy_wind_solar = linear_interpolation(
@@ -70,18 +88,14 @@ pub fn sim_energy_source(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 pub fn update_civ_domain(planet: &Planet, sim: &mut Sim) {
-    for p in planet.map.iter_idx() {
-        sim.domain[p] = None;
-    }
+    sim.domain.fill(None);
 
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(settlement)) = &planet.map[p].structure else {
             continue;
         };
         sim.domain[p] = Some((settlement.id, f32::INFINITY));
-        sim.civ_sum
-            .get_mut(settlement.id)
-            .total_pop_for_energy_distribution += settlement.pop as f64;
+        sim.civ_sum.get_mut(settlement.id).total_pop_prev += settlement.pop as f64;
 
         for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
             if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
@@ -101,10 +115,10 @@ pub fn process_settlement_energy(
     planet: &mut Planet,
     sim: &mut Sim,
     p: Coords,
-    settlement: &Settlement,
+    settlement: &mut Settlement,
     params: &Params,
     cr: f32,
-) -> f32 {
+) {
     let age = settlement.age as usize;
     let animal_id = settlement.id;
 
@@ -131,7 +145,7 @@ pub fn process_settlement_energy(
 
     // Calculate fossil fuel & gift energy supply
     let sum_values = sim.civ_sum.get_mut(animal_id);
-    let a = settlement.pop / sum_values.total_pop_for_energy_distribution as f32;
+    let a = settlement.pop / sum_values.total_pop_prev as f32;
     supply[EnergySource::FossilFuel as usize] = sum_values.fossil_fuel_supply * a;
     supply[EnergySource::Gift as usize] = sum_values.gift_supply * a;
 
@@ -146,28 +160,54 @@ pub fn process_settlement_energy(
     supply[EnergySource::Nuclear as usize] = demand * a;
 
     // Calculate energy distribution
-    let priority = [
+    let src_without_biomass = [
         EnergySource::Gift,
         EnergySource::HydroGeothermal,
         EnergySource::Nuclear,
         EnergySource::FossilFuel,
         EnergySource::WindSolar,
     ];
-    let mut remaining = demand;
-    for src in priority {
+    let mut v: ArrayVec<(usize, f32, f32), { (EnergySource::LEN - 1) * 2 }> = ArrayVec::new();
+    let mut high_eff_wind_solar = 0.0;
+    for src in src_without_biomass {
         let src = src as usize;
         debug_assert!(supply[src] >= 0.0);
-        consume[src] += (demand * params.sim.energy_source_limit_by_age[age][src])
-            .min(supply[src])
+        let eff = params.sim.energy_efficiency[age][src];
+        let high_eff = params.sim.energy_high_efficiency[age][src];
+        if high_eff > 0.0 {
+            let high_eff_supply = (supply[src] * params.sim.high_efficiency_limit_by_supply[src])
+                .min(demand * params.sim.high_efficiency_limit_by_demand[src]);
+            let normal_supply = supply[src] - high_eff_supply;
+            v.push((src, high_eff, high_eff_supply));
+            v.push((src, eff, normal_supply));
+            if src == EnergySource::WindSolar as usize {
+                high_eff_wind_solar = high_eff_supply;
+            }
+        } else {
+            v.push((src, eff, supply[src]));
+        }
+    }
+    v.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+    let mut remaining = demand;
+    let mut sum_eff = 0.0;
+    for (src, eff, supply) in v {
+        let a = (demand * params.sim.energy_source_limit_by_age[age][src] - consume[src])
+            .min(supply)
             .min(remaining);
-        remaining -= consume[src];
+        debug_assert!(a >= 0.0);
+        consume[src] += a;
+        remaining -= a;
+        sum_eff += a * eff;
     }
     consume[EnergySource::Biomass as usize] = remaining;
+    sum_eff += remaining * params.sim.energy_efficiency[age][EnergySource::Biomass as usize];
+    sim.energy_eff[p] = sum_eff / demand;
 
-    // Add minimum required or waste energy consume
+    // Add waste energy consume
     for src in EnergySource::iter() {
         let src = src as usize;
-        let req = demand * params.sim.energy_source_min_by_age[age][src];
+        let req = demand * params.sim.energy_source_waste_by_age[age][src];
         let supply = supply[src] - consume[src];
         if src == 0 || supply > req {
             consume[src] += req;
@@ -182,54 +222,24 @@ pub fn process_settlement_energy(
         sum_values.total_energy_consumption[src as usize] += consume[src as usize] as f64;
     }
 
-    // Consume biomass from a tile that has maximum biomass
+    // Calculate biomass consumption
     let impact_on_biomass: f32 = params
         .sim
         .energy_source_biomass_impact
         .iter()
         .enumerate()
-        .map(|(src, a)| a * consume[src])
-        .sum();
-    if impact_on_biomass <= 0.0 {
-        return 1.0;
-    }
-    let biomass_to_consume = impact_on_biomass / params.sim.biomass_energy_factor;
-    let mut p_max_biomass = p;
-    let mut total_biomass = planet.map[p].biomass;
-    let mut max_biomass = total_biomass;
-    for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
-            if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
-                let biomass = planet.map[p_adj].biomass;
-                if biomass > max_biomass {
-                    max_biomass = biomass;
-                    total_biomass += biomass;
-                    p_max_biomass = p_adj;
-                }
+        .map(|(src, a)| {
+            if src == EnergySource::WindSolar as usize {
+                params.sim.high_efficiency_wind_solar_biomass_impact
+                    * high_eff_wind_solar.max(consume[src])
+                    + a * (consume[src] - high_eff_wind_solar).max(0.0)
+            } else {
+                a * consume[src]
             }
-        }
-    }
-
-    // Decrease biomass
-    let total_biomass = total_biomass * sim.biomass_density_to_mass();
-    let max_biomass = max_biomass * sim.biomass_density_to_mass();
-    let available_biomass_ratio = if biomass_to_consume > 0.0 {
-        total_biomass / biomass_to_consume
-    } else {
-        return 1.0;
-    };
-
-    let new_biomass = (max_biomass - biomass_to_consume).max(0.0);
-    let diff_biomass = max_biomass - new_biomass;
-    planet.map[p_max_biomass].biomass = new_biomass / sim.biomass_density_to_mass();
-    planet.atmo.release_carbon(diff_biomass);
-
-    let x = available_biomass_ratio * params.sim.resource_availability_factor;
-    if x < 1.0 {
-        x * x
-    } else {
-        x.min(1.0)
-    }
+        })
+        .sum();
+    debug_assert!(impact_on_biomass > 0.0);
+    settlement.biomass_consumption = impact_on_biomass / params.sim.biomass_energy_factor;
 }
 
 pub fn consume_buried_carbon(planet: &mut Planet, sim: &mut Sim, params: &Params) {

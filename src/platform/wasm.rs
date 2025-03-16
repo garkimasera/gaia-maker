@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
-use super::DEFAULT_WINDOW_SIZE;
+use crate::{conf::Conf, saveload::SavedTime};
 
-pub const N_SAVE_FILES: usize = 1;
+pub const SAVE_DIRS_LIMIT: bool = true;
 
 #[cfg(feature = "asset_tar")]
 pub fn addon_directory() -> Vec<std::path::PathBuf> {
@@ -24,7 +24,7 @@ pub fn write_data_file(file_name: &str, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn savefile_write(file_name: &str, data: &[u8]) -> Result<()> {
+pub fn write_savefile(dir_name: &str, file_name: &str, data: &[u8]) -> Result<()> {
     use std::io::Write;
 
     let base64_encoder =
@@ -37,17 +37,17 @@ pub fn savefile_write(file_name: &str, data: &[u8]) -> Result<()> {
     log::info!("save {} bytes to local storage", s.len());
 
     get_web_storage()?
-        .set_item(&format!("save/{}", file_name), &s)
+        .set_item(&format!("saves/{}/{}", dir_name, file_name), &s)
         .map_err(|e| anyhow!("setItem failed: {:?}", e))?;
 
     Ok(())
 }
 
-pub fn savefile_read(file_name: &str) -> Result<Vec<u8>> {
+pub fn read_savefile(dir_name: &str, file_name: &str) -> Result<impl std::io::Read> {
     use std::io::{Cursor, Read};
 
     let s = get_web_storage()?
-        .get_item(&format!("save/{}", file_name))
+        .get_item(&format!("saves/{}/{}", dir_name, file_name))
         .map_err(|e| anyhow!("getItem failed: {:?}", e))?
         .ok_or_else(|| anyhow!("getItem failed"))?;
     let mut s = Cursor::new(s);
@@ -57,7 +57,89 @@ pub fn savefile_read(file_name: &str) -> Result<Vec<u8>> {
 
     let mut data = Vec::new();
     decoder.read_to_end(&mut data)?;
-    Ok(data)
+    Ok(std::io::Cursor::new(data))
+}
+
+pub fn delete_savefile(dir_name: &str, file_name: &str) -> Result<()> {
+    let web_storage = get_web_storage()?;
+    web_storage
+        .remove_item(&format!("saves/{}/{}", dir_name, file_name))
+        .map_err(|e| anyhow!("removeItem failed: {:?}", e))
+}
+
+pub fn delete_save_sub_dir(dir_name: &str) -> Result<()> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let dir_path = format!("saves/{}/", dir_name);
+
+    let mut keys = Vec::new();
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        keys.push(key);
+    }
+
+    for key in keys {
+        if key.starts_with(&dir_path) {
+            web_storage
+                .remove_item(&key)
+                .map_err(|e| anyhow!("removeItem failed: {:?}", e))?;
+        }
+    }
+
+    Ok(())
+}
+
+pub fn save_sub_dirs() -> Result<Vec<(SavedTime, String)>> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let mut sub_dirs = std::collections::BTreeSet::new();
+
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        if let Some(s) = key.strip_prefix("saves/") {
+            log::info!("{}", s);
+            if let Some((sub_dir_name, _)) = s.split_once('/') {
+                sub_dirs.insert(sub_dir_name.to_string());
+            }
+        }
+    }
+
+    // Use SavedTime::now for dir modified time because the number of sub dirs is limited to one in wasm
+    Ok(sub_dirs
+        .into_iter()
+        .map(|sub_dir_name| (SavedTime::now(), sub_dir_name))
+        .collect())
+}
+
+pub fn save_sub_dir_files(dir_name: &str) -> Result<Vec<String>> {
+    let web_storage = get_web_storage()?;
+    let len = web_storage
+        .length()
+        .map_err(|e| anyhow!("length failed: {:?}", e))?;
+    let dir_path = format!("saves/{}/", dir_name);
+    let mut files = Vec::new();
+
+    for i in 0..len {
+        let key = web_storage
+            .key(i)
+            .map_err(|e| anyhow!("key failed: {:?}", e))?
+            .unwrap();
+        if let Some(file_name) = key.strip_prefix(&dir_path) {
+            files.push(file_name.to_owned());
+        }
+    }
+
+    Ok(files)
 }
 
 fn get_web_storage() -> Result<web_sys::Storage> {
@@ -69,22 +151,13 @@ fn get_web_storage() -> Result<web_sys::Storage> {
     Ok(storage)
 }
 
-pub fn preferred_window_size() -> (u32, u32) {
-    let Some(w) = web_sys::window() else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-
-    let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
-        return DEFAULT_WINDOW_SIZE;
-    };
-    let width = width as u32;
-    let height = height as u32;
-
-    (width, height)
+pub fn modify_conf(mut conf: Conf) -> Conf {
+    conf.autosave_max_files = 1;
+    conf.manual_max_files = 1;
+    conf
 }
+
+pub fn init_rayon(_num_threads: usize) {}
 
 pub fn window_open() {
     set_element_display("game-screen", "block");
@@ -148,13 +221,28 @@ pub fn window_resize(
         return;
     };
 
-    // Adjust target size to prevent pixel blurring
-    let target_width = width - width % 2;
-    let target_height = height - height % 2;
-
-    if window.width() as u32 != target_width || window.height() as u32 != target_height {
-        window
-            .resolution
-            .set(target_width as f32, target_height as f32);
+    if window.width() as u32 != width || window.height() as u32 != height {
+        window.resolution.set(width as f32, height as f32);
     }
+}
+
+impl super::PreferredWindowResolution {
+    pub fn get() -> Self {
+        let Some(w) = web_sys::window() else {
+            return Self::default();
+        };
+        let Some(width) = w.inner_width().ok().and_then(|width| width.as_f64()) else {
+            return Self::default();
+        };
+        let Some(height) = w.inner_height().ok().and_then(|height| height.as_f64()) else {
+            return Self::default();
+        };
+        Self::Size(width as u32, height as u32)
+    }
+}
+
+pub fn init_log_file(_path: std::path::PathBuf) {}
+
+pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
+    None
 }
