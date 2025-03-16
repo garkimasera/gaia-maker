@@ -7,9 +7,10 @@ use crate::{
     GameSpeed, GameState,
     conf::Conf,
     manage_planet::ManagePlanet,
-    planet::{Cost, KELVIN_CELSIUS, Params, Planet, StructureKind},
+    planet::{Cost, Params, Planet, StructureKind},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     text::WithUnitDisplay,
+    ui::tile_info::ui_tile_info,
 };
 
 use super::{UiTextures, WindowsOpenState, help::HelpItem, misc::LabelWithIcon};
@@ -296,72 +297,7 @@ fn sidebar(
     }
 
     let p = hover_tile.0.unwrap_or(last_hover_tile.unwrap());
-
-    let tile = &planet.map[p];
-
-    ui.horizontal(|ui| {
-        ui.image(textures.get("ui/icon-coordinates"))
-            .on_hover_text(t!("coordinates"));
-        ui.label(format!("[{}, {}]", p.0, p.1))
-            .on_hover_text(t!("coordinates"));
-
-        let (longitude, latitude) = planet.calc_longitude_latitude(p);
-        ui.label(format!(
-            "{:.0}°, {:.0}°",
-            longitude * 180.0 * std::f32::consts::FRAC_1_PI,
-            latitude * 180.0 * std::f32::consts::FRAC_1_PI,
-        ))
-        .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
-    });
-
-    let items: &[(&str, String, &str)] = &[
-        (
-            "ui/icon-height",
-            format!("{:.0} m", planet.height_above_sea_level(p)),
-            "height",
-        ),
-        (
-            "ui/icon-air-temperature",
-            format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
-            "air-temperature",
-        ),
-        (
-            "ui/icon-rainfall",
-            format!("{:.0} mm", tile.rainfall),
-            "rainfall",
-        ),
-        (
-            "ui/icon-fertility",
-            format!("{:.0} %", tile.fertility),
-            "fertility",
-        ),
-        (
-            "ui/icon-biomass",
-            format!("{:.1} kg/m²", tile.biomass),
-            "biomass",
-        ),
-    ];
-
-    for (icon, label, s) in items {
-        let s = t!(s);
-        ui.horizontal(|ui| {
-            ui.image(textures.get(icon)).on_hover_text(&s);
-            ui.label(label).on_hover_text(s);
-        });
-    }
-
-    ui.separator();
-
-    ui.label(t!(tile.biome));
-
-    let s = if let Some(structure) = &tile.structure {
-        crate::info::structure_info(structure)
-    } else if let Some(animal) = tile.largest_animal() {
-        t!("animal", animal.id)
-    } else {
-        "".into()
-    };
-    ui.label(s);
+    ui_tile_info(ui, p, planet, textures);
 }
 
 fn build_menu(

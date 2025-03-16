@@ -13,6 +13,7 @@ mod report;
 mod saveload;
 mod space_buildings;
 mod stat;
+mod tile_info;
 mod tutorial;
 
 use bevy::prelude::*;
