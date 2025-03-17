@@ -7,9 +7,10 @@ autosave_max_files = 5
 manual_max_files = 5
 screen_refresh_rate = "medium"
 show_fps = false
+sound_effect_volume = 1.0
 
 [ui]
 scale_factor = 1.0
 font_scale = 1.2
-reports_in_list = 32
+reports_in_list = 10
 min_sidebar_width = 200

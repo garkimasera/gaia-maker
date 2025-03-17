@@ -1,7 +1,11 @@
 use bevy::{ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
 
-use crate::assets::SoundEffectSources;
+use crate::{
+    GameState,
+    assets::SoundEffectSources,
+    conf::{Conf, ConfLoadSystemSet},
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct GameAudioPlugin;
@@ -31,6 +35,15 @@ impl SoundEffectPlayer<'_> {
 
 impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(AudioPlugin).add_audio_channel::<SEChannel>();
+        app.add_plugins(AudioPlugin)
+            .add_audio_channel::<SEChannel>()
+            .add_systems(
+                OnEnter(GameState::MainMenu),
+                init_volume.after(ConfLoadSystemSet),
+            );
     }
+}
+
+fn init_volume(channel_se: Res<AudioChannelSE>, conf: Res<Conf>) {
+    channel_se.set_volume(conf.sound_effect_volume);
 }

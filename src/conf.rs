@@ -11,6 +11,9 @@ pub const CONF_FILE_NAME: &str = "conf.toml";
 #[derive(Clone, Copy, Debug)]
 pub struct ConfPlugin;
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct ConfLoadSystemSet;
+
 impl Plugin for ConfPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ConfChange>()
@@ -18,7 +21,10 @@ impl Plugin for ConfPlugin {
                 "conf.toml",
             ]))
             .add_systems(Update, on_change)
-            .add_systems(OnExit(GameState::AssetLoading), load_conf);
+            .add_systems(
+                OnExit(GameState::AssetLoading),
+                load_conf.in_set(ConfLoadSystemSet),
+            );
     }
 }
 
@@ -60,6 +66,7 @@ pub struct Conf {
     pub manual_max_files: usize,
     pub screen_refresh_rate: HighLow3,
     pub show_fps: bool,
+    pub sound_effect_volume: f64,
     pub window: Option<WindowConf>,
 }
 
