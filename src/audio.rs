@@ -1,7 +1,7 @@
 use bevy::{ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
 
-use crate::assets::AudioSources;
+use crate::assets::SoundEffectSources;
 
 #[derive(Clone, Copy, Debug)]
 pub struct GameAudioPlugin;
@@ -12,13 +12,13 @@ pub struct SEChannel;
 pub type AudioChannelSE = AudioChannel<SEChannel>;
 
 #[derive(SystemParam)]
-pub struct AudioPlayer<'w> {
-    sources: Res<'w, AudioSources>,
+pub struct SoundEffectPlayer<'w> {
+    sources: Res<'w, SoundEffectSources>,
     channel_se: Res<'w, AudioChannelSE>,
 }
 
-impl AudioPlayer<'_> {
-    pub fn play_se(&self, s: &str) {
+impl SoundEffectPlayer<'_> {
+    pub fn play(&self, s: &str) {
         let path = compact_str::format_compact!("se/{}.ogg", s);
         let Some(audio_source) = self.sources.sound_effects.get(path.as_str()) else {
             log::warn!("unknown sound effect {}", path);

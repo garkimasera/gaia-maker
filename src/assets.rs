@@ -38,7 +38,7 @@ impl Plugin for AssetsPlugin {
                     .load_collection::<UiAssets>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
-                    .load_collection::<AudioSources>(),
+                    .load_collection::<SoundEffectSources>(),
             )
             .add_systems(
                 OnExit(GameState::AssetLoading),
@@ -135,7 +135,7 @@ define_asset_list_from_enum! {
 }
 
 #[derive(Debug, Resource, AssetCollection)]
-pub struct AudioSources {
+pub struct SoundEffectSources {
     #[asset(path = "se", collection(mapped, typed))]
     pub sound_effects: HashMap<String, Handle<AudioSource>>,
 }

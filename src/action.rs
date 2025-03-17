@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use geom::Coords;
 
-use crate::audio::AudioPlayer;
+use crate::audio::SoundEffectPlayer;
 use crate::draw::UpdateDraw;
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
@@ -35,7 +35,7 @@ fn cursor_action(
     mut sim: ResMut<Sim>,
     params: Res<Params>,
     mut planet: ResMut<Planet>,
-    audio_player: AudioPlayer,
+    se_player: SoundEffectPlayer,
 ) {
     for e in er.read() {
         let CursorAction { coords, .. } = *e;
@@ -45,7 +45,7 @@ fn cursor_action(
             CursorMode::Demolition => {
                 update_draw.update();
                 if planet.demolition(coords, &mut sim, &params) {
-                    audio_player.play_se("demolish");
+                    se_player.play("demolish");
                 }
             }
             CursorMode::Build(kind) => {
@@ -53,7 +53,7 @@ fn cursor_action(
                     update_draw.update();
                     if planet.placeable(coords) {
                         planet.place(coords, new_structure(kind), &mut sim, &params);
-                        audio_player.play_se("build");
+                        se_player.play("build");
                     }
                 }
             }
@@ -65,7 +65,7 @@ fn cursor_action(
                 if planet.animal_spawnable(coords, animal_id, &params) {
                     update_draw.update();
                     planet.spawn_animal(coords, animal_id, &params);
-                    audio_player.play_se("spawn-animal");
+                    se_player.play("spawn-animal");
                 }
             }
             CursorMode::EditBiome(biome) => {
