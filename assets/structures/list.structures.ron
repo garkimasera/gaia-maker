@@ -27,7 +27,7 @@
         columns: 1,
         rows: 2,
         building: (
-            power: -0.05,
+            power: -0.2,
             cost: 50,
             effect: Fertilize ( increment: 0.1, max: 40.0, range: 2 ),
         ),
@@ -60,9 +60,9 @@
         columns: 1,
         rows: 2,
         building: (
-            power: -1,
+            power: -10,
             cost: 150,
-            effect: SupplyEnergy ( value: 8.0e+7 ),
+            effect: SupplyEnergy ( value: 8.0e+8 ),
         ),
     ),
     settlement: (

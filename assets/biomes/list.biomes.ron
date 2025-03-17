@@ -29,7 +29,7 @@
     ),
     "sea-ice": (
         z: 95.0,
-        albedo: 0.8,
+        albedo: 0.7,
         revaporization_ratio: 0.0,
         priority: 0,
         mean_transition_time: 100,
@@ -57,7 +57,7 @@
     ),
     "ice-sheet": (
         z: 70.0,
-        albedo: 0.8,
+        albedo: 0.7,
         revaporization_ratio: 0.1,
         priority: 2,
         mean_transition_time: 80,
