@@ -17,7 +17,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         };
         let animal_id = settlement.id;
-        let animal_attr = &params.animals[&settlement.id];
+        let animal_attr = &params.animals[&animal_id];
         let cr = sim.settlement_cr[p];
 
         // Delete settlement if the biome is unhabitable for the animal
@@ -41,7 +41,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Tech exp
         if planet.cycles % params.sim.advance_tech_interval_cycles == 0 {
-            tech_exp(&mut settlement, params);
+            tech_exp(&mut settlement, params, &planet.civs[&animal_id]);
         }
 
         // Pop growth & decline
@@ -62,10 +62,8 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     * params.sim.pop_factor_by_settlement_state[settlement.state as usize]
             }
         };
-
-        let growth_speed = params.sim.base_pop_growth_speed;
-        let ratio = settlement.pop / cap.max(1e-10);
-        let dn = growth_speed * ratio * (-ratio + 1.0);
+        let cap = cap.max(1e-10);
+        let dn = params.sim.base_pop_growth_speed * settlement.pop * (1.0 - settlement.pop / cap);
 
         let can_growth = !planet.map[p]
             .tile_events
@@ -220,17 +218,21 @@ fn spread_settlement(
     }
 }
 
-fn tech_exp(settlement: &mut Settlement, params: &Params) {
+fn tech_exp(settlement: &mut Settlement, params: &Params, civ: &Civilization) {
     let age = settlement.age as usize;
     let normalized_pop = settlement.pop / params.sim.settlement_init_pop[age];
 
-    let diff = match settlement.state {
-        SettlementState::Growing | SettlementState::Stable => {
-            (normalized_pop - 0.5) * params.sim.base_tech_exp
-        }
-        SettlementState::Declining | SettlementState::Deserted => {
-            -params.sim.tech_exp_declining_speed
-        }
+    let diff = if matches!(
+        settlement.state,
+        SettlementState::Growing | SettlementState::Stable
+    ) && normalized_pop > 1.0
+    {
+        let total_pop_factor = (civ.total_pop
+            / params.sim.tech_exp_total_pop_factor[settlement.age as usize])
+            .min(2.0);
+        params.sim.base_tech_exp * normalized_pop.sqrt() * total_pop_factor
+    } else {
+        -params.sim.tech_exp_declining_speed
     };
     settlement.tech_exp += diff;
 

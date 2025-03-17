@@ -739,6 +739,8 @@ pub struct SimParams {
     pub advance_tech_interval_cycles: u64,
     /// Base tech exp
     pub base_tech_exp: f32,
+    /// Tech exp total population factor
+    pub tech_exp_total_pop_factor: [f32; CivilizationAge::LEN],
     /// Tech exp declining speed at settlement that has bad state
     pub tech_exp_declining_speed: f32,
     /// Required tech exp to evolve the age
