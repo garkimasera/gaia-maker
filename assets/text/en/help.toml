@@ -3,6 +3,7 @@ concept = "Concept"
 player = "Player"
 terraforming = "Terraforming"
 space-buildings = "Buildings"
+glossary = "Glossary"
 
 [help]
 concept = "In Gaia Maker, players assume the role of overseer of an undeveloped planet and the star system that contains it, and are responsible for terraforming and operating the facility. Terraforming is the process of improving a barren planet into a habitable environment. Terraforming is essential for humans to establish large settlements outside of Earth. Various types of facilities are constructed to adjust the atmosphere, temperature, and vegetation on the planet. In this way, we can create an ideal environment for life."
@@ -31,3 +32,40 @@ fire = "It will cause a fire in the specified tile. It will burn the biomass on 
 plague = "The plague will spread to the city you have selected. The plague will also infect other cities over time, reducing the population of civilization."
 vehicle = "Advanced civilizations use ships and airplanes for travel."
 war = "Cities can become involved in wars. The population of cities during wars decreases."
+
+rock = "In barren areas where rocks are exposed, there is little or no life."
+ice-sheet = "Life cannot survive in areas covered in ice sheets. The ice layer reflects the stellar light efficiently, and has the effect of cooling the surrounding area even further."
+desert = "Deserts are barren areas where plants cannot grow due to the dryness. Even if there is life, the amount is minimal."
+ocean = "Oceans are bodies of water with a certain area and depth. They are an important source of water for the planet, and marine life can live in them."
+sea-ice = "Sea ice is an area where the sea surface has frozen due to the low temperature."
+grassland = "Grasslands are fertile areas where grasslands spread out. If there is not enough rainfall for forests to develop, they become grasslands. There are fewer organisms in grasslands than in forests."
+tundra = "A tundra is an area where permafrost exists underground. Because it is cold, forests do not develop, but there is a small amount of life."
+boreal-forest = "Boreal forests are forests that form in areas with low temperatures."
+temperate-forest = "Temperate forests are forests that form in warm regions. Many forms of life exist here."
+tropical-rainforest = "Tropical rainforests are forests that form in regions that are even warmer and wetter than temperate forests. Many forms of life exist here."
+
+oxygen = "Oxygen is essential for life to exist. An ideal level would be 20% in the atmosphere, and too little or too much would be a problem."
+nitrogen = "Nitrogen is essential for keeping atmospheric pressure. In addition, nitrogen is one of the essential components of life, and some of the nitrogen in the atmosphere is absorbed by living organisms."
+carbon-dioxide = "Carbon Dioxide is essential for plant growth. It also plays a role in regulating the temperature of the planet through its greenhouse effect. Too little can cause cooling, while too much can cause warming. For this reason, changes in its concentration have a significant impact on the environment of the entire planet."
+argon = "Argon does not react with other chemicals, so its concentration does not change much. It contributes slightly to keeping atmospheric pressure."
+
+biomass = "Biomass is the amount of living organisms in a particular area or on a planet as a whole, expressed in terms of the mass of carbon. When plants grow, carbon dioxide in the atmosphere is stored in their bodies as carbon. In contrast, when the biomass of an area decreases due to factors such as fire, the carbon dioxide is released back into the atmosphere. The more biomass there is in an area, the easier it is for animals to breed there."
+civilization = "Animals with a certain level of intelligence and a body size suitable for using tools can be made intelligent through genetic manipulation and given civilization. From the player's perspective, they will build a primitive civilization, because that civilization cannot leave the planet. The civilization will start with stone age technology, and over time will acquire more advanced technology. The existence of an expanded civilization will also have an impact on the planet's environment."
+fertility = "Fertility refers to the fertility of the soil on land, or the nutrient content of the seawater in the ocean. If the land is fertile, forests will grow and it will be easier for a civilization to flourish. In order for the land to become fertile, it is necessary to have the right temperature and rainfall."
+solar-constant = "Solar Constant refers to the amount of energy a planet receives from its star. The higher this value is, the higher the temperature of the planet will be. It can increase or decrease due to buildings and natural phenomena."
+
+[help.age]
+stone = "Stone Age civilizations use stone tools as primitive tools and begin primitive agriculture. Since their populations are small and energy consumption is low, their impact on the ecosystem is minimal, they consume a small amount of biomass as an energy source."
+bronze = "Bronze Age civilizations use more sophisticated tools and have basic metalworking technology. They settle in cities and form societies. In addition, writing is invented, and it becomes possible to pass on technology and culture to future generations. The main source of energy is biomass."
+iron = "Iron Age civilizations use iron to make tools, and they practice intensive agriculture and form complex societies. Iron production consumes a lot of energy, and since the source of this energy is biomass, it has a negative impact on the ecosystem, such as deforestation. A small amount of energy is produced from hydropower, wind power and fossil fuels."
+industrial = "Industrial Age civilizations mass-produce products in factories. Population and energy consumption increase dramatically. Without fossil fuels or more efficient energy, it is impossible to sustain society. The main energy sources are fossil fuels and hydropower."
+atomic = "Atomic Age civilizations have the technology to harness nuclear fission energy. They also use fossil fuels if they are available. They have built a society that has developed from this highly efficient energy, but there is a possibility of a nuclear war."
+early-space = "Early Space Age civilizations have the technology to harness nuclear fusion energy. This means that they are already obtaining enough energy to sustain their civilization without having to exploit natural resources. In addition, the surplus energy is enough to escape from the planet's gravity."
+
+[help.energy_source]
+biomass = "Biomass is energy obtained by burning things like firewood and animal fat, or by making livestock work. It can be used regardless of the level of technology in a civilization, but because it directly consumes biomass from the natural world, if a civilization consumes a lot of energy, relying on biomass can cause significant environmental destruction. As technology advances and other forms of energy become available, consumption will decrease."
+wind-solar = "Wind and solar energy use wind and stellar light as their energy source. Because of their low energy density, a large area is needed to obtain a large amount of energy, and land acquisition can cause environmental destruction. Also, because of their instability, the efficiency of this energy source decreases as the proportion of this energy source increases. However, in the case of civilizations with advanced technology, if they are used as supplementary energy sources, they can be a highly efficient energy source."
+hydro-geothermal = "Hydropower and geothermal energy extract energy from the flow of rivers and geothermal heat. They are important as highly efficient energy sources for industrialized civilizations. However, the amount that can be used is limited. They also cause some environmental destruction."
+fossil-fuel = "Fossil fuels extract energy by burning carbon buried in the ground. They are an important energy source for industrialized civilizations. In order to use them, the civilization must have access to land where the carbon is buried, and in some cases they may not be available on certain planets. In addition, when a civilization consumes fossil fuels, carbon dioxide is emitted. They also cause a small amount of environmental destruction in terms of mining and consumption."
+nuclear = "Nuclear energy is the energy obtained from nuclear fission of uranium and thorium, or nuclear fusion of deuterium. It is the most efficient energy source that intelligent life on a planet can obtain, and it has almost no impact on the environment. Although it is an ideal energy source from a physical perspective, it is necessary to maintain a high level of technology in order to use it. It should also be remembered that civilizations that can use nuclear energy also have the technology to carry out nuclear war."
+gift = "Gift energy is energy that the overseer makes available to primitive civilizations on the planet. It is supplied in the form that is easiest for them to use, depending on the level of technology in a civilization. It is highly efficient energy that primitive civilizations would not normally be able to obtain, and so it will have a significant impact on the evolution of civilization."

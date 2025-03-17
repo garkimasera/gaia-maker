@@ -60,7 +60,7 @@ impl AsRef<str> for HelpItem {
 }
 
 const BASIC_ITEMS: &[&str] = &["concept", "player", "terraforming"];
-const GLOSSARY_ITEMS: &[&str] = &["fertility"];
+const GLOSSARY_ITEMS: &[&str] = &["biomass", "civilization", "fertility", "solar-constant"];
 
 #[allow(clippy::derivable_impls)]
 impl Default for ItemGroup {
