@@ -3,3 +3,7 @@ ant = "アリ"
 elephant = "ゾウ"
 fox = "キツネ"
 raccoon-dog = "タヌキ"
+
+[civ]
+fox = "キツネ文明"
+raccoon-dog = "タヌキ文明"

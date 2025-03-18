@@ -5,7 +5,7 @@ use std::cmp::Reverse;
 use std::collections::BTreeMap;
 use std::mem::discriminant;
 
-use super::AnimalId;
+use super::{AnimalId, CivilizationAge};
 
 const COMMON_NOTICE_REPORT_SPAN: u64 = 1000;
 
@@ -94,13 +94,24 @@ pub enum ReportContent {
     WarnLowTemp,
     WarnLowOxygen,
     WarnLowCarbonDioxide,
-    EventCivilized { pos: Coords, animal: AnimalId },
+    EventCivilized {
+        pos: Coords,
+        animal: AnimalId,
+    },
+    EventCivAdvance {
+        pos: Coords,
+        id: AnimalId,
+        age: CivilizationAge,
+        name: Option<String>,
+    },
 }
 
 impl ReportContent {
     pub fn span(&self) -> Option<u64> {
         match self {
-            Self::EventCivilized { .. } => Some(COMMON_NOTICE_REPORT_SPAN),
+            Self::EventCivilized { .. } | Self::EventCivAdvance { .. } => {
+                Some(COMMON_NOTICE_REPORT_SPAN)
+            }
             _ => None,
         }
     }
@@ -108,6 +119,7 @@ impl ReportContent {
     pub fn pos(&self) -> Option<Coords> {
         match self {
             Self::EventCivilized { pos, .. } => Some(*pos),
+            Self::EventCivAdvance { pos, .. } => Some(*pos),
             _ => None,
         }
     }

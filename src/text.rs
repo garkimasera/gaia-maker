@@ -43,6 +43,15 @@ impl Report {
                 let animal = t!("animal", animal);
                 (Notice, t!("report/civilized"; animal = animal))
             }
+            ReportContent::EventCivAdvance { name, age, id, .. } => {
+                let name = if let Some(name) = name {
+                    name.to_owned()
+                } else {
+                    t!("civ", id)
+                };
+                let age = t!("age", age);
+                (Notice, t!("report/civ-advance"; name = name, age = age))
+            }
         }
     }
 }

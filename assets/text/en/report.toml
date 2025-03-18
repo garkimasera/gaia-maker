@@ -4,3 +4,4 @@ warn-low-carbon-dioxide = "There is not enough carbon dioxide in the atmosphere.
 warn-low-oxygen = "There is not enough oxygen in the air. Build Oxygen Generators or Carbon Capturers."
 warn-low-temp = "The temperature is too low. An effective way to raise the temperature is to operate the Orbital Mirror to increase the amount of stellar light reaching the surface."
 civilized = "The process of civilizing {$animal} has been completed."
+civ-advance = "{$name} advanced into the {$age} Age."

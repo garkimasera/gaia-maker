@@ -282,6 +282,7 @@ pub struct Animal {
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Civilization {
     pub name: Option<String>,
+    pub most_advanced_age: CivilizationAge,
     pub total_pop: f32,
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f32; EnergySource::LEN],

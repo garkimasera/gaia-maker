@@ -41,7 +41,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Tech exp
         if planet.cycles % params.sim.advance_tech_interval_cycles == 0 {
-            tech_exp(&mut settlement, params, &planet.civs[&animal_id]);
+            tech_exp(&mut settlement, planet, p, params);
         }
 
         // Pop growth & decline
@@ -218,9 +218,10 @@ fn spread_settlement(
     }
 }
 
-fn tech_exp(settlement: &mut Settlement, params: &Params, civ: &Civilization) {
+fn tech_exp(settlement: &mut Settlement, planet: &mut Planet, p: Coords, params: &Params) {
     let age = settlement.age as usize;
     let normalized_pop = settlement.pop / params.sim.settlement_init_pop[age];
+    let civ = planet.civs.get_mut(&settlement.id).unwrap();
 
     let diff = if matches!(
         settlement.state,
@@ -238,9 +239,25 @@ fn tech_exp(settlement: &mut Settlement, params: &Params, civ: &Civilization) {
 
     if age < (CivilizationAge::LEN - 1) && settlement.tech_exp > params.sim.tech_exp_evolution[age]
     {
-        settlement.age = CivilizationAge::from_usize(age + 1).unwrap();
+        let new_age = CivilizationAge::from_usize(age + 1).unwrap();
+        settlement.age = new_age;
         settlement.tech_exp = 0.0;
         settlement.change_state(SettlementState::Growing);
+
+        // Check this age advance is the first for this civilization
+        if civ.most_advanced_age < new_age {
+            civ.most_advanced_age = new_age;
+            let name = civ.name.clone();
+            planet.reports.append(
+                planet.cycles,
+                ReportContent::EventCivAdvance {
+                    id: settlement.id,
+                    age: new_age,
+                    pos: p,
+                    name,
+                },
+            );
+        }
     } else if age > 0 && settlement.tech_exp < -100.0 {
         settlement.age = CivilizationAge::from_usize(age - 1).unwrap();
         settlement.tech_exp = 0.0;
