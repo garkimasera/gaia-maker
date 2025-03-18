@@ -74,19 +74,7 @@ impl Planet {
 
         // Simulate before start
         let mut sim = Sim::new(&planet, params);
-        sim.before_start = true;
         planet.advance(&mut sim, params);
-        heat_transfer::init_temp(&mut planet, &mut sim, params);
-
-        let water_volume = planet.water.water_volume;
-        planet.water.water_volume = 0.0;
-        for _ in 0..(start_params.cycles_before_start / 2) {
-            // Advance without water to accelerate heat transfer calclation
-            planet.advance(&mut sim, params);
-        }
-        planet.water.water_volume = water_volume;
-        planet.advance(&mut sim, params);
-
         for initial_condition in &start_params.initial_conditions {
             initial_conditions::apply_initial_condition(
                 &mut planet,
@@ -95,8 +83,23 @@ impl Planet {
                 params,
             );
         }
+        planet.advance(&mut sim, params);
+        heat_transfer::init_temp(&mut planet, &mut sim, params);
 
-        for _ in 0..(start_params.cycles_before_start / 2) {
+        let water_volume = planet.water.water_volume;
+        planet.water.water_volume = 0.0;
+        planet.water.water_volume = water_volume;
+        planet.advance(&mut sim, params);
+
+        sim.before_start = true;
+        for _ in 0..start_params.cycles_before_start {
+            if start_params
+                .initial_conditions
+                .iter()
+                .any(|ic| matches!(ic, InitialCondition::Snowball { .. }))
+            {
+                sim.albedo.fill(0.8);
+            }
             planet.advance(&mut sim, params);
         }
 

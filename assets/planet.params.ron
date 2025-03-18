@@ -349,7 +349,7 @@
             fusion_reactor: 1,
             asteroid_mining_station: 1,
         },
-        cycles_before_start: 100,
+        cycles_before_start: 150,
         initial_conditions: [],
         height_table: [],
     ),

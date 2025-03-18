@@ -2,7 +2,7 @@
     id: "tutorial",
     habitability: ideal,
     radius: (6000, 0),
-    solar_constant: (1330, 0),
+    solar_constant: (1300, 0),
     elevation: (7000.0, 0.0),
     water_volume: (2.0e+17, 0.2e+17),
     nitrogen: (0.75, 0.00),

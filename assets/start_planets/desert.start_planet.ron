@@ -1,7 +1,7 @@
 (
     id: "desert",
     habitability: poor,
-    radius: (6000, 300),
+    radius: (6500, 200),
     solar_constant: (1200, 200),
     elevation: (7000.0, 1000.0),
     water_volume: (0.0, 0.0),
@@ -10,4 +10,5 @@
     carbon_dioxide: (0.08, 0.02),
     argon: (1.0e-2, 0.2e-2),
     initial_conditions: [],
+    height_table: [(0.0, 0.0), (0.3, 0.05), (0.8, 0.4), (1.0, 1.0)],
 )
