@@ -155,7 +155,10 @@ pub fn replace(s: &str, map: HashMap<String, String>) -> String {
 
     RE.replace_all(s, |caps: &Captures| {
         let name = caps.get(1).unwrap().as_str();
-        map[name].to_string()
+        map.get(name)
+            .map(|s| s.as_str())
+            .unwrap_or_else(|| "{}")
+            .to_owned()
     })
     .into_owned()
 }
