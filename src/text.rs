@@ -52,6 +52,14 @@ impl Report {
                 let age = t!("age", age);
                 (Notice, t!("report/civ-advance"; name = name, age = age))
             }
+            ReportContent::EventCivExtinct { name, id } => {
+                let name = if let Some(name) = name {
+                    name.to_owned()
+                } else {
+                    t!("civ", id)
+                };
+                (Notice, t!("report/civ-extinct"; name = name))
+            }
         }
     }
 }

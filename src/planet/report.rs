@@ -104,6 +104,10 @@ pub enum ReportContent {
         age: CivilizationAge,
         name: Option<String>,
     },
+    EventCivExtinct {
+        id: AnimalId,
+        name: Option<String>,
+    },
 }
 
 impl ReportContent {
