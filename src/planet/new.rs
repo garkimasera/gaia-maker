@@ -1,3 +1,5 @@
+use sim::CoordsConverter;
+
 use super::*;
 
 impl Planet {
@@ -36,6 +38,10 @@ impl Planet {
         for (&kind, &n) in &start_params.space_buildings {
             let building = planet.space_building_mut(kind);
             building.n = n;
+        }
+        // Locate initial buried carbon
+        if let Some(initial_buried_carbon) = &start_params.initial_buried_carbon {
+            locate_initial_buried_carbon(&mut planet, initial_buried_carbon);
         }
 
         // Adjust water volume
@@ -110,5 +116,38 @@ impl Planet {
         self::stat::record_stats(&mut planet, params);
 
         planet
+    }
+}
+
+fn locate_initial_buried_carbon(planet: &mut Planet, initial_buried_carbon: &InitialBuriedCarbon) {
+    let coords_converter = CoordsConverter::new(planet);
+    let size = planet.map.size();
+    let InitialBuriedCarbon {
+        n_spot,
+        mass,
+        radius,
+        scattering,
+    } = *initial_buried_carbon;
+    let mut rng = super::misc::get_rng();
+    let n_spot = rng.random_range(n_spot.0..n_spot.1);
+
+    for _ in 0..n_spot {
+        let mass = 10.0_f32.powf(rng.random_range(mass.0.log10()..mass.1.log10()));
+        let radius = rng.random_range(radius.0..=radius.1);
+        let center = (rng.random_range(0..size.0), rng.random_range(0..size.1));
+        let shape = geom::Shape::Circle {
+            center: center.into(),
+            radius,
+        };
+        let tiles: Vec<_> = shape
+            .iter()
+            .into_iter()
+            .filter_map(|p| coords_converter.conv(p))
+            .collect();
+        let m = mass / tiles.len() as f32;
+        for p in tiles {
+            planet.map[p].buried_carbon =
+                m * rng.random_range((1.0 - scattering)..(1.0 + scattering));
+        }
     }
 }

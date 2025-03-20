@@ -198,11 +198,13 @@ pub fn process_settlement_energy(
         debug_assert!(a >= 0.0);
         consume[src] += a;
         remaining -= a;
-        sum_eff += a * eff;
+        if eff > 0.0 {
+            sum_eff += a / eff;
+        }
     }
     consume[EnergySource::Biomass as usize] = remaining;
-    sum_eff += remaining * params.sim.energy_efficiency[age][EnergySource::Biomass as usize];
-    sim.energy_eff[p] = sum_eff / demand;
+    sum_eff += remaining / params.sim.energy_efficiency[age][EnergySource::Biomass as usize];
+    sim.energy_eff[p] = demand / sum_eff;
 
     // Add waste energy consume
     for src in EnergySource::iter() {

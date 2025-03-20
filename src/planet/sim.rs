@@ -135,6 +135,10 @@ impl Sim {
 pub struct CoordsConverter((u32, u32));
 
 impl CoordsConverter {
+    pub fn new(planet: &Planet) -> Self {
+        Self(planet.map.size())
+    }
+
     pub fn conv(&self, p: Coords) -> Option<Coords> {
         geom::CyclicMode::X.convert_coords(self.0, p)
     }

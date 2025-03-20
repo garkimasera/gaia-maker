@@ -560,6 +560,16 @@ pub struct StartParams {
     pub target_sea_area: Option<f32>,
     #[serde(default)]
     pub height_map: Vec<f32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub initial_buried_carbon: Option<InitialBuriedCarbon>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct InitialBuriedCarbon {
+    pub n_spot: (u32, u32),
+    pub mass: (f32, f32),
+    pub radius: (u32, u32),
+    pub scattering: f32,
 }
 
 #[serde_as]
@@ -914,6 +924,8 @@ pub struct StartPlanet {
     pub target_sea_area: Option<f32>,
     #[serde(default)]
     pub height_map: Vec<f32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub initial_buried_carbon: Option<InitialBuriedCarbon>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]

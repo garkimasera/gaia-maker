@@ -239,6 +239,7 @@ pub fn start_planet_to_start_params(id: &str, params: &Params) -> StartParams {
         target_sea_level: start_planet.target_sea_level,
         target_sea_area: start_planet.target_sea_area,
         height_map: start_planet.height_map.clone(),
+        initial_buried_carbon: start_planet.initial_buried_carbon.clone(),
         ..params.default_start_params.clone()
     }
 }

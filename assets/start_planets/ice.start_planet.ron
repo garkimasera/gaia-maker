@@ -13,4 +13,10 @@
         Snowball ( thickness: (250.0, 10.0) )
     ],
     height_table: [(0.0, 0.0), (0.2, 0.05), (0.4, 0.5), (0.8, 0.7), (1.0, 1.0)],
+    initial_buried_carbon: (
+        n_spot: (8, 16),
+        mass: (1.0e+4, 1.0e+5),
+        radius: (1, 2),
+        scattering: 0.4,
+    ),
 )

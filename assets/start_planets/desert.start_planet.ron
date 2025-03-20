@@ -11,4 +11,10 @@
     argon: (1.0e-2, 0.2e-2),
     initial_conditions: [],
     height_table: [(0.0, 0.0), (0.3, 0.05), (0.8, 0.4), (1.0, 1.0)],
+    initial_buried_carbon: (
+        n_spot: (3, 10),
+        mass: (1.0e+1, 1.0e+4),
+        radius: (2, 3),
+        scattering: 0.4,
+    ),
 )
