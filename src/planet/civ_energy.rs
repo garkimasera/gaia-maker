@@ -203,7 +203,12 @@ pub fn process_settlement_energy(
         }
     }
     consume[EnergySource::Biomass as usize] = remaining;
-    sum_eff += remaining / params.sim.energy_efficiency[age][EnergySource::Biomass as usize];
+    let biomass_eff_factor = linear_interpolation(
+        &params.sim.biomass_energy_efficiency_density_factor_table,
+        planet.map[p].biomass,
+    );
+    sum_eff += remaining
+        / (params.sim.energy_efficiency[age][EnergySource::Biomass as usize] * biomass_eff_factor);
     sim.energy_eff[p] = demand / sum_eff;
 
     // Add waste energy consume
