@@ -130,10 +130,11 @@ fn update_state(
 
     let density_to_mass = sim.biomass_density_to_mass();
     if settlement.state != SettlementState::Deserted
-        && settlement.biomass_consumption
+        && (settlement.biomass_consumption
             > planet.map[p].biomass
                 * density_to_mass
                 * params.sim.settlement_deserted_by_biomass_factor
+            || sim.energy_eff[p] < params.sim.energy_efficiency_required[settlement.age as usize])
     {
         settlement.change_state(SettlementState::Deserted);
         return;

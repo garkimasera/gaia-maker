@@ -778,10 +778,12 @@ pub struct SimParams {
     pub energy_source_limit_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Energy source waste by settlement age
     pub energy_source_waste_by_age: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
-    /// Base energy efficency
+    /// Base energy efficiency
     pub energy_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
-    /// Energy efficency with high qualicty
+    /// Energy efficiency with high qualicty
     pub energy_high_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
+    /// Biomass energy efficiency factor by density [kg/m^2] table
+    pub biomass_energy_efficiency_density_factor_table: Vec<(f32, f32)>,
     /// High efficiency energy limit by ratio to supply
     pub high_efficiency_limit_by_supply: [f32; EnergySource::LEN],
     /// High efficiency energy limit by ratio to demand
@@ -790,6 +792,8 @@ pub struct SimParams {
     pub energy_source_biomass_impact: [f32; EnergySource::LEN],
     /// Biomass impact of high efficiency wind solar energy source
     pub high_efficiency_wind_solar_biomass_impact: f32,
+    /// Required energy efficiency to sustain settlement
+    pub energy_efficiency_required: [f32; CivilizationAge::LEN],
     /// Soil erosion effect by settlement
     pub soil_erosion_effect_by_settlement: [f32; CivilizationAge::LEN],
     /// Duration of events

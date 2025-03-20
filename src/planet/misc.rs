@@ -2,7 +2,7 @@ use geom::{Coords, CyclicMode};
 use rand::{Rng, SeedableRng, rngs::SmallRng};
 
 pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
-    assert!(table.len() > 2);
+    assert!(table.len() >= 2);
     let first = table.first().unwrap();
     let last = table.last().unwrap();
     if first.0 >= x {
