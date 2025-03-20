@@ -3,6 +3,7 @@ mod debug_tools;
 mod error_popup;
 mod help;
 mod hover_tile_tooltip;
+mod layers;
 mod main_menu;
 mod map;
 mod misc;
@@ -32,6 +33,7 @@ use crate::{
     gz::GunzipBin,
     manage_planet::{ManagePlanetError, SwitchPlanet},
     overlay::OverlayLayerKind,
+    planet::{AnimalId, Params},
     screen::{CursorMode, OccupiedScreenSpace},
 };
 
@@ -87,7 +89,7 @@ impl Plugin for UiPlugin {
             .init_resource::<map::NeedUpdate>()
             .add_systems(
                 OnExit(GameState::AssetLoading),
-                (setup_fonts, load_textures, setup_style),
+                (setup_fonts, load_textures, setup_style).after(crate::assets::AssetsListSystemSet),
             )
             .add_systems(OnEnter(GameState::MainMenu), main_menu::set_main_menu_state)
             .add_systems(OnEnter(GameState::Running), map::update)
@@ -117,7 +119,7 @@ impl Plugin for UiPlugin {
                     animals::animals_window,
                     map::map_window,
                     stat::stat_window,
-                    layers_window,
+                    layers::layers_window,
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,
@@ -198,6 +200,7 @@ fn load_textures(
     mut egui_ctxs: EguiContexts,
     images: Res<Assets<Image>>,
     ui_assets: Res<UiAssets>,
+    params: Res<Params>,
     mut texture_handles: Local<Vec<egui::TextureHandle>>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
@@ -225,11 +228,10 @@ fn load_textures(
     let mut egui_textures = HashMap::new();
     for (path, handle) in textures {
         let image = images.get(&handle).unwrap();
-        let (texture_handle, size) = bevy_image_to_egui_texture(ctx, image, &path);
-
-        let Some(path) = path.strip_suffix(".png") else {
+        let Some((path, _)) = path.split_once(".") else {
             continue;
         };
+        let (texture_handle, size) = bevy_image_to_egui_texture(ctx, image, path, &params);
 
         egui_textures.insert(
             path.to_owned(),
@@ -248,6 +250,7 @@ fn bevy_image_to_egui_texture(
     ctx: &egui::Context,
     image: &bevy::prelude::Image,
     name: &str,
+    params: &Params,
 ) -> (egui::TextureHandle, egui::Vec2) {
     let image = image
         .clone()
@@ -257,8 +260,10 @@ fn bevy_image_to_egui_texture(
     let w = image.width();
     let h = image.height();
 
-    let (w, h) = if name.starts_with("animals/") {
-        (w / 2, h / 2)
+    let (w, h) = if let Some(animal) = name.strip_prefix("animals/") {
+        let attr = &params.animals[&AnimalId::from(animal).unwrap()];
+        let nw = if attr.civ.is_some() { 3 } else { 2 };
+        (w / nw, h / 2)
     } else {
         (w, h)
     };
@@ -282,58 +287,6 @@ fn bevy_image_to_egui_texture(
         ctx.load_texture(name, color_image, egui::TextureOptions::NEAREST),
         egui::Vec2::new(w as f32, h as f32),
     )
-}
-
-fn layers_window(
-    mut egui_ctxs: EguiContexts,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    mut wos: ResMut<WindowsOpenState>,
-    mut current_layer: ResMut<OverlayLayerKind>,
-    mut update_draw: ResMut<UpdateDraw>,
-    mut display_opts: ResMut<DisplayOpts>,
-) {
-    if !wos.layers {
-        return;
-    }
-
-    let rect = egui::Window::new(t!("layers"))
-        .open(&mut wos.layers)
-        .vscroll(false)
-        .default_width(100.0)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            layers_menu(ui, &mut current_layer, &mut update_draw, &mut display_opts);
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space.push_egui_window_rect(rect);
-}
-
-fn layers_menu(
-    ui: &mut egui::Ui,
-    current_layer: &mut OverlayLayerKind,
-    update_draw: &mut UpdateDraw,
-    display_opts: &mut DisplayOpts,
-) {
-    let mut new_layer = *current_layer;
-    for kind in OverlayLayerKind::iter() {
-        if ui.radio_value(&mut new_layer, kind, t!(kind)).clicked() {
-            ui.close_menu();
-        }
-    }
-    if new_layer != *current_layer {
-        *current_layer = new_layer;
-        update_draw.update();
-    }
-    ui.separator();
-
-    let old = *display_opts;
-    ui.checkbox(&mut display_opts.animals, t!("animal"));
-    ui.checkbox(&mut display_opts.cities, t!("cities"));
-    ui.checkbox(&mut display_opts.structures, t!("structures"));
-    if *display_opts != old {
-        update_draw.update();
-    }
 }
 
 pub fn reset_window_open_state(

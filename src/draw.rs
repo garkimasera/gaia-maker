@@ -18,6 +18,7 @@ pub struct UpdateDraw {
 pub struct DisplayOpts {
     pub animals: bool,
     pub cities: bool,
+    pub city_icons: bool,
     pub structures: bool,
 }
 
@@ -26,6 +27,7 @@ impl Default for DisplayOpts {
         Self {
             animals: true,
             cities: true,
+            city_icons: false,
             structures: true,
         }
     }
@@ -241,16 +243,21 @@ fn spawn_structure_textures(
         let kind: StructureKind = structure.into();
         let attrs = &params.structures[&kind];
 
-        let index = if let Structure::Settlement(settlement) = structure {
+        let (index, civ_icon) = if let Structure::Settlement(settlement) = structure {
             if !display_opts.cities {
                 continue;
             }
-            settlement.age as usize
+            let civ_icon = if display_opts.city_icons {
+                Some(settlement.id)
+            } else {
+                None
+            };
+            (settlement.age as usize, civ_icon)
         } else {
             if !display_opts.structures {
                 continue;
             }
-            0
+            (0, None)
         };
         let index = if monochrome {
             index + attrs.columns
@@ -273,6 +280,26 @@ fn spawn_structure_textures(
             ))
             .id();
         tex_entities.push(id);
+
+        if let Some(id) = civ_icon {
+            let t = &texture_handles.animals[&id];
+            let x = x - (TILE_SIZE - t.width as f32) / 2.0;
+            let y = y - (TILE_SIZE - t.height as f32) / 2.0;
+            let id = commands
+                .spawn((
+                    Sprite {
+                        image: t.image.clone(),
+                        texture_atlas: Some(TextureAtlas {
+                            index: 2,
+                            layout: t.layout.clone(),
+                        }),
+                        ..default()
+                    },
+                    Transform::from_xyz(x, y, 410.0),
+                ))
+                .id();
+            tex_entities.push(id);
+        }
     }
 }
 

@@ -19,6 +19,9 @@ use crate::planet::*;
 #[derive(Clone, Copy, Debug)]
 pub struct AssetsPlugin;
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct AssetsListSystemSet;
+
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(RonAssetPlugin::<ParamsAsset>::new(&["params.ron"]))
@@ -42,7 +45,8 @@ impl Plugin for AssetsPlugin {
             )
             .add_systems(
                 OnExit(GameState::AssetLoading),
-                (create_assets_list, crate::text_assets::set_text_global),
+                (create_assets_list, crate::text_assets::set_text_global)
+                    .in_set(AssetsListSystemSet),
             );
     }
 }
@@ -98,8 +102,8 @@ pub struct TextureHandles {
 pub struct LoadedTexture {
     pub layout: Handle<TextureAtlasLayout>,
     pub image: Handle<Image>,
-    pub _width: u32,
-    pub _height: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Debug, Resource, AssetCollection)]
@@ -256,8 +260,7 @@ fn create_assets_list(
             o => o,
         });
 
-    // Animals
-    let mut animals = HashMap::default();
+    // Animal
     for (path, handle) in &planet_asset_collection.animal_handles {
         let animal_id = path
             .strip_prefix("animals/")
@@ -277,27 +280,48 @@ fn create_assets_list(
             params.animals.insert(animal_id, animal);
             continue;
         }
-        if let Ok(handle) = handle.clone().try_typed::<Image>() {
-            let image = images.get(&handle).unwrap();
-            let width = image.width() / 2;
-            let height = image.height() / 2;
-            let layout = texture_atlas_assets.add(TextureAtlasLayout::from_grid(
-                UVec2::new(width, height),
-                2,
-                2,
-                None,
-                None,
-            ));
-            animals.insert(
-                animal_id,
-                LoadedTexture {
-                    layout,
-                    image: handle,
-                    _width: width,
-                    _height: height,
-                },
-            );
-        }
+    }
+
+    let mut animals = HashMap::default();
+    for (path, handle) in &planet_asset_collection.animal_handles {
+        let animal_id = path
+            .strip_prefix("animals/")
+            .and_then(|s| s.split_once('.'))
+            .expect("unexpected animal asset path")
+            .0;
+        let animal_id = match AnimalId::from(animal_id) {
+            Ok(animal_id) => animal_id,
+            Err(e) => {
+                log::warn!("invalid string \"{}\" for animal id: {}", animal_id, e);
+                continue;
+            }
+        };
+
+        let Ok(handle) = handle.clone().try_typed::<Image>() else {
+            continue;
+        };
+        let attr = params.animals.get(&animal_id).expect("no animal parameters");
+
+        let nw = if attr.civ.is_some() { 3 } else { 2 };
+        let image = images.get(&handle).unwrap();
+        let width = image.width() / nw;
+        let height = image.height() / 2;
+        let layout = texture_atlas_assets.add(TextureAtlasLayout::from_grid(
+            UVec2::new(width, height),
+            nw,
+            2,
+            None,
+            None,
+        ));
+        animals.insert(
+            animal_id,
+            LoadedTexture {
+                layout,
+                image: handle,
+                width,
+                height,
+            },
+        );
     }
 
     // Tile animations
@@ -337,8 +361,8 @@ fn create_assets_list(
                 LoadedTexture {
                     layout,
                     image: handle.clone(),
-                    _width: TILE_SIZE as u32,
-                    _height: TILE_SIZE as u32,
+                    width: TILE_SIZE as u32,
+                    height: TILE_SIZE as u32,
                 },
             )
         })
