@@ -189,7 +189,7 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
     style.visuals.widgets.inactive.fg_stroke.color = text_color;
     style.spacing.scroll = egui::style::ScrollStyle::solid();
-    style.interaction.tooltip_delay = 0.2;
+    style.interaction.tooltip_delay = 0.04;
     // style.debug.debug_on_hover = true;
 
     ctx.set_style(style);
