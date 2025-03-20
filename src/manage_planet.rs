@@ -205,6 +205,7 @@ fn update(
             hover_tile.get_single().ok().and_then(|hover_tile| hover_tile.0),
         );
         planet.advance(&mut sim, &params);
+        planet.monitor(&params, conf.report_lifespan);
         *last_advance_planet = now;
 
         if conf.autosave_enabled && planet.cycles % conf.autosave_cycle_duration == 0 {

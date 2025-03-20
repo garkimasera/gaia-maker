@@ -7,8 +7,6 @@ use std::mem::discriminant;
 
 use super::{AnimalId, CivilizationAge};
 
-const COMMON_NOTICE_REPORT_SPAN: u64 = 1000;
-
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Reports {
     count: Reverse<u64>,
@@ -53,9 +51,9 @@ impl Reports {
             .retain(|report| discriminant(&report.content) != discriminant(target));
     }
 
-    pub fn remove_outdated(&mut self, cycles: u64) {
+    pub fn remove_outdated(&mut self, cycles: u64, span: u64) {
         self.reports.retain(|_, report| {
-            if let Some(span) = report.content.span() {
+            if report.content.remove_by_cycle_progress() {
                 report.cycles + span > cycles
             } else {
                 true
@@ -111,13 +109,14 @@ pub enum ReportContent {
 }
 
 impl ReportContent {
-    pub fn span(&self) -> Option<u64> {
-        match self {
-            Self::EventCivilized { .. } | Self::EventCivAdvance { .. } => {
-                Some(COMMON_NOTICE_REPORT_SPAN)
-            }
-            _ => None,
-        }
+    pub fn remove_by_cycle_progress(&self) -> bool {
+        !matches!(
+            self,
+            Self::WarnHighTemp
+                | Self::WarnLowTemp
+                | Self::WarnLowOxygen
+                | Self::WarnLowCarbonDioxide
+        )
     }
 
     pub fn pos(&self) -> Option<Coords> {

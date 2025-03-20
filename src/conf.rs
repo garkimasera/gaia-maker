@@ -64,6 +64,7 @@ pub struct Conf {
     pub autosave_cycle_duration: u64,
     pub autosave_max_files: usize,
     pub manual_max_files: usize,
+    pub report_lifespan: u64,
     pub screen_refresh_rate: HighLow3,
     pub show_fps: bool,
     pub sound_effect_volume: f64,

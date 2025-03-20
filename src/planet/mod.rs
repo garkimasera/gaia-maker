@@ -143,7 +143,6 @@ impl Planet {
         self::civ::sim_civs(self, sim, params);
         self::event::advance(self, sim, params);
         self::stat::record_stats(self, params);
-        self::monitoring::monitor(self, params);
     }
 
     /// Update after user action without advance the cycle
