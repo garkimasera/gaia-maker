@@ -11,11 +11,14 @@ const FERTILITY_MIN: f32 = 0.0;
 pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let size = planet.map.size();
     let map_iter_idx = planet.map.iter_idx();
+    let coords_converter = sim.coords_converter();
 
     // Fertility
-    sim.fertility_effect.fill(0.0);
+    sim.fertility_value_and_effect.fill((0.0, 0.0));
 
     for p in map_iter_idx {
+        let (value, effect) = &mut sim.fertility_value_and_effect[p];
+        *value = planet.map[p].fertility;
         if let Some(&BuildingEffect::Fertilize {
             increment,
             max,
@@ -23,10 +26,15 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }) = planet.working_building_effect(p, params)
         {
             for (_, p) in CDistRangeIter::new(p, range as _) {
-                if planet.map.in_range(p) && planet.map[p].fertility < max {
-                    sim.fertility_effect[p] += increment;
+                if let Some(p) = coords_converter.conv(p) {
+                    if planet.map.in_range(p) && planet.map[p].fertility < max {
+                        *effect += increment;
+                    }
                 }
             }
+        } else if let Some(Structure::Settlement(Settlement { age, .. })) = &planet.map[p].structure
+        {
+            *effect -= *value * params.sim.fertility_settlement_impact[*age as usize];
         }
     }
 
@@ -82,7 +90,8 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         let mut new_fertility = (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
         if new_fertility < max_fertility {
-            new_fertility = (new_fertility + sim.fertility_effect[p]).min(max_fertility);
+            new_fertility =
+                (new_fertility + sim.fertility_value_and_effect[p].1).min(max_fertility);
         }
         sum_diff += (new_fertility - fertility) as f64;
         planet.map[p].fertility = new_fertility;

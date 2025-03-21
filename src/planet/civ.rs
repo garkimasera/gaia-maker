@@ -35,10 +35,6 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             update_state(planet, sim, p, &mut settlement, params, animal_attr);
         }
 
-        // Soil erosion
-        planet.map[p].fertility *=
-            1.0 - params.sim.soil_erosion_effect_by_settlement[settlement.age as usize];
-
         // Tech exp
         if planet.cycles % params.sim.advance_tech_interval_cycles == 0 {
             tech_exp(&mut settlement, planet, p, params);

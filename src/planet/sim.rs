@@ -42,8 +42,8 @@ pub struct Sim {
     pub vapor_new: Array2d<f32>,
     /// Tile humidity that calculated by adjusting rainfall by temperature
     pub humidity: Array2d<f32>,
-    /// Fertility effect to tile from structures or other factors
-    pub fertility_effect: Array2d<f32>,
+    /// Fertility value and effect to tile from structures or other factors
+    pub fertility_value_and_effect: Array2d<(f32, f32)>,
     /// Biomass difference in the cycle
     pub diff_biomass: Array2d<f32>,
     /// The number of working buildings
@@ -103,7 +103,7 @@ impl Sim {
             vapor,
             vapor_new: Array2d::new(size.0, size.1, 0.0),
             humidity: Array2d::new(size.0, size.1, 0.0),
-            fertility_effect: Array2d::new(size.0, size.1, 0.0),
+            fertility_value_and_effect: Array2d::new(size.0, size.1, (0.0, 0.0)),
             diff_biomass: Array2d::new(size.0, size.1, 0.0),
             working_buildings: HashMap::default(),
             energy_hydro_geothermal: Array2d::new(size.0, size.1, 0.0),

@@ -642,6 +642,8 @@ pub struct SimParams {
     pub sea_fertility_attenuation_factor: f32,
     /// Fertility factor when changed from ocean
     pub change_from_ocean_fertility_factor: f32,
+    /// Fertility impact by settlement
+    pub fertility_settlement_impact: [f32; CivilizationAge::LEN],
     /// Nitrogen in soil per area [m2] each percent
     pub soil_nitrogen: f32,
     /// Max biomass by fertility
@@ -794,8 +796,6 @@ pub struct SimParams {
     pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Required energy efficiency to sustain settlement
     pub energy_efficiency_required: [f32; CivilizationAge::LEN],
-    /// Soil erosion effect by settlement
-    pub soil_erosion_effect_by_settlement: [f32; CivilizationAge::LEN],
     /// Duration of events
     pub event_duration: HashMap<PlanetEventKind, u64>,
 }
