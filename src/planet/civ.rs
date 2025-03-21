@@ -26,14 +26,14 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         }
 
+        // Energy
+        super::civ_energy::process_settlement_energy(planet, sim, p, &mut settlement, params, cr);
+
         // Settlement state update
         settlement.since_state_changed = settlement.since_state_changed.saturating_add(1);
         if settlement.since_state_changed % SETTLEMENT_STATE_UPDATE_INTERVAL_CYCLES == 0 {
             update_state(planet, sim, p, &mut settlement, params, animal_attr);
         }
-
-        // Energy
-        super::civ_energy::process_settlement_energy(planet, sim, p, &mut settlement, params, cr);
 
         // Soil erosion
         planet.map[p].fertility *=
