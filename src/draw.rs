@@ -39,14 +39,19 @@ impl UpdateDraw {
     }
 }
 
-#[derive(Debug, Component)]
-struct FastAnimatedTexture {
-    start: u8,
-    monochrome_shift: u8,
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[repr(u8)]
+enum AnimatedTextureSpeed {
+    Fast,
+    Slow,
 }
 
 #[derive(Debug, Component)]
-struct SlowAnimatedTexture;
+struct AnimatedTexture {
+    speed: AnimatedTextureSpeed,
+    start: u8,
+    monochrome_shift: u8,
+}
 
 #[derive(Debug, Default, Resource)]
 struct AnimationCounter {
@@ -309,6 +314,7 @@ fn spawn_animal_textures(
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
+    params: Res<Params>,
     (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
@@ -357,6 +363,11 @@ fn spawn_animal_textures(
         let index = if monochrome { index + 2 } else { index };
 
         let t = &texture_handles.animals[&animal.id];
+        let monochrome_shift = if params.animals[&animal.id].civ.is_some() {
+            3
+        } else {
+            2
+        };
 
         let x = (p_screen.0 as f32 + 0.5) * TILE_SIZE;
         let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
@@ -371,7 +382,11 @@ fn spawn_animal_textures(
                     ..default()
                 },
                 Transform::from_xyz(x, y, 400.0),
-                SlowAnimatedTexture,
+                AnimatedTexture {
+                    speed: AnimatedTextureSpeed::Slow,
+                    start: 0,
+                    monochrome_shift,
+                },
             ))
             .id();
         tex_entities.push(id);
@@ -492,28 +507,21 @@ fn spawn_overlay_meshes(
 fn update_animation(
     mut counter: ResMut<AnimationCounter>,
     current_layer: Res<OverlayLayerKind>,
-    mut query_fast: Query<(&FastAnimatedTexture, &mut Sprite), Without<SlowAnimatedTexture>>,
-    mut query_slow: Query<(&SlowAnimatedTexture, &mut Sprite), Without<FastAnimatedTexture>>,
+    mut query: Query<(&AnimatedTexture, &mut Sprite)>,
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
     counter.fast ^= 1;
-
-    for (animated_texture, mut sprite) in &mut query_fast {
-        sprite.texture_atlas.as_mut().unwrap().index =
-            animated_texture.index(counter.fast, monochrome);
-    }
-
     if counter.fast == 1 {
-        return;
+        counter.slow ^= 1;
     }
 
-    counter.slow ^= 1;
-
-    let new_index = counter.slow + if monochrome { 2 } else { 0 };
-
-    for (_a, mut sprite) in &mut query_slow {
-        sprite.texture_atlas.as_mut().unwrap().index = new_index;
+    for (animated_texture, mut sprite) in &mut query {
+        let counter = match animated_texture.speed {
+            AnimatedTextureSpeed::Fast => counter.fast,
+            AnimatedTextureSpeed::Slow => counter.slow,
+        };
+        sprite.texture_atlas.as_mut().unwrap().index = animated_texture.index(counter, monochrome);
     }
 }
 
@@ -564,7 +572,7 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
     }
 }
 
-fn tile_event_texture(tile_event: &TileEvent) -> FastAnimatedTexture {
+fn tile_event_texture(tile_event: &TileEvent) -> AnimatedTexture {
     match tile_event {
         TileEvent::Vehicle {
             kind,
@@ -583,19 +591,21 @@ fn tile_event_texture(tile_event: &TileEvent) -> FastAnimatedTexture {
                 VehicleKind::AirPlane => 8,
             };
             let start = if direction.0 < 0 { start } else { start + 2 };
-            FastAnimatedTexture {
+            AnimatedTexture {
+                speed: AnimatedTextureSpeed::Fast,
                 monochrome_shift: 12,
                 start,
             }
         }
-        _ => FastAnimatedTexture {
+        _ => AnimatedTexture {
+            speed: AnimatedTextureSpeed::Fast,
             monochrome_shift: 2,
             start: 0,
         },
     }
 }
 
-impl FastAnimatedTexture {
+impl AnimatedTexture {
     fn index(&self, counter: usize, monochrome: bool) -> usize {
         let index = self.start as usize + counter;
         if monochrome {
