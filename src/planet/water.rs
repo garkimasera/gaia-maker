@@ -119,9 +119,9 @@ pub fn advance_rainfall_calc(planet: &mut Planet, sim: &mut Sim, params: &Params
         let rainfall = sim.vapor[p] * RAINFALL_DURATION;
         planet.map[p].rainfall = rainfall;
         sum_rainfall += rainfall as f64;
+        let temp = (planet.map[p].temp - KELVIN_CELSIUS).max(0.0);
         sim.humidity[p] = (rainfall
-            - params.sim.drying_factors.0
-                * (planet.map[p].temp - KELVIN_CELSIUS + params.sim.drying_factors.1))
+            - params.sim.drying_factors.0 * (temp - params.sim.drying_factors.1))
             .max(0.0);
     }
 

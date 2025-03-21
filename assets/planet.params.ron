@@ -22,9 +22,9 @@
             (1.39626340159546, 0.138),
             (1.5707963267949, 0.131),
         ],
-        air_diffusion_factor: 0.35,
+        air_diffusion_factor: 0.30,
         sea_diffusion_factor: 0.02,
-        n_loop_atmo_heat_calc: 8,
+        n_loop_atmo_heat_calc: 6,
         cloud_albedo_table: [
             (0.0,  0.0),
             (50.0, 0.30),
@@ -70,7 +70,7 @@
             (40.0, 4000.0),
             (90.0, 5000.0),
         ],
-        drying_factors: (20.0, -4.0),
+        drying_factors: (24.0, 10.0),
         temperature_fertility_table: [
             (-20.0, 0),
             (-15.0, 0.3),

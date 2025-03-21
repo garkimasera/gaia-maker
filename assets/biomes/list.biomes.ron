@@ -107,7 +107,7 @@
             temp: (2.0, 15.0),
             rainfall: (300.0, 10000.0),
             fertility: 40.0,
-            biomass: 6.0,
+            biomass: 5.5,
         ),
         color: (24, 80, 22),
     ),
