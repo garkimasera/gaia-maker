@@ -4927,7 +4927,7 @@ dependencies = [
 [[package]]
 name = "tile-geom"
 version = "0.1.0"
-source = "git+https://github.com/garkimasera/tile-geom.git#89c7fc948c5340a4c1994c84dc9127a9686ea47d"
+source = "git+https://github.com/garkimasera/tile-geom.git#ed1a5750f0e0638ea9c261b1502fb907fb6c1e48"
 dependencies = [
  "rayon",
  "serde",

@@ -17,8 +17,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     sim.fertility_value_and_effect.fill((0.0, 0.0));
 
     for p in map_iter_idx {
-        let (value, effect) = &mut sim.fertility_value_and_effect[p];
-        *value = planet.map[p].fertility;
+        let effect = &mut sim.fertility_value_and_effect[p].1;
         if let Some(&BuildingEffect::Fertilize {
             increment,
             max,
@@ -34,7 +33,8 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             }
         } else if let Some(Structure::Settlement(Settlement { age, .. })) = &planet.map[p].structure
         {
-            *effect -= *value * params.sim.fertility_settlement_impact[*age as usize];
+            *effect -=
+                planet.map[p].fertility * params.sim.fertility_settlement_impact[*age as usize];
         }
     }
 
@@ -42,10 +42,9 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         &params.sim.nitrogen_fertility_table,
         planet.atmo.partial_pressure(GasKind::Nitrogen),
     );
-
-    let mut sum_diff = 0.0;
-
-    for p in map_iter_idx {
+    let par_iter = sim.fertility_value_and_effect.par_iter_mut().enumerate();
+    par_iter.for_each(|(i, (new_value, effect))| {
+        let p = Coords::from_index_size(i, size);
         let temp_factor =
             linear_interpolation(&params.sim.temperature_fertility_table, planet.map[p].temp);
         let rainfall_factor =
@@ -59,7 +58,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let fertility_from_adjacent_tiles = Direction::FOUR_DIRS
                 .iter()
                 .filter_map(|dir| {
-                    let p_adj = sim.convert_p_cyclic(p + dir.as_coords());
+                    let p_adj = coords_converter.conv(p + dir.as_coords());
                     if let Some(p_adj) = p_adj {
                         if planet.map.in_range(p_adj) {
                             Some((planet.map[p_adj].fertility - fertility).max(0.0))
@@ -88,13 +87,20 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             0.0
         };
 
-        let mut new_fertility = (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
-        if new_fertility < max_fertility {
-            new_fertility =
-                (new_fertility + sim.fertility_value_and_effect[p].1).min(max_fertility);
+        *new_value = (fertility + diff + sea_effect).clamp(FERTILITY_MIN, FERTILITY_MAX);
+        if *new_value < max_fertility {
+            *new_value = (*new_value + *effect).min(max_fertility);
         }
-        sum_diff += (new_fertility - fertility) as f64;
-        planet.map[p].fertility = new_fertility;
+    });
+
+    let mut sum_diff = 0.0;
+    for (tile, (new_value, _)) in planet
+        .map
+        .iter_mut()
+        .zip(sim.fertility_value_and_effect.iter_mut())
+    {
+        sum_diff += (*new_value - tile.fertility) as f64;
+        tile.fertility = *new_value;
     }
     planet.atmo.add(
         GasKind::Nitrogen,
