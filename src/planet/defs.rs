@@ -718,14 +718,15 @@ pub struct SimParams {
     pub civ_temp_bonus: [f32; CivilizationAge::LEN],
     /// The number of cycles until settlement state becomes changeable
     pub settlement_state_changeable_cycles: u16,
-    /// Threshold to stop growing by biomass decrease
-    pub settlement_stop_growing_biomass_threshold: f32,
-    /// Probability to stop growing by biomass decrease
-    pub settlement_stop_growing_biomass_prob: f32,
+    /// Threshold to detect biomass decrease
+    pub settlement_biomass_decrease_threshold: f32,
     /// Settlement becomes deserted when the tile biomass is under this factor
     pub settlement_deserted_by_biomass_factor: f32,
     /// Settlement state change weight table
     pub settlement_state_change_weight_table: [[u32; SettlementState::LEN]; SettlementState::LEN],
+    /// Settlement state change weight table when biomass decreases
+    pub settlement_state_change_weight_table_decrease:
+        [[u32; SettlementState::LEN]; SettlementState::LEN],
     /// Settlement in stable state population fluctuation
     pub settlement_stable_pop_fluctuation: f32,
     /// Settlement spread simulation interval cycles

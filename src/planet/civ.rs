@@ -135,16 +135,10 @@ fn update_state(
         settlement.change_state(SettlementState::Deserted);
         return;
     }
-    if settlement.state == SettlementState::Growing
-        && sim.diff_biomass[p] < params.sim.settlement_stop_growing_biomass_threshold
-        && sim
-            .rng
-            .random_bool(params.sim.settlement_stop_growing_biomass_prob as f64)
+    let biomass_decrease = sim.diff_biomass[p] < params.sim.settlement_biomass_decrease_threshold;
+    if settlement.since_state_changed < params.sim.settlement_state_changeable_cycles
+        || !(biomass_decrease && settlement.state != SettlementState::Growing)
     {
-        settlement.change_state(SettlementState::Stable);
-        return;
-    }
-    if settlement.since_state_changed < params.sim.settlement_state_changeable_cycles {
         return;
     }
 
@@ -157,9 +151,21 @@ fn update_state(
             .map(|v| WeightedIndex::new(v).expect("invalid settlement_state_change_weight_table"))
             .collect()
     });
+    let change_weight_decrease = CHANGE_WEIGHT.get_or_init(|| {
+        params
+            .sim
+            .settlement_state_change_weight_table_decrease
+            .iter()
+            .map(|v| WeightedIndex::new(v).expect("invalid settlement_state_change_weight_table"))
+            .collect()
+    });
+    let table = if biomass_decrease {
+        change_weight
+    } else {
+        change_weight_decrease
+    };
     let new_state =
-        SettlementState::from_usize(change_weight[settlement.state as usize].sample(&mut sim.rng))
-            .unwrap();
+        SettlementState::from_usize(table[settlement.state as usize].sample(&mut sim.rng)).unwrap();
     if new_state != settlement.state {
         settlement.change_state(new_state);
     }
