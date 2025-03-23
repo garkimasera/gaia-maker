@@ -142,6 +142,7 @@ ion-irradiator = "イオン放射機"
 # Tile Events
 aerosol-injection = "エアロゾル注入"
 black-dust = "黒色塵"
+decadence = "退廃"
 fire = "火災"
 plague = "疫病"
 vehicle = "乗り物"

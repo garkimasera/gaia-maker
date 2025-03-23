@@ -15,7 +15,7 @@ pub fn animals_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut cursor_mode: ResMut<CursorMode>,
-    (mut planet, mut sim): (ResMut<Planet>, ResMut<Sim>),
+    mut planet: ResMut<Planet>,
     params: Res<Params>,
     textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
@@ -35,15 +35,7 @@ pub fn animals_window(
                 select_panel(ui, state);
                 ui.separator();
                 ui.vertical(|ui| {
-                    contents(
-                        ui,
-                        state,
-                        &mut planet,
-                        &mut sim,
-                        &params,
-                        &textures,
-                        &mut cursor_mode,
-                    );
+                    contents(ui, state, &mut planet, &params, &textures, &mut cursor_mode);
                 });
             });
         })
@@ -57,7 +49,6 @@ fn contents(
     ui: &mut egui::Ui,
     state: &State,
     planet: &mut Planet,
-    sim: &mut Sim,
     params: &Params,
     textures: &UiTextures,
     cursor_mode: &mut CursorMode,
@@ -142,7 +133,7 @@ fn contents(
                         String::new()
                     };
                     if ui.button(t!("civilize")).on_disabled_hover_text(s).clicked() {
-                        planet.civilize_animal(state.current, sim, params);
+                        planet.civilize_animal(state.current, params);
                     }
                 }
             });

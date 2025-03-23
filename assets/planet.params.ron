@@ -288,13 +288,13 @@
         biomass_energy_efficiency_density_factor_table: [(0.0, 0.2), (4.0, 1.0)],
         high_efficiency_limit_by_supply: (0, 0.4, 0.3, 0, 1.0, 0),
         high_efficiency_limit_by_demand: (0, 0.1, 1.0, 0, 0.5, 0),
-        energy_source_biomass_impact: (1.00, 0.03, 8.0e-5, 4.0e-5, 2.0e-5, 0.00),
+        energy_source_biomass_impact: (1.00, 0.03, 8.0e-5, 4.0e-5, 2.0e-5, 0.0),
         energy_efficiency_required: (3.5, 4.0, 4.5, 15.0, 20.0, 30.0),
         high_efficiency_wind_solar_biomass_impact: 6.0e-5,
-        event_duration: {civilize: 108},
     ),
     event: (
         n_animal_to_civilize: 8.0,
+        civilize_cycles: 108,
         tile_event_costs: {
             fire: Material(100.0),
             black_dust: Material(50.0),
@@ -309,7 +309,6 @@
         black_dust_decrease_by_rainfall: 200,
         aerosol_injection_cycles: 40,
         aerosol_injection_amount: 0.002,
-        settlement_random_event_interval_cycles: 10,
         plague_list: [
             (
                 w: 0.01, w_manual: 0.5,
@@ -320,6 +319,11 @@
         ],
         plague_spread_base_prob: 0.2,
         plague_base_lethality_speed: 0.01,
+        decadence_prob: 1.0e-5,
+        decadence_pop_threshold: 0.1,
+        decadence_cycles: (2000, 4000),
+        decadence_interval_cycles: (3000, 4000),
+        decadence_infectivity: 0.2,
         vehicle_spawn_prob: 0.01,
         vehicle_move_interval_cycles: 16,
         vehicle_ns_move_prob: 0.25,

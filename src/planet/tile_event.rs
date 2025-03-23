@@ -41,11 +41,14 @@ impl TileEvents {
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     sim.war_counter.clear();
 
-    for p in planet.map.iter_idx() {
-        let tile = &mut planet.map[p];
+    for tile in planet.map.iter_mut() {
         let tile_events = &mut tile.tile_events;
         if tile_events.0.is_empty() {
             continue;
+        }
+
+        if !matches!(tile.structure, Some(Structure::Settlement(_))) {
+            tile_events.retain(|te| !te.is_settlement_event());
         }
 
         if let Some(TileEvent::Fire) = tile_events.get_mut(TileEventKind::Fire) {
@@ -232,5 +235,14 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     for (p, vehicle) in moved_vehicles {
         planet.map[p].tile_events.insert(vehicle);
+    }
+}
+
+impl TileEvent {
+    pub fn is_settlement_event(&self) -> bool {
+        matches!(
+            self,
+            Self::War { .. } | Self::Decadence { .. } | Self::Plague { .. }
+        )
     }
 }

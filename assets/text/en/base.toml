@@ -143,6 +143,7 @@ ion-irradiator = "Ion Irradiator"
 # Tile Events
 aerosol-injection = "Aerosol Injection"
 black-dust = "Black Dust"
+decadence = "Decadence"
 fire = "Fire"
 plague = "Plague"
 vehicle = "Vehicle"

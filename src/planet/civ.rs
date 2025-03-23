@@ -10,6 +10,7 @@ use super::{Planet, ReportContent, Sim, defs::*};
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
 const SETTLEMENT_STATE_UPDATE_INTERVAL_CYCLES: u16 = 8;
+const SETTLEMENT_RANDOM_EVENT_INTERVAL_CYCLES: u64 = 10;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
@@ -274,10 +275,11 @@ fn tech_exp(settlement: &mut Settlement, planet: &mut Planet, p: Coords, params:
 }
 
 fn cause_random_events(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    match planet.cycles % params.event.settlement_random_event_interval_cycles {
+    match planet.cycles % SETTLEMENT_RANDOM_EVENT_INTERVAL_CYCLES {
         1 => spawn_vehicles(planet, sim, params),
         2 => super::plague::cause_plague_random(planet, sim, params),
-        3 => super::war::cause_war_random(planet, sim, params),
+        3 => super::decadence::cause_decadence_random(planet, sim, params),
+        4 => super::war::cause_war_random(planet, sim, params),
         _ => (),
     }
 }

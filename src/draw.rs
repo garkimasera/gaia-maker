@@ -557,18 +557,19 @@ fn coord_rotation_x(size: (u32, u32), p: Coords) -> Coords {
 
 fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
     match tile_event {
-        TileEvent::Fire => 9000,
-        TileEvent::BlackDust { .. } => 1000,
-        TileEvent::AerosolInjection { .. } => 2000,
+        TileEvent::Fire => 90,
+        TileEvent::BlackDust { .. } => 10,
+        TileEvent::AerosolInjection { .. } => 20,
         TileEvent::Plague { cured, .. } => {
             if *cured {
                 0
             } else {
-                3000
+                31
             }
         }
-        TileEvent::Vehicle { .. } => 3000,
-        TileEvent::War { .. } => 4000,
+        TileEvent::Vehicle { .. } => 40,
+        TileEvent::Decadence { .. } => 30,
+        TileEvent::War { .. } => 32,
     }
 }
 

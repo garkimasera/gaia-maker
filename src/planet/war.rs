@@ -26,7 +26,7 @@ fn start_civil_war(
         kind: WarKind::CivilWar,
         start_at: Some(p),
     };
-    planet.start_event(PlanetEvent::War(planet_event), sim, params);
+    planet.events.start_event(PlanetEvent::War(planet_event), None);
 
     let region1 = if settlement.age >= CivilizationAge::Iron {
         geom::CHEBYSHEV_DISTANCE_1_COORDS
@@ -81,8 +81,8 @@ pub fn exec_combat(
 
 fn empty_war_id(planet: &Planet) -> u32 {
     'i_loop: for a in 0.. {
-        for e in planet.events.in_progress_iter(PlanetEventKind::War) {
-            if let PlanetEvent::War(WarEvent { i, .. }) = e {
+        for e in planet.events.in_progress_iter() {
+            if let PlanetEvent::War(WarEvent { i, .. }) = &e.event {
                 if *i == a {
                     continue 'i_loop;
                 }

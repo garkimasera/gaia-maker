@@ -125,16 +125,8 @@ impl AsRef<BuildingAttrs> for StructureAttrs {
 
 #[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(StructureKind))]
-#[strum_discriminants(derive(
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    EnumIter,
-    AsRefStr,
-    Display
-))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize))]
+#[strum_discriminants(derive(EnumIter, AsRefStr, Display))]
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum Structure {
@@ -168,16 +160,8 @@ pub enum StructureBuildingState {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(TileEventKind))]
-#[strum_discriminants(derive(
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    AsRefStr,
-    Display,
-    EnumIter
-))]
+#[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize))]
+#[strum_discriminants(derive(EnumIter, AsRefStr, Display))]
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum TileEvent {
@@ -198,6 +182,7 @@ pub enum TileEvent {
         age: CivilizationAge,
         direction: (i8, i8),
     },
+    Decadence {},
     War {
         i: u32,
         defence_power: f32,
@@ -488,6 +473,7 @@ pub enum BuildingEffect {
 pub enum PlanetEvent {
     Civilize { target: AnimalId },
     Plague(PlagueEvent),
+    Decadence(DecadenceEvent),
     War(WarEvent),
 }
 
@@ -501,6 +487,14 @@ impl PlanetEvent {
 pub struct PlagueEvent {
     pub i: usize,
     pub start_at: Coords,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DecadenceEvent {
+    pub id: AnimalId,
+    pub start_pos: Coords,
+    pub remaining_cycles: i32,
+    pub age: CivilizationAge,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -797,14 +791,14 @@ pub struct SimParams {
     pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Required energy efficiency to sustain settlement
     pub energy_efficiency_required: [f32; CivilizationAge::LEN],
-    /// Duration of events
-    pub event_duration: HashMap<PlanetEventKind, u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EventParams {
     /// Minimum required animal population to civilize
     pub n_animal_to_civilize: f32,
+    /// Required cycles to civilize an animal
+    pub civilize_cycles: u64,
     /// Resource cost for tile event
     pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
     /// The ratio of biomass burn at one cycle
@@ -823,14 +817,22 @@ pub struct EventParams {
     pub aerosol_injection_cycles: u32,
     /// Aerosol injection amount
     pub aerosol_injection_amount: f32,
-    /// Settlement random event start routine interval cycles
-    pub settlement_random_event_interval_cycles: u64,
     /// Plague list
     pub plague_list: Vec<PlagueParams>,
     /// Base probability of plague spreading
     pub plague_spread_base_prob: f32,
     /// Base lethality speed of plague
     pub plague_base_lethality_speed: f32,
+    /// Decadence probability
+    pub decadence_prob: f64,
+    /// Decadence population threashold to max population
+    pub decadence_pop_threshold: f32,
+    /// Decadence cycles
+    pub decadence_cycles: (u32, u32),
+    /// Decadence minimum interval cycles
+    pub decadence_interval_cycles: (u32, u32),
+    /// Decadence infectivity
+    pub decadence_infectivity: f64,
     /// Vehicle spawn probability
     pub vehicle_spawn_prob: f32,
     /// Vehicle move interval cycles

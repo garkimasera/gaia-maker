@@ -52,9 +52,6 @@ pub struct GlobalDataChanged {
     pub app_exit_after_saved: bool,
 }
 
-#[derive(Clone, Debug, Event)]
-pub struct StartEvent(pub PlanetEvent);
-
 impl Resource for SaveState {}
 impl Resource for Planet {}
 impl Resource for Params {}
@@ -65,7 +62,6 @@ impl Plugin for ManagePlanetPlugin {
         app.add_event::<ManagePlanet>()
             .add_event::<ManagePlanetError>()
             .add_event::<SwitchPlanet>()
-            .add_event::<StartEvent>()
             .add_event::<GlobalDataChanged>()
             .init_resource::<SaveState>()
             .add_systems(
@@ -77,10 +73,7 @@ impl Plugin for ManagePlanetPlugin {
                 OnEnter(GameState::Running),
                 start_sim.in_set(GameSystemSet::StartSim),
             )
-            .add_systems(
-                FixedUpdate,
-                (update, start_event).run_if(in_state(GameState::Running)),
-            )
+            .add_systems(FixedUpdate, update.run_if(in_state(GameState::Running)))
             .add_systems(Update, manage_planet.before(GameSystemSet::Draw))
             .add_systems(Update, save_global_data_on_changed)
             .add_systems(
@@ -226,17 +219,6 @@ fn update(
         update_draw.update();
     }
     *last_frame = now;
-}
-
-fn start_event(
-    mut planet: ResMut<Planet>,
-    mut sim: ResMut<Sim>,
-    mut er_start_event: EventReader<StartEvent>,
-    params: Res<Params>,
-) {
-    for event in er_start_event.read() {
-        planet.start_event(event.0.clone(), &mut sim, &params);
-    }
 }
 
 #[derive(Clone, Debug, Event)]

@@ -5,6 +5,7 @@ mod biome;
 mod buildings;
 mod civ;
 mod civ_energy;
+mod decadence;
 mod defs;
 mod event;
 mod heat_transfer;
@@ -158,10 +159,6 @@ impl Planet {
         // Add gene point based on planet biomass
         self.res.diff_gene_point =
             (self.stat.sum_biomass / params.sim.coef_gene_point_income).sqrt();
-    }
-
-    pub fn start_event(&mut self, event: PlanetEvent, _sim: &mut Sim, params: &Params) {
-        self.events.start_event(event, params);
     }
 
     pub fn n_tile(&self) -> u32 {

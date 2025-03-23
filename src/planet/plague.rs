@@ -6,8 +6,8 @@ use super::{Planet, Sim, defs::*};
 
 pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coords) {
     let plague_event: &mut PlagueEvent = 'a: {
-        for event in planet.events.in_progress_iter_mut(PlanetEventKind::Plague) {
-            if let PlanetEvent::Plague(plague_event) = &mut *event {
+        for e in planet.events.in_progress_iter_mut() {
+            if let PlanetEvent::Plague(plague_event) = &mut e.event {
                 break 'a plague_event;
             }
         }
@@ -15,9 +15,9 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
         let plague_event = PlagueEvent { i: 0, start_at: p };
         planet
             .events
-            .start_event(PlanetEvent::Plague(plague_event), params);
-        for event in planet.events.in_progress_iter_mut(PlanetEventKind::Plague) {
-            if let PlanetEvent::Plague(plague_event) = &mut *event {
+            .start_event(PlanetEvent::Plague(plague_event), None);
+        for e in planet.events.in_progress_iter_mut() {
+            if let PlanetEvent::Plague(plague_event) = &mut e.event {
                 break 'a plague_event;
             }
         }
@@ -42,8 +42,8 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         .next()
         .unwrap();
     let plague_event: &mut PlagueEvent = 'a: {
-        for event in planet.events.in_progress_iter_mut(PlanetEventKind::Plague) {
-            if let PlanetEvent::Plague(plague_event) = &mut *event {
+        for e in planet.events.in_progress_iter_mut() {
+            if let PlanetEvent::Plague(plague_event) = &mut e.event {
                 break 'a plague_event;
             }
         }
