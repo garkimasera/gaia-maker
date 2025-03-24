@@ -60,6 +60,14 @@ impl Report {
                 };
                 (Notice, t!("report/civ-extinct"; name = name))
             }
+            ReportContent::EventCivDecadence { name, id, .. } => {
+                let name = if let Some(name) = name {
+                    name.to_owned()
+                } else {
+                    t!("civ", id)
+                };
+                (Notice, t!("report/civ-decadence"; name = name))
+            }
         }
     }
 }

@@ -182,7 +182,9 @@ pub enum TileEvent {
         age: CivilizationAge,
         direction: (i8, i8),
     },
-    Decadence {},
+    Decadence {
+        cured: bool,
+    },
     War {
         i: u32,
         defence_power: f32,

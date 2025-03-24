@@ -106,6 +106,11 @@ pub enum ReportContent {
         id: AnimalId,
         name: Option<String>,
     },
+    EventCivDecadence {
+        pos: Coords,
+        id: AnimalId,
+        name: Option<String>,
+    },
 }
 
 impl ReportContent {
@@ -121,8 +126,9 @@ impl ReportContent {
 
     pub fn pos(&self) -> Option<Coords> {
         match self {
-            Self::EventCivilized { pos, .. } => Some(*pos),
-            Self::EventCivAdvance { pos, .. } => Some(*pos),
+            Self::EventCivilized { pos, .. }
+            | Self::EventCivAdvance { pos, .. }
+            | Self::EventCivDecadence { pos, .. } => Some(*pos),
             _ => None,
         }
     }

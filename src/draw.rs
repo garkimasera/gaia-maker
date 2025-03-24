@@ -568,7 +568,13 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
             }
         }
         TileEvent::Vehicle { .. } => 40,
-        TileEvent::Decadence { .. } => 30,
+        TileEvent::Decadence { cured } => {
+            if *cured {
+                0
+            } else {
+                30
+            }
+        }
         TileEvent::War { .. } => 32,
     }
 }

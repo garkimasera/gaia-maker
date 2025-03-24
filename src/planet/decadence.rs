@@ -4,7 +4,7 @@ use arrayvec::ArrayVec;
 use geom::Coords;
 use rand::{Rng, seq::IndexedRandom};
 
-use super::{Planet, Sim, defs::*};
+use super::{Planet, ReportContent, Sim, defs::*};
 
 pub fn cause_decadence_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let events: HashMap<_, _> = planet
@@ -46,26 +46,39 @@ pub fn cause_decadence_random(planet: &mut Planet, sim: &mut Sim, params: &Param
 }
 
 pub fn cause_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params, p: Coords) {
-    if let Some(Structure::Settlement(settlement)) = planet.map[p].structure {
-        planet.map[p].tile_events.insert(TileEvent::Decadence {});
-        let remaining_cycles = sim
-            .rng
-            .random_range(params.event.decadence_cycles.0..params.event.decadence_cycles.1);
-        let duration = remaining_cycles
-            + sim.rng.random_range(
-                params.event.decadence_interval_cycles.0..params.event.decadence_interval_cycles.1,
-            );
+    let Some(Structure::Settlement(settlement)) = planet.map[p].structure else {
+        return;
+    };
 
-        planet.events.start_event(
-            PlanetEvent::Decadence(DecadenceEvent {
-                id: settlement.id,
-                start_pos: p,
-                age: settlement.age,
-                remaining_cycles: remaining_cycles as i32,
-            }),
-            duration as u64,
+    planet.map[p]
+        .tile_events
+        .insert(TileEvent::Decadence { cured: false });
+    let remaining_cycles = sim
+        .rng
+        .random_range(params.event.decadence_cycles.0..params.event.decadence_cycles.1);
+    let duration = remaining_cycles
+        + sim.rng.random_range(
+            params.event.decadence_interval_cycles.0..params.event.decadence_interval_cycles.1,
         );
-    }
+
+    planet.events.start_event(
+        PlanetEvent::Decadence(DecadenceEvent {
+            id: settlement.id,
+            start_pos: p,
+            age: settlement.age,
+            remaining_cycles: remaining_cycles as i32,
+        }),
+        duration as u64,
+    );
+    let name = planet.civ_name(settlement.id);
+    planet.reports.append(
+        planet.cycles,
+        ReportContent::EventCivDecadence {
+            id: settlement.id,
+            name,
+            pos: p,
+        },
+    );
 }
 
 pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
@@ -84,17 +97,30 @@ pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
         let (id, age) = {
             let tile = &mut planet.map[p];
-            let Some(TileEvent::Decadence {}) = tile.tile_events.get_mut(TileEventKind::Decadence)
+            let Some(TileEvent::Decadence { cured }) =
+                tile.tile_events.get_mut(TileEventKind::Decadence)
             else {
                 continue;
             };
+            if *cured {
+                continue;
+            }
             let Some(Structure::Settlement(settlement)) = &mut tile.structure else {
                 continue;
             };
+            let DecadenceEvent {
+                remaining_cycles,
+                age,
+                ..
+            } = events[&settlement.id];
 
-            let remaining_cycles = events[&settlement.id].remaining_cycles;
             if remaining_cycles <= 0 {
                 tile.tile_events.remove(TileEventKind::Decadence);
+                continue;
+            }
+
+            if settlement.age < age {
+                *cured = true;
                 continue;
             }
 
@@ -113,7 +139,14 @@ pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
                 if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
                     if let Some(Structure::Settlement(settlement)) = &planet.map[p_adj].structure {
-                        if settlement.id == id && settlement.age == age {
+                        if settlement.id == id
+                            && settlement.age == age
+                            && planet.map[p_adj]
+                                .tile_events
+                                .list()
+                                .iter()
+                                .all(|te| !te.is_settlement_event())
+                        {
                             target_tiles.push(p_adj);
                         }
                     }
@@ -122,7 +155,7 @@ pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             if let Some(p_target) = target_tiles.choose(&mut sim.rng) {
                 planet.map[*p_target]
                     .tile_events
-                    .insert(TileEvent::Decadence {});
+                    .insert(TileEvent::Decadence { cured: false });
             }
         }
     }

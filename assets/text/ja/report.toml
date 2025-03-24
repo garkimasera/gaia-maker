@@ -6,3 +6,4 @@ warn-low-temp = "気温が低すぎます。気温を上げるには、軌道上
 civilized = "{$animal}の文明化が完了しました"
 civ-advance = "{$name} が {$age}時代 に進歩しました"
 civ-extinct = "{$name} が滅亡しました"
+civ-decadence = "{$name} の退廃が始まりました"

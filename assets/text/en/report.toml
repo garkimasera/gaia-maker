@@ -6,3 +6,4 @@ warn-low-temp = "The temperature is too low. An effective way to raise the tempe
 civilized = "The process of civilizing {$animal} has been completed."
 civ-advance = "{$name} advanced into the {$age} Age."
 civ-extinct = "{$name} has become extinct."
+civ-decadence = "The decadence of {$name} began."
