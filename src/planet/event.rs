@@ -97,7 +97,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Check civil war is ended
         if let PlanetEvent::War(WarEvent { i, kind, .. }) = &ein.event {
-            if *kind == WarKind::CivilWar && *i == 0 {
+            if *kind == WarKind::CivilWar && matches!(sim.war_counter.get(i), Some(0) | None) {
                 return false;
             }
         }
