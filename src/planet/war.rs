@@ -13,7 +13,7 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 }
 
-fn start_civil_war(
+pub fn start_civil_war(
     planet: &mut Planet,
     sim: &mut Sim,
     params: &Params,

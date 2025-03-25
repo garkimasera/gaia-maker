@@ -98,6 +98,8 @@ pub trait PlanetDebug {
     fn edit_biome(&mut self, p: Coords, biome: Biome);
     fn change_height(&mut self, p: Coords, value: f32, sim: &mut Sim, params: &Params);
     fn place_settlement(&mut self, p: Coords, settlement: Settlement);
+    fn cause_decadence(&mut self, p: Coords, sim: &mut Sim, params: &Params);
+    fn cause_civil_war(&mut self, p: Coords, sim: &mut Sim, params: &Params);
     fn delete_civilization(&mut self);
     fn height_map_as_string(&self) -> String;
 }
@@ -115,6 +117,15 @@ impl PlanetDebug for Planet {
 
     fn place_settlement(&mut self, p: Coords, settlement: Settlement) {
         self.map[p].structure = Some(Structure::Settlement(settlement));
+    }
+
+    fn cause_decadence(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
+        super::decadence::cause_decadence(self, sim, params, p);
+    }
+    fn cause_civil_war(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
+        if let Some(Structure::Settlement(settlement)) = self.map[p].structure.clone() {
+            super::war::start_civil_war(self, sim, params, p, settlement);
+        }
     }
 
     fn delete_civilization(&mut self) {

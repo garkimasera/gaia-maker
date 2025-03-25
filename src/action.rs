@@ -5,7 +5,7 @@ use crate::audio::SoundEffectPlayer;
 use crate::draw::UpdateDraw;
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
-use crate::screen::CursorMode;
+use crate::screen::{CauseEventKind, CursorMode};
 use crate::{GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
@@ -13,7 +13,7 @@ pub struct ActionPlugin;
 
 #[derive(Clone, Copy, Debug, Event)]
 pub struct CursorAction {
-    pub coords: Coords,
+    pub p: Coords,
     pub _drag: bool,
 }
 
@@ -38,48 +38,48 @@ fn cursor_action(
     se_player: SoundEffectPlayer,
 ) {
     for e in er.read() {
-        let CursorAction { coords, .. } = *e;
+        let CursorAction { p, .. } = *e;
 
         match *cursor_mode {
             CursorMode::Normal => (),
             CursorMode::Demolition => {
                 update_draw.update();
-                if planet.demolition(coords, &mut sim, &params) {
+                if planet.demolition(p, &mut sim, &params) {
                     se_player.play("demolish");
                 }
             }
             CursorMode::Build(kind) => {
                 if planet.buildable(params.structures[&kind].as_ref()).is_ok() {
                     update_draw.update();
-                    if planet.placeable(coords) {
-                        planet.place(coords, new_structure(kind), &mut sim, &params);
+                    if planet.placeable(p) {
+                        planet.place(p, new_structure(kind), &mut sim, &params);
                         se_player.play("build");
                     }
                 }
             }
             CursorMode::TileEvent(kind) => {
-                planet.cause_tile_event(coords, kind, &mut sim, &params);
+                planet.cause_tile_event(p, kind, &mut sim, &params);
                 update_draw.update();
             }
             CursorMode::SpawnAnimal(animal_id) => {
-                if planet.animal_spawnable(coords, animal_id, &params) {
+                if planet.animal_spawnable(p, animal_id, &params) {
                     update_draw.update();
-                    planet.spawn_animal(coords, animal_id, &params);
+                    planet.spawn_animal(p, animal_id, &params);
                     se_player.play("spawn-animal");
                 }
             }
             CursorMode::EditBiome(biome) => {
                 update_draw.update();
-                planet.edit_biome(coords, biome);
+                planet.edit_biome(p, biome);
             }
             CursorMode::ChangeHeight(value) => {
                 update_draw.update();
-                planet.change_height(coords, value, &mut sim, &params);
+                planet.change_height(p, value, &mut sim, &params);
             }
             CursorMode::PlaceSettlement(id, age) => {
                 update_draw.update();
                 planet.place_settlement(
-                    coords,
+                    p,
                     Settlement {
                         id,
                         age,
@@ -87,6 +87,17 @@ fn cursor_action(
                         ..Default::default()
                     },
                 );
+            }
+            CursorMode::CauseEvent(kind) => {
+                update_draw.update();
+                match kind {
+                    CauseEventKind::Decadence => {
+                        planet.cause_decadence(p, &mut sim, &params);
+                    }
+                    CauseEventKind::CivilWar => {
+                        planet.cause_civil_war(p, &mut sim, &params);
+                    }
+                }
             }
         }
     }

@@ -258,6 +258,7 @@ fn sidebar(
             CursorMode::PlaceSettlement(id, age) => {
                 format!("settlement: {} {:?}", id, age)
             }
+            CursorMode::CauseEvent(kind) => AsRef::<str>::as_ref(&kind).to_owned(),
         };
         ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));
         ui.horizontal(|ui| {

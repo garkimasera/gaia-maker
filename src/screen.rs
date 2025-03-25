@@ -10,6 +10,7 @@ use bevy::{
     prelude::*,
 };
 use geom::Coords;
+use strum::{AsRefStr, EnumIter};
 
 #[derive(Clone, Copy, Debug)]
 pub struct ScreenPlugin;
@@ -27,6 +28,14 @@ pub enum CursorMode {
     EditBiome(Biome),
     ChangeHeight(f32),
     PlaceSettlement(AnimalId, CivilizationAge),
+    CauseEvent(CauseEventKind),
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug, EnumIter, AsRefStr)]
+pub enum CauseEventKind {
+    #[default]
+    Decadence,
+    CivilWar,
 }
 
 impl Default for CursorMode {
@@ -176,7 +185,7 @@ fn mouse_event(
     if let Some(coords) = hover_tile.get_single().unwrap().0.0 {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             ew_cursor_action.send(CursorAction {
-                coords,
+                p: coords,
                 _drag: false,
             });
             *prev_tile_coords = Some(coords);
@@ -185,7 +194,7 @@ fn mouse_event(
 
         if prev_tile_coords.is_some() && Some(coords) != *prev_tile_coords {
             ew_cursor_action.send(CursorAction {
-                coords,
+                p: coords,
                 _drag: true,
             });
             *prev_tile_coords = Some(coords);

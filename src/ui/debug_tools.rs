@@ -1,8 +1,8 @@
 use super::{CursorMode, OccupiedScreenSpace, WindowsOpenState};
-use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
 use crate::saveload::SaveState;
 use crate::screen::HoverTile;
+use crate::{planet::debug::PlanetDebug, screen::CauseEventKind};
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
@@ -120,6 +120,7 @@ pub struct MapPanel {
     biome: Biome,
     settlement_age: CivilizationAge,
     animal_id: Option<AnimalId>,
+    cause_event: CauseEventKind,
 }
 
 impl MapPanel {
@@ -141,7 +142,7 @@ impl MapPanel {
         }
 
         ui.horizontal(|ui| {
-            egui::ComboBox::from_id_salt(Biome::Ocean)
+            egui::ComboBox::from_id_salt("debug_tool_biomes")
                 .selected_text(AsRef::<str>::as_ref(&self.biome))
                 .show_ui(ui, |ui| {
                     for b in Biome::iter() {
@@ -154,7 +155,7 @@ impl MapPanel {
             }
         });
         ui.horizontal(|ui| {
-            egui::ComboBox::from_id_salt(CivilizationAge::default())
+            egui::ComboBox::from_id_salt("debug_tool_civ_ages")
                 .selected_text(AsRef::<str>::as_ref(&self.settlement_age))
                 .show_ui(ui, |ui| {
                     for age in CivilizationAge::iter() {
@@ -165,7 +166,7 @@ impl MapPanel {
                         );
                     }
                 });
-            egui::ComboBox::from_id_salt(default_civ_animal)
+            egui::ComboBox::from_id_salt("debug_tool_civ_animals")
                 .selected_text(&*self.animal_id.unwrap())
                 .show_ui(ui, |ui| {
                     for animal_id in params
@@ -187,6 +188,21 @@ impl MapPanel {
                     CursorMode::PlaceSettlement(self.animal_id.unwrap(), self.settlement_age);
             }
         });
+        ui.horizontal(|ui| {
+            egui::ComboBox::from_id_salt("debug_tool_cause_event")
+                .selected_text(AsRef::<str>::as_ref(&self.cause_event))
+                .show_ui(ui, |ui| {
+                    for ce in CauseEventKind::iter() {
+                        ui.selectable_value(&mut self.cause_event, ce, AsRef::<str>::as_ref(&ce));
+                    }
+                });
+            if ui.button("Cause event").clicked()
+                || matches!(*cursor_mode, CursorMode::CauseEvent(_))
+            {
+                *cursor_mode = CursorMode::CauseEvent(self.cause_event);
+            }
+        });
+
         ui.horizontal(|ui| {
             if ui.button("height +100").clicked() {
                 *cursor_mode = CursorMode::ChangeHeight(100.0);
