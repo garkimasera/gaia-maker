@@ -31,6 +31,7 @@ black-dust = "Black dust is spread over the surface of the planet. The surface o
 fire = "It will cause a fire in the specified tile. It will burn the biomass on the ground, destroying civilization and animals. It will increase carbon dioxide and aerosols."
 plague = "The plague will spread to the city you have selected. The plague will also infect other cities over time, reducing the population of civilization."
 vehicle = "Advanced civilizations use ships and airplanes for travel."
+decadence = "Civilizations that have achieved a certain level of prosperity may become decadent. In a decadent civilization, people neglect maintaining the foundations of prosperity - science, technology, culture, and infrastructure - or actively damage these foundations. The population and level of technology in the civilization decline."
 war = "Cities can become involved in wars. The population of cities during wars decreases."
 
 rock = "In barren areas where rocks are exposed, there is little or no life."
