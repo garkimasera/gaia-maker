@@ -1,7 +1,7 @@
 use bevy_egui::egui;
 use geom::Coords;
 
-use crate::planet::{KELVIN_CELSIUS, Planet, Structure};
+use crate::planet::{KELVIN_CELSIUS, Planet, Structure, TileEvent};
 
 use super::UiTextures;
 
@@ -81,5 +81,39 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
 
     if let Some(animal) = tile.largest_animal() {
         ui.label(format!("{}: {}", t!("animal"), t!("animal", animal.id)));
+    }
+
+    for tile_event in tile.tile_events.list().iter() {
+        match tile_event {
+            TileEvent::Fire => {
+                ui.label(t!("fire"));
+            }
+            TileEvent::BlackDust { .. } => {
+                ui.label(t!("black-dust"));
+            }
+            TileEvent::AerosolInjection { .. } => {
+                ui.label(t!("aerosol-injection"));
+            }
+            TileEvent::Plague { cured, .. } => {
+                if !*cured {
+                    ui.label(t!("plague"));
+                }
+            }
+            TileEvent::Vehicle { id, .. } => {
+                ui.label(format!(
+                    "{} ({})",
+                    t!("vehicle"),
+                    planet.civ_name(*id).unwrap_or_default()
+                ));
+            }
+            TileEvent::Decadence { cured, .. } => {
+                if !*cured {
+                    ui.label(t!("decadence"));
+                }
+            }
+            TileEvent::War { .. } => {
+                ui.label(t!("war"));
+            }
+        }
     }
 }
