@@ -1,7 +1,5 @@
 (
     sim: (
-        sim_slow_loop_duration_ms: 250,
-        sim_medium_loop_duration_ms: 100,
         mol_per_atm: 1.85e+8,
         secs_per_cycle: 86400,
         air_heat_cap: 1000.0,
@@ -234,8 +232,8 @@
         settlement_spread_pop: (2.0, 4.0, 5.0, 10.0, 20.0, 30.0),
         base_settlement_spreading_prob: 0.05,
         base_settlement_spreading_threshold: 0.67,
-        technology_propagation_prob: 0.02,
-        settlement_extinction_threshold: 0.4,
+        technology_propagation_prob: 0.2,
+        settlement_extinction_threshold: 0.5,
         energy_demand_per_pop: (10, 33, 66, 170, 340, 420),
         biomass_energy_factor: 20000,
         resource_availability_factor: 0.004,

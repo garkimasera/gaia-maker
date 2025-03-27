@@ -9,6 +9,8 @@ report_lifespan = 2000
 screen_refresh_rate = "medium"
 show_fps = false
 sound_effect_volume = 1.0
+slow_speed_sim_duration_ms = 250
+medium_speed_sim_duration_ms = 100
 
 [ui]
 scale_factor = 1.0

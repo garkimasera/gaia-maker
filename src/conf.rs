@@ -68,6 +68,8 @@ pub struct Conf {
     pub screen_refresh_rate: HighLow3,
     pub show_fps: bool,
     pub sound_effect_volume: f64,
+    pub slow_speed_sim_duration_ms: u64,
+    pub medium_speed_sim_duration_ms: u64,
     pub window: Option<WindowConf>,
 }
 

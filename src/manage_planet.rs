@@ -160,10 +160,11 @@ fn update(
     time: Res<Time<Real>>,
     wos: Res<WindowsOpenState>,
     conf: Res<Conf>,
-    (mut last_advance_planet, mut last_update_draw, mut last_frame): (
+    (mut last_advance_planet, mut last_update_draw, mut last_frame, mut delay_counter): (
         Local<Duration>,
         Local<Duration>,
         Local<Duration>,
+        Local<u8>,
     ),
 ) {
     if wos.save || wos.load {
@@ -179,13 +180,24 @@ fn update(
     let advance_planet = match *speed {
         GameSpeed::Paused => false,
         GameSpeed::Slow => {
-            now - *last_advance_planet > Duration::from_millis(params.sim.sim_slow_loop_duration_ms)
+            now - *last_advance_planet > Duration::from_millis(conf.slow_speed_sim_duration_ms)
         }
         GameSpeed::Medium => {
-            now - *last_advance_planet
-                > Duration::from_millis(params.sim.sim_medium_loop_duration_ms)
+            now - *last_advance_planet > Duration::from_millis(conf.medium_speed_sim_duration_ms)
         }
-        GameSpeed::Fast => true,
+        GameSpeed::Fast => {
+            if now - *last_frame > Duration::from_millis(1000 / 50) {
+                *delay_counter = delay_counter.saturating_add(20);
+            } else {
+                *delay_counter = delay_counter.saturating_sub(1);
+            }
+            if *delay_counter < 100 {
+                true
+            } else {
+                now - *last_advance_planet
+                    > Duration::from_millis(conf.medium_speed_sim_duration_ms / 2)
+            }
+        }
     };
     let advance_planet = if advance_planet {
         now - *last_frame < Duration::from_millis(1000 / 30)

@@ -72,7 +72,10 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
 
         // Settlement extinction
-        if settlement.pop < params.sim.settlement_extinction_threshold {
+        if settlement.pop
+            < params.sim.settlement_init_pop[settlement.age as usize]
+                * params.sim.settlement_extinction_threshold
+        {
             planet.map[p].structure = None;
             continue;
         } else {
