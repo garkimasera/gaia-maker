@@ -5,7 +5,7 @@ use bevy_egui::{EguiContexts, egui};
 use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
-use super::{OccupiedScreenSpace, WindowsOpenState};
+use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState, help::HelpItem};
 use crate::{manage_planet::SaveState, planet::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
@@ -25,6 +25,7 @@ pub fn stat_window(
     planet: Res<Planet>,
     params: Res<Params>,
     save_state: Res<SaveState>,
+    textures: Res<UiTextures>,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
     mut current_graph_item: Local<GraphItem>,
@@ -50,7 +51,7 @@ pub fn stat_window(
                     &planet,
                     save_state.save_file_metadata.debug_mode_enabled,
                 ),
-                Panel::Atmosphere => atmo_stat(ui, &planet),
+                Panel::Atmosphere => atmo_stat(ui, &textures, &planet),
                 Panel::Civilization => civ_stat(ui, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
@@ -95,7 +96,7 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
     }
 }
 
-fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
+fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet) {
     ui.label(format!(
         "{}: {:.1} °C",
         t!("average-air-temperature"),
@@ -114,17 +115,22 @@ fn atmo_stat(ui: &mut egui::Ui, planet: &Planet) {
     ));
     ui.separator();
 
-    egui::Grid::new("grid_atmo").striped(true).show(ui, |ui| {
-        for gas_kind in GasKind::iter() {
-            ui.label(t!(gas_kind));
-            ui.label(format!("{:.2}%", planet.atmo.mole_ratio[&gas_kind] * 100.0));
-            ui.horizontal(|ui| {
-                ui.add_space(8.0);
-                ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)));
-            });
-            ui.end_row();
-        }
-    });
+    egui::Grid::new("grid_atmo")
+        .striped(true)
+        .min_col_width(16.0)
+        .show(ui, |ui| {
+            for gas_kind in GasKind::iter() {
+                let help_item = HelpItem::Atmosphere(gas_kind);
+                ui.image(textures.get(format!("ui/icon-{}", gas_kind.as_ref())))
+                    .on_hover_text(t!("help", help_item));
+                ui.label(format!("{:.2}%", planet.atmo.mole_ratio[&gas_kind] * 100.0));
+                ui.horizontal(|ui| {
+                    ui.add_space(8.0);
+                    ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)));
+                });
+                ui.end_row();
+            }
+        });
 }
 
 fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<AnimalId>) {
