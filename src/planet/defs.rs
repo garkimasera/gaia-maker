@@ -648,6 +648,8 @@ pub struct SimParams {
     pub max_biomass_factor_o2_table: Vec<(f32, f32)>,
     /// Max biomass by settlement population
     pub max_biomass_pop_table: Vec<(f32, f32)>,
+    /// Max biomass by settlement population effect to adjacent tiles
+    pub max_biomass_pop_adj_factor: f32,
     /// Base biomass increase speed
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed

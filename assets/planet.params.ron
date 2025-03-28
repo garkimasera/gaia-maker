@@ -152,6 +152,7 @@
             (1000, 10.0),
             (4000, 8.0),
         ],
+        max_biomass_pop_adj_factor: 0.7,
         base_biomass_increase_speed: 0.01,
         base_biomass_decrease_speed: 0.06,
         biomass_growth_speed_atm_table: [

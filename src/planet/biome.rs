@@ -1,6 +1,7 @@
 use geom::{CDistRangeIter, Direction};
 use rand::Rng;
 use rayon::prelude::*;
+use sim::CoordsConverter;
 
 use super::misc::linear_interpolation;
 use super::*;
@@ -139,6 +140,7 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             &sim.humidity,
             params,
             p,
+            coords_converter,
             max_biomass_density_planet_factor,
         );
         let biomass = planet.map[p].biomass;
@@ -274,6 +276,7 @@ fn calc_tile_max_biomass_density(
     humidity: &Array2d<f32>,
     params: &Params,
     p: Coords,
+    coords_converter: CoordsConverter,
     planet_factor: f32,
 ) -> f32 {
     let max_by_fertility = linear_interpolation(
@@ -286,12 +289,26 @@ fn calc_tile_max_biomass_density(
     } else {
         params.sim.sea_biomass_factor
     };
-    let max_by_pop =
+    let max_by_pop_zero = params.sim.max_biomass_pop_table[0].1;
+    let mut max_by_pop =
         if let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p].structure {
             linear_interpolation(&params.sim.max_biomass_pop_table, pop)
         } else {
             f32::MAX
         };
+    for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
+        if let Some(p_adj) = coords_converter.conv(p + *p_adj) {
+            if let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p_adj].structure
+            {
+                let diff =
+                    max_by_pop_zero - linear_interpolation(&params.sim.max_biomass_pop_table, pop);
+                let m = max_by_pop_zero - params.sim.max_biomass_pop_adj_factor * diff;
+                if m < max_by_pop {
+                    max_by_pop = m;
+                }
+            }
+        }
+    }
 
     (max_by_fertility * planet_factor * land_or_sea_factor)
         .min(max_by_humidity)
