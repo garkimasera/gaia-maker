@@ -359,15 +359,18 @@ fn spawn_animal_textures(
             continue;
         };
 
-        let index = counter.slow;
-        let index = if monochrome { index + 2 } else { index };
-
         let t = &texture_handles.animals[&animal.id];
-        let monochrome_shift = if params.animals[&animal.id].civ.is_some() {
+        let monochrome_shift: u8 = if params.animals[&animal.id].civ.is_some() {
             3
         } else {
             2
         };
+        let animated_texture = AnimatedTexture {
+            speed: AnimatedTextureSpeed::Slow,
+            start: 0,
+            monochrome_shift,
+        };
+        let index = animated_texture.index(counter.slow, monochrome);
 
         let x = (p_screen.0 as f32 + 0.5) * TILE_SIZE;
         let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
@@ -382,11 +385,7 @@ fn spawn_animal_textures(
                     ..default()
                 },
                 Transform::from_xyz(x, y, 400.0),
-                AnimatedTexture {
-                    speed: AnimatedTextureSpeed::Slow,
-                    start: 0,
-                    monochrome_shift,
-                },
+                animated_texture,
             ))
             .id();
         tex_entities.push(id);
