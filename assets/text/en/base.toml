@@ -161,7 +161,7 @@ early-space = "Early Space"
 # Energy sources
 [energy_source]
 biomass = "Biomass"
-wind-solar = "Wind & Solar"
+solar-wind = "Solar & Wind"
 hydro-geothermal = "Hydro & Geothermal"
 fossil-fuel = "Fossil Fuel"
 nuclear = "Nuclear"

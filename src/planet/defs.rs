@@ -336,7 +336,7 @@ pub enum SettlementKind {
 #[repr(u8)]
 pub enum EnergySource {
     Biomass = 0,
-    WindSolar,
+    SolarWind,
     HydroGeothermal,
     FossilFuel,
     Nuclear,

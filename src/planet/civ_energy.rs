@@ -138,7 +138,7 @@ pub fn process_settlement_energy(
             }
         }
     }
-    supply[EnergySource::WindSolar as usize] =
+    supply[EnergySource::SolarWind as usize] =
         surrounding_wind_solar * (1.0 - cr) + sim.energy_wind_solar;
     supply[EnergySource::HydroGeothermal as usize] =
         surrounding_hydro_geothermal * (1.0 - cr) + sim.energy_hydro_geothermal[p];
@@ -165,7 +165,7 @@ pub fn process_settlement_energy(
         EnergySource::HydroGeothermal,
         EnergySource::Nuclear,
         EnergySource::FossilFuel,
-        EnergySource::WindSolar,
+        EnergySource::SolarWind,
     ];
     let mut v: ArrayVec<(usize, f32, f32), { (EnergySource::LEN - 1) * 2 }> = ArrayVec::new();
     let mut high_eff_wind_solar = 0.0;
@@ -180,7 +180,7 @@ pub fn process_settlement_energy(
             let normal_supply = supply[src] - high_eff_supply;
             v.push((src, high_eff, high_eff_supply));
             v.push((src, eff, normal_supply));
-            if src == EnergySource::WindSolar as usize {
+            if src == EnergySource::SolarWind as usize {
                 high_eff_wind_solar = high_eff_supply;
             }
         } else {
@@ -236,7 +236,7 @@ pub fn process_settlement_energy(
         .iter()
         .enumerate()
         .map(|(src, a)| {
-            if src == EnergySource::WindSolar as usize {
+            if src == EnergySource::SolarWind as usize {
                 params.sim.high_efficiency_wind_solar_biomass_impact
                     * high_eff_wind_solar.max(consume[src])
                     + a * (consume[src] - high_eff_wind_solar).max(0.0)

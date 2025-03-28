@@ -48,7 +48,7 @@ impl AsRef<str> for HelpItem {
             },
             HelpItem::EnergySources(energy_source) => match energy_source {
                 EnergySource::Biomass => "energy_source/biomass",
-                EnergySource::WindSolar => "energy_source/wind-solar",
+                EnergySource::SolarWind => "energy_source/solar-wind",
                 EnergySource::HydroGeothermal => "energy_source/hydro-geothermal",
                 EnergySource::FossilFuel => "energy_source/fossil-fuel",
                 EnergySource::Nuclear => "energy_source/nuclear",

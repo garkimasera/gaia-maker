@@ -184,7 +184,7 @@ fn civ_stat(
     ui.separator();
 
     ui.label(t!("energy-consumption"));
-    egui::Grid::new("table_civ").show(ui, |ui| {
+    egui::Grid::new("table_civ").min_col_width(16.0).show(ui, |ui| {
         let max = c
             .total_energy_consumption
             .iter()
@@ -193,6 +193,9 @@ fn civ_stat(
             .unwrap()
             .into_inner();
         for src in EnergySource::iter() {
+            let help_item = HelpItem::EnergySources(src);
+            ui.image(textures.get(format!("ui/icon-energy-source-{}", src.as_ref())))
+                .on_hover_text(t!("help", help_item));
             ui.label(t!("energy_source", src));
             let e = c.total_energy_consumption[src as usize];
             let s = if max < 1000.0 {

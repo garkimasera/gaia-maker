@@ -160,7 +160,7 @@ early-space = "初期宇宙"
 # Energy sources
 [energy_source]
 biomass = "バイオマス"
-wind-solar = "風力 & 太陽"
+solar-wind = "太陽 & 風力"
 hydro-geothermal = "水力 & 地熱"
 fossil-fuel = "化石燃料"
 nuclear = "原子力"
