@@ -52,7 +52,7 @@ pub fn stat_window(
                     save_state.save_file_metadata.debug_mode_enabled,
                 ),
                 Panel::Atmosphere => atmo_stat(ui, &textures, &planet),
-                Panel::Civilization => civ_stat(ui, &planet, &mut current_civ_id),
+                Panel::Civilization => civ_stat(ui, &textures, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
         })
@@ -133,7 +133,12 @@ fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet) {
         });
 }
 
-fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<AnimalId>) {
+fn civ_stat(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    planet: &Planet,
+    current_civ_id: &mut Option<AnimalId>,
+) {
     if planet.civs.is_empty() {
         ui.label(t!("no-civilization"));
         *current_civ_id = None;
@@ -164,13 +169,18 @@ fn civ_stat(ui: &mut egui::Ui, planet: &Planet, current_civ_id: &mut Option<Anim
     ui.separator();
 
     ui.label(t!("cities"));
-    egui::Grid::new("table_cities").show(ui, |ui| {
-        for age in CivilizationAge::iter() {
-            ui.label(t!("age", age));
-            ui.label(format!("{}", c.total_settlement[age as usize]));
-            ui.end_row();
-        }
-    });
+    egui::Grid::new("table_cities")
+        .min_col_width(16.0)
+        .show(ui, |ui| {
+            for age in CivilizationAge::iter() {
+                let help_item = HelpItem::CivilizationAges(age);
+                ui.image(textures.get(format!("ui/icon-age-{}", age.as_ref())))
+                    .on_hover_text(t!("help", help_item));
+                ui.label(t!("age", age));
+                ui.label(format!("{}", c.total_settlement[age as usize]));
+                ui.end_row();
+            }
+        });
     ui.separator();
 
     ui.label(t!("energy-consumption"));
