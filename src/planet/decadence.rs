@@ -121,6 +121,7 @@ pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             if settlement.age < age {
                 *cured = true;
+                settlement.change_state_after_bad_event(sim, params);
                 continue;
             }
 

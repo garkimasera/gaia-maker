@@ -723,6 +723,9 @@ pub struct SimParams {
     /// Settlement state change weight table when biomass decreases
     pub settlement_state_change_weight_table_decrease:
         [[u32; SettlementState::LEN]; SettlementState::LEN],
+    /// Settlement state change weight table after bad event
+    pub settlement_state_change_weight_after_bad_event:
+        [[u32; SettlementState::LEN]; SettlementState::LEN],
     /// Settlement in stable state population fluctuation
     pub settlement_stable_pop_fluctuation: f32,
     /// Settlement spread simulation interval cycles

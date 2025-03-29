@@ -443,9 +443,29 @@ impl Planet {
 }
 
 impl Settlement {
-    fn change_state(&mut self, new_state: SettlementState) {
+    pub fn change_state(&mut self, new_state: SettlementState) {
         self.state = new_state;
         self.since_state_changed = 0;
+    }
+
+    pub fn change_state_after_bad_event(&mut self, sim: &mut Sim, params: &Params) {
+        use rand::distr::weighted::WeightedIndex;
+        static CHANGE_WEIGHT: OnceLock<Vec<WeightedIndex<u32>>> = OnceLock::new();
+        let table = CHANGE_WEIGHT.get_or_init(|| {
+            params
+                .sim
+                .settlement_state_change_weight_after_bad_event
+                .iter()
+                .map(|v| {
+                    WeightedIndex::new(v).expect("invalid settlement_state_change_weight_table")
+                })
+                .collect()
+        });
+        let new_state =
+            SettlementState::from_usize(table[self.state as usize].sample(&mut sim.rng)).unwrap();
+        if new_state != self.state {
+            self.change_state(new_state);
+        }
     }
 }
 

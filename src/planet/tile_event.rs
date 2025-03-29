@@ -110,6 +110,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     .max(0.0);
                 *sim.war_counter.entry(*id).or_default() += 1;
                 if finished {
+                    settlement.change_state_after_bad_event(sim, params);
                     tile_events.remove(TileEventKind::War);
                 }
             } else {
