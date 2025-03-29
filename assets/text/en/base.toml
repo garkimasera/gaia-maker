@@ -184,3 +184,10 @@ delete-save-data = "Delete the following save data?"
 save-limit = "Due to storage limitations, you cannot create multiple save data files when playing on the web."
 save-limit-strong = "Do you want to delete the following save data and start a new game? This action cannot be undone."
 web-limit-warning = "You are running Gaia Maker in a web browser. When running in a web browser, the number of save data and performance are limited. If you want to play without limitations, please use the download version."
+
+# Stat items
+[stat_item]
+planet-name = "Name of the planet"
+cycles = "Time elapsed since terraforming began"
+radius = "Radius of the planet"
+population = "Population of civilizations"

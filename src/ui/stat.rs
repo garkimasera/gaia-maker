@@ -48,6 +48,7 @@ pub fn stat_window(
             match *current_panel {
                 Panel::Planet => planet_stat(
                     ui,
+                    &textures,
                     &planet,
                     save_state.save_file_metadata.debug_mode_enabled,
                 ),
@@ -62,17 +63,36 @@ pub fn stat_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
-    egui::Grid::new("table_planet").striped(true).show(ui, |ui| {
+fn planet_stat(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    planet: &Planet,
+    debug_mode_enabled: bool,
+) {
+    let grid = egui::Grid::new("table_planet")
+        .striped(true)
+        .min_col_width(16.0);
+    grid.show(ui, |ui| {
+        ui.image(textures.get("ui/icon-planet"))
+            .on_hover_text(t!("stat_item", "planet-name"));
         ui.label(t!("planet-name"));
         ui.label(&planet.basics.name);
         ui.end_row();
+
+        ui.image(textures.get("ui/icon-cycles"))
+            .on_hover_text(t!("stat_item", "cycles"));
         ui.label(t!("cycles"));
         ui.label(format!("{}", planet.cycles));
         ui.end_row();
+
+        ui.image(textures.get("ui/icon-radius"))
+            .on_hover_text(t!("stat_item", "radius"));
         ui.label(t!("radius"));
         ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
         ui.end_row();
+
+        ui.image(textures.get("ui/icon-solar-constant"))
+            .on_hover_text(t!("help", "solar-constant"));
         ui.label(t!("solar-constant"));
         ui.label(format!(
             "{:.0} W/m² ({:+.0}%)",
@@ -80,11 +100,17 @@ fn planet_stat(ui: &mut egui::Ui, planet: &Planet, debug_mode_enabled: bool) {
             (planet.state.solar_power_multiplier - 1.0) * 100.0
         ));
         ui.end_row();
+
+        ui.image(textures.get("ui/icon-biomass"))
+            .on_hover_text(t!("help", "biomass"));
         ui.label(t!("biomass"));
         ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
         ui.end_row();
-        let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
+
+        ui.image(textures.get("ui/icon-population"))
+            .on_hover_text(t!("stat_item", "population"));
         ui.label(t!("population"));
+        let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
         ui.label(format!("{:.0}", sum_pop.abs()));
     });
 
