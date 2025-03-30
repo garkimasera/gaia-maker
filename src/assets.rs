@@ -12,6 +12,7 @@ use serde_with::{DisplayFromStr, Same, serde_as};
 use strum::IntoEnumIterator;
 
 use crate::GameState;
+use crate::audio::MusicListAsset;
 use crate::conf::Conf;
 use crate::gz::GunzipBin;
 use crate::planet::*;
@@ -33,6 +34,7 @@ impl Plugin for AssetsPlugin {
                 "start_planet.ron",
             ]))
             .add_plugins(RonAssetPlugin::<AnimalAsset>::new(&["animal.ron"]))
+            .add_plugins(RonAssetPlugin::<MusicListAsset>::new(&["music.ron"]))
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
@@ -41,11 +43,16 @@ impl Plugin for AssetsPlugin {
                     .load_collection::<UiAssets>()
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
-                    .load_collection::<SoundEffectSources>(),
+                    .load_collection::<SoundEffectSources>()
+                    .load_collection::<MusicSources>(),
             )
             .add_systems(
                 OnExit(GameState::AssetLoading),
-                (create_assets_list, crate::text_assets::set_text_global)
+                (
+                    create_assets_list,
+                    crate::text_assets::set_text_global,
+                    crate::audio::set_music_list,
+                )
                     .in_set(AssetsListSystemSet),
             );
     }
@@ -142,6 +149,12 @@ define_asset_list_from_enum! {
 pub struct SoundEffectSources {
     #[asset(path = "se", collection(mapped, typed))]
     pub sound_effects: HashMap<String, Handle<AudioSource>>,
+}
+
+#[derive(Debug, Resource, AssetCollection)]
+pub struct MusicSources {
+    #[asset(path = "music", collection(mapped))]
+    pub music_handles: HashMap<String, UntypedHandle>,
 }
 
 fn create_assets_list(
