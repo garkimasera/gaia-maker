@@ -30,8 +30,8 @@ impl Plugin for ConfPlugin {
 
 fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>>) {
     if let Some(conf) = conf {
-        let conf = toml::to_string(&*conf).unwrap();
-        if er_conf_change.read().next().is_some() {
+        if er_conf_change.read().last().is_some() {
+            let conf = toml::to_string(&*conf).unwrap();
             if let Err(e) = crate::platform::write_data_file(CONF_FILE_NAME, &conf) {
                 log::error!("cannot save conf: {}", e);
             }
@@ -67,7 +67,8 @@ pub struct Conf {
     pub report_lifespan: u64,
     pub screen_refresh_rate: HighLow3,
     pub show_fps: bool,
-    pub sound_effect_volume: f64,
+    pub sound_effect_volume: u8,
+    pub bgm_volume: u8,
     pub slow_speed_sim_duration_ms: u64,
     pub medium_speed_sim_duration_ms: u64,
     pub window: Option<WindowConf>,

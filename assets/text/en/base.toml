@@ -172,6 +172,8 @@ gift = "Gift"
 autosave-enabled = "Enable Autosave"
 screen-refresh-rate = "Screen Refresh Rate"
 show-fps = "Show FPS"
+bgm-volume = "BGM Volume"
+se-volume = "Sound Effects Volume"
 
 # Messages
 [msg]

@@ -35,6 +35,14 @@ pub fn preferences_window(
                     });
             });
             ui.checkbox(&mut conf.show_fps, t!("preference", "show-fps"));
+
+            egui::Grid::new("volume_preferences").show(ui, |ui| {
+                ui.label(t!("preference", "bgm-volume"));
+                ui.add(egui::Slider::new(&mut conf.bgm_volume, 0..=100).suffix("%"));
+                ui.end_row();
+                ui.label(t!("preference", "se-volume"));
+                ui.add(egui::Slider::new(&mut conf.sound_effect_volume, 0..=100).suffix("%"));
+            });
         })
         .unwrap()
         .response

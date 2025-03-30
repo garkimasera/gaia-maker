@@ -171,6 +171,8 @@ gift = "ギフト"
 autosave-enabled = "オートセーブ"
 screen-refresh-rate = "画面更新頻度"
 show-fps = "FPS表示"
+bgm-volume = "BGM音量"
+se-volume = "効果音音量"
 
 # Messages
 [msg]

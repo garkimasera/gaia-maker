@@ -8,7 +8,8 @@ manual_max_files = 5
 report_lifespan = 2000
 screen_refresh_rate = "medium"
 show_fps = false
-sound_effect_volume = 1.0
+sound_effect_volume = 100
+bgm_volume = 100
 slow_speed_sim_duration_ms = 250
 medium_speed_sim_duration_ms = 100
 
