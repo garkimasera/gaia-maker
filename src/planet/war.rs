@@ -24,7 +24,7 @@ pub fn start_civil_war(
     let planet_event = WarEvent {
         i,
         kind: WarKind::CivilWar,
-        start_at: Some(p),
+        start_pos: Some(p),
     };
     planet.events.start_event(PlanetEvent::War(planet_event), None);
 

@@ -173,6 +173,7 @@ pub enum TileEvent {
         remaining_cycles: u32,
     },
     Plague {
+        i: u32,
         cured: bool,
         target_pop: f32,
     },
@@ -487,8 +488,8 @@ impl PlanetEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlagueEvent {
-    pub i: usize,
-    pub start_at: Coords,
+    pub i: u32,
+    pub start_pos: Coords,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -503,7 +504,7 @@ pub struct DecadenceEvent {
 pub struct WarEvent {
     pub i: u32,
     pub kind: WarKind,
-    pub start_at: Option<Coords>,
+    pub start_pos: Option<Coords>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

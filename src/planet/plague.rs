@@ -12,7 +12,7 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
             }
         }
         // Start new plague
-        let plague_event = PlagueEvent { i: 0, start_at: p };
+        let plague_event = PlagueEvent { i: 0, start_pos: p };
         planet
             .events
             .start_event(PlanetEvent::Plague(plague_event), None);
@@ -23,9 +23,10 @@ pub fn cause_plague(planet: &mut Planet, _sim: &mut Sim, params: &Params, p: Coo
         }
         unreachable!();
     };
-    let plague_params = &params.event.plague_list[plague_event.i];
+    let plague_params = &params.event.plague_list[plague_event.i as usize];
     if let Some(Structure::Settlement(settlement)) = planet.map[p].structure {
         planet.map[p].tile_events.insert(TileEvent::Plague {
+            i: plague_event.i,
             cured: false,
             target_pop: settlement.pop * (1.0 - plague_params.lethality),
         });
@@ -49,7 +50,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         }
         unreachable!();
     };
-    let plague_params = &params.event.plague_list[plague_event.i];
+    let plague_params = &params.event.plague_list[plague_event.i as usize];
     let infection_enabled_by_cycles = elapsed_cycles <= plague_params.infection_limit_cycles;
     let mut count_infected = 0;
 
@@ -61,7 +62,11 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
             planet.map[p].tile_events.remove(TileEventKind::Plague);
             continue;
         };
-        let Some(TileEvent::Plague { cured, target_pop }) = planet.map[p]
+        let Some(TileEvent::Plague {
+            i,
+            cured,
+            target_pop,
+        }) = planet.map[p]
             .tile_events
             .get_mut(TileEventKind::Plague)
             .copied()
@@ -83,9 +88,12 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
 
             if settlement.pop < target_pop {
                 planet.map[p].tile_events.insert(TileEvent::Plague {
+                    i,
                     cured: true,
                     target_pop,
                 });
+                settlement.change_state_after_bad_event(sim, params);
+                planet.map[p].structure = Some(Structure::Settlement(settlement));
                 continue;
             }
 
@@ -111,6 +119,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
                     let tile_events = &mut planet.map[*p_target].tile_events;
                     if !tile_events.contains(TileEventKind::Plague) {
                         tile_events.insert(TileEvent::Plague {
+                            i,
                             cured: false,
                             target_pop: pop * (1.0 - plague_params.lethality),
                         });
@@ -136,6 +145,7 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
                         .into(),
                 ) {
                     planet.map[p].tile_events.insert(TileEvent::Plague {
+                        i: plague_event.i,
                         cured: false,
                         target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
                     });
