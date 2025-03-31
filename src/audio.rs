@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::{
     GameState,
-    assets::{MusicSources, SoundEffectSources},
+    assets::SoundEffectSources,
     conf::{Conf, ConfChange, ConfLoadSystemSet},
 };
 
@@ -64,37 +64,25 @@ fn play_planet_music(list: Res<MusicList>, channel: Res<AudioChannel<MainTrack>>
 
 pub fn set_music_list(
     mut commands: Commands,
-    sources: Res<MusicSources>,
     music_list_assets: Res<Assets<MusicListAsset>>,
+    asset_server: Res<AssetServer>,
 ) {
     let mut list = MusicList::default();
 
     for item in music_list_assets.iter().flat_map(|list| &list.1.0) {
-        let path = format!("music/{}", item.path);
-        if let Some(handle) = sources.music_handles.get(&path) {
-            match handle.clone().try_typed::<AudioSource>() {
-                Ok(handle) => {
-                    let item = MusicItem {
-                        kind: item.kind.clone(),
-                        handle,
-                        loop_from: item.loop_from,
-                        loop_until: item.loop_until,
-                    };
-                    match item.kind {
-                        MusicKind::MainMenu => {
-                            todo!()
-                        }
-                        MusicKind::RandomPlanet => {
-                            list.random_planet.push(item);
-                        }
-                    }
-                }
-                Err(e) => {
-                    log::warn!("{}", e);
-                }
+        let item = MusicItem {
+            kind: item.kind.clone(),
+            handle: asset_server.load(format!("music/{}", item.path)),
+            loop_from: item.loop_from,
+            loop_until: item.loop_until,
+        };
+        match item.kind {
+            MusicKind::MainMenu => {
+                todo!()
             }
-        } else {
-            log::warn!("not found music: {}", path);
+            MusicKind::RandomPlanet => {
+                list.random_planet.push(item);
+            }
         }
     }
 
@@ -122,6 +110,8 @@ pub struct MusicListAsset(Vec<MusicListAssetItem>);
 struct MusicListAssetItem {
     kind: MusicKind,
     path: String,
+    #[allow(unused)]
+    author: String,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     loop_from: Option<f64>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]

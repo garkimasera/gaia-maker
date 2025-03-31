@@ -44,7 +44,7 @@ impl Plugin for AssetsPlugin {
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
                     .load_collection::<SoundEffectSources>()
-                    .load_collection::<MusicSources>(),
+                    .load_collection::<MusicLists>(),
             )
             .add_systems(
                 OnExit(GameState::AssetLoading),
@@ -152,9 +152,9 @@ pub struct SoundEffectSources {
 }
 
 #[derive(Debug, Resource, AssetCollection)]
-pub struct MusicSources {
-    #[asset(path = "music", collection(mapped))]
-    pub music_handles: HashMap<String, UntypedHandle>,
+pub struct MusicLists {
+    #[asset(path = "music/list.music.ron")]
+    pub _list: Handle<MusicListAsset>,
 }
 
 fn create_assets_list(
