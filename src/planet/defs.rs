@@ -192,6 +192,9 @@ pub enum TileEvent {
         offence_power: f32,
         offence: AnimalId,
     },
+    NuclearExplosion {
+        remaining_cycles: u32,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
@@ -505,12 +508,14 @@ pub struct WarEvent {
     pub i: u32,
     pub kind: WarKind,
     pub start_pos: Option<Coords>,
+    pub ceased: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum WarKind {
     CivilWar,
     InterCity,
+    NuclearWar,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -855,6 +860,20 @@ pub struct EventParams {
     pub coef_pop_decrease_by_combat_damage: f32,
     /// Offence power factor when starting civil war
     pub civil_war_offence_factor: f32,
+    /// Nuclear explosion cycles
+    pub nuclear_explosion_cycles: u32,
+    /// The ratio of biomass burn by nuclear explosion at one cycle
+    pub nuclear_explosion_biomass_burn_ratio: f32,
+    /// Aerosol supply by nuclear explosion
+    pub nuclear_explosion_aerosol: f32,
+    /// Probability to cause nuclear war per cycle
+    pub nuclear_war_prob: [f64; CivilizationAge::LEN],
+    /// Nuclear war duration cycles
+    pub nuclear_war_duration_cycles: u64,
+    /// Nuclear war interval cycles
+    pub nuclear_war_interval_cycles: u64,
+    /// Nuclear war city bombing probability
+    pub nuclear_war_bomb_prob: f64,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

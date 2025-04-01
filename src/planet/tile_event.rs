@@ -57,12 +57,12 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let biomass = biomass - burned_biomass;
             tile.biomass = biomass;
             let burned_biomass = sim.biomass_density_to_mass();
+            planet.atmo.release_carbon(burned_biomass);
             let extinction_biomass = sim.rng.sample(ConstantDist::from(
                 params.event.biomass_at_fire_extinction_range,
             ));
             if biomass <= extinction_biomass {
                 tile_events.remove(TileEventKind::Fire);
-                planet.atmo.release_carbon(burned_biomass);
             }
             planet.atmo.aerosol += params.event.fire_aerosol;
 
@@ -115,6 +115,27 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 }
             } else {
                 tile_events.remove(TileEventKind::War);
+            }
+        }
+
+        if let Some(TileEvent::NuclearExplosion { remaining_cycles }) =
+            tile_events.get_mut(TileEventKind::NuclearExplosion)
+        {
+            let biomass = tile.biomass;
+            let burned_biomass = biomass * params.event.nuclear_explosion_biomass_burn_ratio;
+            let biomass = biomass - burned_biomass;
+            tile.biomass = biomass;
+            let burned_biomass = sim.biomass_density_to_mass();
+            planet.atmo.release_carbon(burned_biomass);
+            planet.atmo.aerosol += params.event.nuclear_explosion_aerosol;
+
+            if matches!(tile.structure, Some(Structure::Settlement(_))) {
+                tile.structure = None;
+            }
+            tile.animal = [None; AnimalSize::LEN];
+            *remaining_cycles -= 1;
+            if *remaining_cycles == 0 {
+                tile_events.remove(TileEventKind::NuclearExplosion);
             }
         }
     }

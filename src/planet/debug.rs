@@ -100,6 +100,7 @@ pub trait PlanetDebug {
     fn place_settlement(&mut self, p: Coords, settlement: Settlement);
     fn cause_decadence(&mut self, p: Coords, sim: &mut Sim, params: &Params);
     fn cause_civil_war(&mut self, p: Coords, sim: &mut Sim, params: &Params);
+    fn cause_nuclear_explosion(&mut self, p: Coords, sim: &mut Sim, params: &Params);
     fn delete_civilization(&mut self);
     fn height_map_as_string(&self) -> String;
 }
@@ -122,10 +123,17 @@ impl PlanetDebug for Planet {
     fn cause_decadence(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
         super::decadence::cause_decadence(self, sim, params, p);
     }
+
     fn cause_civil_war(&mut self, p: Coords, sim: &mut Sim, params: &Params) {
         if let Some(Structure::Settlement(settlement)) = self.map[p].structure.clone() {
             super::war::start_civil_war(self, sim, params, p, settlement);
         }
+    }
+
+    fn cause_nuclear_explosion(&mut self, p: Coords, _sim: &mut Sim, params: &Params) {
+        self.map[p].tile_events.insert(TileEvent::NuclearExplosion {
+            remaining_cycles: params.event.nuclear_explosion_cycles,
+        });
     }
 
     fn delete_civilization(&mut self) {

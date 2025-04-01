@@ -73,7 +73,9 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             PlanetEventKind::Decadence => {
                 super::decadence::sim_decadence(planet, sim, params);
             }
-            PlanetEventKind::War => (),
+            PlanetEventKind::War => {
+                super::war::sim_war(planet, sim, params);
+            }
             _ => (),
         }
     }

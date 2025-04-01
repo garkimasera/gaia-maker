@@ -36,6 +36,7 @@ pub enum CauseEventKind {
     #[default]
     Decadence,
     CivilWar,
+    NuclearExplsion,
 }
 
 impl Default for CursorMode {

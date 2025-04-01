@@ -97,6 +97,9 @@ fn cursor_action(
                     CauseEventKind::CivilWar => {
                         planet.cause_civil_war(p, &mut sim, &params);
                     }
+                    CauseEventKind::NuclearExplsion => {
+                        planet.cause_nuclear_explosion(p, &mut sim, &params);
+                    }
                 }
             }
         }

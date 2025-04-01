@@ -337,6 +337,13 @@
         base_combat_speed: 0.02,
         coef_pop_decrease_by_combat_damage: 0.3,
         civil_war_offence_factor: 0.6,
+        nuclear_explosion_cycles: 10,
+        nuclear_explosion_biomass_burn_ratio: 0.04,
+        nuclear_explosion_aerosol: 0.0004,
+        nuclear_war_prob: (0, 0, 0, 0, 8e-5, 2e-5),
+        nuclear_war_duration_cycles: 16,
+        nuclear_war_interval_cycles: 10000,
+        nuclear_war_bomb_prob: 0.01,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

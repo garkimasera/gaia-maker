@@ -114,6 +114,9 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
             TileEvent::War { .. } => {
                 ui.label(t!("war"));
             }
+            TileEvent::NuclearExplosion { .. } => {
+                ui.label(t!("nuclear-explosion"));
+            }
         }
     }
 }

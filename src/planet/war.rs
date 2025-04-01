@@ -11,6 +11,66 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             start_civil_war(planet, sim, params, p, settlement);
         }
     }
+
+    if !planet.events.in_progress_iter().any(|e| {
+        if let PlanetEvent::War(WarEvent { kind, .. }) = &e.event {
+            *kind == WarKind::NuclearWar
+        } else {
+            false
+        }
+    }) {
+        for civ in planet.civs.values() {
+            let prob = params.event.nuclear_war_prob[civ.most_advanced_age as usize];
+
+            if sim.rng.random_bool(prob) {
+                // Start nuclear war
+                let i = empty_war_id(planet);
+                let planet_event = WarEvent {
+                    i,
+                    kind: WarKind::NuclearWar,
+                    start_pos: None,
+                    ceased: false,
+                };
+                planet.events.start_event(
+                    PlanetEvent::War(planet_event),
+                    params.event.nuclear_war_interval_cycles,
+                );
+                break;
+            }
+        }
+    }
+}
+
+pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    if let Some((e, progress)) = planet.events.in_progress_iter_mut().find_map(|e| {
+        if let PlanetEvent::War(event) = &mut e.event {
+            if event.kind == WarKind::NuclearWar && !event.ceased {
+                Some((event, e.progress))
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }) {
+        if progress > params.event.nuclear_war_duration_cycles {
+            e.ceased = true;
+        }
+
+        for p in planet.map.iter_idx() {
+            let Some(Structure::Settlement(settlement)) = &planet.map[p].structure else {
+                continue;
+            };
+
+            if settlement.age >= CivilizationAge::Industrial
+                && sim.rng.random_bool(params.event.nuclear_war_bomb_prob)
+            {
+                planet.map[p].tile_events.insert(TileEvent::NuclearExplosion {
+                    remaining_cycles: params.event.nuclear_explosion_cycles,
+                });
+            }
+        }
+    }
 }
 
 pub fn start_civil_war(
@@ -25,6 +85,7 @@ pub fn start_civil_war(
         i,
         kind: WarKind::CivilWar,
         start_pos: Some(p),
+        ceased: false,
     };
     planet.events.start_event(PlanetEvent::War(planet_event), None);
 
