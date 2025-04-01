@@ -1,13 +1,14 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
+use strum::IntoEnumIterator;
 
+use crate::assets::CreditsAsset;
 use crate::conf::{Conf, ConfChange};
 use crate::manage_planet::{GlobalData, ManagePlanet, ManagePlanetError, SaveState};
 use crate::planet::Params;
 use crate::text_assets::Lang;
 use crate::tutorial::TUTORIAL_PLANET;
-use strum::IntoEnumIterator;
 
 use super::UiTextures;
 use super::new_planet::NewPlanetState;
@@ -19,6 +20,7 @@ pub enum MainMenuMode {
     Tutorial,
     NewPlanet,
     Load,
+    Credit,
     Error,
 }
 
@@ -54,7 +56,7 @@ pub fn main_menu(
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
-    (textures, global_data): (Res<UiTextures>, Res<GlobalData>),
+    (textures, global_data, credits): (Res<UiTextures>, Res<GlobalData>, Res<Assets<CreditsAsset>>),
     random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
@@ -100,6 +102,7 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+            display_credits_button(&mut egui_ctxs, &mut state.mode);
             display_web_limit_warning(&mut egui_ctxs);
         }
         MainMenuMode::Tutorial => {
@@ -139,6 +142,11 @@ pub fn main_menu(
                 &save_state.current_save_sub_dir,
             );
             if !open_state {
+                state.mode = MainMenuMode::Menu;
+            }
+        }
+        MainMenuMode::Credit => {
+            if !credit_window(egui_ctxs.ctx_mut(), &credits) {
                 state.mode = MainMenuMode::Menu;
             }
         }
@@ -198,6 +206,50 @@ fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
     } else {
         None
     }
+}
+
+fn display_credits_button(egui_ctxs: &mut EguiContexts, mode: &mut MainMenuMode) {
+    egui::Window::new(t!("credits"))
+        .title_bar(false)
+        .anchor(egui::Align2::RIGHT_BOTTOM, egui::Vec2::new(-10.0, -10.0))
+        .resizable(false)
+        .show(egui_ctxs.ctx_mut(), |ui| {
+            if ui.button(t!("credits")).clicked() {
+                *mode = MainMenuMode::Credit;
+            }
+        })
+        .unwrap();
+}
+
+fn credit_window(ctx: &mut egui::Context, credits: &Assets<CreditsAsset>) -> bool {
+    let mut open = true;
+
+    egui::Window::new(t!("credits"))
+        .title_bar(false)
+        .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::new(0.0, 0.0))
+        .default_width(500.0)
+        .resizable(false)
+        .show(ctx, |ui| {
+            ui.vertical_centered(|ui| {
+                ui.heading(t!("credits"));
+                ui.add_space(8.0);
+                ui.separator();
+                for (section, items) in credits.iter().flat_map(|c| &c.1.0) {
+                    ui.heading(section.as_ref());
+                    for item in items {
+                        ui.label(item);
+                        ui.add_space(2.0);
+                    }
+                    ui.add_space(8.0);
+                }
+                ui.separator();
+                if ui.button(t!("close")).clicked() {
+                    open = false;
+                }
+            });
+        })
+        .unwrap();
+    open
 }
 
 fn display_web_limit_warning(egui_ctxs: &mut EguiContexts) {

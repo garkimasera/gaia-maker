@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::collections::BTreeMap;
 
 use bevy::prelude::*;
 use bevy::utils::HashMap;
@@ -9,7 +10,7 @@ use compact_str::CompactString;
 use fnv::FnvHashMap;
 use serde::Deserialize;
 use serde_with::{DisplayFromStr, Same, serde_as};
-use strum::IntoEnumIterator;
+use strum::{AsRefStr, IntoEnumIterator};
 
 use crate::GameState;
 use crate::audio::MusicListAsset;
@@ -35,6 +36,7 @@ impl Plugin for AssetsPlugin {
             ]))
             .add_plugins(RonAssetPlugin::<AnimalAsset>::new(&["animal.ron"]))
             .add_plugins(RonAssetPlugin::<MusicListAsset>::new(&["music.ron"]))
+            .add_plugins(RonAssetPlugin::<CreditsAsset>::new(&["credits.ron"]))
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::MainMenu)
@@ -44,7 +46,8 @@ impl Plugin for AssetsPlugin {
                     .load_collection::<BiomeTextures>()
                     .load_collection::<StructureTextures>()
                     .load_collection::<SoundEffectSources>()
-                    .load_collection::<MusicLists>(),
+                    .load_collection::<MusicLists>()
+                    .load_collection::<Credits>(),
             )
             .add_systems(
                 OnExit(GameState::AssetLoading),
@@ -96,6 +99,17 @@ pub struct StartPlanetAsset(StartPlanet);
 #[derive(Clone, Debug, Deserialize, Asset, TypePath)]
 #[serde(transparent)]
 pub struct AnimalAsset(AnimalAttr);
+
+#[derive(Clone, Debug, Deserialize, Asset, TypePath)]
+#[serde(transparent)]
+pub struct CreditsAsset(pub BTreeMap<CreditSection, Vec<String>>);
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Deserialize, AsRefStr)]
+pub enum CreditSection {
+    Illustration,
+    #[allow(clippy::upper_case_acronyms)]
+    BGM,
+}
 
 #[derive(Resource)]
 pub struct TextureHandles {
@@ -155,6 +169,12 @@ pub struct SoundEffectSources {
 pub struct MusicLists {
     #[asset(path = "music/list.music.ron")]
     pub _list: Handle<MusicListAsset>,
+}
+
+#[derive(Debug, Resource, AssetCollection)]
+pub struct Credits {
+    #[asset(path = "list.credits.ron")]
+    pub _list: Handle<CreditsAsset>,
 }
 
 fn create_assets_list(
