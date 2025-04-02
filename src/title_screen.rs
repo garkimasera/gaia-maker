@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use rand::{Rng, SeedableRng, seq::IndexedRandom};
 
 use crate::{GameState, draw::UpdateDraw};
 
@@ -22,8 +21,11 @@ struct TitleScreen;
 #[derive(Component)]
 pub struct TitleScreenLogo;
 
-const N_STARS: usize = 2000;
+#[derive(Component)]
+pub struct TitleScreenBackground;
+
 const LOGO_SIZE: (f32, f32) = (316.0, 250.0);
+const BACKGROUND_SIZE: (f32, f32) = (1920.0, 896.0);
 
 fn setup_title_screen(
     mut commands: Commands,
@@ -66,47 +68,32 @@ fn setup_title_screen(
         .insert(TitleScreen)
         .insert(TitleScreenLogo);
 
-    // Stars
-    let mut rng = rand::rngs::SmallRng::seed_from_u64(0x47616961);
-    let colors: &[[u8; 3]] = &[
-        [0xFE, 0xFE, 0xFE],
-        [0xFE, 0xF3, 0xEA],
-        [0xE4, 0xE4, 0xE0],
-        [0xEE, 0xEC, 0xFC],
-    ];
-    let materials: Vec<_> = colors
-        .iter()
-        .map(|color| {
-            materials.add(ColorMaterial {
-                color: Srgba {
-                    red: color[0] as f32 / 255.0,
-                    green: color[1] as f32 / 255.0,
-                    blue: color[2] as f32 / 255.0,
-                    alpha: 1.0,
-                }
-                .into(),
+    // Background
+    let background = asset_server.load("title-screen.webp");
+    let mesh_handle = meshes.add(Rectangle::from_size(Vec2::new(
+        BACKGROUND_SIZE.0,
+        BACKGROUND_SIZE.1,
+    )));
+    commands
+        .spawn((
+            Mesh2d(mesh_handle.clone()),
+            MeshMaterial2d(materials.add(ColorMaterial {
+                texture: Some(background),
                 ..default()
-            })
-        })
-        .collect();
-    let mesh = meshes.add(Mesh::from(Rectangle::new(2.0, 2.0)));
-
-    for _ in 0..N_STARS {
-        let x = rng.random_range(-2000.0..2000.0);
-        let y = rng.random_range(-2000.0..2000.0);
-        commands
-            .spawn((
-                Mesh2d(mesh.clone()),
-                MeshMaterial2d(materials.choose(&mut rng).cloned().unwrap()),
-                Transform::from_xyz(x, y, 991.0),
-            ))
-            .insert(TitleScreen);
-    }
+            })),
+            Transform::from_xyz(0.0, 0.0, 991.0),
+        ))
+        .insert(TitleScreen)
+        .insert(TitleScreenBackground);
 }
 
 fn enter_title_screen(
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
     mut meshes: Query<&mut Visibility, With<TitleScreen>>,
+    mut bg_transform: Query<
+        &mut Transform,
+        (With<TitleScreenBackground>, Without<OrthographicProjection>),
+    >,
     window: Query<&Window, With<bevy::window::PrimaryWindow>>,
 ) {
     let Ok(window) = window.get_single() else {
@@ -120,6 +107,12 @@ fn enter_title_screen(
     for mut bg in meshes.iter_mut() {
         *bg = Visibility::Visible;
     }
+
+    let bg_scale = (window.width() / BACKGROUND_SIZE.0)
+        .max(window.height() / BACKGROUND_SIZE.1)
+        .max(1.0);
+    let mut t = bg_transform.get_single_mut().unwrap();
+    *t = t.with_scale(Vec3::new(bg_scale, bg_scale, 1.0));
 }
 
 fn exit_title_screen(mut meshes: Query<&mut Visibility, With<TitleScreen>>) {
@@ -131,9 +124,19 @@ fn exit_title_screen(mut meshes: Query<&mut Visibility, With<TitleScreen>>) {
 fn on_resize(
     mut er: EventReader<bevy::window::WindowResized>,
     mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+    mut bg_transform: Query<
+        &mut Transform,
+        (With<TitleScreenBackground>, Without<OrthographicProjection>),
+    >,
 ) {
     let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
     if let Some(e) = er.read().last() {
         crate::screen::adjust_camera_pos(&mut cpos.x, &mut cpos.y, e.width, e.height);
+
+        let bg_scale = (e.width / BACKGROUND_SIZE.0)
+            .max(e.height / BACKGROUND_SIZE.1)
+            .max(1.0);
+        let mut t = bg_transform.get_single_mut().unwrap();
+        *t = t.with_scale(Vec3::new(bg_scale, bg_scale, 1.0));
     }
 }
