@@ -94,7 +94,7 @@ impl ColorMaterials {
             OverlayLayerKind::BuriedCarbon => {
                 let x = planet.map[p].buried_carbon / params.sim.buried_carbon_energy_threshold;
                 let y = if x < 1.0 {
-                    0.5 * x * x
+                    0.5 * x
                 } else {
                     let n = 16.0;
                     (x - 1.0) / (2.0 * (n - 1.0)) + 0.5
