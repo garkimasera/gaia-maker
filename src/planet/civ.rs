@@ -5,7 +5,7 @@ use geom::Coords;
 use num_traits::FromPrimitive;
 use rand::{Rng, distr::Distribution, seq::IndexedRandom};
 
-use super::{Planet, ReportContent, Sim, defs::*};
+use super::{Planet, ReportContent, Sim, TileEvents, defs::*};
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
@@ -62,11 +62,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let cap = cap.max(1e-10);
         let dn = params.sim.base_pop_growth_speed * settlement.pop * (1.0 - settlement.pop / cap);
 
-        let can_growth = !planet.map[p]
-            .tile_events
-            .list()
-            .iter()
-            .any(growth_blocked_by_tile_event);
+        let can_growth = !settlement_blocked_by_tile_event(&planet.map[p].tile_events);
         if dn < 0.0 || can_growth {
             settlement.pop += dn;
         }
@@ -194,7 +190,9 @@ fn spread_settlement(
         let Some(q) = sim.convert_p_cyclic(p + *d) else {
             continue;
         };
-        if !animal_attr.habitat.match_biome(planet.map[q].biome) {
+        if !animal_attr.habitat.match_biome(planet.map[q].biome)
+            || settlement_blocked_by_tile_event(&planet.map[q].tile_events)
+        {
             continue;
         }
         if planet.map[q].structure.is_none() {
@@ -407,12 +405,15 @@ pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, anim
     }
 }
 
-fn growth_blocked_by_tile_event(tile_event: &TileEvent) -> bool {
-    match tile_event {
-        TileEvent::Fire | TileEvent::BlackDust { .. } | TileEvent::War { .. } => true,
+fn settlement_blocked_by_tile_event(tile_events: &TileEvents) -> bool {
+    tile_events.list().iter().any(|tile_event| match tile_event {
+        TileEvent::Fire
+        | TileEvent::BlackDust { .. }
+        | TileEvent::War { .. }
+        | TileEvent::NuclearExplosion { .. } => true,
         TileEvent::Plague { cured, .. } => !cured,
         _ => false,
-    }
+    })
 }
 
 impl Planet {
