@@ -111,6 +111,7 @@ pub enum ReportContent {
         id: AnimalId,
         name: Option<String>,
     },
+    EventNuclearWar {},
 }
 
 impl ReportContent {

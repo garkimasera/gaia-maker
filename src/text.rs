@@ -68,6 +68,7 @@ impl Report {
                 };
                 (Notice, t!("report/civ-decadence"; name = name))
             }
+            ReportContent::EventNuclearWar { .. } => (Notice, t!("report/nuclear-war")),
         }
     }
 }

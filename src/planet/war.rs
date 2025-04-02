@@ -35,6 +35,9 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     PlanetEvent::War(planet_event),
                     params.event.nuclear_war_interval_cycles,
                 );
+                planet
+                    .reports
+                    .append(planet.cycles, ReportContent::EventNuclearWar {});
                 break;
             }
         }
