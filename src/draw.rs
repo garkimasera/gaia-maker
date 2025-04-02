@@ -49,6 +49,7 @@ enum AnimatedTextureSpeed {
 #[derive(Debug, Component)]
 struct AnimatedTexture {
     speed: AnimatedTextureSpeed,
+    n_frame: u8,
     start: u8,
     monochrome_shift: u8,
 }
@@ -367,6 +368,7 @@ fn spawn_animal_textures(
         };
         let animated_texture = AnimatedTexture {
             speed: AnimatedTextureSpeed::Slow,
+            n_frame: 2,
             start: 0,
             monochrome_shift,
         };
@@ -510,9 +512,9 @@ fn update_animation(
 ) {
     let monochrome = !matches!(*current_layer, OverlayLayerKind::None);
 
-    counter.fast ^= 1;
-    if counter.fast == 1 {
-        counter.slow ^= 1;
+    counter.fast = counter.fast.wrapping_add(1);
+    if counter.fast % 2 == 0 {
+        counter.slow = counter.slow.wrapping_add(1);
     }
 
     for (animated_texture, mut sprite) in &mut query {
@@ -600,12 +602,20 @@ fn tile_event_texture(tile_event: &TileEvent) -> AnimatedTexture {
             let start = if direction.0 < 0 { start } else { start + 2 };
             AnimatedTexture {
                 speed: AnimatedTextureSpeed::Fast,
+                n_frame: 2,
                 monochrome_shift: 12,
                 start,
             }
         }
+        TileEvent::NuclearExplosion { .. } => AnimatedTexture {
+            speed: AnimatedTextureSpeed::Fast,
+            n_frame: 3,
+            monochrome_shift: 3,
+            start: 0,
+        },
         _ => AnimatedTexture {
             speed: AnimatedTextureSpeed::Fast,
+            n_frame: 2,
             monochrome_shift: 2,
             start: 0,
         },
@@ -614,7 +624,7 @@ fn tile_event_texture(tile_event: &TileEvent) -> AnimatedTexture {
 
 impl AnimatedTexture {
     fn index(&self, counter: usize, monochrome: bool) -> usize {
-        let index = self.start as usize + counter;
+        let index = self.start as usize + counter % self.n_frame as usize;
         if monochrome {
             index + self.monochrome_shift as usize
         } else {
