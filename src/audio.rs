@@ -21,11 +21,11 @@ pub struct SEChannel;
 
 pub type AudioChannelSE = AudioChannel<SEChannel>;
 
-#[derive(Debug, Component)]
-struct Stop {
+#[derive(Default, Debug, Resource)]
+struct BgmState {
+    instance: Option<Handle<AudioInstance>>,
+    stop_timer_fadeout: Option<(Timer, f64)>,
     path: String,
-    timer: Timer,
-    fade_out: Option<f64>,
 }
 
 #[derive(SystemParam)]
@@ -50,6 +50,7 @@ impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(AudioPlugin)
             .add_audio_channel::<SEChannel>()
+            .init_resource::<BgmState>()
             .add_systems(OnEnter(GameState::Running), play_planet_bgm)
             .add_systems(
                 OnExit(GameState::AssetLoading),
@@ -64,85 +65,76 @@ impl Plugin for GameAudioPlugin {
 }
 
 fn play_planet_bgm(
-    mut commands: Commands,
+    mut bgm_state: ResMut<BgmState>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
 ) {
     if let Some(item) = list.random_planet.choose(&mut rand::rng()) {
-        commands.spawn(play_bgm(item, &channel));
+        play_bgm(&mut bgm_state, item, &channel);
     }
 }
 
 fn check_planet_bgm(
-    mut commands: Commands,
-    mut stop_query: Query<(Entity, &mut Stop)>,
+    mut bgm_state: ResMut<BgmState>,
     time: Res<Time>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
 ) {
-    let Ok((entity, mut stop)) = stop_query.get_single_mut() else {
-        return;
-    };
-    stop.timer.tick(time.delta());
-
-    if !stop.timer.finished() {
-        return;
-    }
-    commands.entity(entity).despawn();
-
-    if let Some(fade_out) = stop.fade_out {
-        commands.spawn(Stop {
-            path: stop.path.clone(),
-            timer: Timer::new(Duration::from_secs_f64(fade_out), TimerMode::Once),
-            fade_out: None,
-        });
-        channel.stop().fade_out(AudioTween::new(
-            Duration::from_secs_f64(fade_out),
-            AudioEasing::InPowi(3),
-        ));
-    } else {
+    if bgm_state
+        .instance
+        .as_ref()
+        .is_none_or(|instance| matches!(channel.state(instance), PlaybackState::Stopped))
+    {
         for i in 0..N_RETRY_CHOOSE_MUSIC {
             if let Some(item) = list.random_planet.choose(&mut rand::rng()) {
-                if item.path == stop.path && i < N_RETRY_CHOOSE_MUSIC - 1 {
+                if item.path == bgm_state.path && i < N_RETRY_CHOOSE_MUSIC - 1 {
                     continue;
                 }
-                commands.spawn(play_bgm(item, &channel));
+                play_bgm(&mut bgm_state, item, &channel);
             }
             break;
+        }
+        return;
+    }
+
+    if let Some((timer, fade_out)) = &mut bgm_state.stop_timer_fadeout {
+        timer.tick(time.delta());
+        if timer.finished() {
+            channel.stop().fade_out(AudioTween::new(
+                Duration::from_secs_f64(*fade_out),
+                AudioEasing::InPowi(3),
+            ));
+            bgm_state.stop_timer_fadeout = None;
         }
     }
 }
 
-fn play_bgm(item: &MusicItem, channel: &AudioChannel<MainTrack>) -> Stop {
+fn play_bgm(bgm_state: &mut BgmState, item: &MusicItem, channel: &AudioChannel<MainTrack>) {
     channel.stop();
     let handle = item.handle.clone();
     let mut c = channel.play(handle);
-    let mut l = item.length;
-    if let Some(loop_from) = item.loop_from {
-        c.loop_from(loop_from);
-        l -= loop_from;
-    }
-    if let Some(loop_until) = item.loop_until {
-        c.loop_from(loop_until);
-        l -= loop_until;
-    }
-    let length = l * item.n_loop.unwrap_or(1) as f64
-        + item.loop_from.unwrap_or_default()
-        + item.loop_until.unwrap_or_default();
 
-    if let Some(fade_out) = item.fade_out {
-        Stop {
-            path: item.path.clone(),
-            timer: Timer::new(Duration::from_secs_f64(length - fade_out), TimerMode::Once),
-            fade_out: Some(fade_out),
+    let n_loop = item.n_loop.unwrap_or(1);
+    if n_loop > 1 {
+        let mut l = item.length.unwrap_or_default();
+        c.looped();
+        if let Some(loop_from) = item.loop_from {
+            c.loop_from(loop_from);
+            l -= loop_from;
         }
-    } else {
-        Stop {
-            path: item.path.clone(),
-            timer: Timer::new(Duration::from_secs_f64(length), TimerMode::Once),
-            fade_out: None,
+        if let Some(loop_until) = item.loop_until {
+            c.loop_from(loop_until);
+            l -= loop_until;
         }
+        let length = l * item.n_loop.unwrap_or(1) as f64
+            + item.loop_from.unwrap_or_default()
+            + item.loop_until.unwrap_or_default();
+        let fade_out = item.fade_out.unwrap_or_default();
+        let timer = Timer::new(Duration::from_secs_f64(length - fade_out), TimerMode::Once);
+        bgm_state.stop_timer_fadeout = Some((timer, fade_out));
     }
+    bgm_state.instance = Some(c.handle());
+    bgm_state.path = item.path.clone();
 }
 
 pub fn set_music_list(
@@ -186,8 +178,8 @@ struct MusicItem {
     kind: MusicKind,
     path: String,
     handle: Handle<AudioSource>,
-    length: f64,
     n_loop: Option<u32>,
+    length: Option<f64>,
     fade_out: Option<f64>,
     loop_from: Option<f64>,
     loop_until: Option<f64>,
@@ -203,9 +195,10 @@ struct MusicListAssetItem {
     path: String,
     #[allow(unused)]
     author: String,
-    length: f64,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     n_loop: Option<u32>,
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    length: Option<f64>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
     fade_out: Option<f64>,
     #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
