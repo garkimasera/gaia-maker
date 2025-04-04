@@ -1,14 +1,14 @@
-use std::time::Duration;
+use std::{collections::HashSet, time::Duration};
 
 use bevy::{ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
-use rand::seq::IndexedRandom;
 use serde::Deserialize;
 
 use crate::{
     GameState,
     assets::SoundEffectSources,
     conf::{Conf, ConfChange, ConfLoadSystemSet},
+    planet::Planet,
 };
 
 const N_RETRY_CHOOSE_MUSIC: usize = 4;
@@ -68,8 +68,9 @@ fn play_planet_bgm(
     mut bgm_state: ResMut<BgmState>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
+    planet: Res<Planet>,
 ) {
-    if let Some(item) = list.random_planet.choose(&mut rand::rng()) {
+    if let Some(item) = list.choose(&planet) {
         play_bgm(&mut bgm_state, item, &channel);
     }
 }
@@ -79,6 +80,7 @@ fn check_planet_bgm(
     time: Res<Time>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
+    planet: Res<Planet>,
 ) {
     if bgm_state
         .instance
@@ -86,7 +88,7 @@ fn check_planet_bgm(
         .is_none_or(|instance| matches!(channel.state(instance), PlaybackState::Stopped))
     {
         for i in 0..N_RETRY_CHOOSE_MUSIC {
-            if let Some(item) = list.random_planet.choose(&mut rand::rng()) {
+            if let Some(item) = list.choose(&planet) {
                 if item.path == bgm_state.path && i < N_RETRY_CHOOSE_MUSIC - 1 {
                     continue;
                 }
@@ -155,13 +157,10 @@ pub fn set_music_list(
             loop_from: item.loop_from,
             loop_until: item.loop_until,
         };
-        match item.kind {
-            MusicKind::MainMenu => {
-                todo!()
-            }
-            MusicKind::RandomPlanet => {
-                list.random_planet.push(item);
-            }
+        if matches!(item.kind, MusicKind::MainMenu) {
+            list.main_menu = Some(item);
+        } else {
+            list.random_planet.push(item);
         }
     }
 
@@ -170,6 +169,7 @@ pub fn set_music_list(
 
 #[derive(Clone, Default, Debug, Resource)]
 struct MusicList {
+    main_menu: Option<MusicItem>,
     random_planet: Vec<MusicItem>,
 }
 
@@ -211,6 +211,7 @@ struct MusicListAssetItem {
 enum MusicKind {
     MainMenu,
     RandomPlanet,
+    Industrial,
 }
 
 fn init_volume(
@@ -232,4 +233,36 @@ fn on_conf_change(
         channel_music.set_volume(conf.bgm_volume as f64 / 100.0);
         channel_se.set_volume(conf.sound_effect_volume as f64 / 100.0);
     }
+}
+
+impl MusicList {
+    fn choose(&self, planet: &Planet) -> Option<&MusicItem> {
+        use rand::distr::Distribution;
+        let kind_set = music_kind_set_by_planet_state(planet);
+
+        let w = self.random_planet.iter().map(|item| {
+            if kind_set.contains(&item.kind) {
+                1.0
+            } else {
+                0.0
+            }
+        });
+        let w = rand::distr::weighted::WeightedIndex::new(w).ok()?;
+        self.random_planet.get(w.sample(&mut rand::rng()))
+    }
+}
+
+fn music_kind_set_by_planet_state(planet: &Planet) -> HashSet<MusicKind> {
+    use crate::planet::*;
+
+    let mut kind_list = HashSet::default();
+    kind_list.insert(MusicKind::RandomPlanet);
+
+    for civ in planet.civs.values() {
+        if civ.most_advanced_age >= CivilizationAge::Industrial && civ.total_pop > 1000.0 {
+            kind_list.insert(MusicKind::Industrial);
+        }
+    }
+
+    kind_list
 }
