@@ -211,6 +211,8 @@ struct MusicListAssetItem {
 enum MusicKind {
     MainMenu,
     RandomPlanet,
+    Uncivilized,
+    Civilization,
     Industrial,
 }
 
@@ -257,9 +259,16 @@ fn music_kind_set_by_planet_state(planet: &Planet) -> HashSet<MusicKind> {
 
     let mut kind_list = HashSet::default();
     kind_list.insert(MusicKind::RandomPlanet);
+    kind_list.insert(MusicKind::Uncivilized);
 
     for civ in planet.civs.values() {
-        if civ.most_advanced_age >= CivilizationAge::Industrial && civ.total_pop > 1000.0 {
+        if civ.total_pop > 0.0 {
+            kind_list.remove(&MusicKind::Uncivilized);
+        }
+        if civ.total_pop > 1000.0 {
+            kind_list.insert(MusicKind::Civilization);
+        }
+        if civ.most_advanced_age >= CivilizationAge::Industrial && civ.total_pop > 10000.0 {
             kind_list.insert(MusicKind::Industrial);
         }
     }
