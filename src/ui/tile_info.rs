@@ -70,7 +70,7 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
                 t!("settlement")
             };
             ui.label(format!("{} ({})", s, t!("age", settlement.age),));
-            ui.label(planet.civ_name(settlement.id).unwrap_or_default());
+            ui.label(planet.civ_name(settlement.id));
             ui.label(format!("{}: {:.1}", t!("population"), settlement.pop));
         }
         Some(structure) => {
@@ -100,11 +100,7 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
                 }
             }
             TileEvent::Vehicle { id, .. } => {
-                ui.label(format!(
-                    "{} ({})",
-                    t!("vehicle"),
-                    planet.civ_name(*id).unwrap_or_default()
-                ));
+                ui.label(format!("{} ({})", t!("vehicle"), planet.civ_name(*id)));
             }
             TileEvent::Decadence { cured, .. } => {
                 if !*cured {
@@ -118,11 +114,7 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
                 ui.label(t!("nuclear-explosion"));
             }
             TileEvent::Troop { id, .. } => {
-                ui.label(format!(
-                    "{} ({})",
-                    t!("troop"),
-                    planet.civ_name(*id).unwrap_or_default()
-                ));
+                ui.label(format!("{} ({})", t!("troop"), planet.civ_name(*id)));
             }
         }
     }

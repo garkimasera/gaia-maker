@@ -100,18 +100,19 @@ pub enum ReportContent {
         pos: Coords,
         id: AnimalId,
         age: CivilizationAge,
-        name: Option<String>,
     },
     EventCivExtinct {
         id: AnimalId,
-        name: Option<String>,
     },
     EventCivDecadence {
         pos: Coords,
         id: AnimalId,
-        name: Option<String>,
     },
     EventNuclearWar {},
+    EventInterSpeciesWar {
+        id_a: AnimalId,
+        id_b: AnimalId,
+    },
 }
 
 impl ReportContent {

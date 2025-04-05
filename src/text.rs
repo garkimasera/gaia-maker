@@ -1,6 +1,6 @@
 use compact_str::format_compact;
 
-use crate::planet::{Report, ReportContent};
+use crate::planet::{Planet, Report, ReportContent};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum WithUnitDisplay {
@@ -32,7 +32,7 @@ impl std::fmt::Display for WithUnitDisplay {
 }
 
 impl Report {
-    pub fn text(&self) -> (MsgStyle, String) {
+    pub fn text(&self, planet: &Planet) -> (MsgStyle, String) {
         use MsgStyle::*;
         match &self.content {
             ReportContent::WarnHighTemp => (Warn, t!("report/warn-high-temp")),
@@ -43,30 +43,26 @@ impl Report {
                 let animal = t!("animal", animal);
                 (Notice, t!("report/civilized"; animal = animal))
             }
-            ReportContent::EventCivAdvance { name, age, id, .. } => {
-                let name = if let Some(name) = name {
-                    name.to_owned()
-                } else {
-                    t!("civ", id)
-                };
+            ReportContent::EventCivAdvance { age, id, .. } => {
+                let civ = planet.civ_name(*id);
                 let age = t!("age", age);
-                (Notice, t!("report/civ-advance"; name = name, age = age))
+                (Notice, t!("report/civ-advance"; civ = civ, age = age))
             }
-            ReportContent::EventCivExtinct { name, id } => {
-                let name = if let Some(name) = name {
-                    name.to_owned()
-                } else {
-                    t!("civ", id)
-                };
-                (Notice, t!("report/civ-extinct"; name = name))
+            ReportContent::EventCivExtinct { id } => {
+                let civ = planet.civ_name(*id);
+                (Notice, t!("report/civ-extinct"; civ = civ))
             }
-            ReportContent::EventCivDecadence { name, id, .. } => {
-                let name = if let Some(name) = name {
-                    name.to_owned()
-                } else {
-                    t!("civ", id)
-                };
-                (Notice, t!("report/civ-decadence"; name = name))
+            ReportContent::EventCivDecadence { id, .. } => {
+                let civ = planet.civ_name(*id);
+                (Notice, t!("report/civ-decadence"; civ = civ))
+            }
+            ReportContent::EventInterSpeciesWar { id_a, id_b, .. } => {
+                let civ_a = planet.civ_name(*id_a);
+                let civ_b = planet.civ_name(*id_b);
+                (
+                    Notice,
+                    t!("report/inter-species-war"; civ_a = civ_a, civ_b = civ_b),
+                )
             }
             ReportContent::EventNuclearWar { .. } => (Notice, t!("report/nuclear-war")),
         }

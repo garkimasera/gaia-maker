@@ -178,10 +178,10 @@ fn civ_stat(
     let mut selected_civ_id = current_civ_id.unwrap();
 
     egui::ComboBox::from_id_salt("select-civilization")
-        .selected_text(planet.civ_name(selected_civ_id).unwrap())
+        .selected_text(planet.civ_name(selected_civ_id))
         .show_ui(ui, |ui| {
             for &id in &civ_ids {
-                ui.selectable_value(&mut selected_civ_id, id, planet.civ_name(id).unwrap());
+                ui.selectable_value(&mut selected_civ_id, id, planet.civ_name(id));
             }
         });
 

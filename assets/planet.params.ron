@@ -337,6 +337,8 @@
         base_combat_speed: 0.02,
         coef_pop_decrease_by_combat_damage: 0.3,
         civil_war_offence_factor: 0.6,
+        inter_species_war_prob: (0, 0, 1e-4, 2e-4, 2e-4, 1e-4),
+        inter_species_war_duration_cycles: (200, 5000),
         nuclear_explosion_cycles: 10,
         nuclear_explosion_biomass_burn_ratio: 0.04,
         nuclear_explosion_aerosol: 0.0004,

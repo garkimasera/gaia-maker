@@ -94,11 +94,10 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for (id, sum_values) in sim.civ_sum.iter() {
         if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 && sum_values.n_moving == 0
         {
-            if let Some(civ) = planet.civs.remove(&id) {
-                planet.reports.append(
-                    planet.cycles,
-                    ReportContent::EventCivExtinct { id, name: civ.name },
-                )
+            if planet.civs.remove(&id).is_some() {
+                planet
+                    .reports
+                    .append(planet.cycles, ReportContent::EventCivExtinct { id })
             }
             continue;
         }
@@ -257,14 +256,12 @@ fn tech_exp(settlement: &mut Settlement, planet: &mut Planet, p: Coords, params:
         // Check this age advance is the first for this civilization
         if civ.most_advanced_age < new_age {
             civ.most_advanced_age = new_age;
-            let name = civ.name.clone();
             planet.reports.append(
                 planet.cycles,
                 ReportContent::EventCivAdvance {
                     id: settlement.id,
                     age: new_age,
                     pos: p,
-                    name,
                 },
             );
         }
@@ -471,15 +468,28 @@ impl Settlement {
 }
 
 impl Planet {
-    pub fn civ_name(&self, id: AnimalId) -> Option<String> {
+    pub fn civ_name(&self, id: AnimalId) -> String {
         if let Some(civ) = self.civs.get(&id) {
             if let Some(name) = &civ.name {
-                Some(name.into())
+                name.into()
             } else {
-                Some(t!("civ", id))
+                t!("civ", id)
             }
         } else {
-            None
+            id.to_string()
         }
+    }
+}
+
+impl Civilization {
+    pub fn current_age(&self) -> CivilizationAge {
+        let max = self
+            .total_settlement
+            .iter()
+            .enumerate()
+            .map(|(age, n)| if *n > 0 { age } else { 0 })
+            .max()
+            .unwrap_or_default();
+        CivilizationAge::from_usize(max).unwrap_or_default()
     }
 }

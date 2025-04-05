@@ -70,12 +70,10 @@ pub fn cause_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params, p: C
         }),
         duration as u64,
     );
-    let name = planet.civ_name(settlement.id);
     planet.reports.append(
         planet.cycles,
         ReportContent::EventCivDecadence {
             id: settlement.id,
-            name,
             pos: p,
         },
     );

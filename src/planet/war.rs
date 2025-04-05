@@ -12,6 +12,48 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
     }
 
+    for (id_a, id_b) in civ_combinations(&planet.civs) {
+        let civ0 = &planet.civs[&id_a];
+        let civ1 = &planet.civs[&id_b];
+        let age = civ0.current_age().max(civ1.current_age());
+
+        if !sim
+            .rng
+            .random_bool(params.event.inter_species_war_prob[age as usize])
+        {
+            continue;
+        }
+        if planet.events.in_progress_iter().any(|e| {
+            if let PlanetEvent::War(WarEvent { kind, .. }) = &e.event {
+                *kind == WarKind::InterSpecies(id_a, id_b)
+                    || *kind == WarKind::InterSpecies(id_b, id_a)
+            } else {
+                false
+            }
+        }) {
+            continue;
+        }
+
+        // Start inter spieces war
+        let duration = sim.rng.random_range(
+            params.event.inter_species_war_duration_cycles.0
+                ..params.event.inter_species_war_duration_cycles.1,
+        );
+        let planet_event = WarEvent {
+            i: empty_war_id(planet),
+            kind: WarKind::InterSpecies(id_a, id_b),
+            start_pos: None,
+            ceased: false,
+        };
+        planet
+            .events
+            .start_event(PlanetEvent::War(planet_event), duration);
+        planet.reports.append(
+            planet.cycles,
+            ReportContent::EventInterSpeciesWar { id_a, id_b },
+        );
+    }
+
     if !planet.events.in_progress_iter().any(|e| {
         if let PlanetEvent::War(WarEvent { kind, .. }) = &e.event {
             *kind == WarKind::NuclearWar
@@ -24,9 +66,8 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             if sim.rng.random_bool(prob) {
                 // Start nuclear war
-                let i = empty_war_id(planet);
                 let planet_event = WarEvent {
-                    i,
+                    i: empty_war_id(planet),
                     kind: WarKind::NuclearWar,
                     start_pos: None,
                     ceased: false,
@@ -151,4 +192,16 @@ fn empty_war_id(planet: &Planet) -> u32 {
         return a;
     }
     unreachable!()
+}
+
+fn civ_combinations(map: &Civs) -> Vec<(AnimalId, AnimalId)> {
+    if map.len() < 2 {
+        return Vec::new();
+    }
+    let keys: Vec<_> = map.keys().copied().collect();
+    let n = keys.len();
+    let ref_keys = &keys;
+    (0..n)
+        .flat_map(|i| ((i + 1)..n).map(move |j| (ref_keys[i], ref_keys[j])))
+        .collect()
 }

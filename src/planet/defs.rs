@@ -520,7 +520,7 @@ pub struct WarEvent {
 pub enum WarKind {
     CivilWar,
     InterCity,
-    InterSpecies,
+    InterSpecies(AnimalId, AnimalId),
     NuclearWar,
 }
 
@@ -866,6 +866,10 @@ pub struct EventParams {
     pub coef_pop_decrease_by_combat_damage: f32,
     /// Offence power factor when starting civil war
     pub civil_war_offence_factor: f32,
+    /// Probability to cause inter species war per cycle
+    pub inter_species_war_prob: [f64; CivilizationAge::LEN],
+    /// Inter species war duration cycles
+    pub inter_species_war_duration_cycles: (u64, u64),
     /// Nuclear explosion cycles
     pub nuclear_explosion_cycles: u32,
     /// The ratio of biomass burn by nuclear explosion at one cycle
