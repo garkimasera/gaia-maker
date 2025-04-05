@@ -115,31 +115,27 @@ pub fn start_civil_war(
             continue;
         };
         if target_settlement.id == settlement.id {
-            let power = base_settlement_force_power(&target_settlement, p, sim);
+            let str = base_settlement_strength(&target_settlement, p, sim);
             planet.map[p].tile_events.insert(TileEvent::War {
                 i,
-                defence_power: power,
-                offence_power: power * params.event.civil_war_offence_factor,
+                defence_str: str,
+                offence_str: str * params.event.civil_war_offence_factor,
                 offence: settlement.id,
             });
         }
     }
 }
 
-fn base_settlement_force_power(settlement: &Settlement, p: Coords, sim: &Sim) -> f32 {
+fn base_settlement_strength(settlement: &Settlement, p: Coords, sim: &Sim) -> f32 {
     settlement.pop * sim.energy_eff[p] * 0.01
 }
 
 /// Execution combat and returns damage and finished or not
-pub fn exec_combat(
-    defence_power: &mut f32,
-    offence_power: &mut f32,
-    params: &Params,
-) -> (f32, bool) {
-    let d_defence = *offence_power * params.event.base_combat_speed;
-    let d_offence = *defence_power * params.event.base_combat_speed;
-    *defence_power -= d_defence;
-    *offence_power -= d_offence;
+pub fn exec_combat(defence_str: &mut f32, offence_str: &mut f32, params: &Params) -> (f32, bool) {
+    let d_defence = *offence_str * params.event.base_combat_speed;
+    let d_offence = *defence_str * params.event.base_combat_speed;
+    *defence_str -= d_defence;
+    *offence_str -= d_offence;
     (d_defence, d_defence <= 0.0 || d_offence <= 0.0)
 }
 

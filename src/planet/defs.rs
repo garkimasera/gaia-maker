@@ -188,12 +188,17 @@ pub enum TileEvent {
     },
     War {
         i: u32,
-        defence_power: f32,
-        offence_power: f32,
+        defence_str: f32,
+        offence_str: f32,
         offence: AnimalId,
     },
     NuclearExplosion {
         remaining_cycles: u32,
+    },
+    Troop {
+        id: AnimalId,
+        dest: Coords,
+        power: f32,
     },
 }
 
@@ -515,6 +520,7 @@ pub struct WarEvent {
 pub enum WarKind {
     CivilWar,
     InterCity,
+    InterSpecies,
     NuclearWar,
 }
 

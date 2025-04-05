@@ -117,6 +117,13 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
             TileEvent::NuclearExplosion { .. } => {
                 ui.label(t!("nuclear-explosion"));
             }
+            TileEvent::Troop { id, .. } => {
+                ui.label(format!(
+                    "{} ({})",
+                    t!("troop"),
+                    planet.civ_name(*id).unwrap_or_default()
+                ));
+            }
         }
     }
 }

@@ -97,14 +97,13 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         if let Some(TileEvent::War {
             i: id,
-            defence_power,
-            offence_power,
+            defence_str,
+            offence_str,
             ..
         }) = tile_events.get_mut(TileEventKind::War)
         {
             if let Some(Structure::Settlement(settlement)) = &mut tile.structure {
-                let (damage, finished) =
-                    super::war::exec_combat(defence_power, offence_power, params);
+                let (damage, finished) = super::war::exec_combat(defence_str, offence_str, params);
                 settlement.pop = (settlement.pop
                     - damage * params.event.coef_pop_decrease_by_combat_damage)
                     .max(0.0);
