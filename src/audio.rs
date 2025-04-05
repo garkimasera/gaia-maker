@@ -77,7 +77,7 @@ fn play_planet_bgm(
 
 fn check_planet_bgm(
     mut bgm_state: ResMut<BgmState>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
     planet: Res<Planet>,
@@ -126,7 +126,7 @@ fn play_bgm(bgm_state: &mut BgmState, item: &MusicItem, channel: &AudioChannel<M
         }
         if let Some(loop_until) = item.loop_until {
             c.loop_from(loop_until);
-            l -= loop_until;
+            l -= item.length.unwrap_or_default() - loop_until;
         }
         let length = l * item.n_loop.unwrap_or(1) as f64
             + item.loop_from.unwrap_or_default()
