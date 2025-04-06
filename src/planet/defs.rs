@@ -188,7 +188,6 @@ pub enum TileEvent {
     },
     War {
         i: u32,
-        defence_str: f32,
         offence_str: f32,
         offence: AnimalId,
     },
@@ -290,6 +289,7 @@ pub struct Settlement {
     pub age: CivilizationAge,
     pub pop: f32,
     pub tech_exp: f32,
+    pub str: f32,
     pub biomass_consumption: f32,
     pub state: SettlementState,
     pub kind: SettlementKind,
@@ -808,6 +808,10 @@ pub struct SimParams {
     pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Required energy efficiency to sustain settlement
     pub energy_efficiency_required: [f32; CivilizationAge::LEN],
+    /// Interval cycles to supply strength to settlements
+    pub settlement_str_supply_interval_cycles: u64,
+    /// Supply ratio of settlement strength
+    pub settlement_str_supply_ratio: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

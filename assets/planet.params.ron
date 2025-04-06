@@ -296,6 +296,8 @@
         energy_source_biomass_impact: (1.00, 0.03, 8.0e-5, 4.0e-5, 2.0e-5, 0.0),
         energy_efficiency_required: (3.5, 4.0, 4.5, 15.0, 20.0, 30.0),
         high_efficiency_wind_solar_biomass_impact: 6.0e-5,
+        settlement_str_supply_interval_cycles: 3,
+        settlement_str_supply_ratio: 0.3,
     ),
     event: (
         n_animal_to_civilize: 8.0,

@@ -81,6 +81,15 @@ pub fn tile_debug_info(planet: &Planet, sim: &Sim, p: Coords) -> Vec<(&'static s
             _ => "-".into(),
         },
     ));
+    v.push((
+        "strength",
+        match &planet.map[p].structure {
+            Some(Structure::Settlement(settlement)) => {
+                format!("{}", settlement.str)
+            }
+            _ => "-".into(),
+        },
+    ));
     v.push(("energy efficiency", format!("{:.1}", sim.energy_eff[p])));
 
     v

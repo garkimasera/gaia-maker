@@ -117,6 +117,20 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 }
 
+pub fn sim_settlement_str(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    if planet.cycles % params.sim.settlement_str_supply_interval_cycles != 0 {
+        return;
+    }
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(settlement)) = &mut planet.map[p].structure else {
+            continue;
+        };
+        let max = base_settlement_strength(settlement, p, sim);
+        settlement.str = (settlement.str + max * params.sim.settlement_str_supply_ratio).min(max);
+    }
+}
+
 pub fn start_civil_war(
     planet: &mut Planet,
     sim: &mut Sim,
@@ -156,11 +170,9 @@ pub fn start_civil_war(
             continue;
         };
         if target_settlement.id == settlement.id {
-            let str = base_settlement_strength(&target_settlement, p, sim);
             planet.map[p].tile_events.insert(TileEvent::War {
                 i,
-                defence_str: str,
-                offence_str: str * params.event.civil_war_offence_factor,
+                offence_str: settlement.str * params.event.civil_war_offence_factor,
                 offence: settlement.id,
             });
         }

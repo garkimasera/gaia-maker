@@ -110,6 +110,7 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Cause settlement random events
+    super::war::sim_settlement_str(planet, sim, params);
     cause_random_events(planet, sim, params);
 }
 
