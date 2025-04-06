@@ -185,6 +185,13 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     style.visuals.widgets.hovered.corner_radius = cr;
     style.visuals.widgets.active.corner_radius = cr;
     style.visuals.widgets.open.corner_radius = cr;
+    let bg_color = egui::Color32::from_rgb(7, 12, 19);
+    style.visuals.window_fill = bg_color;
+    style.visuals.panel_fill = bg_color;
+    let button_color = egui::Color32::from_rgb(53, 57, 72);
+    style.visuals.widgets.inactive.weak_bg_fill = button_color;
+    style.visuals.widgets.hovered.weak_bg_fill = button_color;
+    style.visuals.widgets.open.weak_bg_fill = egui::Color32::from_rgb(33, 36, 47);
     let text_color = egui::Color32::from_rgb(208, 208, 208);
     style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
     style.visuals.widgets.inactive.fg_stroke.color = text_color;
