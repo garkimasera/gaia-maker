@@ -22,16 +22,23 @@ pub fn report_ui(
         .resizable(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
-                let s = if *open { "▼" } else { "▲" };
+                let max_reports = 10;
+                let n_reports = planet.reports.n_reports();
+                let (n, s) = if *open {
+                    (n_reports.min(max_reports), "▼".to_owned())
+                } else if n_reports > 1 {
+                    (1, format!("▲ (+{})", n_reports - 1))
+                } else {
+                    (1, "▲".to_owned())
+                };
                 if ui
                     .add_sized([BUTTON_WIDTH, 20.0], egui::Button::new(s))
                     .clicked()
                 {
                     *open = !*open;
                 }
-                let n_items = if *open { 10 } else { 1 };
                 ui.vertical(|ui| {
-                    super::report::report_list(ui, &planet, &mut ew_centering, n_items, w);
+                    super::report::report_list(ui, &planet, &mut ew_centering, n, w);
                 });
             });
         })
@@ -45,11 +52,11 @@ pub fn report_list(
     ui: &mut egui::Ui,
     planet: &Planet,
     ew_centering: &mut EventWriter<Centering>,
-    n_items: usize,
+    n_reports: usize,
     width: f32,
 ) {
     let w = (width - 48.0).max(0.0);
-    let wrap_mode = if n_items <= 1 {
+    let wrap_mode = if n_reports <= 1 {
         egui::TextWrapMode::Truncate
     } else {
         egui::TextWrapMode::Wrap
@@ -58,7 +65,7 @@ pub fn report_list(
         .striped(true)
         .min_col_width(16.0)
         .show(ui, |ui| {
-            for report in planet.reports.iter().take(n_items) {
+            for report in planet.reports.iter().take(n_reports) {
                 let (style, text) = report.text(planet);
                 ui.label(style.icon());
                 ui.vertical(|ui| {
