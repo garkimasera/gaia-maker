@@ -64,6 +64,8 @@ pub struct Sim {
     pub biomass_consumption: Array2d<f32>,
     /// Count the number of settlements in war
     pub war_counter: FnvHashMap<u32, u32>,
+    /// War target settlements
+    pub war_target_settlements: HashMap<AnimalId, (f32, Coords)>,
 }
 
 impl Sim {
@@ -114,6 +116,7 @@ impl Sim {
             settlement_cr: Array2d::new(size.0, size.1, 0.0),
             biomass_consumption: Array2d::new(size.0, size.1, 0.0),
             war_counter: FnvHashMap::default(),
+            war_target_settlements: HashMap::default(),
         }
     }
 

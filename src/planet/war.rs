@@ -1,5 +1,7 @@
 use super::*;
 
+const SETTLEMENT_STR_SUPPLY_INTERVAL_CYCLES: u64 = 3;
+
 pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(settlement)) = planet.map[p].structure else {
@@ -118,7 +120,7 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 pub fn sim_settlement_str(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    if planet.cycles % params.sim.settlement_str_supply_interval_cycles != 0 {
+    if planet.cycles % SETTLEMENT_STR_SUPPLY_INTERVAL_CYCLES != 0 {
         return;
     }
 
@@ -128,6 +130,57 @@ pub fn sim_settlement_str(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         };
         let max = base_settlement_strength(settlement, p, sim);
         settlement.str = (settlement.str + max * params.sim.settlement_str_supply_ratio).min(max);
+    }
+}
+
+pub fn spawn_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    if planet.cycles % SETTLEMENT_STR_SUPPLY_INTERVAL_CYCLES != 1 {
+        return;
+    }
+    update_target_settlements(planet, sim, params);
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(_settlement)) = &mut planet.map[p].structure else {
+            continue;
+        };
+    }
+}
+
+fn update_target_settlements(planet: &Planet, sim: &mut Sim, params: &Params) {
+    sim.war_target_settlements.clear();
+
+    for p in planet.map.iter_idx() {
+        let Some(Structure::Settlement(Settlement { id, pop, .. })) = &planet.map[p].structure
+        else {
+            continue;
+        };
+
+        let mut energy_score = 0.0;
+        for &d in [Coords(0, 0)].iter().chain(geom::CHEBYSHEV_DISTANCE_1_COORDS) {
+            if let Some(p_adj) = sim.convert_p_cyclic(p + d) {
+                let tile = &planet.map[p_adj];
+                if tile.buried_carbon > params.sim.buried_carbon_energy_threshold {
+                    energy_score += (0.25 * tile.buried_carbon
+                        / params.sim.buried_carbon_energy_threshold)
+                        .min(2.0);
+                }
+                if matches!(tile.structure, Some(Structure::GiftTower)) {
+                    energy_score += 1000.0;
+                }
+            }
+        }
+        let pop_score = pop / params.sim.settlement_max_pop[CivilizationAge::EarlySpace as usize];
+        let score = energy_score + pop_score;
+
+        sim.war_target_settlements
+            .entry(*id)
+            .and_modify(|s| {
+                if score > s.0 {
+                    s.0 = score;
+                    s.1 = p;
+                }
+            })
+            .or_insert((score, p));
     }
 }
 

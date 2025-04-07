@@ -281,6 +281,8 @@ fn cause_random_events(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         4 => super::war::cause_war_random(planet, sim, params),
         _ => (),
     }
+
+    super::war::spawn_troops(planet, sim, params);
 }
 
 fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {

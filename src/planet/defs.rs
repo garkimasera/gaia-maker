@@ -808,8 +808,6 @@ pub struct SimParams {
     pub high_efficiency_wind_solar_biomass_impact: f32,
     /// Required energy efficiency to sustain settlement
     pub energy_efficiency_required: [f32; CivilizationAge::LEN],
-    /// Interval cycles to supply strength to settlements
-    pub settlement_str_supply_interval_cycles: u64,
     /// Supply ratio of settlement strength
     pub settlement_str_supply_ratio: f32,
 }
