@@ -25,6 +25,7 @@ pub type AudioChannelSE = AudioChannel<SEChannel>;
 struct BgmState {
     instance: Option<Handle<AudioInstance>>,
     stop_timer_fadeout: Option<(Timer, f64)>,
+    kind: Option<MusicKind>,
     path: String,
 }
 
@@ -59,6 +60,10 @@ impl Plugin for GameAudioPlugin {
             .add_systems(Update, on_conf_change.run_if(in_state(GameState::Running)))
             .add_systems(
                 Update,
+                check_main_menu_bgm.run_if(in_state(GameState::MainMenu)),
+            )
+            .add_systems(
+                Update,
                 check_planet_bgm.run_if(in_state(GameState::Running)),
             );
     }
@@ -72,6 +77,34 @@ fn play_planet_bgm(
 ) {
     if let Some(item) = list.choose(&planet) {
         play_bgm(&mut bgm_state, item, &channel);
+    }
+}
+
+fn check_main_menu_bgm(
+    mut bgm_state: ResMut<BgmState>,
+    list: Res<MusicList>,
+    channel: Res<AudioChannel<MainTrack>>,
+) {
+    if bgm_state
+        .instance
+        .as_ref()
+        .is_none_or(|instance| matches!(channel.state(instance), PlaybackState::Stopped))
+    {
+        if let Some(item) = &list.main_menu {
+            let handle = channel.play(item.handle.clone()).looped().handle();
+            bgm_state.instance = Some(handle);
+            bgm_state.path = item.path.clone();
+            bgm_state.kind = Some(item.kind);
+        }
+    }
+
+    if bgm_state.kind.is_some_and(|kind| kind != MusicKind::MainMenu) {
+        channel.stop().fade_out(AudioTween::new(
+            Duration::from_secs_f64(3.0),
+            AudioEasing::InPowi(3),
+        ));
+        bgm_state.stop_timer_fadeout = None;
+        bgm_state.kind = None;
     }
 }
 
@@ -137,6 +170,7 @@ fn play_bgm(bgm_state: &mut BgmState, item: &MusicItem, channel: &AudioChannel<M
     }
     bgm_state.instance = Some(c.handle());
     bgm_state.path = item.path.clone();
+    bgm_state.kind = Some(item.kind);
 }
 
 pub fn set_music_list(
@@ -148,7 +182,7 @@ pub fn set_music_list(
 
     for item in music_list_assets.iter().flat_map(|list| &list.1.0) {
         let item = MusicItem {
-            kind: item.kind.clone(),
+            kind: item.kind,
             path: item.path.clone(),
             handle: asset_server.load(format!("music/{}", item.path)),
             length: item.length,
@@ -207,7 +241,7 @@ struct MusicListAssetItem {
     loop_until: Option<f64>,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
 enum MusicKind {
     MainMenu,
     RandomPlanet,
