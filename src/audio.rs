@@ -52,7 +52,7 @@ impl Plugin for GameAudioPlugin {
         app.add_plugins(AudioPlugin)
             .add_audio_channel::<SEChannel>()
             .init_resource::<BgmState>()
-            .add_systems(OnEnter(GameState::Running), play_planet_bgm)
+            .add_systems(OnEnter(GameState::Running), stop_main_menu_bgm)
             .add_systems(
                 OnExit(GameState::AssetLoading),
                 init_volume.after(ConfLoadSystemSet),
@@ -69,15 +69,12 @@ impl Plugin for GameAudioPlugin {
     }
 }
 
-fn play_planet_bgm(
-    mut bgm_state: ResMut<BgmState>,
-    list: Res<MusicList>,
-    channel: Res<AudioChannel<MainTrack>>,
-    planet: Res<Planet>,
-) {
-    if let Some(item) = list.choose(&planet) {
-        play_bgm(&mut bgm_state, item, &channel);
-    }
+fn stop_main_menu_bgm(mut bgm_state: ResMut<BgmState>, channel: Res<AudioChannel<MainTrack>>) {
+    channel.stop().fade_out(AudioTween::new(
+        Duration::from_secs_f64(3.0),
+        AudioEasing::InPowi(3),
+    ));
+    bgm_state.kind = None;
 }
 
 fn check_main_menu_bgm(
