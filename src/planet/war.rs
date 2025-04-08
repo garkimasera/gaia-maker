@@ -1,6 +1,9 @@
+use rand::seq::IndexedRandom;
+
 use super::*;
 
 const SETTLEMENT_STR_SUPPLY_INTERVAL_CYCLES: u64 = 3;
+const TROOP_STR_THRESHOLD: f32 = 0.01;
 
 pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for p in planet.map.iter_idx() {
@@ -129,7 +132,11 @@ pub fn sim_settlement_str(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         };
         let max = base_settlement_strength(settlement, p, sim);
-        settlement.str = (settlement.str + max * params.sim.settlement_str_supply_ratio).min(max);
+        if settlement.str < max {
+            settlement.str += max * params.sim.settlement_str_supply_ratio;
+        } else {
+            settlement.str *= params.sim.garrison_troop_str_remaing_rate;
+        }
     }
 }
 
@@ -140,9 +147,48 @@ pub fn spawn_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     update_target_settlements(planet, sim, params);
 
     for p in planet.map.iter_idx() {
-        let Some(Structure::Settlement(_settlement)) = &mut planet.map[p].structure else {
+        let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;
         };
+
+        if !sim.rng.random_bool(params.event.spawn_troop_prob)
+            || settlement.str < 0.5 * base_settlement_strength(&settlement, p, sim)
+        {
+            continue;
+        }
+
+        if let Some(dest) = choose_target(planet, sim, p, settlement.id) {
+            let str = 0.5 * settlement.str;
+            settlement.str = str;
+            let tile = &mut planet.map[p];
+
+            tile.tile_events.insert(TileEvent::Troop {
+                id: settlement.id,
+                dest,
+                str,
+            });
+            tile.structure = Some(Structure::Settlement(settlement));
+        }
+    }
+}
+
+fn choose_target(planet: &Planet, sim: &mut Sim, p: Coords, src_id: AnimalId) -> Option<Coords> {
+    let adj_iter = geom::CHEBYSHEV_DISTANCE_1_COORDS
+        .iter()
+        .chain(geom::CHEBYSHEV_DISTANCE_2_COORDS)
+        .filter_map(|d| sim.convert_p_cyclic(p + *d));
+    for p_adj in adj_iter {
+        if let Some(Structure::Settlement(Settlement { id, .. })) = &planet.map[p_adj].structure {
+            if src_id != *id && planet.events.in_war(src_id, *id).is_some() {
+                return Some(p_adj);
+            }
+        }
+    }
+
+    if let Some(enemy_id) = get_enemies(&planet.events, src_id).choose(&mut sim.rng) {
+        sim.war_target_settlements.get(enemy_id).map(|(_, p)| *p)
+    } else {
+        None
     }
 }
 
@@ -232,6 +278,145 @@ pub fn start_civil_war(
     }
 }
 
+pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let mut moved_troops = Vec::new();
+
+    for p_prev in planet.map.iter_idx() {
+        let tile = &mut planet.map[p_prev];
+        let Some(TileEvent::Troop { id, str, dest }) =
+            tile.tile_events.get(TileEventKind::Troop).copied()
+        else {
+            continue;
+        };
+        tile.tile_events.remove(TileEventKind::Troop);
+
+        let str = str * params.sim.moved_troop_str_remaing_rate;
+
+        let d = direction(p_prev, dest, sim.size.0);
+        if d.0 == 0 && d.1 == 0 {
+            // Choose new target
+            if let Some(dest) = choose_target(planet, sim, p_prev, id) {
+                moved_troops.push((p_prev, id, str, dest));
+            }
+        } else {
+            let p = p_prev + d;
+            moved_troops.push((p, id, str, dest));
+        }
+    }
+
+    for (p, troop_id, troop_str, troop_dest) in moved_troops {
+        if troop_str < TROOP_STR_THRESHOLD {
+            continue;
+        }
+        let p = sim.convert_p_cyclic(p).unwrap();
+        let tile = &mut planet.map[p];
+        tile.tile_events.insert(TileEvent::Troop {
+            id: troop_id,
+            dest: troop_dest,
+            str: troop_str,
+        });
+
+        if let Some(Structure::Settlement(target_settlement)) = tile.structure {
+            let war_i = if troop_id != target_settlement.id {
+                planet.events.in_war(troop_id, target_settlement.id)
+            } else {
+                None
+            };
+            if let Some(war_i) = war_i {
+                if let Some(TileEvent::War {
+                    i,
+                    offence,
+                    offence_str,
+                }) = &tile.tile_events.get(TileEventKind::War)
+                {
+                    let (offence, offence_str) = if *offence == troop_id {
+                        // Merge troop
+                        (troop_id, offence_str + troop_str)
+                    } else {
+                        // Use larger strength
+                        if troop_str >= *offence_str {
+                            (troop_id, troop_str)
+                        } else {
+                            (*offence, *offence_str)
+                        }
+                    };
+                    tile.tile_events.insert(TileEvent::War {
+                        i: *i,
+                        offence,
+                        offence_str,
+                    });
+                } else {
+                    tile.tile_events.insert(TileEvent::War {
+                        i: war_i,
+                        offence: troop_id,
+                        offence_str: troop_str,
+                    });
+                }
+            } else {
+                let (id, dest, str) = if let Some(TileEvent::Troop { id, str, dest }) =
+                    &tile.tile_events.get(TileEventKind::Troop)
+                {
+                    if *id == troop_id {
+                        // Merge troop
+                        if troop_str > *str {
+                            (troop_id, troop_dest, troop_str + str)
+                        } else {
+                            (troop_id, *dest, troop_str + *str)
+                        }
+                    } else if planet.events.in_war(troop_id, *id).is_some() {
+                        // Execute combat
+                        let mut troop_str = troop_str;
+                        let mut str = *str;
+                        exec_combat_until_finish(&mut troop_str, &mut str);
+                        if troop_str > TROOP_STR_THRESHOLD {
+                            (troop_id, troop_dest, troop_str)
+                        } else if str > TROOP_STR_THRESHOLD {
+                            (*id, *dest, str)
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        // Use larger strength
+                        if troop_str > *str {
+                            (troop_id, troop_dest, troop_str)
+                        } else {
+                            (*id, *dest, *str)
+                        }
+                    }
+                } else {
+                    (troop_id, troop_dest, troop_str)
+                };
+                tile.tile_events.insert(TileEvent::Troop { id, dest, str });
+            }
+        }
+    }
+}
+
+fn direction(p: Coords, dest: Coords, w: u32) -> Coords {
+    let w = w as i32;
+    let dest = [dest, dest + Coords::new(w, 0), dest + Coords::new(-w, 0)]
+        .into_iter()
+        .min_by_key(|dest| dest.cdistance(p))
+        .unwrap();
+    let d = dest - p;
+    Coords::new(
+        if d.0 > 0 {
+            1
+        } else if d.0 < 0 {
+            -1
+        } else {
+            0
+        },
+        if d.1 > 0 {
+            1
+        } else if d.1 < 0 {
+            -1
+        } else {
+            0
+        },
+    )
+}
+
 fn base_settlement_strength(settlement: &Settlement, p: Coords, sim: &Sim) -> f32 {
     settlement.pop * sim.energy_eff[p] * 0.01
 }
@@ -243,6 +428,35 @@ pub fn exec_combat(defence_str: &mut f32, offence_str: &mut f32, params: &Params
     *defence_str -= d_defence;
     *offence_str -= d_offence;
     (d_defence, d_defence <= 0.0 || d_offence <= 0.0)
+}
+
+/// Execution combat until finish
+pub fn exec_combat_until_finish(defence_str: &mut f32, offence_str: &mut f32) {
+    if *defence_str >= *offence_str {
+        *defence_str = (defence_str.powi(2) - offence_str.powi(2)).sqrt();
+        *offence_str = 0.0;
+    } else {
+        *defence_str = 0.0;
+        *offence_str = (offence_str.powi(2) - defence_str.powi(2)).sqrt();
+    }
+}
+
+fn get_enemies(events: &Events, id: AnimalId) -> smallvec::SmallVec<[AnimalId; 2]> {
+    let mut enemies = smallvec::SmallVec::new();
+    for e in events.in_progress_iter() {
+        if let PlanetEvent::War(event) = &e.event {
+            match event.kind {
+                WarKind::InterSpecies(aid, enemy_id) if aid == id => {
+                    enemies.push(enemy_id);
+                }
+                WarKind::InterSpecies(enemy_id, aid) if aid == id => {
+                    enemies.push(enemy_id);
+                }
+                _ => (),
+            }
+        }
+    }
+    enemies
 }
 
 fn empty_war_id(planet: &Planet) -> u32 {

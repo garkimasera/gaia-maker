@@ -138,6 +138,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     advance_vehicle(planet, sim, params);
+    super::war::advance_troops(planet, sim, params);
 }
 
 pub fn cause_tile_event(
@@ -168,10 +169,6 @@ pub fn cause_tile_event(
 }
 
 fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
-    if planet.cycles % params.event.vehicle_move_interval_cycles == 0 {
-        return;
-    }
-
     let mut moved_vehicles = Vec::new();
 
     for p_prev in planet.map.iter_idx() {

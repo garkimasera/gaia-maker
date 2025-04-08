@@ -197,7 +197,7 @@ pub enum TileEvent {
     Troop {
         id: AnimalId,
         dest: Coords,
-        power: f32,
+        str: f32,
     },
 }
 
@@ -810,6 +810,10 @@ pub struct SimParams {
     pub energy_efficiency_required: [f32; CivilizationAge::LEN],
     /// Supply ratio of settlement strength
     pub settlement_str_supply_ratio: f32,
+    /// Troop strength remaining rate after moving
+    pub moved_troop_str_remaing_rate: f32,
+    /// Troop strength remaining rate after garrison
+    pub garrison_troop_str_remaing_rate: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -854,8 +858,6 @@ pub struct EventParams {
     pub decadence_infectivity: f64,
     /// Vehicle spawn probability
     pub vehicle_spawn_prob: f32,
-    /// Vehicle move interval cycles
-    pub vehicle_move_interval_cycles: u64,
     /// Probability of vehicle moving north or south
     pub vehicle_ns_move_prob: f64,
     /// Penalty to vehicle settlement probability
@@ -872,6 +874,8 @@ pub struct EventParams {
     pub inter_species_war_prob: [f64; CivilizationAge::LEN],
     /// Inter species war duration cycles
     pub inter_species_war_duration_cycles: (u64, u64),
+    /// Probability of settlements spawn troops
+    pub spawn_troop_prob: f64,
     /// Nuclear explosion cycles
     pub nuclear_explosion_cycles: u32,
     /// The ratio of biomass burn by nuclear explosion at one cycle

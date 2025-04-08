@@ -245,7 +245,7 @@ pub fn process_settlement_energy(
             }
         })
         .sum();
-    debug_assert!(impact_on_biomass > 0.0);
+    debug_assert!(impact_on_biomass >= 0.0);
     settlement.biomass_consumption = impact_on_biomass / params.sim.biomass_energy_factor;
 }
 
