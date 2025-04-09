@@ -48,9 +48,8 @@ impl Report {
                 let age = t!("age", age);
                 (Notice, t!("report/civ-advance"; civ = civ, age = age))
             }
-            ReportContent::EventCivExtinct { id } => {
-                let civ = planet.civ_name(*id);
-                (Notice, t!("report/civ-extinct"; civ = civ))
+            ReportContent::EventCivExtinct { name, .. } => {
+                (Notice, t!("report/civ-extinct"; civ = name))
             }
             ReportContent::EventCivDecadence { id, .. } => {
                 let civ = planet.civ_name(*id);

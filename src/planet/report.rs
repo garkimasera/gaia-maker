@@ -107,6 +107,7 @@ pub enum ReportContent {
     },
     EventCivExtinct {
         id: AnimalId,
+        name: String,
     },
     EventCivDecadence {
         pos: Coords,

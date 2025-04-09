@@ -94,10 +94,11 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     for (id, sum_values) in sim.civ_sum.iter() {
         if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 && sum_values.n_moving == 0
         {
+            let name = planet.civ_name(id);
             if planet.civs.remove(&id).is_some() {
                 planet
                     .reports
-                    .append(planet.cycles, ReportContent::EventCivExtinct { id })
+                    .append(planet.cycles, ReportContent::EventCivExtinct { id, name })
             }
             continue;
         }
