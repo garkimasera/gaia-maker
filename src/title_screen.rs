@@ -54,7 +54,7 @@ fn setup_title_screen(
         .insert(TitleScreen);
 
     // Logo
-    let logo = asset_server.load("logo.png");
+    let logo = asset_server.load("logo.webp");
     let mesh_handle = meshes.add(Rectangle::from_size(Vec2::new(LOGO_SIZE.0, LOGO_SIZE.1)));
     commands
         .spawn((
