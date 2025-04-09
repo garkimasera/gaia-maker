@@ -350,7 +350,7 @@ fn spawn_animal_textures(
             .tile_events
             .list()
             .iter()
-            .any(|te| matches!(te, TileEvent::Vehicle { .. }))
+            .any(|te| matches!(te, TileEvent::Vehicle { .. } | TileEvent::Troop { .. }))
         {
             continue;
         }
@@ -416,8 +416,9 @@ fn spawn_tile_animation_textures(
 
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
+        let tile = &planet.map[p];
 
-        let Some((_, tile_event)) = planet.map[p]
+        let Some((_, tile_event)) = tile
             .tile_events
             .list()
             .iter()
@@ -429,7 +430,7 @@ fn spawn_tile_animation_textures(
         else {
             continue;
         };
-        let animated_texture = tile_event_texture(tile_event);
+        let animated_texture = tile_event_texture(tile_event, tile);
         let index = animated_texture.index(counter.fast, monochrome);
         let Some(t) = texture_handles.tile_animations.get(tile_event.kind().as_ref()) else {
             continue;
@@ -578,11 +579,11 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
         }
         TileEvent::War { .. } => 32,
         TileEvent::NuclearExplosion { .. } => 90,
-        TileEvent::Troop { .. } => 40,
+        TileEvent::Troop { .. } => 41,
     }
 }
 
-fn tile_event_texture(tile_event: &TileEvent) -> AnimatedTexture {
+fn tile_event_texture(tile_event: &TileEvent, tile: &Tile) -> AnimatedTexture {
     match tile_event {
         TileEvent::Vehicle {
             kind,
@@ -605,6 +606,21 @@ fn tile_event_texture(tile_event: &TileEvent) -> AnimatedTexture {
                 speed: AnimatedTextureSpeed::Fast,
                 n_frame: 2,
                 monochrome_shift: 12,
+                start,
+            }
+        }
+        TileEvent::Troop { age, .. } => {
+            let mut start = 0;
+            if tile.biome.is_sea() {
+                start += 2;
+            }
+            if *age >= CivilizationAge::Industrial {
+                start += 4;
+            }
+            AnimatedTexture {
+                speed: AnimatedTextureSpeed::Fast,
+                n_frame: 2,
+                monochrome_shift: 4,
                 start,
             }
         }

@@ -196,6 +196,7 @@ pub enum TileEvent {
     },
     Troop {
         id: AnimalId,
+        age: CivilizationAge,
         dest: Coords,
         str: f32,
     },

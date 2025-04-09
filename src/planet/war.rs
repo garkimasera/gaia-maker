@@ -164,6 +164,7 @@ pub fn spawn_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
             tile.tile_events.insert(TileEvent::Troop {
                 id: settlement.id,
+                age: settlement.age,
                 dest,
                 str,
             });
@@ -283,7 +284,7 @@ pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     for p_prev in planet.map.iter_idx() {
         let tile = &mut planet.map[p_prev];
-        let Some(TileEvent::Troop { id, str, dest }) =
+        let Some(TileEvent::Troop { id, str, dest, age }) =
             tile.tile_events.get(TileEventKind::Troop).copied()
         else {
             continue;
@@ -296,15 +297,15 @@ pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if d.0 == 0 && d.1 == 0 {
             // Choose new target
             if let Some(dest) = choose_target(planet, sim, p_prev, id) {
-                moved_troops.push((p_prev, id, str, dest));
+                moved_troops.push((p_prev, id, str, dest, age));
             }
         } else {
             let p = p_prev + d;
-            moved_troops.push((p, id, str, dest));
+            moved_troops.push((p, id, str, dest, age));
         }
     }
 
-    for (p, troop_id, troop_str, troop_dest) in moved_troops {
+    for (p, troop_id, troop_str, troop_dest, troop_age) in moved_troops {
         if troop_str < TROOP_STR_THRESHOLD {
             continue;
         }
@@ -312,6 +313,7 @@ pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let tile = &mut planet.map[p];
         tile.tile_events.insert(TileEvent::Troop {
             id: troop_id,
+            age: troop_age,
             dest: troop_dest,
             str: troop_str,
         });
@@ -353,15 +355,15 @@ pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     });
                 }
             } else {
-                let (id, dest, str) = if let Some(TileEvent::Troop { id, str, dest }) =
+                let (id, age, dest, str) = if let Some(TileEvent::Troop { id, age, str, dest }) =
                     &tile.tile_events.get(TileEventKind::Troop)
                 {
                     if *id == troop_id {
                         // Merge troop
                         if troop_str > *str {
-                            (troop_id, troop_dest, troop_str + str)
+                            (troop_id, troop_age, troop_dest, troop_str + str)
                         } else {
-                            (troop_id, *dest, troop_str + *str)
+                            (troop_id, *age, *dest, troop_str + *str)
                         }
                     } else if planet.events.in_war(troop_id, *id).is_some() {
                         // Execute combat
@@ -369,24 +371,24 @@ pub fn advance_troops(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                         let mut str = *str;
                         exec_combat_until_finish(&mut troop_str, &mut str);
                         if troop_str > TROOP_STR_THRESHOLD {
-                            (troop_id, troop_dest, troop_str)
+                            (troop_id, troop_age, troop_dest, troop_str)
                         } else if str > TROOP_STR_THRESHOLD {
-                            (*id, *dest, str)
+                            (*id, *age, *dest, str)
                         } else {
                             continue;
                         }
                     } else {
                         // Use larger strength
                         if troop_str > *str {
-                            (troop_id, troop_dest, troop_str)
+                            (troop_id, troop_age, troop_dest, troop_str)
                         } else {
-                            (*id, *dest, *str)
+                            (*id, *age, *dest, *str)
                         }
                     }
                 } else {
-                    (troop_id, troop_dest, troop_str)
+                    (troop_id, troop_age, troop_dest, troop_str)
                 };
-                tile.tile_events.insert(TileEvent::Troop { id, dest, str });
+                tile.tile_events.insert(TileEvent::Troop { id, age, dest, str });
             }
         }
     }
