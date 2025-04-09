@@ -41,9 +41,9 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Start inter spieces war
         let duration = sim.rng.random_range(
-            params.event.inter_species_war_duration_cycles.0
-                ..params.event.inter_species_war_duration_cycles.1,
-        );
+            params.event.inter_species_war_interval_cycles.0
+                ..params.event.inter_species_war_interval_cycles.1,
+        ) + params.event.inter_species_war_duration_cycles.1;
         let planet_event = WarEvent {
             i: empty_war_id(planet),
             kind: WarKind::InterSpecies(id_a, id_b),
@@ -117,6 +117,38 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 planet.map[p].tile_events.insert(TileEvent::NuclearExplosion {
                     remaining_cycles: params.event.nuclear_explosion_cycles,
                 });
+            }
+        }
+    }
+
+    for (e, progress, id_a, id_b) in planet.events.in_progress_iter_mut().filter_map(|e| {
+        if let PlanetEvent::War(event) = &mut e.event {
+            if let WarKind::InterSpecies(id_a, id_b) = event.kind {
+                if !event.ceased {
+                    Some((event, e.progress, id_a, id_b))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }) {
+        if progress > params.event.inter_species_war_duration_cycles.0 {
+            let prob = if progress > params.event.inter_species_war_duration_cycles.1 {
+                1.0
+            } else {
+                1.0 / (params.event.inter_species_war_duration_cycles.1
+                    - params.event.inter_species_war_duration_cycles.0) as f64
+            };
+            if sim.rng.random_bool(prob) {
+                e.ceased = true;
+                planet.reports.append(
+                    planet.cycles,
+                    ReportContent::EventInterSpeciesWarCeased { id_a, id_b },
+                );
             }
         }
     }
@@ -447,14 +479,16 @@ fn get_enemies(events: &Events, id: AnimalId) -> smallvec::SmallVec<[AnimalId; 2
     let mut enemies = smallvec::SmallVec::new();
     for e in events.in_progress_iter() {
         if let PlanetEvent::War(event) = &e.event {
-            match event.kind {
-                WarKind::InterSpecies(aid, enemy_id) if aid == id => {
-                    enemies.push(enemy_id);
+            if !event.ceased {
+                match event.kind {
+                    WarKind::InterSpecies(aid, enemy_id) if aid == id => {
+                        enemies.push(enemy_id);
+                    }
+                    WarKind::InterSpecies(enemy_id, aid) if aid == id => {
+                        enemies.push(enemy_id);
+                    }
+                    _ => (),
                 }
-                WarKind::InterSpecies(enemy_id, aid) if aid == id => {
-                    enemies.push(enemy_id);
-                }
-                _ => (),
             }
         }
     }

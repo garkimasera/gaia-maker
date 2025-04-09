@@ -875,6 +875,8 @@ pub struct EventParams {
     pub inter_species_war_prob: [f64; CivilizationAge::LEN],
     /// Inter species war duration cycles
     pub inter_species_war_duration_cycles: (u64, u64),
+    /// Inter species war interval cycles
+    pub inter_species_war_interval_cycles: (u64, u64),
     /// Probability of settlements spawn troops
     pub spawn_troop_prob: f64,
     /// Nuclear explosion cycles

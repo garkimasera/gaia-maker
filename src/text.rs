@@ -64,6 +64,14 @@ impl Report {
                     t!("report/inter-species-war"; civ_a = civ_a, civ_b = civ_b),
                 )
             }
+            ReportContent::EventInterSpeciesWarCeased { id_a, id_b, .. } => {
+                let civ_a = planet.civ_name(*id_a);
+                let civ_b = planet.civ_name(*id_b);
+                (
+                    Notice,
+                    t!("report/inter-species-war-ceased"; civ_a = civ_a, civ_b = civ_b),
+                )
+            }
             ReportContent::EventNuclearWar { .. } => (Notice, t!("report/nuclear-war")),
         }
     }

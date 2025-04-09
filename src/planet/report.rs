@@ -117,6 +117,10 @@ pub enum ReportContent {
         id_a: AnimalId,
         id_b: AnimalId,
     },
+    EventInterSpeciesWarCeased {
+        id_a: AnimalId,
+        id_b: AnimalId,
+    },
 }
 
 impl ReportContent {

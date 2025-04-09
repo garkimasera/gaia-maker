@@ -48,9 +48,11 @@ impl Events {
     pub fn in_war(&self, a: AnimalId, b: AnimalId) -> Option<u32> {
         for e in self.in_progress_iter() {
             if let PlanetEvent::War(war_event) = &e.event {
-                if let WarKind::InterSpecies(id0, id1) = &war_event.kind {
-                    if (*id0 == a && *id1 == b) || (*id0 == b && *id1 == a) {
-                        return Some(war_event.i);
+                if !war_event.ceased {
+                    if let WarKind::InterSpecies(id0, id1) = &war_event.kind {
+                        if (*id0 == a && *id1 == b) || (*id0 == b && *id1 == a) {
+                            return Some(war_event.i);
+                        }
                     }
                 }
             }

@@ -104,7 +104,7 @@
         priority: 15,
         mean_transition_time: 150,
         requirements: (
-            temp: (2.0, 15.0),
+            temp: (2.0, 12.0),
             rainfall: (300.0, 10000.0),
             fertility: 40.0,
             biomass: 5.5,
@@ -118,7 +118,7 @@
         priority: 20,
         mean_transition_time: 180,
         requirements: (
-            temp: (15.0, 25.0),
+            temp: (12.0, 25.0),
             rainfall: (500.0, 10000.0),
             fertility: 40.0,
             biomass: 6.0,
