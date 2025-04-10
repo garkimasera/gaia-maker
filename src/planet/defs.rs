@@ -182,6 +182,7 @@ pub enum TileEvent {
         id: AnimalId,
         age: CivilizationAge,
         direction: (i8, i8),
+        moved_counter: u16,
     },
     Decadence {
         cured: bool,

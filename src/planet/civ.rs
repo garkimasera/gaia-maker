@@ -331,6 +331,7 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     id: settlement.id,
                     age: settlement.age,
                     direction: (dx, d.1 as _),
+                    moved_counter: 0,
                 });
             } else if settlement.age >= CivilizationAge::Atomic
                 && planet.map[p_adj].structure.is_none()
@@ -341,6 +342,7 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     id: settlement.id,
                     age: settlement.age,
                     direction: (dx, d.1 as _),
+                    moved_counter: 0,
                 });
             }
         }

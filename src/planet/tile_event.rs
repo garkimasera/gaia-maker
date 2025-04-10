@@ -170,6 +170,7 @@ pub fn cause_tile_event(
 
 fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let mut moved_vehicles = Vec::new();
+    let moved_counter_max = planet.map.size().0 as u16;
 
     for p_prev in planet.map.iter_idx() {
         let Some(TileEvent::Vehicle {
@@ -177,6 +178,7 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             id,
             age,
             direction,
+            moved_counter,
         }) = planet.map[p_prev]
             .tile_events
             .get(TileEventKind::Vehicle)
@@ -184,7 +186,13 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         else {
             continue;
         };
+
         planet.map[p_prev].tile_events.remove(TileEventKind::Vehicle);
+
+        let moved_counter = moved_counter + 1;
+        if moved_counter > moved_counter_max {
+            continue;
+        }
         let dy = if sim.rng.random_bool(params.event.vehicle_ns_move_prob) {
             direction.1
         } else {
@@ -208,6 +216,7 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     id,
                     age,
                     direction,
+                    moved_counter,
                 },
             ));
             civ_sum_values.total_pop_prev += 1.0;
@@ -241,6 +250,7 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                         id,
                         age,
                         direction,
+                        moved_counter,
                     },
                 ));
                 civ_sum_values.total_pop_prev += 1.0;
