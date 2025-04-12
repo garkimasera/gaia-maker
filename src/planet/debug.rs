@@ -126,6 +126,7 @@ impl PlanetDebug for Planet {
     }
 
     fn place_settlement(&mut self, p: Coords, settlement: Settlement) {
+        self.civs.entry(settlement.id).or_default();
         self.map[p].structure = Some(Structure::Settlement(settlement));
     }
 
