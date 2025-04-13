@@ -130,6 +130,11 @@ impl TutorialStep {
                 ui.vertical_centered(|ui| {
                     ui.image(textures.get("ui/icon-speed-medium"));
                 });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "fertilize-1-3"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/tutorial-soil-fertilize-example"));
+                });
             },
             Self::BuildOxygen(0) => |ui, textures| {
                 ui.label(t!("tutorial", "build-oxygen-0-1"));

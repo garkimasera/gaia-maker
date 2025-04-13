@@ -14,7 +14,8 @@ fertilize-0-1 = "Once you have enough power, you can start greening the planet.\
 fertilize-0-2 = "The air temperature should be between 10 and 30°C, and the rainfall should be at least 500mm."
 fertilize-1-1 = "When you find a tile with good conditions, click on the icon below in the toolbar to open the menu and select the Soil Fertilization Plant. Then, click on the tile you want to build."
 fertilize-1-2 = "Let's build several Soil Fertilization Plants at a distance from each other. When you've finished building, click the icon below on the toolbar to advance the time."
-fertilize-checklist1 = "Build three or more Soil Fertilization Plants"
+fertilize-1-3 = "As time passes, grasslands will spread out as in the example below. If grasslands don't form no matter how long you wait, check the temperature and rainfall again."
+fertilize-checklist1 = "Build 3 or more Soil Fertilization Plants"
 fertilize-checklist2 = "Grasslands spread over 10 tiles or more"
 
 build-oxygen-0-1 = "Congratulations! Life has begun to spread across the planet. Next, let's check the state of the atmosphere. Click on the following icon in the toolbar to open the statistics window, and then click on the Atmosphere tab."
