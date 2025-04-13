@@ -152,7 +152,8 @@ pub fn buildng_row(
     match &mut building.control {
         BuildingControlValue::AlwaysEnabled => {}
         BuildingControlValue::IncreaseRate(rate) => {
-            ui.add(egui::Slider::new(rate, -100..=100));
+            ui.spacing_mut().slider_width = 220.0;
+            ui.add(egui::Slider::new(rate, -100..=100).suffix("%"));
         }
     }
 }
