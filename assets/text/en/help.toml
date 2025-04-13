@@ -33,6 +33,7 @@ plague = "The plague will spread to the city you have selected. The plague will 
 vehicle = "Advanced civilizations use ships and airplanes for travel."
 decadence = "Civilizations that have achieved a certain level of prosperity may become decadent. In a decadent civilization, people neglect maintaining the foundations of prosperity - science, technology, culture, and infrastructure - or actively damage these foundations. The population and level of technology in the civilization decline."
 war = "Cities can become involved in wars. The population of cities during wars decreases."
+troop = "Troops advance on their target cities. The cities that are attacked enter a state of war."
 
 rock = "In barren areas where rocks are exposed, there is little or no life."
 ice-sheet = "Life cannot survive in areas covered in ice sheets. The ice layer reflects the stellar light efficiently, and has the effect of cooling the surrounding area even further."
