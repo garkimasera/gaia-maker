@@ -19,7 +19,7 @@ use std::sync::LazyLock;
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum HelpItem {
     Basics(&'static str),
-    Structures(StructureKind),
+    Facilities(StructureKind),
     SpaceBuildings(SpaceBuildingKind),
     TileEvents(TileEventKind),
     Biomes(Biome),
@@ -33,7 +33,7 @@ impl AsRef<str> for HelpItem {
     fn as_ref(&self) -> &str {
         match self {
             HelpItem::Basics(basic_items) => basic_items,
-            HelpItem::Structures(structure_kind) => structure_kind.as_ref(),
+            HelpItem::Facilities(structure_kind) => structure_kind.as_ref(),
             HelpItem::SpaceBuildings(space_building_kind) => space_building_kind.as_ref(),
             HelpItem::TileEvents(tile_event_kind) => tile_event_kind.as_ref(),
             HelpItem::Biomes(biome) => biome.as_ref(),
@@ -89,13 +89,13 @@ static ITEM_LIST: LazyLock<BTreeMap<ItemGroup, Vec<HelpItem>>> = LazyLock::new(|
         BASIC_ITEMS.iter().map(|item| HelpItem::Basics(item)).collect(),
     );
     map.insert(
-        ItemGroup::Structures,
+        ItemGroup::Facilities,
         StructureKind::iter()
             .filter_map(|structure_kind| {
                 if matches!(structure_kind, StructureKind::Settlement) {
                     None
                 } else {
-                    Some(HelpItem::Structures(structure_kind))
+                    Some(HelpItem::Facilities(structure_kind))
                 }
             })
             .collect(),
@@ -189,7 +189,7 @@ pub fn help_window(
 impl HelpItem {
     pub fn ui(&self, ui: &mut egui::Ui, textures: &UiTextures, params: &Params) {
         if let Some(building_attrs) = match self {
-            HelpItem::Structures(kind) => Some(&params.structures[kind].building),
+            HelpItem::Facilities(kind) => Some(&params.structures[kind].building),
             HelpItem::SpaceBuildings(kind) => Some(&params.space_buildings[kind]),
             _ => None,
         } {
