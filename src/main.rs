@@ -45,6 +45,8 @@ struct Args {
     /// Log file path
     #[arg(long)]
     log_file: Option<PathBuf>,
+    #[arg(long)]
+    launcher_port: Option<u16>,
 }
 
 fn main() {
@@ -52,6 +54,9 @@ fn main() {
     crate::platform::init_rayon(args.num_threads as usize);
     if let Some(log_file) = args.log_file {
         crate::platform::init_log_file(log_file);
+    }
+    if let Some(port) = args.launcher_port {
+        crate::platform::client::run_client(port);
     }
     crate::platform::window_open();
 
