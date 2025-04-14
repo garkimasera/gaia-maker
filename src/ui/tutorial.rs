@@ -184,6 +184,10 @@ impl TutorialStep {
                 });
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "animal-1-2"));
+                ui.add_space(8.0);
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/tutorial-animal-habitat"));
+                });
             },
             Self::Civilize(0) => |ui, _textures| {
                 ui.label(t!("tutorial", "civilize-0-1"));
