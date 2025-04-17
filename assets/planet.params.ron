@@ -399,9 +399,9 @@
             build_max: 20,
         ),
         dyson_swarm_unit: (
-            power: 500,
+            power: 1000,
             cost: 100000,
-            build_max: 100,
+            build_max: 80,
         ),
         orbital_mirror: (
             power: -0.1,

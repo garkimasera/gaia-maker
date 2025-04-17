@@ -5,9 +5,9 @@
         columns: 1,
         rows: 2,
         building: (
-            power: -200,
-            cost: 400,
-            effect: SprayToAtmo( kind: oxygen, mass: 1000, limit_atm: 0.25 ),
+            power: -400,
+            cost: 500,
+            effect: SprayToAtmo( kind: oxygen, mass: 2000, limit_atm: 0.25 ),
         ),
     ),
     rainmaker: (
