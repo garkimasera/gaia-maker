@@ -14,6 +14,7 @@ deb = ["asset_tar"]
 [dependencies]
 anyhow = "1"
 arrayvec = { version = "0.7", features = ["serde"] }
+base64 = "0.22"
 bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_window", "bevy_winit", "multi_threaded", "x11", "webgl2", "webp"] }
 bevy_asset_loader = "0.22"
 bevy_common_assets = { version = "0.12", features = ["ron", "toml"] }
@@ -58,7 +59,6 @@ tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 zstd = "0.13.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-base64 = "0.22"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = ["Window", "Storage", "Location"] }
 getrandom = { version = "0.3", features = ["wasm_js"] } # For rand v0.9

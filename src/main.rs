@@ -7,6 +7,7 @@ mod tools;
 #[macro_use]
 mod text_assets;
 
+mod achivement_save;
 mod action;
 mod assets;
 mod audio;
@@ -106,6 +107,7 @@ fn main() {
         .add_plugins(draw::DrawPlugin)
         .add_plugins(action::ActionPlugin)
         .add_plugins(manage_planet::ManagePlanetPlugin)
+        .add_plugins(achivement_save::AchivementPlugin)
         .insert_resource(WinitSettings::game())
         .init_resource::<GameSpeed>()
         .run();

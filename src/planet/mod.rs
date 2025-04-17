@@ -1,3 +1,4 @@
+mod achivement;
 mod action;
 mod animal;
 mod atmo;
@@ -27,6 +28,7 @@ mod water;
 
 pub mod debug;
 
+pub use self::achivement::{Achivement, check_achivements};
 pub use self::atmo::Atmosphere;
 use self::civ::Civs;
 pub use self::defs::*;

@@ -1,5 +1,7 @@
+use fnv::FnvHashSet;
 use rand::rngs::SmallRng;
 
+use super::achivement::Achivement;
 use super::*;
 use std::collections::{BTreeMap, HashMap};
 use std::f32::consts::PI;
@@ -66,6 +68,8 @@ pub struct Sim {
     pub war_counter: FnvHashMap<u32, u32>,
     /// War target settlements
     pub war_target_settlements: HashMap<AnimalId, (f32, Coords)>,
+    /// New achievements
+    pub new_achievements: FnvHashSet<Achivement>,
 }
 
 impl Sim {
@@ -117,6 +121,7 @@ impl Sim {
             biomass_consumption: Array2d::new(size.0, size.1, 0.0),
             war_counter: FnvHashMap::default(),
             war_target_settlements: HashMap::default(),
+            new_achievements: FnvHashSet::default(),
         }
     }
 
