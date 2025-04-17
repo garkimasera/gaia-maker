@@ -153,7 +153,9 @@ impl Plugin for AssetPlugin {
         }
         #[cfg(not(feature = "deb"))]
         fn asset_file_path() -> PathBuf {
-            PathBuf::from(option_env!("ASSET_FILE_PATH").unwrap_or("assets.tar.gz"))
+            let current_exe = std::env::current_exe().expect("cannot get current exe path");
+            let dir = current_exe.parent().expect("invalid current exe path");
+            dir.join("assets.tar.gz")
         }
 
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
