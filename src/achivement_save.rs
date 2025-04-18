@@ -2,6 +2,7 @@ use anyhow::Context;
 use base64::Engine;
 use bevy::prelude::*;
 use fnv::FnvHashSet;
+use num_traits::FromPrimitive;
 
 use crate::{
     GameState,
@@ -9,7 +10,7 @@ use crate::{
 };
 
 #[derive(Debug, Resource)]
-pub struct UnlockedAchivements(FnvHashSet<Achivement>);
+pub struct UnlockedAchivements(pub FnvHashSet<Achivement>);
 
 const ACHIVEMENT_FILE_NAME: &str = "saves/achivements.planet";
 
@@ -38,17 +39,14 @@ fn load_unlocked_achivement(mut command: Commands) {
                 .context("invalid achivement data")
         })
         .and_then(|data| {
-            rmp_serde::from_slice::<Vec<String>>(&data).context("deserialize achivement data")
+            rmp_serde::from_slice::<Vec<u16>>(&data).context("deserialize achivement data")
         }) {
         Ok(achivement_data) => {
-            for achivement_name in achivement_data {
-                match achivement_name.parse::<Achivement>() {
-                    Ok(achivement) => {
-                        achivements.insert(dbg!(achivement));
-                    }
-                    Err(_) => {
-                        log::warn!("unknown achivement in file: {}", achivement_name);
-                    }
+            for achivement_number in achivement_data {
+                if let Some(achivement) = Achivement::from_u16(achivement_number) {
+                    achivements.insert(achivement);
+                } else {
+                    log::warn!("unknown achivement in file: {}", achivement_number);
                 }
             }
         }
@@ -83,12 +81,12 @@ fn check_periodic(
     }
 
     if need_update_file {
-        let list: Vec<String> = unlocked_achivements
+        let list: Vec<u16> = unlocked_achivements
             .0
             .iter()
-            .map(|achivement| AsRef::<str>::as_ref(&achivement).to_owned())
+            .map(|achivement| *achivement as u16)
             .collect();
-        let data = rmp_serde::to_vec::<Vec<String>>(&list).expect("serialize achivement data");
+        let data = rmp_serde::to_vec(&list).expect("serialize achivement data");
         let data = base64::prelude::BASE64_STANDARD.encode(data);
         if let Err(e) = crate::platform::write_data_file(ACHIVEMENT_FILE_NAME, &data) {
             log::warn!("cannot write achivement data: {}", e);

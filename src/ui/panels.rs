@@ -181,6 +181,10 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
+    if button(ui, "ui/icon-achivements", "achivements") {
+        wos.achivements = !wos.achivements;
+    }
+
     if button(ui, "ui/icon-help", "help") {
         wos.help = !wos.help;
     }

@@ -28,7 +28,7 @@ mod water;
 
 pub mod debug;
 
-pub use self::achivement::{Achivement, check_achivements};
+pub use self::achivement::{ACHIVEMENTS, Achivement, check_achivements};
 pub use self::atmo::Atmosphere;
 use self::civ::Civs;
 pub use self::defs::*;

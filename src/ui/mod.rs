@@ -1,3 +1,4 @@
+mod achivements;
 mod animals;
 mod debug_tools;
 mod error_popup;
@@ -53,6 +54,7 @@ pub struct WindowsOpenState {
     pub help: bool,
     pub save: bool,
     pub load: bool,
+    pub achivements: bool,
     pub error_popup: Option<ManagePlanetError>,
     pub preferences: bool,
     pub debug_tools: bool,
@@ -123,6 +125,7 @@ impl Plugin for UiPlugin {
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,
+                    achivements::achivements_window,
                     error_popup::error_popup,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,
