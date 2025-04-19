@@ -5,6 +5,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     GameSpeed, GameState,
+    achivement_save::AchivementNotification,
     conf::Conf,
     manage_planet::ManagePlanet,
     planet::{Cost, Params, Planet, StructureKind},
@@ -26,6 +27,7 @@ pub fn panels(
     mut next_game_state: ResMut<NextState<GameState>>,
     (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
     diagnostics_store: Res<DiagnosticsStore>,
+    mut achivement_notification: ResMut<AchivementNotification>,
     mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
@@ -68,6 +70,7 @@ pub fn panels(
                     ),
                     &textures,
                     &params,
+                    &mut achivement_notification,
                 );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
@@ -90,6 +93,7 @@ fn toolbar(
     ),
     textures: &UiTextures,
     params: &Params,
+    achivement_notification: &mut AchivementNotification,
 ) {
     // Menu buttons
 
@@ -181,7 +185,22 @@ fn toolbar(
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
-    if button(ui, "ui/icon-achivements", "achivements") {
+    let resp = ui.add(egui::ImageButton::new(textures.get("ui/icon-achivements")));
+    let resp = if let Some(achivement) = achivement_notification.achivement {
+        resp.show_tooltip_ui(|ui| {
+            ui.set_width(200.0);
+            ui.strong(t!("new-achivement"));
+            ui.horizontal(|ui| {
+                ui.image(textures.get(format!("ui/achivement-{}", achivement.as_ref())));
+                ui.label(t!("achivement", achivement.as_ref()));
+            });
+        });
+        resp
+    } else {
+        resp.on_hover_text(t!("achivements"))
+    };
+    if resp.clicked() {
+        *achivement_notification = AchivementNotification::default();
         wos.achivements = !wos.achivements;
     }
 

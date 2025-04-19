@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use anyhow::Context;
 use base64::Engine;
 use bevy::prelude::*;
@@ -12,16 +14,25 @@ use crate::{
 #[derive(Debug, Resource)]
 pub struct UnlockedAchivements(pub FnvHashSet<Achivement>);
 
+#[derive(Default, Debug, Resource)]
+pub struct AchivementNotification {
+    pub achivement: Option<Achivement>,
+    timer: Option<Timer>,
+}
+
 const ACHIVEMENT_FILE_NAME: &str = "saves/achivements.planet";
 
 const CHECK_ACHIVEMENT_INTERVAL_CYCLES: u64 = 10;
+
+const ACHIVEMENT_NOTIFICATION_DURATION: Duration = Duration::from_secs(4);
 
 #[derive(Debug)]
 pub struct AchivementPlugin;
 
 impl Plugin for AchivementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(GameState::AssetLoading), load_unlocked_achivement)
+        app.init_resource::<AchivementNotification>()
+            .add_systems(OnExit(GameState::AssetLoading), load_unlocked_achivement)
             .add_systems(
                 FixedUpdate,
                 check_periodic.run_if(in_state(GameState::Running)),
@@ -60,7 +71,9 @@ fn load_unlocked_achivement(mut command: Commands) {
 fn check_periodic(
     planet: Res<Planet>,
     mut unlocked_achivements: ResMut<UnlockedAchivements>,
+    mut achivement_notification: ResMut<AchivementNotification>,
     mut sim: ResMut<Sim>,
+    time: Res<Time<Real>>,
 ) {
     if planet.cycles % CHECK_ACHIVEMENT_INTERVAL_CYCLES != 0 {
         return;
@@ -70,6 +83,13 @@ fn check_periodic(
 
     let mut need_update_file = false;
 
+    if let Some(timer) = &mut achivement_notification.timer {
+        timer.tick(time.delta());
+        if timer.finished() {
+            *achivement_notification = AchivementNotification::default();
+        }
+    }
+
     for new_achivement in sim.new_achievements.drain() {
         if unlocked_achivements.0.contains(&new_achivement) {
             continue;
@@ -78,6 +98,11 @@ fn check_periodic(
         log::info!("get achivement {:?}", new_achivement);
         unlocked_achivements.0.insert(new_achivement);
         need_update_file = true;
+        achivement_notification.achivement = Some(new_achivement);
+        achivement_notification.timer = Some(Timer::new(
+            ACHIVEMENT_NOTIFICATION_DURATION,
+            TimerMode::Once,
+        ));
     }
 
     if need_update_file {
