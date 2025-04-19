@@ -8,6 +8,7 @@ use num_traits::FromPrimitive;
 
 use crate::{
     GameState,
+    audio::SoundEffectPlayer,
     planet::{Achivement, Planet, Sim, check_achivements},
 };
 
@@ -20,7 +21,7 @@ pub struct AchivementNotification {
     timer: Option<Timer>,
 }
 
-const ACHIVEMENT_FILE_NAME: &str = "saves/achivements.planet";
+const ACHIVEMENT_FILE_NAME: &str = "saves/achivements";
 
 const CHECK_ACHIVEMENT_INTERVAL_CYCLES: u64 = 10;
 
@@ -73,6 +74,7 @@ fn check_periodic(
     mut unlocked_achivements: ResMut<UnlockedAchivements>,
     mut achivement_notification: ResMut<AchivementNotification>,
     mut sim: ResMut<Sim>,
+    se_player: SoundEffectPlayer,
     time: Res<Time<Real>>,
 ) {
     if planet.cycles % CHECK_ACHIVEMENT_INTERVAL_CYCLES != 0 {
@@ -81,7 +83,7 @@ fn check_periodic(
 
     check_achivements(&planet, &unlocked_achivements.0, &mut sim.new_achievements);
 
-    let mut need_update_file = false;
+    let mut unlocked = false;
 
     if let Some(timer) = &mut achivement_notification.timer {
         timer.tick(time.delta());
@@ -97,7 +99,7 @@ fn check_periodic(
 
         log::info!("get achivement {:?}", new_achivement);
         unlocked_achivements.0.insert(new_achivement);
-        need_update_file = true;
+        unlocked = true;
         achivement_notification.achivement = Some(new_achivement);
         achivement_notification.timer = Some(Timer::new(
             ACHIVEMENT_NOTIFICATION_DURATION,
@@ -105,7 +107,9 @@ fn check_periodic(
         ));
     }
 
-    if need_update_file {
+    if unlocked {
+        se_player.play("achivement");
+
         let list: Vec<u16> = unlocked_achivements
             .0
             .iter()
