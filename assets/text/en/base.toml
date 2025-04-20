@@ -1,4 +1,5 @@
 # UI
+achivements = "Achivements"
 air-temperature = "Temperature"
 animal = "Animal"
 argon = "Argon"
@@ -66,6 +67,7 @@ medium = "Medium"
 menu = "Menu"
 messages = "Messages"
 new = "New"
+new-achivement = "New Achievement!"
 new-planet = "New Planet"
 next = "Next"
 next-tutorial = "Next Tutorial"

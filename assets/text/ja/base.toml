@@ -1,4 +1,5 @@
 # UI
+achivements = "実績"
 air-temperature = "気温"
 animal = "動物"
 argon = "アルゴン"
@@ -66,6 +67,7 @@ medium = "中"
 menu = "メニュー"
 messages = "メッセージ"
 new = "新規"
+new-achivement = "実績獲得!"
 new-planet = "新しい惑星"
 next = "次へ"
 next-tutorial = "次のチュートリアル"
