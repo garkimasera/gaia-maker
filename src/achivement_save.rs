@@ -9,7 +9,7 @@ use num_traits::FromPrimitive;
 use crate::{
     GameState,
     audio::SoundEffectPlayer,
-    planet::{Achivement, Planet, Sim, check_achivements},
+    planet::{Achivement, Params, Planet, Sim, check_achivements},
 };
 
 #[derive(Debug, Resource)]
@@ -71,6 +71,7 @@ fn load_unlocked_achivement(mut command: Commands) {
 
 fn check_periodic(
     planet: Res<Planet>,
+    params: Res<Params>,
     mut unlocked_achivements: ResMut<UnlockedAchivements>,
     mut achivement_notification: ResMut<AchivementNotification>,
     mut sim: ResMut<Sim>,
@@ -81,7 +82,12 @@ fn check_periodic(
         return;
     }
 
-    check_achivements(&planet, &unlocked_achivements.0, &mut sim.new_achievements);
+    check_achivements(
+        &planet,
+        &unlocked_achivements.0,
+        &mut sim.new_achievements,
+        &params,
+    );
 
     let mut unlocked = false;
 

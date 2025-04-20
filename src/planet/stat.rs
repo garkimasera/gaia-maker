@@ -43,6 +43,11 @@ impl Stat {
         &self.history
     }
 
+    pub fn record(&self, cycles: u64, params: &Params) -> Option<&Record> {
+        let n = cycles / params.history.interval_cycles;
+        self.history.get(n as usize)
+    }
+
     pub fn clear_history(&mut self) {
         self.history.clear();
     }

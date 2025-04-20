@@ -19,6 +19,7 @@ pub enum Achivement {
     StepTowardEcumenopolis,
     AbundantPower = 301,
     GiantMirror,
+    DestroyPlanet,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
@@ -28,16 +29,17 @@ pub fn check_achivements(
     planet: &Planet,
     unlocked_achivements: &FnvHashSet<Achivement>,
     new_achivements: &mut FnvHashSet<Achivement>,
+    params: &Params,
 ) {
     for achivement in Achivement::iter() {
-        if !unlocked_achivements.contains(&achivement) && achivement.check(planet) {
+        if !unlocked_achivements.contains(&achivement) && achivement.check(planet, params) {
             new_achivements.insert(achivement);
         }
     }
 }
 
 impl Achivement {
-    fn check(self, planet: &Planet) -> bool {
+    fn check(self, planet: &Planet, params: &Params) -> bool {
         match self {
             Achivement::Grasslands => Requirement::BiomeTiles {
                 biomes: vec![Biome::Grassland],
@@ -89,11 +91,22 @@ impl Achivement {
                     .filter(|tile| matches!(tile.structure, Some(Structure::Settlement(_))))
                     .count()
                     > (planet.map.size().0 * planet.map.size().1 / 2) as usize
-                    && planet.civs.iter().map(|civ| civ.1.total_pop).sum::<f32>() > 10_000_000.0
+                    && planet.civs.iter().map(|civ| civ.1.total_pop).sum::<f32>() > 7500000.0
             }
             Achivement::AbundantPower => planet.res.power >= 10000.0,
             Achivement::GiantMirror => {
                 planet.space_building(SpaceBuildingKind::OrbitalMirror).n > 0
+            }
+            Achivement::DestroyPlanet => {
+                if planet.stat.sum_biomass < 1.0 && planet.civs.is_empty() {
+                    if let Some(record) = planet.stat.record(3000, params) {
+                        record.biomass > 500_000.0 && record.pop.values().sum::<f32>() > 1000.0
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
             }
         }
     }
