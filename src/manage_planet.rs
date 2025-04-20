@@ -173,6 +173,7 @@ fn update(
 
     if er_switch_planet.read().last().is_some() {
         *speed = GameSpeed::Paused;
+        planet.update(&mut sim, &params);
     }
 
     let now = time.elapsed();

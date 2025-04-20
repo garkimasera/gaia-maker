@@ -241,6 +241,7 @@ fn animal_ratio_attr_default() -> f32 {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimalCivParams {
     pub civilize_cost: f32,
+    pub color: [u8; 3],
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr)]

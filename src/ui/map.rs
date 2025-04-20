@@ -27,6 +27,7 @@ pub enum MapLayer {
     Biomass,
     BuriedCarbon,
     Cities,
+    Civilizations,
     Structures,
 }
 
@@ -38,8 +39,7 @@ pub fn map_window(
     mut wos: ResMut<WindowsOpenState>,
     mut ew_centering: EventWriter<Centering>,
     mut need_update: ResMut<NeedUpdate>,
-    planet: Res<Planet>,
-    params: Res<Params>,
+    (planet, sim, params): (Res<Planet>, Res<Sim>, Res<Params>),
     color_materials: Res<ColorMaterials>,
     mut er_switch_planet: EventReader<SwitchPlanet>,
     mut screen: (
@@ -74,14 +74,14 @@ pub fn map_window(
     let map_tex_handle = if let Some(map_tex_handle) = &mut *map_tex_handle {
         map_tex_handle
     } else {
-        let color_image = map_img(&planet, &params, *map_layer, &color_materials, m);
+        let color_image = map_img(&planet, &sim, &params, *map_layer, &color_materials, m);
         *map_tex_handle = Some(ctx.load_texture("map", color_image, egui::TextureOptions::NEAREST));
         map_tex_handle.as_mut().unwrap()
     };
 
     let switched = er_switch_planet.read().fold(false, |_, _| true);
     if *image_update_counter >= 60 || *map_layer != *before_map_layer || need_update.0 || switched {
-        let color_image = map_img(&planet, &params, *map_layer, &color_materials, m);
+        let color_image = map_img(&planet, &sim, &params, *map_layer, &color_materials, m);
         map_tex_handle.set(color_image, egui::TextureOptions::NEAREST);
         *before_map_layer = *map_layer;
         *image_update_counter = 0;
@@ -113,7 +113,7 @@ pub fn map_window(
                         ew_centering.send(Centering(pos));
                     }
                 }
-                legend.ui(ui, *map_layer);
+                legend.ui(ui, *map_layer, &planet, &params);
             });
         })
         .unwrap()
@@ -188,6 +188,7 @@ fn map_ui(
 
 fn map_img(
     planet: &Planet,
+    sim: &Sim,
     params: &Params,
     map_layer: MapLayer,
     color_materials: &ColorMaterials,
@@ -227,6 +228,19 @@ fn map_img(
                 MapLayer::Cities => {
                     if let Some(Structure::Settlement(settlement)) = &planet.map[(x, y)].structure {
                         CITY_COLORS[settlement.age as usize]
+                    } else if planet.map[(x, y)].biome.is_land() {
+                        params.biomes[&Biome::Rock].color
+                    } else {
+                        params.biomes[&Biome::Ocean].color
+                    }
+                }
+                MapLayer::Civilizations => {
+                    if let Some((id, _)) = &sim.domain[(x, y)] {
+                        params.animals[id]
+                            .civ
+                            .as_ref()
+                            .map(|civ| civ.color)
+                            .unwrap_or_default()
                     } else if planet.map[(x, y)].biome.is_land() {
                         params.biomes[&Biome::Rock].color
                     } else {
@@ -336,7 +350,7 @@ impl Legend {
         }
     }
 
-    fn ui(&self, ui: &mut egui::Ui, map_layer: MapLayer) {
+    fn ui(&self, ui: &mut egui::Ui, map_layer: MapLayer, planet: &Planet, params: &Params) {
         ui.add_space(3.0);
         match map_layer {
             MapLayer::AirTemperature
@@ -360,6 +374,10 @@ impl Legend {
                 let legend_items =
                     CivilizationAge::iter().map(|age| (CITY_COLORS[age as usize], t!("age", age)));
                 self.ui_color_legend(ui, legend_items);
+            }
+            MapLayer::Civilizations => {
+                let legend_items = civilization_color_legends(planet, params);
+                self.ui_color_legend(ui, legend_items.into_iter());
             }
             MapLayer::Structures => {
                 let legend_items = STRUCTURE_COLORS.iter().map(|(kind, color)| (*color, t!(kind)));
@@ -408,6 +426,19 @@ static STRUCTURE_COLORS: LazyLock<BTreeMap<StructureKind, [u8; 3]>> = LazyLock::
     map.insert(StructureKind::GiftTower, [190, 0, 255]);
     map
 });
+
+fn civilization_color_legends(planet: &Planet, params: &Params) -> Vec<([u8; 3], String)> {
+    let mut civs = BTreeMap::new();
+    for civ in &planet.civs {
+        let color = params.animals[civ.0]
+            .civ
+            .as_ref()
+            .map(|c| c.color)
+            .unwrap_or_default();
+        civs.insert(*civ.0, (color, planet.civ_name(*civ.0)));
+    }
+    civs.into_values().collect()
+}
 
 struct ColorLegend {
     color: egui::Color32,

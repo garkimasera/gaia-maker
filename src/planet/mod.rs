@@ -154,6 +154,7 @@ impl Planet {
         self.res.reset_before_update();
         self.state.solar_power_multiplier = 1.0;
 
+        self::civ_energy::update_civ_domain(self, sim);
         self::buildings::update(self, sim, params);
 
         self.state.solar_power = self.basics.solar_constant * self.state.solar_power_multiplier;
