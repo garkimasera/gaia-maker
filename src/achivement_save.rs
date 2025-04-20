@@ -25,7 +25,7 @@ const ACHIVEMENT_FILE_NAME: &str = "saves/achivements";
 
 const CHECK_ACHIVEMENT_INTERVAL_CYCLES: u64 = 10;
 
-const ACHIVEMENT_NOTIFICATION_DURATION: Duration = Duration::from_secs(4);
+const ACHIVEMENT_NOTIFICATION_DURATION: Duration = Duration::from_secs(5);
 
 #[derive(Debug)]
 pub struct AchivementPlugin;
@@ -78,6 +78,13 @@ fn check_periodic(
     se_player: SoundEffectPlayer,
     time: Res<Time<Real>>,
 ) {
+    if let Some(timer) = &mut achivement_notification.timer {
+        timer.tick(time.delta());
+        if timer.finished() {
+            *achivement_notification = AchivementNotification::default();
+        }
+    }
+
     if planet.cycles % CHECK_ACHIVEMENT_INTERVAL_CYCLES != 0 {
         return;
     }
@@ -90,13 +97,6 @@ fn check_periodic(
     );
 
     let mut unlocked = false;
-
-    if let Some(timer) = &mut achivement_notification.timer {
-        timer.tick(time.delta());
-        if timer.finished() {
-            *achivement_notification = AchivementNotification::default();
-        }
-    }
 
     for new_achivement in sim.new_achievements.drain() {
         if unlocked_achivements.0.contains(&new_achivement) {
