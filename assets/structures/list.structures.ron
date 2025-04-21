@@ -7,7 +7,7 @@
         building: (
             power: -400,
             cost: 500,
-            effect: SprayToAtmo( kind: oxygen, mass: 2000, limit_atm: 0.25 ),
+            effect: SprayToAtmo( kind: oxygen, mass: 4000, limit_atm: 0.21 ),
         ),
     ),
     rainmaker: (
