@@ -66,7 +66,7 @@ pub fn report_list(
         .min_col_width(16.0)
         .show(ui, |ui| {
             for report in planet.reports.iter().take(n_reports) {
-                let (style, text) = report.text(planet);
+                let (style, text) = report.text();
                 ui.label(style.icon());
                 ui.vertical(|ui| {
                     ui.style_mut().wrap_mode = Some(wrap_mode);

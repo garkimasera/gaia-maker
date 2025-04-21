@@ -103,6 +103,7 @@ pub enum ReportContent {
     EventCivAdvance {
         pos: Coords,
         id: AnimalId,
+        name: String,
         age: CivilizationAge,
     },
     EventCivExtinct {
@@ -112,15 +113,20 @@ pub enum ReportContent {
     EventCivDecadence {
         pos: Coords,
         id: AnimalId,
+        name: String,
     },
     EventNuclearWar {},
     EventInterSpeciesWar {
         id_a: AnimalId,
         id_b: AnimalId,
+        name_a: String,
+        name_b: String,
     },
     EventInterSpeciesWarCeased {
         id_a: AnimalId,
         id_b: AnimalId,
+        name_a: String,
+        name_b: String,
     },
 }
 

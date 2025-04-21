@@ -74,6 +74,7 @@ pub fn cause_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params, p: C
         planet.cycles,
         ReportContent::EventCivDecadence {
             id: settlement.id,
+            name: planet.civ_name(settlement.id),
             pos: p,
         },
     );

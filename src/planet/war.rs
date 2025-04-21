@@ -55,7 +55,12 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             .start_event(PlanetEvent::War(planet_event), duration);
         planet.reports.append(
             planet.cycles,
-            ReportContent::EventInterSpeciesWar { id_a, id_b },
+            ReportContent::EventInterSpeciesWar {
+                id_a,
+                id_b,
+                name_a: planet.civ_name(id_a),
+                name_b: planet.civ_name(id_b),
+            },
         );
     }
 
@@ -147,7 +152,12 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 e.ceased = true;
                 planet.reports.append(
                     planet.cycles,
-                    ReportContent::EventInterSpeciesWarCeased { id_a, id_b },
+                    ReportContent::EventInterSpeciesWarCeased {
+                        id_a,
+                        id_b,
+                        name_a: super::civ::civ_name(&planet.civs, id_a),
+                        name_b: super::civ::civ_name(&planet.civs, id_b),
+                    },
                 );
             }
         }

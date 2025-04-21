@@ -262,6 +262,7 @@ fn tech_exp(settlement: &mut Settlement, planet: &mut Planet, p: Coords, params:
                 planet.cycles,
                 ReportContent::EventCivAdvance {
                     id: settlement.id,
+                    name: planet.civ_name(settlement.id),
                     age: new_age,
                     pos: p,
                 },
@@ -473,17 +474,21 @@ impl Settlement {
     }
 }
 
+pub fn civ_name(civs: &Civs, id: AnimalId) -> String {
+    if let Some(civ) = civs.get(&id) {
+        if let Some(name) = &civ.name {
+            name.into()
+        } else {
+            t!("civ", id)
+        }
+    } else {
+        id.to_string()
+    }
+}
+
 impl Planet {
     pub fn civ_name(&self, id: AnimalId) -> String {
-        if let Some(civ) = self.civs.get(&id) {
-            if let Some(name) = &civ.name {
-                name.into()
-            } else {
-                t!("civ", id)
-            }
-        } else {
-            id.to_string()
-        }
+        civ_name(&self.civs, id)
     }
 }
 
