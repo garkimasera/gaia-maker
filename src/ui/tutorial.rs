@@ -154,6 +154,9 @@ impl TutorialStep {
                 ui.vertical_centered(|ui| {
                     ui.image(textures.get("ui/icon-build"));
                 });
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/tutorial-oxygen-generator-example"));
+                });
             },
             Self::WaitOxygen(0) => |ui, textures| {
                 ui.label(t!("tutorial", "wait-oxygen-0-1"));
@@ -167,6 +170,8 @@ impl TutorialStep {
                 ui.label(t!("tutorial", "carbon-0-1"));
                 ui.vertical_centered(|ui| {
                     ui.image(textures.get("ui/icon-build"));
+                    ui.add_space(8.0);
+                    ui.image(textures.get("ui/tutorial-carbon-capturer-example"));
                 });
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "carbon-0-2"));
