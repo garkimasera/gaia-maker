@@ -153,11 +153,15 @@ impl Plugin for AssetPlugin {
                 .expect("cannot get usr directory path");
             usr_dir.join("share/games/gaia-maker/assets.tar.gz")
         }
-        #[cfg(not(feature = "deb"))]
+        #[cfg(all(not(feature = "deb"), not(target_arch = "wasm32")))]
         fn asset_file_path() -> PathBuf {
             let current_exe = std::env::current_exe().expect("cannot get current exe path");
             let dir = current_exe.parent().expect("invalid current exe path");
             dir.join("assets.tar.gz")
+        }
+        #[cfg(all(not(feature = "deb"), target_arch = "wasm32"))]
+        fn asset_file_path() -> PathBuf {
+            "assets.tar".into()
         }
 
         app.add_plugins(bevy_asset_tar::AssetTarPlugin {
