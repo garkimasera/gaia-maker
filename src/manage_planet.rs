@@ -187,8 +187,10 @@ fn update(
             now - *last_advance_planet > Duration::from_millis(conf.medium_speed_sim_duration_ms)
         }
         GameSpeed::Fast => {
-            if now - *last_frame > Duration::from_millis(1000 / 50) {
-                *delay_counter = delay_counter.saturating_add(20);
+            let diff = now - *last_frame;
+            if diff > Duration::from_millis(1000 / 50) {
+                let n = diff.subsec_millis() / (1000 / 60);
+                *delay_counter = delay_counter.saturating_add(n as u8);
             } else {
                 *delay_counter = delay_counter.saturating_sub(1);
             }
