@@ -18,7 +18,7 @@ fertilize-1-3 = "As time passes, grasslands will spread out as in the example be
 fertilize-checklist1 = "Build 3 or more Soil Fertilization Plants on the planet surface."
 fertilize-checklist2 = "Spread grasslands over 10 or more tiles."
 
-build-oxygen-0-1 = "Congratulations! Life has begun to spread across the planet. Next, let's check the state of the atmosphere. Click on the following icon in the toolbar to open the statistics window, and then click on the Atmosphere tab."
+build-oxygen-0-1 = "Congratulations! Life has begun to spread across the planet. Next, let's check the state of the atmosphere. Click on the following icon in the toolbar to open the statistics window, and then click on the \"Atmosphere\" tab."
 build-oxygen-0-2 = "For advanced ecosystems such as forests and animals, a certain amount of oxygen is needed in the planet's atmosphere. If there is not enough oxygen, let's build Oxygen Generators."
 build-oxygen-1-1 = "Oxygen Generators require a lot of power. Click on the icon below in the toolbar to open the building window and construct Dyson Swarm Units to obtain power."
 build-oxygen-1-2 = "If you don't have enough materials for building, please advance the time after adding Asteroid Mining Stations.\nAfter obtaining power, open the menu by clicking the icon below in the toolbar, and select Oxygen Generator. Then, click on an empty tile to build it."
@@ -42,5 +42,10 @@ animal-checklist1 = "Have foxes inhabit more than 30 tiles."
 
 civilize-0-1 = "Suitable animal species can be guided to develop civilization. Press the \"Civilize\" button in the animal window. This process requires Gene Points and takes some time."
 civilize-checklist1 = "Establish a civilization city on the planet."
+
+orbital-mirror-0-1 = "An Orbital Mirror is the best way to instantly and finely adjust the planet's temperature for the sake of life and civilization. Click the following icon on the toolbar to open the building window, then click the button labeled “+1” under the Orbital Mirror section to construct it."
+orbital-mirror-0-2 = "The Orbital Mirror is a structure that directly regulates the stellar light. You can adjust it using the slider in the Orbital Mirror section.\nEven small changes in light intensity can have a significant impact on the planet, so start by moving the slider into the -10% to -5% range to lower the temperature slightly. To check the average temperature of the entire planet, click the following icon in the toolbar to open the Statistics window, then click the \"Atmosphere\" tab."
+orbital-mirror-checklist1 = "Possess an Orbital Mirror."
+orbital-mirror-checklist2 = "Adjust the Orbital Mirror to within the -10% to -5% range."
 
 complete-0-1 = "Congratulations! You have improved the planet's environment enough for civilization to develop. You are free to continue improving the planet, watch over the animals and civilization, or destroy them. The tutorial is now over, but you can continue playing. If you want to start on another planet, select \"New\" from the main menu."
