@@ -12,13 +12,13 @@ pub enum Achivement {
     Forests,
     Animals,
     Civilize,
+    GiantMirror,
     GreenPlanet,
     MeltedIce = 101,
     DesertGreening,
     IndustrialRevolution = 201,
     StepTowardEcumenopolis,
     AbundantPower = 301,
-    GiantMirror,
     DestroyPlanet,
 }
 
@@ -94,9 +94,11 @@ impl Achivement {
                     && planet.civs.iter().map(|civ| civ.1.total_pop).sum::<f32>() > 7500000.0
             }
             Achivement::AbundantPower => planet.res.power >= 10000.0,
-            Achivement::GiantMirror => {
-                planet.space_building(SpaceBuildingKind::OrbitalMirror).n > 0
+            Achivement::GiantMirror => Requirement::SpaceBuildingBuilt {
+                kind: SpaceBuildingKind::OrbitalMirror,
+                n: 1,
             }
+            .check(planet),
             Achivement::DestroyPlanet => {
                 if planet.stat.sum_biomass < 1.0 && planet.civs.is_empty() {
                     if let Some(record) = planet.stat.record(3000, params) {

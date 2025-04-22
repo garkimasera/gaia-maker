@@ -22,6 +22,7 @@ pub enum TutorialStep {
     Carbon(usize),
     Animal(usize),
     Civilize(usize),
+    OrbitalMirror(usize),
     Complete(bool),
 }
 
@@ -40,6 +41,8 @@ pub enum ChecklistItem {
     CarbonChecklist1,
     AnimalChecklist1,
     CivilizeChecklist1,
+    OrbitalMirrorChecklist1,
+    OrbitalMirrorChecklist2,
 }
 
 impl Default for TutorialState {
@@ -62,9 +65,7 @@ pub fn update_tutorial(mut save_state: ResMut<SaveState>, planet: Res<Planet>) {
     }
 
     for (item, checked) in &mut tutorial_state.checklist {
-        if !*checked {
-            *checked = check(&planet, *item);
-        }
+        *checked = check(&planet, *item);
     }
 }
 
@@ -120,6 +121,7 @@ impl TutorialStep {
         Self::Animal(0),
         Self::Animal(1),
         Self::Civilize(0),
+        Self::OrbitalMirror(0),
         Self::Complete(false),
         Self::Complete(true),
     ];
@@ -220,6 +222,13 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
             n: 1,
             animal_id: None,
         },
+        ChecklistItem::OrbitalMirrorChecklist1 => Requirement::SpaceBuildingBuilt {
+            kind: SpaceBuildingKind::OrbitalMirror,
+            n: 1,
+        },
+        ChecklistItem::OrbitalMirrorChecklist2 => {
+            Requirement::OrbitalMirrorAdjust { range: -10..=-5 }
+        }
     };
     requirement.check(planet)
 }
@@ -245,6 +254,10 @@ fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
         TutorialStepDiscriminants::Carbon => &[ChecklistItem::CarbonChecklist1],
         TutorialStepDiscriminants::Animal => &[ChecklistItem::AnimalChecklist1],
         TutorialStepDiscriminants::Civilize => &[ChecklistItem::CivilizeChecklist1],
+        TutorialStepDiscriminants::OrbitalMirror => &[
+            ChecklistItem::OrbitalMirrorChecklist1,
+            ChecklistItem::OrbitalMirrorChecklist2,
+        ],
         _ => &[],
     }
 }

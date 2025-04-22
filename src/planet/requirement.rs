@@ -28,6 +28,9 @@ pub enum Requirement {
         n: u32,
         animal_id: Option<AnimalId>,
     },
+    OrbitalMirrorAdjust {
+        range: std::ops::RangeInclusive<i32>,
+    },
 }
 
 impl Requirement {
@@ -87,6 +90,15 @@ impl Requirement {
                     })
                     .count()
                     >= *n as usize
+            }
+            Self::OrbitalMirrorAdjust { range } => {
+                if let BuildingControlValue::IncreaseRate(rate) =
+                    &planet.space_building(SpaceBuildingKind::OrbitalMirror).control
+                {
+                    range.contains(rate)
+                } else {
+                    false
+                }
             }
         }
     }

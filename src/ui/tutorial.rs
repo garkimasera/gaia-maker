@@ -197,6 +197,16 @@ impl TutorialStep {
             Self::Civilize(0) => |ui, _textures| {
                 ui.label(t!("tutorial", "civilize-0-1"));
             },
+            Self::OrbitalMirror(0) => |ui, textures| {
+                ui.label(t!("tutorial", "orbital-mirror-0-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-space-buildings"));
+                });
+                ui.label(t!("tutorial", "orbital-mirror-0-2"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-stat"));
+                });
+            },
             Self::Complete(_) => |ui, _textures| {
                 ui.label(t!("tutorial", "complete-0-1"));
             },
