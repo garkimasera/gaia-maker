@@ -8,6 +8,8 @@ use compact_str::format_compact;
 pub struct State {
     ordered_ids: Vec<AnimalId>,
     current: AnimalId,
+    civ_default_name: String,
+    civ_name: String,
 }
 
 pub fn animals_window(
@@ -19,6 +21,7 @@ pub fn animals_window(
     params: Res<Params>,
     textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
+    mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
 ) {
     if !wos.animals {
         return;
@@ -32,10 +35,18 @@ pub fn animals_window(
         .open(&mut wos.animals)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
-                select_panel(ui, state);
+                select_panel(ui, state, &params);
                 ui.separator();
                 ui.vertical(|ui| {
-                    contents(ui, state, &mut planet, &params, &textures, &mut cursor_mode);
+                    contents(
+                        ui,
+                        state,
+                        &mut planet,
+                        &params,
+                        &textures,
+                        &mut cursor_mode,
+                        &mut window.single_mut(),
+                    );
                 });
             });
         })
@@ -47,11 +58,12 @@ pub fn animals_window(
 
 fn contents(
     ui: &mut egui::Ui,
-    state: &State,
+    state: &mut State,
     planet: &mut Planet,
     params: &Params,
     textures: &UiTextures,
     cursor_mode: &mut CursorMode,
+    _window: &mut bevy::window::Window,
 ) {
     ui.horizontal(|ui| {
         ui.add(egui::Image::new(
@@ -139,9 +151,19 @@ fn contents(
             });
         }
     });
+
+    // if attr.civ.is_some() {
+    //     window.ime_enabled = false;
+    //     let result = ui.add(egui::TextEdit::singleline(&mut state.civ_name).char_limit(92));
+    //     if result.has_focus() {
+    //         window.ime_enabled = true;
+    //         window.ime_position = bevy::math::Vec2::new(result.rect.left(), result.rect.top());
+    //     }
+    // }
 }
 
-fn select_panel(ui: &mut egui::Ui, state: &mut State) {
+fn select_panel(ui: &mut egui::Ui, state: &mut State, params: &Params) {
+    let before = state.current;
     egui::ScrollArea::vertical()
         .min_scrolled_height(200.0)
         .show(ui, |ui| {
@@ -153,6 +175,18 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State) {
                 }
             });
         });
+
+    // Selected animal changed
+    if before != state.current
+        && params
+            .animals
+            .get(&state.current)
+            .map(|attr| attr.civ.is_some())
+            .unwrap_or_default()
+    {
+        state.civ_default_name = t!("civ", state.current);
+        state.civ_name = state.civ_default_name.clone();
+    }
 }
 
 impl State {
@@ -163,6 +197,8 @@ impl State {
         Self {
             ordered_ids: ids,
             current,
+            civ_default_name: String::new(),
+            civ_name: String::new(),
         }
     }
 }
