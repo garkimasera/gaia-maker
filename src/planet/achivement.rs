@@ -17,8 +17,12 @@ pub enum Achivement {
     MeltedIce = 101,
     DesertGreening,
     IndustrialRevolution = 201,
+    InterSpeciesWar,
+    Pandemic,
     StepTowardEcumenopolis,
+    MagicalEnergy,
     AbundantPower = 301,
+    LowCarbonDioxide,
     DestroyPlanet,
 }
 
@@ -84,6 +88,14 @@ impl Achivement {
                     false
                 }
             }),
+            Achivement::Pandemic => {
+                planet
+                    .map
+                    .iter()
+                    .filter(|tile| tile.tile_events.get(TileEventKind::Plague).is_some())
+                    .count()
+                    > 1000
+            }
             Achivement::StepTowardEcumenopolis => {
                 planet
                     .map
@@ -93,12 +105,19 @@ impl Achivement {
                     > (planet.map.size().0 * planet.map.size().1 / 2) as usize
                     && planet.civs.iter().map(|civ| civ.1.total_pop).sum::<f32>() > 7500000.0
             }
-            Achivement::AbundantPower => planet.res.power >= 10000.0,
+            Achivement::MagicalEnergy => planet.civs.iter().any(|(_, civ)| {
+                civ.current_age() == CivilizationAge::Iron
+                    && civ.total_energy_consumption[EnergySource::Gift as usize] > 1.0
+            }),
+            Achivement::AbundantPower => planet.res.power >= 30000.0,
             Achivement::GiantMirror => Requirement::SpaceBuildingBuilt {
                 kind: SpaceBuildingKind::OrbitalMirror,
                 n: 1,
             }
             .check(planet),
+            Achivement::LowCarbonDioxide => {
+                planet.atmo.partial_pressure(GasKind::CarbonDioxide) < 30.0 * 1.0e-6
+            }
             Achivement::DestroyPlanet => {
                 if planet.stat.sum_biomass < 1.0 && planet.civs.is_empty() {
                     if let Some(record) = planet.stat.record(3000, params) {
@@ -110,6 +129,7 @@ impl Achivement {
                     false
                 }
             }
+            _ => false,
         }
     }
 }

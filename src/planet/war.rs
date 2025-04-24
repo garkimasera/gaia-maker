@@ -53,6 +53,7 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         planet
             .events
             .start_event(PlanetEvent::War(planet_event), duration);
+        sim.new_achievements.insert(Achivement::InterSpeciesWar);
         planet.reports.append(
             planet.cycles,
             ReportContent::EventInterSpeciesWar {
