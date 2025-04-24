@@ -141,7 +141,8 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             None
         }
     }) {
-        if progress > params.event.inter_species_war_duration_cycles.0 {
+        let extinct = !planet.civs.contains_key(&id_a) || !planet.civs.contains_key(&id_b);
+        if progress > params.event.inter_species_war_duration_cycles.0 || extinct {
             let prob = if progress > params.event.inter_species_war_duration_cycles.1 {
                 1.0
             } else {
@@ -150,15 +151,17 @@ pub fn sim_war(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             };
             if sim.rng.random_bool(prob) {
                 e.ceased = true;
-                planet.reports.append(
-                    planet.cycles,
-                    ReportContent::EventInterSpeciesWarCeased {
-                        id_a,
-                        id_b,
-                        name_a: super::civ::civ_name(&planet.civs, id_a),
-                        name_b: super::civ::civ_name(&planet.civs, id_b),
-                    },
-                );
+                if !extinct {
+                    planet.reports.append(
+                        planet.cycles,
+                        ReportContent::EventInterSpeciesWarCeased {
+                            id_a,
+                            id_b,
+                            name_a: super::civ::civ_name(&planet.civs, id_a),
+                            name_b: super::civ::civ_name(&planet.civs, id_b),
+                        },
+                    );
+                }
             }
         }
     }
