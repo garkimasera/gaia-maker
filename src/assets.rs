@@ -107,9 +107,10 @@ pub struct CreditsAsset(pub BTreeMap<CreditSection, Vec<String>>);
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Deserialize, AsRefStr)]
 pub enum CreditSection {
     Developer,
-    Illustration,
-    #[allow(clippy::upper_case_acronyms)]
-    BGM,
+    #[strum(serialize = "Background Illustration")]
+    BackgroundIllustration,
+    #[strum(serialize = "BGM")]
+    Bgm,
 }
 
 #[derive(Resource)]
