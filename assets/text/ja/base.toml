@@ -189,8 +189,10 @@ loading-failed = "ロード失敗"
 loading-failed-desc-decode-error = "ロードに失敗しました。セーブデータが互換のないバージョンで作成されたか、破損しています。"
 loading-failed-desc-not-found = "ロードに失敗しました。セーブデータを見つけられません。"
 delete-save-data = "以下のセーブデータを削除しますか?"
-save-limit = "ストレージの制限により、Web上で動作している場合は複数のセーブデータを作成できません。"
+save-limit = "ストレージの制限により、Webブラウザ上で動作している場合は複数のセーブデータを作成できません。"
 save-limit-strong = "以下のセーブデータを削除し、新規のゲームをはじめますか? この動作は取り消せません。"
+save-limit-file = "消去: {$name}"
+save-limit-supplement = "この制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
 web-limit-warning = "Gaia MakerはWebブラウザ上で実行されています。Webブラウザ上で実行する場合、セーブデータの数やパフォーマンスが制限されます。制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
 
 # Stat items

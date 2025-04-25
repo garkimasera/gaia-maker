@@ -263,7 +263,7 @@ fn display_web_limit_warning(egui_ctxs: &mut EguiContexts) {
         .default_width(600.0)
         .resizable(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
-            ui.label(t!("msg", "web-limit-warning"));
+            ui.label(egui::RichText::new(t!("msg", "web-limit-warning")).color(egui::Color32::RED));
         })
         .unwrap();
 }

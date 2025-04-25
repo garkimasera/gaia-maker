@@ -59,7 +59,7 @@ macro_rules! t {
     }};
     ($prefix:expr, $s:expr; $($name:ident = $value:expr),*) => {{
         let s: &str = $s.as_ref();
-        let s = compact_str::format_compact!("{}/{}", $prefix, $s);
+        let s = compact_str::format_compact!("{}/{}", $prefix, s);
         let mut map = std::collections::HashMap::default();
 
         $(

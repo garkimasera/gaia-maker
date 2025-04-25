@@ -325,8 +325,9 @@ pub fn check_save_limit(
         ui.label(t!("msg", "save-limit"));
         ui.strong(t!("msg", "save-limit-strong"));
         ui.add_space(5.0);
-        ui.label(&name);
+        ui.strong(t!("msg", "save-limit-file"; name = name));
         ui.add_space(5.0);
+        ui.label(t!("msg", "save-limit-supplement"));
 
         ui.horizontal(|ui| {
             if ui.button(t!("delete")).clicked() {
