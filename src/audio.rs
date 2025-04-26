@@ -8,6 +8,7 @@ use crate::{
     GameState,
     assets::SoundEffectSources,
     conf::{Conf, ConfChange, ConfLoadSystemSet},
+    manage_planet::ManagePlanetSystemSet,
     planet::Planet,
 };
 
@@ -65,6 +66,10 @@ impl Plugin for GameAudioPlugin {
             .add_systems(
                 Update,
                 check_planet_bgm.run_if(in_state(GameState::Running)),
+            )
+            .add_systems(
+                Update,
+                stop_before_manage_planet.before(ManagePlanetSystemSet),
             );
     }
 }
@@ -305,4 +310,22 @@ fn music_kind_set_by_planet_state(planet: &Planet) -> HashSet<MusicKind> {
     }
 
     kind_list
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn stop_before_manage_planet() {}
+
+/// Workaround for noise in wasm
+#[cfg(target_arch = "wasm32")]
+fn stop_before_manage_planet(
+    mut er_manage_planet: EventReader<crate::manage_planet::ManagePlanet>,
+    channel_music: Res<AudioChannel<MainTrack>>,
+) {
+    use crate::manage_planet::ManagePlanet;
+
+    for manage_planet in er_manage_planet.read() {
+        if matches!(manage_planet, ManagePlanet::New(_)) {
+            channel_music.stop();
+        }
+    }
 }

@@ -52,6 +52,9 @@ pub struct GlobalDataChanged {
     pub app_exit_after_saved: bool,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, SystemSet)]
+pub struct ManagePlanetSystemSet;
+
 impl Resource for SaveState {}
 impl Resource for Planet {}
 impl Resource for Params {}
@@ -74,7 +77,12 @@ impl Plugin for ManagePlanetPlugin {
                 start_sim.in_set(GameSystemSet::StartSim),
             )
             .add_systems(FixedUpdate, update.run_if(in_state(GameState::Running)))
-            .add_systems(Update, manage_planet.before(GameSystemSet::Draw))
+            .add_systems(
+                Update,
+                manage_planet
+                    .before(GameSystemSet::Draw)
+                    .in_set(ManagePlanetSystemSet),
+            )
             .add_systems(Update, save_global_data_on_changed)
             .add_systems(
                 Update,
