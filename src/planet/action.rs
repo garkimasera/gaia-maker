@@ -29,12 +29,10 @@ impl Planet {
     }
 
     pub fn demolition(&mut self, p: Coords, sim: &mut Sim, params: &Params) -> bool {
-        if self.map[p].structure.is_some() {
-            self.map[p].structure = None;
+        let structure = &mut self.map[p].structure;
+        if structure.is_some() && !matches!(structure, Some(Structure::Settlement(_))) {
+            *structure = None;
             self.update(sim, params);
-            self.map[p]
-                .tile_events
-                .retain(|e| e.kind() != TileEventKind::Plague);
             true
         } else {
             false
