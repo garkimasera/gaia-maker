@@ -323,6 +323,7 @@ fn manage_planet(
             auto,
             n,
         } => {
+            let prev_save_sub_dir = save_state.current_save_sub_dir.clone();
             save_state.change_current(sub_dir_name, false);
             match crate::saveload::load_from(&save_state, *auto, *n) {
                 Ok((planet, metadata)) => {
@@ -337,6 +338,7 @@ fn manage_planet(
                         ManagePlanetError::Other
                     };
                     ew_manage_planet_error.send(e);
+                    save_state.change_current(&prev_save_sub_dir, false);
                     None
                 }
             }
