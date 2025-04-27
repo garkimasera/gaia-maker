@@ -561,7 +561,7 @@ dependencies = [
 [[package]]
 name = "bevy_asset_tar"
 version = "0.1.0"
-source = "git+https://github.com/garkimasera/bevy_asset_tar.git#f0b72664fdc7291b423e6c29ef12d569fe4379cb"
+source = "git+https://github.com/garkimasera/bevy_asset_tar.git?rev=f0b7266#f0b72664fdc7291b423e6c29ef12d569fe4379cb"
 dependencies = [
  "async-fs",
  "bevy",

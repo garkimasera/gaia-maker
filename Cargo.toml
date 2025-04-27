@@ -52,7 +52,7 @@ strum = { version = "0.27.1", features = ["derive"] }
 toml = "0.8.19"
 winit = { version = "0.30.9", default-features = false }
 
-bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", optional = true }
+bevy_asset_tar = { git = "https://github.com/garkimasera/bevy_asset_tar.git", rev = "f0b7266", optional = true }
 tile-geom = { git = "https://github.com/garkimasera/tile-geom.git" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
