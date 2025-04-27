@@ -17,6 +17,12 @@ Planet and terraforming simulation game written in Rust
 * Various dynamic events affecting civilizations, such as plagues and wars.
 * Multiple distinct planet types to terraform.
 
+## Downloads
+
+Pre-built packages and wasm version is available at [garkimasera.itch.io/gaia-maker](https://garkimasera.itch.io/gaia-maker)
+
+[Github Releases](https://github.com/garkimasera/gaia-maker/releases)
+
 ## Screenshots
 
 ![Biome](https://garkimasera.github.io/games/images/screenshots/gaia-maker-01.webp)
