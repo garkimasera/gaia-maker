@@ -1,6 +1,6 @@
 use std::{collections::HashSet, time::Duration};
 
-use bevy::{ecs::system::SystemParam, prelude::*};
+use bevy::{asset::LoadState, ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
 use serde::Deserialize;
 
@@ -86,6 +86,7 @@ fn check_main_menu_bgm(
     mut bgm_state: ResMut<BgmState>,
     list: Res<MusicList>,
     channel: Res<AudioChannel<MainTrack>>,
+    server: Res<AssetServer>,
 ) {
     if bgm_state
         .instance
@@ -93,10 +94,15 @@ fn check_main_menu_bgm(
         .is_none_or(|instance| matches!(channel.state(instance), PlaybackState::Stopped))
     {
         if let Some(item) = &list.main_menu {
-            let handle = channel.play(item.handle.clone()).looped().handle();
-            bgm_state.instance = Some(handle);
-            bgm_state.path = item.path.clone();
-            bgm_state.kind = Some(item.kind);
+            if matches!(
+                server.get_load_state(item.handle.id()),
+                Some(LoadState::Loaded)
+            ) {
+                let handle = channel.play(item.handle.clone()).looped().handle();
+                bgm_state.instance = Some(handle);
+                bgm_state.path = item.path.clone();
+                bgm_state.kind = Some(item.kind);
+            }
         }
     }
 
