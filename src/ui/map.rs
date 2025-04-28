@@ -103,7 +103,7 @@ pub fn map_window(
                     });
                 ui.separator();
                 let response = map_ui(ui, map_tex_handle, &screen, m as f32);
-                if response.clicked() {
+                if response.clicked() | response.dragged() {
                     if let Some(pos) = response.interact_pointer_pos {
                         let pos = pos - response.rect.min;
                         let pos = Vec2::new(
@@ -139,7 +139,7 @@ fn map_ui(
     let egui_settings = egui_settings.single();
     let [w, h] = map_tex_handle.size();
     let size = egui::vec2(w as _, h as _);
-    let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
+    let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click() | egui::Sense::drag());
 
     if !ui.is_rect_visible(rect) {
         return response;
