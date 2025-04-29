@@ -73,45 +73,56 @@ fn planet_stat(
         .striped(true)
         .min_col_width(16.0);
     grid.show(ui, |ui| {
+        let hover_text = t!("stat_item", "planet-name");
         ui.image(textures.get("ui/icon-planet"))
-            .on_hover_text(t!("stat_item", "planet-name"));
-        ui.label(t!("planet-name"));
-        ui.label(&planet.basics.name);
+            .on_hover_text(&hover_text);
+        ui.label(t!("planet-name")).on_hover_text(&hover_text);
+        ui.label(&planet.basics.name).on_hover_text(&hover_text);
         ui.end_row();
 
+        let hover_text = t!("stat_item", "cycles");
         ui.image(textures.get("ui/icon-cycles"))
-            .on_hover_text(t!("stat_item", "cycles"));
-        ui.label(t!("cycles"));
-        ui.label(format!("{}", planet.cycles));
+            .on_hover_text(&hover_text);
+        ui.label(t!("cycles")).on_hover_text(&hover_text);
+        ui.label(format!("{}", planet.cycles))
+            .on_hover_text(&hover_text);
         ui.end_row();
 
+        let hover_text = t!("stat_item", "radius");
         ui.image(textures.get("ui/icon-radius"))
-            .on_hover_text(t!("stat_item", "radius"));
-        ui.label(t!("radius"));
-        ui.label(format!("{:.0} km", planet.basics.radius / 1000.0));
+            .on_hover_text(&hover_text);
+        ui.label(t!("radius")).on_hover_text(&hover_text);
+        ui.label(format!("{:.0} km", planet.basics.radius / 1000.0))
+            .on_hover_text(&hover_text);
         ui.end_row();
 
+        let hover_text = t!("help", "solar-constant");
         ui.image(textures.get("ui/icon-solar-constant"))
-            .on_hover_text(t!("help", "solar-constant"));
-        ui.label(t!("solar-constant"));
+            .on_hover_text(&hover_text);
+        ui.label(t!("solar-constant")).on_hover_text(&hover_text);
         ui.label(format!(
             "{:.0} W/m² ({:+.0}%)",
             planet.basics.solar_constant,
             (planet.state.solar_power_multiplier - 1.0) * 100.0
-        ));
+        ))
+        .on_hover_text(&hover_text);
         ui.end_row();
 
+        let hover_text = t!("help", "biomass");
         ui.image(textures.get("ui/icon-biomass"))
-            .on_hover_text(t!("help", "biomass"));
-        ui.label(t!("biomass"));
-        ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3));
+            .on_hover_text(&hover_text);
+        ui.label(t!("biomass")).on_hover_text(&hover_text);
+        ui.label(format!("{:.1} Gt", planet.stat.sum_biomass * 1e-3))
+            .on_hover_text(&hover_text);
         ui.end_row();
 
-        ui.image(textures.get("ui/icon-population"))
-            .on_hover_text(t!("stat_item", "population"));
-        ui.label(t!("population"));
         let sum_pop: f32 = planet.civs.iter().map(|civ| civ.1.total_pop).sum();
-        ui.label(format!("{:.0}", sum_pop.abs()));
+        let hover_text = t!("stat_item", "population");
+        ui.image(textures.get("ui/icon-population"))
+            .on_hover_text(&hover_text);
+        ui.label(t!("population")).on_hover_text(&hover_text);
+        ui.label(format!("{:.0}", sum_pop.abs()))
+            .on_hover_text(&hover_text);
     });
 
     if debug_mode_enabled {
@@ -147,12 +158,15 @@ fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet) {
         .show(ui, |ui| {
             for gas_kind in GasKind::iter() {
                 let help_item = HelpItem::Atmosphere(gas_kind);
+                let hover_text = t!("help", help_item);
                 ui.image(textures.get(format!("ui/icon-{}", gas_kind.as_ref())))
-                    .on_hover_text(t!("help", help_item));
-                ui.label(format!("{:.2}%", planet.atmo.mole_ratio[&gas_kind] * 100.0));
+                    .on_hover_text(&hover_text);
+                ui.label(format!("{:.2}%", planet.atmo.mole_ratio[&gas_kind] * 100.0))
+                    .on_hover_text(&hover_text);
                 ui.horizontal(|ui| {
                     ui.add_space(8.0);
-                    ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)));
+                    ui.label(format!("{:.4} atm", planet.atmo.partial_pressure(gas_kind)))
+                        .on_hover_text(&hover_text);
                 });
                 ui.end_row();
             }
@@ -200,10 +214,12 @@ fn civ_stat(
         .show(ui, |ui| {
             for age in CivilizationAge::iter() {
                 let help_item = HelpItem::CivilizationAges(age);
+                let hover_text = t!("help", help_item);
                 ui.image(textures.get(format!("ui/icon-age-{}", age.as_ref())))
-                    .on_hover_text(t!("help", help_item));
-                ui.label(t!("age", age));
-                ui.label(format!("{}", c.total_settlement[age as usize]));
+                    .on_hover_text(&hover_text);
+                ui.label(t!("age", age)).on_hover_text(&hover_text);
+                ui.label(format!("{}", c.total_settlement[age as usize]))
+                    .on_hover_text(&hover_text);
                 ui.end_row();
             }
         });
@@ -220,16 +236,17 @@ fn civ_stat(
             .into_inner();
         for src in EnergySource::iter() {
             let help_item = HelpItem::EnergySources(src);
+            let hover_text = t!("help", help_item);
             ui.image(textures.get(format!("ui/icon-energy-source-{}", src.as_ref())))
-                .on_hover_text(t!("help", help_item));
-            ui.label(t!("energy_source", src));
+                .on_hover_text(&hover_text);
+            ui.label(t!("energy_source", src)).on_hover_text(&hover_text);
             let e = c.total_energy_consumption[src as usize];
             let s = if max < 1000.0 {
                 format!("{} GJ", crate::text::format_float_1000(e, 0))
             } else {
                 format!("{} TJ", crate::text::format_float_1000(e * 1e-3, 3))
             };
-            ui.label(s);
+            ui.label(s).on_hover_text(&hover_text);
             ui.end_row();
         }
     });
