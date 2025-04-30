@@ -52,7 +52,7 @@ pub fn stat_window(
                     &planet,
                     save_state.save_file_metadata.debug_mode_enabled,
                 ),
-                Panel::Atmosphere => atmo_stat(ui, &textures, &planet),
+                Panel::Atmosphere => atmo_stat(ui, &textures, &planet, &params),
                 Panel::Civilization => civ_stat(ui, &textures, &planet, &mut current_civ_id),
                 Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
             }
@@ -133,7 +133,7 @@ fn planet_stat(
     }
 }
 
-fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet) {
+fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet, params: &Params) {
     ui.label(format!(
         "{}: {:.1} °C",
         t!("average-air-temperature"),
@@ -171,6 +171,15 @@ fn atmo_stat(ui: &mut egui::Ui, textures: &UiTextures, planet: &Planet) {
                 ui.end_row();
             }
         });
+
+    ui.separator();
+    let hover_text = t!("help", "cloud-albedo");
+    ui.horizontal(|ui| {
+        ui.image(textures.get("ui/icon-cloud-albedo"))
+            .on_hover_text(&hover_text);
+        ui.label(format!("{:.1} %", planet.cloud_albedo(params) * 100.0))
+            .on_hover_text(&hover_text);
+    });
 }
 
 fn civ_stat(

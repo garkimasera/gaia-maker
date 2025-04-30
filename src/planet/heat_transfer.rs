@@ -34,8 +34,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     });
 
     // Calculate albedo of tiles
-    let cloud_albedo =
-        linear_interpolation(&params.sim.cloud_albedo_table, planet.atmo.cloud_amount);
+    let cloud_albedo = planet.cloud_albedo(params);
     let par_iter = sim.albedo.par_iter_mut().zip(planet.map.par_iter());
     par_iter.for_each(|(albedo, tile)| {
         if tile.tile_events.contains(TileEventKind::BlackDust) {
@@ -219,5 +218,11 @@ pub fn init_temp(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if sim.sea_heat_cap[p] > 0.0 {
             planet.map[p].sea_temp = t;
         }
+    }
+}
+
+impl Planet {
+    pub fn cloud_albedo(&self, params: &Params) -> f32 {
+        linear_interpolation(&params.sim.cloud_albedo_table, self.atmo.cloud_amount)
     }
 }
