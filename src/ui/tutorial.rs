@@ -98,10 +98,10 @@ impl TutorialStep {
             },
             Self::Power(0) => |ui, textures| {
                 ui.label(t!("tutorial", "power-0-1"));
-                super::misc::power_indicator(ui, textures, 30.0, 2.0);
+                super::indicators::power_indicator(ui, textures, 30.0, 2.0);
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "power-0-2"));
-                super::misc::material_indicator(ui, textures, 100.0, 20.0);
+                super::indicators::material_indicator(ui, textures, 100.0, 20.0);
             },
             Self::Power(1) => |ui, textures| {
                 ui.label(t!("tutorial", "power-1-1"));
@@ -178,7 +178,7 @@ impl TutorialStep {
             },
             Self::Animal(0) => |ui, textures| {
                 ui.label(t!("tutorial", "animal-0-1"));
-                super::misc::gene_point_indicator(ui, textures, 100.0, 0.1);
+                super::indicators::gene_point_indicator(ui, textures, 100.0, 0.1);
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "animal-0-2"));
             },

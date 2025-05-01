@@ -4,6 +4,7 @@ mod debug_tools;
 mod error_popup;
 mod help;
 mod hover_tile_tooltip;
+mod indicators;
 mod layers;
 mod main_menu;
 mod map;
@@ -15,7 +16,6 @@ mod report;
 mod saveload;
 mod space_buildings;
 mod stat;
-mod tile_info;
 mod tutorial;
 
 use bevy::prelude::*;
@@ -117,6 +117,7 @@ impl Plugin for UiPlugin {
             .add_systems(
                 Update,
                 (
+                    indicators::indicators,
                     space_buildings::space_buildings_window,
                     animals::animals_window,
                     map::map_window,

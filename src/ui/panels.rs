@@ -1,6 +1,5 @@
-use bevy::{app::AppExit, diagnostic::DiagnosticsStore, prelude::*};
+use bevy::{app::AppExit, prelude::*};
 use bevy_egui::{EguiContexts, egui};
-use geom::Coords;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -8,51 +7,24 @@ use crate::{
     achivement_save::AchivementNotification,
     conf::Conf,
     manage_planet::ManagePlanet,
-    planet::{Cost, Params, Planet, StructureKind},
-    screen::{CursorMode, HoverTile, OccupiedScreenSpace},
-    text::WithUnitDisplay,
-    ui::tile_info::ui_tile_info,
+    planet::{Params, StructureKind},
+    screen::{CursorMode, OccupiedScreenSpace},
 };
 
-use super::{UiTextures, WindowsOpenState, help::HelpItem, misc::LabelWithIcon};
+use super::{UiTextures, WindowsOpenState, help::HelpItem};
 
 pub fn panels(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-    hover_tile: Query<&HoverTile>,
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
     (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
     mut next_game_state: ResMut<NextState<GameState>>,
-    (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
-    diagnostics_store: Res<DiagnosticsStore>,
+    (textures, params, conf): (Res<UiTextures>, Res<Params>, Res<Conf>),
     mut achivement_notification: ResMut<AchivementNotification>,
-    mut last_hover_tile: Local<Option<Coords>>,
 ) {
     occupied_screen_space.reset();
-
-    occupied_screen_space.occupied_left = egui::SidePanel::left("left_panel")
-        .resizable(true)
-        .min_width(conf.ui.min_sidebar_width)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            sidebar(
-                ui,
-                &cursor_mode,
-                &planet,
-                &params,
-                hover_tile.single(),
-                &textures,
-                &conf,
-                &mut last_hover_tile,
-                &diagnostics_store,
-            );
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .width()
-        * conf.ui.scale_factor;
 
     occupied_screen_space.occupied_top = egui::TopBottomPanel::top("top_panel")
         .resizable(false)
@@ -207,121 +179,6 @@ fn toolbar(
     if button(ui, "ui/icon-help", "help") {
         wos.help = !wos.help;
     }
-}
-
-fn sidebar(
-    ui: &mut egui::Ui,
-    cursor_mode: &CursorMode,
-    planet: &Planet,
-    params: &Params,
-    hover_tile: &HoverTile,
-    textures: &UiTextures,
-    conf: &Conf,
-    last_hover_tile: &mut Option<Coords>,
-    diagnostics_store: &DiagnosticsStore,
-) {
-    // FPS indicator
-    const FPS: bevy::diagnostic::DiagnosticPath =
-        bevy::diagnostic::DiagnosticPath::const_new("fps");
-    if conf.show_fps {
-        if let Some(fps) = diagnostics_store.get(&FPS).and_then(|d| d.average()) {
-            ui.label(format!("FPS: {:.2}", fps));
-        }
-    }
-
-    // Resource indicators
-    super::misc::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
-    super::misc::material_indicator(ui, textures, planet.res.material, planet.res.diff_material);
-    super::misc::gene_point_indicator(
-        ui,
-        textures,
-        planet.res.gene_point,
-        planet.res.diff_gene_point,
-    );
-
-    ui.separator();
-
-    // Information about selected tool
-    ui.vertical(|ui| {
-        ui.set_height(50.0);
-        ui.add_space(3.0);
-        let cost_list = crate::action::cursor_mode_lack_and_cost(planet, params, cursor_mode);
-        let bg_color = if cost_list.iter().any(|(lack, _)| *lack) {
-            egui::Color32::DARK_RED
-        } else {
-            egui::Color32::DARK_GRAY
-        };
-        let bg_color = egui::lerp(
-            egui::Rgba::from(bg_color)..=egui::Rgba::from(ui.visuals().window_fill()),
-            0.9,
-        );
-        ui.painter()
-            .rect_filled(ui.available_rect_before_wrap(), 6.0, bg_color);
-        ui.add_space(2.0);
-        let text = match cursor_mode {
-            CursorMode::Normal => "".into(),
-            CursorMode::Demolition => {
-                t!("demolition")
-            }
-            CursorMode::Build(kind) => {
-                t!(kind)
-            }
-            CursorMode::TileEvent(kind) => {
-                t!(kind)
-            }
-            CursorMode::SpawnAnimal(animal_id) => {
-                format!("{} {}", t!("animal"), t!("animal", animal_id))
-            }
-            CursorMode::EditBiome(biome) => {
-                format!("biome editing: {}", biome.as_ref())
-            }
-            CursorMode::ChangeHeight(value) => {
-                format!("change height: {}", value)
-            }
-            CursorMode::PlaceSettlement(id, age) => {
-                format!("settlement: {} {:?}", id, age)
-            }
-            CursorMode::CauseEvent(kind) => AsRef::<str>::as_ref(&kind).to_owned(),
-        };
-        ui.label(egui::RichText::new(text).color(egui::Color32::WHITE));
-        ui.horizontal(|ui| {
-            for (lack, cost) in &cost_list {
-                let (texture, s) = match cost {
-                    Cost::Power(value, _) => (
-                        textures.get("ui/icon-power"),
-                        WithUnitDisplay::Power(*value).to_string(),
-                    ),
-                    Cost::Material(value) => (
-                        textures.get("ui/icon-material"),
-                        WithUnitDisplay::Material(*value).to_string(),
-                    ),
-                    Cost::GenePoint(value) => (
-                        textures.get("ui/icon-gene"),
-                        WithUnitDisplay::GenePoint(*value).to_string(),
-                    ),
-                };
-                if *lack {
-                    ui.add(LabelWithIcon::new(
-                        texture,
-                        egui::RichText::new(s).color(egui::Color32::RED),
-                    ));
-                } else {
-                    ui.add(LabelWithIcon::new(texture, s));
-                }
-            }
-        });
-    });
-
-    ui.separator();
-
-    // Information about the hovered tile
-    last_hover_tile.get_or_insert(Coords(0, 0));
-    if hover_tile.0.is_some() {
-        *last_hover_tile = hover_tile.0;
-    }
-
-    let p = hover_tile.0.unwrap_or(last_hover_tile.unwrap());
-    ui_tile_info(ui, p, planet, textures);
 }
 
 fn build_menu(
