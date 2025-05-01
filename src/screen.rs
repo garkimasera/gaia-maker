@@ -462,9 +462,6 @@ fn keyboard_input(
         wos.map = !wos.map;
     }
     if keys.just_pressed(KeyCode::F4) {
-        wos.layers = !wos.layers;
-    }
-    if keys.just_pressed(KeyCode::F5) {
         wos.stat = !wos.stat;
     }
     // Debug by Alt+F12

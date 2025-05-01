@@ -4,6 +4,8 @@ use geom::Coords;
 
 use crate::{
     conf::Conf,
+    draw::UpdateDraw,
+    overlay::OverlayLayerKind,
     planet::{Cost, KELVIN_CELSIUS, Params, Planet, Structure, TileEvent},
     screen::{CursorMode, HoverTile, OccupiedScreenSpace},
     text::WithUnitDisplay,
@@ -21,6 +23,8 @@ pub fn indicators(
     (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
     diagnostics_store: Res<DiagnosticsStore>,
     mut last_hover_tile: Local<Option<Coords>>,
+    mut current_layer: ResMut<OverlayLayerKind>,
+    mut update_draw: ResMut<UpdateDraw>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
     let visuals = &ctx.style().visuals;
@@ -88,7 +92,14 @@ pub fn indicators(
         .frame(frame)
         .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
         .show(ctx, |ui| {
-            ui_tile_info(ui, p, &planet, &textures);
+            tile_info_indicators(
+                ui,
+                p,
+                &planet,
+                &textures,
+                &mut current_layer,
+                &mut update_draw,
+            );
         })
         .unwrap()
         .response
@@ -221,9 +232,18 @@ pub fn gene_point_indicator(
     });
 }
 
-pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &UiTextures) {
+pub fn tile_info_indicators(
+    ui: &mut egui::Ui,
+    p: Coords,
+    planet: &Planet,
+    textures: &UiTextures,
+    current_layer: &mut OverlayLayerKind,
+    update_draw: &mut UpdateDraw,
+) {
+    let layer = *current_layer;
     let tile = &planet.map[p];
     ui.horizontal(|ui| {
+        ui.radio_value(current_layer, OverlayLayerKind::None, "");
         ui.image(textures.get("ui/icon-coordinates"))
             .on_hover_text(t!("coordinates"));
         ui.label(format!("[{}, {}]", p.0, p.1))
@@ -239,46 +259,61 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
     });
 
     let buried_carbon = if tile.buried_carbon > 5000.0 {
-        format!("{:.1} Gt", tile.buried_carbon)
+        format!("{:.1} Gt", tile.buried_carbon / 1000.0)
     } else {
         format!("{:.1} Mt", tile.buried_carbon)
     };
 
-    let items: &[(&str, String, &str)] = &[
+    let items: &[(OverlayLayerKind, &str, String, &str)] = &[
         (
+            OverlayLayerKind::Height,
             "ui/icon-height",
             format!("{:.0} m", planet.height_above_sea_level(p)),
             "height",
         ),
         (
+            OverlayLayerKind::AirTemperature,
             "ui/icon-air-temperature",
             format!("{:.1} °C", tile.temp - KELVIN_CELSIUS),
             "air-temperature",
         ),
         (
+            OverlayLayerKind::Rainfall,
             "ui/icon-rainfall",
             format!("{:.0} mm", tile.rainfall),
             "rainfall",
         ),
         (
+            OverlayLayerKind::Fertility,
             "ui/icon-fertility",
             format!("{:.0} %", tile.fertility),
             "fertility",
         ),
         (
+            OverlayLayerKind::Biomass,
             "ui/icon-biomass",
             format!("{:.1} kg/m²", tile.biomass),
             "biomass",
         ),
-        ("ui/icon-carbon", buried_carbon, "buried-carbon"),
+        (
+            OverlayLayerKind::BuriedCarbon,
+            "ui/icon-carbon",
+            buried_carbon,
+            "buried-carbon",
+        ),
     ];
 
-    for (icon, label, s) in items {
+    for (layer, icon, label, s) in items {
         let s = t!(s);
         ui.horizontal(|ui| {
+            ui.radio_value(current_layer, *layer, "");
             ui.image(textures.get(icon)).on_hover_text(&s);
             ui.label(label).on_hover_text(s);
         });
+    }
+
+    if layer != *current_layer {
+        update_draw.update();
     }
 
     ui.separator();

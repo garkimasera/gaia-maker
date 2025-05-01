@@ -5,7 +5,6 @@ mod error_popup;
 mod help;
 mod hover_tile_tooltip;
 mod indicators;
-mod layers;
 mod main_menu;
 mod map;
 mod misc;
@@ -24,13 +23,11 @@ use bevy_egui::{
     egui::{self, FontData, FontDefinitions, FontFamily, load::SizedTexture},
 };
 use std::collections::HashMap;
-use strum::IntoEnumIterator;
 
 use crate::{
     GameState,
     assets::UiAssets,
     conf::Conf,
-    draw::{DisplayOpts, UpdateDraw},
     gz::GunzipBin,
     manage_planet::{ManagePlanetError, SwitchPlanet},
     overlay::OverlayLayerKind,
@@ -48,7 +45,6 @@ pub struct WindowsOpenState {
     pub space_building: bool,
     pub animals: bool,
     pub map: bool,
-    pub layers: bool,
     pub stat: bool,
     pub dialogs: Vec<Dialog>,
     pub help: bool,
@@ -122,7 +118,6 @@ impl Plugin for UiPlugin {
                     animals::animals_window,
                     map::map_window,
                     stat::stat_window,
-                    layers::layers_window,
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,

@@ -6,6 +6,7 @@ use crate::{
     GameSpeed, GameState,
     achivement_save::AchivementNotification,
     conf::Conf,
+    draw::{DisplayOpts, UpdateDraw},
     manage_planet::ManagePlanet,
     planet::{Params, StructureKind},
     screen::{CursorMode, OccupiedScreenSpace},
@@ -23,6 +24,8 @@ pub fn panels(
     mut next_game_state: ResMut<NextState<GameState>>,
     (textures, params, conf): (Res<UiTextures>, Res<Params>, Res<Conf>),
     mut achivement_notification: ResMut<AchivementNotification>,
+    mut display_opts: ResMut<DisplayOpts>,
+    mut update_draw: ResMut<UpdateDraw>,
 ) {
     occupied_screen_space.reset();
 
@@ -43,6 +46,8 @@ pub fn panels(
                     &textures,
                     &params,
                     &mut achivement_notification,
+                    &mut display_opts,
+                    &mut update_draw,
                 );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
@@ -66,6 +71,8 @@ fn toolbar(
     textures: &UiTextures,
     params: &Params,
     achivement_notification: &mut AchivementNotification,
+    display_opts: &mut DisplayOpts,
+    update_draw: &mut UpdateDraw,
 ) {
     // Menu buttons
 
@@ -91,6 +98,10 @@ fn toolbar(
         action_menu(ui, cursor_mode, textures, params);
     });
 
+    egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
+        layers_menu(ui, display_opts, update_draw);
+    });
+
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     // Window buttons
@@ -105,10 +116,6 @@ fn toolbar(
 
     if button(ui, "ui/icon-map", "map") {
         wos.map = !wos.map;
-    }
-
-    if button(ui, "ui/icon-layers", "layers") {
-        wos.layers = !wos.layers;
     }
 
     if button(ui, "ui/icon-stat", "statistics") {
@@ -281,5 +288,16 @@ fn game_menu(
         app_exit_events.send(bevy::app::AppExit::Success);
         ui.close_menu();
         crate::platform::window_close();
+    }
+}
+
+fn layers_menu(ui: &mut egui::Ui, display_opts: &mut DisplayOpts, update_draw: &mut UpdateDraw) {
+    let old = *display_opts;
+    ui.checkbox(&mut display_opts.animals, t!("animal"));
+    ui.checkbox(&mut display_opts.cities, t!("cities"));
+    ui.checkbox(&mut display_opts.city_icons, t!("city-icons"));
+    ui.checkbox(&mut display_opts.structures, t!("structures"));
+    if *display_opts != old {
+        update_draw.update();
     }
 }
