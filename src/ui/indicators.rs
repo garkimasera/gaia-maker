@@ -220,6 +220,7 @@ pub fn gene_point_indicator(
         ui.label(egui::RichText::new(format!("({:+.2})", diff_gene_point)).small());
     });
 }
+
 pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &UiTextures) {
     let tile = &planet.map[p];
     ui.horizontal(|ui| {
@@ -236,6 +237,12 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
         ))
         .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
     });
+
+    let buried_carbon = if tile.buried_carbon > 5000.0 {
+        format!("{:.1} Gt", tile.buried_carbon)
+    } else {
+        format!("{:.1} Mt", tile.buried_carbon)
+    };
 
     let items: &[(&str, String, &str)] = &[
         (
@@ -263,6 +270,7 @@ pub fn ui_tile_info(ui: &mut egui::Ui, p: Coords, planet: &Planet, textures: &Ui
             format!("{:.1} kg/m²", tile.biomass),
             "biomass",
         ),
+        ("ui/icon-carbon", buried_carbon, "buried-carbon"),
     ];
 
     for (icon, label, s) in items {
