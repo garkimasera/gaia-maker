@@ -102,6 +102,7 @@ pub fn main_menu(
                     });
                 })
                 .unwrap();
+            display_version(&mut egui_ctxs);
             display_credits_button(&mut egui_ctxs, &mut state.mode);
             display_web_limit_warning(&mut egui_ctxs);
         }
@@ -217,6 +218,19 @@ fn display_credits_button(egui_ctxs: &mut EguiContexts, mode: &mut MainMenuMode)
             if ui.button(t!("credits")).clicked() {
                 *mode = MainMenuMode::Credit;
             }
+        })
+        .unwrap();
+}
+
+fn display_version(egui_ctxs: &mut EguiContexts) {
+    egui::Window::new("cursor-mode-indicator")
+        .vscroll(false)
+        .resizable(false)
+        .title_bar(false)
+        .frame(Default::default())
+        .anchor(egui::Align2::LEFT_TOP, [10.0, 10.0])
+        .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.label(crate::APP_NAME);
         })
         .unwrap();
 }
