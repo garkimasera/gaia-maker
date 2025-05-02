@@ -176,6 +176,12 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     ctx.set_theme(egui::Theme::Dark);
     let mut style = (*ctx.style()).clone();
 
+    style
+        .text_styles
+        .get_mut(&egui::TextStyle::Heading)
+        .unwrap()
+        .size = 14.0;
+
     let cr = egui::CornerRadius::same(2);
     style.visuals.window_corner_radius = cr;
     style.visuals.menu_corner_radius = cr;
