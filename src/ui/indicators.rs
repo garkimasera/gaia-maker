@@ -15,6 +15,8 @@ use super::{UiTextures, misc::LabelWithIcon};
 
 const TOOLBAR_HEIGHT: f32 = 30.0;
 
+const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
+
 pub fn indicators(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
@@ -73,7 +75,6 @@ pub fn indicators(
         .rect;
     occupied_screen_space.push_egui_window_rect(rect);
 
-    let max_width = rect.width();
     y += rect.height();
 
     // Information about the hovered tile
@@ -88,7 +89,7 @@ pub fn indicators(
         .vscroll(false)
         .resizable(false)
         .title_bar(false)
-        .max_width(max_width)
+        .default_width(TILE_INFO_INDICATOR_WIDTH)
         .frame(frame)
         .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
         .show(ctx, |ui| {
@@ -115,7 +116,6 @@ pub fn indicators(
             .vscroll(false)
             .resizable(false)
             .title_bar(false)
-            .max_width(max_width)
             .frame(frame)
             .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
             .show(ctx, |ui| {
@@ -243,7 +243,8 @@ pub fn tile_info_indicators(
     let layer = *current_layer;
     let tile = &planet.map[p];
     ui.horizontal(|ui| {
-        ui.radio_value(current_layer, OverlayLayerKind::None, "");
+        ui.radio_value(current_layer, OverlayLayerKind::None, "")
+            .on_hover_text(t!("coordinates"));
         ui.image(textures.get("ui/icon-coordinates"))
             .on_hover_text(t!("coordinates"));
         ui.label(format!("[{}, {}]", p.0, p.1))
@@ -306,7 +307,7 @@ pub fn tile_info_indicators(
     for (layer, icon, label, s) in items {
         let s = t!(s);
         ui.horizontal(|ui| {
-            ui.radio_value(current_layer, *layer, "");
+            ui.radio_value(current_layer, *layer, "").on_hover_text(&s);
             ui.image(textures.get(icon)).on_hover_text(&s);
             ui.label(label).on_hover_text(s);
         });
