@@ -33,10 +33,6 @@ impl Reports {
         }
     }
 
-    pub fn n_reports(&self) -> usize {
-        self.reports.len() + self.persistent_warns.len()
-    }
-
     pub fn append_persitent_warn(&mut self, cycles: u64, content: ReportContent) {
         let new_report = Report { cycles, content };
         if let Some(report) = self

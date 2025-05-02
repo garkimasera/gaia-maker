@@ -11,7 +11,7 @@ mod misc;
 mod new_planet;
 mod panels;
 mod preferences;
-mod report;
+mod reports;
 mod saveload;
 mod space_buildings;
 mod stat;
@@ -46,6 +46,7 @@ pub struct WindowsOpenState {
     pub animals: bool,
     pub map: bool,
     pub stat: bool,
+    pub reports: bool,
     pub dialogs: Vec<Dialog>,
     pub help: bool,
     pub save: bool,
@@ -105,19 +106,13 @@ impl Plugin for UiPlugin {
             )
             .add_systems(
                 Update,
-                report::report_ui
-                    .run_if(in_state(GameState::Running))
-                    .after(MainPanelsSystemSet)
-                    .before(UiWindowsSystemSet),
-            )
-            .add_systems(
-                Update,
                 (
                     indicators::indicators,
                     space_buildings::space_buildings_window,
                     animals::animals_window,
                     map::map_window,
                     stat::stat_window,
+                    reports::reports_window,
                     help::help_window,
                     saveload::load_window,
                     tutorial::tutorial_popup,

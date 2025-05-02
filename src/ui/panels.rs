@@ -122,6 +122,10 @@ fn toolbar(
         wos.stat = !wos.stat;
     }
 
+    if button(ui, "ui/icon-reports", "reports") {
+        wos.reports = !wos.reports;
+    }
+
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     // Game speed selector

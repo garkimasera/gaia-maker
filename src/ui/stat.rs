@@ -37,6 +37,7 @@ pub fn stat_window(
     let rect = egui::Window::new(t!("statistics"))
         .open(&mut wos.stat)
         .vscroll(true)
+        .collapsible(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
