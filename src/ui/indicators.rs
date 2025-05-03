@@ -13,7 +13,7 @@ use crate::{
 
 use super::{UiTextures, misc::LabelWithIcon};
 
-const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
+pub const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
 
 pub fn indicators(
     mut egui_ctxs: EguiContexts,

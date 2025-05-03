@@ -11,6 +11,7 @@ pub fn tutorial_popup(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut save_state: ResMut<SaveState>,
+    window: Query<&Window, With<bevy::window::PrimaryWindow>>,
     textures: Res<UiTextures>,
 ) {
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
@@ -24,6 +25,13 @@ pub fn tutorial_popup(
     let checked = tutorial_state.checked();
 
     let rect = egui::Window::new(t!("tutorial"))
+        .default_pos([
+            window.single().width()
+                - WINDOW_WIDTH
+                - super::indicators::TILE_INFO_INDICATOR_WIDTH
+                - 30.0,
+            35.0,
+        ])
         .default_width(WINDOW_WIDTH)
         .show(egui_ctxs.ctx_mut(), |ui| {
             tutorial_ui(ui, &textures);
