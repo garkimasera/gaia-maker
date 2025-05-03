@@ -31,6 +31,23 @@ pub enum MapLayer {
     Structures,
 }
 
+impl MapLayer {
+    fn icon(&self) -> &'static str {
+        match self {
+            Self::Biome => "ui/icon-map",
+            Self::Height => "ui/icon-height",
+            Self::AirTemperature => "ui/icon-air-temperature",
+            Self::Rainfall => "ui/icon-rainfall",
+            Self::Fertility => "ui/icon-fertility",
+            Self::Biomass => "ui/icon-biomass",
+            Self::BuriedCarbon => "ui/icon-carbon",
+            Self::Cities => "ui/icon-city",
+            Self::Civilizations => "ui/icon-civilization",
+            Self::Structures => "ui/icon-build",
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Default, Resource)]
 pub struct NeedUpdate(bool);
 
@@ -113,22 +130,26 @@ pub fn map_window(
         .vscroll(false)
         .resizable(false)
         .show(ctx, |ui| {
+            ui.set_min_height(330.0);
             ui.horizontal(|ui| {
                 if ui.button("▼").clicked() {
                     wos.map = false;
                 }
-                ui.heading(t!("map"));
+                ui.heading(format!("{} - {}", t!("map"), t!(map_layer.as_ref())));
             });
             ui.separator();
 
             ui.vertical(|ui| {
-                egui::ComboBox::from_id_salt("map-layer-items")
-                    .selected_text(t!(*map_layer))
-                    .show_ui(ui, |ui| {
-                        for l in MapLayer::iter() {
-                            ui.selectable_value(&mut *map_layer, l, t!(l));
+                let layout = egui::Layout::left_to_right(egui::Align::Min);
+                ui.with_layout(layout, |ui| {
+                    for l in MapLayer::iter() {
+                        let button =
+                            egui::Button::image(textures.get(l.icon())).selected(l == *map_layer);
+                        if ui.add(button).on_hover_text(t!(l)).clicked() {
+                            *map_layer = l;
                         }
-                    });
+                    }
+                });
                 ui.separator();
                 let response = map_ui(ui, map_tex_handle, &screen, m as f32);
                 if response.clicked() | response.dragged() {
