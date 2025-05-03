@@ -13,8 +13,6 @@ use crate::{
 
 use super::{UiTextures, misc::LabelWithIcon};
 
-const TOOLBAR_HEIGHT: f32 = 30.0;
-
 const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
 
 pub fn indicators(
@@ -35,49 +33,8 @@ pub fn indicators(
         .stroke(visuals.window_stroke)
         .inner_margin(egui::Margin::same(4));
 
-    // Information about selected tool
-    if !matches!(*cursor_mode, CursorMode::Normal) {
-        let rect = egui::Window::new("cursor-mode-indicator")
-            .vscroll(false)
-            .resizable(false)
-            .title_bar(false)
-            .frame(frame)
-            .anchor(egui::Align2::LEFT_TOP, [0.0, TOOLBAR_HEIGHT])
-            .show(ctx, |ui| {
-                cursor_mode_indicator(ui, &cursor_mode, &textures, &planet, &params);
-            })
-            .unwrap()
-            .response
-            .rect;
-        occupied_screen_space.push_egui_window_rect(rect);
-    }
-
-    // Resource indicators
-    let mut y = TOOLBAR_HEIGHT;
-    let rect = egui::Window::new("resource-indicators")
-        .vscroll(false)
-        .resizable(false)
-        .title_bar(false)
-        .frame(frame)
-        .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
-        .show(ctx, |ui| {
-            power_indicator(ui, &textures, planet.res.power, planet.res.used_power);
-            material_indicator(ui, &textures, planet.res.material, planet.res.diff_material);
-            gene_point_indicator(
-                ui,
-                &textures,
-                planet.res.gene_point,
-                planet.res.diff_gene_point,
-            );
-        })
-        .unwrap()
-        .response
-        .rect;
-    occupied_screen_space.push_egui_window_rect(rect);
-
-    y += rect.height();
-
     // Information about the hovered tile
+    let mut y = occupied_screen_space.toolbar_height;
     let hover_tile = hover_tile.single();
     last_hover_tile.get_or_insert(Coords(0, 0));
     if hover_tile.0.is_some() {
@@ -107,6 +64,24 @@ pub fn indicators(
         .rect;
     occupied_screen_space.push_egui_window_rect(rect);
     y += rect.height();
+
+    // Information about selected tool
+    if !matches!(*cursor_mode, CursorMode::Normal) {
+        let rect = egui::Window::new("cursor-mode-indicator")
+            .vscroll(false)
+            .resizable(false)
+            .title_bar(false)
+            .frame(frame)
+            .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
+            .show(ctx, |ui| {
+                cursor_mode_indicator(ui, &cursor_mode, &textures, &planet, &params);
+            })
+            .unwrap()
+            .response
+            .rect;
+        occupied_screen_space.push_egui_window_rect(rect);
+        y += rect.height();
+    }
 
     // FPS indicator
     const FPS: bevy::diagnostic::DiagnosticPath =

@@ -8,7 +8,7 @@ use crate::{
     conf::Conf,
     draw::{DisplayOpts, UpdateDraw},
     manage_planet::ManagePlanet,
-    planet::{Params, StructureKind},
+    planet::{Params, Planet, StructureKind},
     screen::{CursorMode, OccupiedScreenSpace},
 };
 
@@ -22,6 +22,7 @@ pub fn toolbar(
     mut speed: ResMut<GameSpeed>,
     (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
     mut next_game_state: ResMut<NextState<GameState>>,
+    planet: Res<Planet>,
     (textures, params, conf): (Res<UiTextures>, Res<Params>, Res<Conf>),
     mut achivement_notification: ResMut<AchivementNotification>,
     mut display_opts: ResMut<DisplayOpts>,
@@ -44,6 +45,7 @@ pub fn toolbar(
                         &mut next_game_state,
                     ),
                     &textures,
+                    &planet,
                     &params,
                     &mut achivement_notification,
                     &mut display_opts,
@@ -71,6 +73,7 @@ fn toolbar_ui(
         &mut NextState<GameState>,
     ),
     textures: &UiTextures,
+    planet: &Planet,
     params: &Params,
     achivement_notification: &mut AchivementNotification,
     display_opts: &mut DisplayOpts,
@@ -86,23 +89,39 @@ fn toolbar_ui(
     let menu_button =
         |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
 
-    egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
+    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
         game_menu(ui, wos, app_exit_events, ew_manage_planet, next_game_state);
-    });
+    })
+    .response
+    .clicked();
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
-    egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
+    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
         build_menu(ui, cursor_mode, textures, params);
-    });
+    })
+    .response
+    .clicked()
+        | menu_clicked;
 
-    egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
+    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
         action_menu(ui, cursor_mode, textures, params);
-    });
+    })
+    .response
+    .clicked()
+        | menu_clicked;
 
-    egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
+    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
         layers_menu(ui, display_opts, update_draw);
-    });
+    })
+    .response
+    .clicked()
+        | menu_clicked;
+
+    if menu_clicked {
+        wos.space_building = false;
+        wos.animals = false;
+    }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
@@ -168,6 +187,25 @@ fn toolbar_ui(
     if button(ui, "ui/icon-help", "help") {
         wos.help = !wos.help;
     }
+
+    ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+    // Resource indicators
+    super::indicators::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
+    ui.separator();
+    super::indicators::material_indicator(
+        ui,
+        textures,
+        planet.res.material,
+        planet.res.diff_material,
+    );
+    ui.separator();
+    super::indicators::gene_point_indicator(
+        ui,
+        textures,
+        planet.res.gene_point,
+        planet.res.diff_gene_point,
+    );
 }
 
 fn build_menu(

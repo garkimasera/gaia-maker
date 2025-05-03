@@ -461,11 +461,15 @@ fn keyboard_input(
     if keys.just_pressed(KeyCode::F2) {
         wos.animals = !wos.animals;
     }
-    if keys.just_pressed(KeyCode::F3) {
+    if keys.just_pressed(KeyCode::F5) {
         wos.map = !wos.map;
     }
-    if keys.just_pressed(KeyCode::F4) {
+    if keys.just_pressed(KeyCode::F6) {
         wos.stat = !wos.stat;
+    }
+    if keys.just_pressed(KeyCode::Escape) {
+        wos.space_building = false;
+        wos.animals = false;
     }
     // Debug by Alt+F12
     if keys.just_pressed(KeyCode::F12)
