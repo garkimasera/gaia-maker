@@ -72,3 +72,11 @@ impl egui::Widget for LabelWithIcon {
         response
     }
 }
+
+pub fn small_window_frame(ctx: &egui::Context) -> egui::Frame {
+    let visuals = &ctx.style().visuals;
+    egui::Frame::default()
+        .fill(visuals.window_fill.gamma_multiply(0.95))
+        .stroke(visuals.window_stroke)
+        .inner_margin(egui::Margin::same(4))
+}

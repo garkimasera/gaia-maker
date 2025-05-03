@@ -40,21 +40,41 @@ const HELP_TOOLTIP_WIDTH: f32 = 256.0;
 #[derive(Clone, Copy, Debug)]
 pub struct UiPlugin;
 
-#[derive(Clone, Default, Debug, Resource)]
+#[derive(Clone, Debug, Resource)]
 pub struct WindowsOpenState {
     pub space_building: bool,
     pub animals: bool,
     pub map: bool,
     pub stat: bool,
     pub reports: bool,
-    pub dialogs: Vec<Dialog>,
     pub help: bool,
     pub save: bool,
     pub load: bool,
     pub achivements: bool,
-    pub error_popup: Option<ManagePlanetError>,
     pub preferences: bool,
     pub debug_tools: bool,
+    pub dialogs: Vec<Dialog>,
+    pub error_popup: Option<ManagePlanetError>,
+}
+
+impl Default for WindowsOpenState {
+    fn default() -> Self {
+        Self {
+            space_building: false,
+            animals: false,
+            map: false,
+            stat: false,
+            reports: true,
+            help: false,
+            save: false,
+            load: false,
+            achivements: false,
+            preferences: false,
+            debug_tools: false,
+            dialogs: Vec::new(),
+            error_popup: None,
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

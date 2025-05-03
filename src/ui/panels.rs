@@ -114,18 +114,6 @@ fn toolbar(
         wos.animals = !wos.animals;
     }
 
-    if button(ui, "ui/icon-map", "map") {
-        wos.map = !wos.map;
-    }
-
-    if button(ui, "ui/icon-stat", "statistics") {
-        wos.stat = !wos.stat;
-    }
-
-    if button(ui, "ui/icon-reports", "reports") {
-        wos.reports = !wos.reports;
-    }
-
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     // Game speed selector

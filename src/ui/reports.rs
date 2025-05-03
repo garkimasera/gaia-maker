@@ -6,7 +6,7 @@ use crate::{
     screen::{Centering, OccupiedScreenSpace},
 };
 
-use super::WindowsOpenState;
+use super::{UiTextures, WindowsOpenState};
 
 const DEFAULT_WINDOW_WIDTH: f32 = 180.0;
 const DEFAULT_WINDOW_HEIGHT: f32 = 150.0;
@@ -16,19 +16,52 @@ pub fn reports_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut ew_centering: EventWriter<Centering>,
+    textures: Res<UiTextures>,
     planet: Res<Planet>,
 ) {
     if !wos.reports {
+        let rect = egui::Window::new("reports-expander")
+            .anchor(
+                egui::Align2::LEFT_BOTTOM,
+                [occupied_screen_space.stat_width, 0.0],
+            )
+            .frame(super::misc::small_window_frame(egui_ctxs.ctx_mut()))
+            .resizable(false)
+            .title_bar(false)
+            .show(egui_ctxs.ctx_mut(), |ui| {
+                if ui
+                    .add(egui::ImageButton::new(textures.get("ui/icon-reports")))
+                    .on_hover_text(t!("reports"))
+                    .clicked()
+                {
+                    wos.reports = true;
+                }
+            })
+            .unwrap()
+            .response
+            .rect;
+        occupied_screen_space.push_egui_window_rect(rect);
         return;
     }
 
-    let rect = egui::Window::new(t!("reports"))
-        .open(&mut wos.reports)
+    let rect = egui::Window::new("reports-window")
+        .anchor(
+            egui::Align2::LEFT_BOTTOM,
+            [occupied_screen_space.stat_width, 0.0],
+        )
+        .title_bar(false)
         .vscroll(true)
-        .collapsible(false)
         .default_width(DEFAULT_WINDOW_WIDTH)
         .default_height(DEFAULT_WINDOW_HEIGHT)
         .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("▼").clicked() {
+                    wos.reports = false;
+                }
+                ui.heading(t!("reports"));
+            });
+            ui.separator();
+
             report_list(ui, &planet, &mut ew_centering);
         })
         .unwrap()

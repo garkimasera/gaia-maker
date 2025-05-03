@@ -31,14 +31,41 @@ pub fn stat_window(
     mut current_graph_item: Local<GraphItem>,
 ) {
     if !wos.stat {
+        let rect = egui::Window::new("stat-expander")
+            .anchor(egui::Align2::LEFT_BOTTOM, [0.0, 0.0])
+            .frame(super::misc::small_window_frame(egui_ctxs.ctx_mut()))
+            .resizable(false)
+            .title_bar(false)
+            .show(egui_ctxs.ctx_mut(), |ui| {
+                if ui
+                    .add(egui::ImageButton::new(textures.get("ui/icon-stat")))
+                    .on_hover_text(t!("statistics"))
+                    .clicked()
+                {
+                    wos.stat = true;
+                }
+            })
+            .unwrap()
+            .response
+            .rect;
+        occupied_screen_space.push_egui_window_rect(rect);
+        occupied_screen_space.stat_width = rect.width();
         return;
     }
 
-    let rect = egui::Window::new(t!("statistics"))
-        .open(&mut wos.stat)
+    let rect = egui::Window::new("stat-window")
+        .anchor(egui::Align2::LEFT_BOTTOM, [0.0, 0.0])
+        .title_bar(false)
         .vscroll(true)
-        .collapsible(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("▼").clicked() {
+                    wos.stat = false;
+                }
+                ui.heading(t!("statistics"));
+            });
+            ui.separator();
+
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
                     ui.selectable_value(&mut *current_panel, panel, t!(panel));
@@ -62,6 +89,7 @@ pub fn stat_window(
         .response
         .rect;
     occupied_screen_space.push_egui_window_rect(rect);
+    occupied_screen_space.stat_width = rect.width();
 }
 
 fn planet_stat(

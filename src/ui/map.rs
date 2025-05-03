@@ -7,7 +7,7 @@ use bevy_egui::{EguiContexts, egui};
 use geom::{Coords, RectIter};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
-use super::{OccupiedScreenSpace, WindowsOpenState};
+use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState};
 use crate::manage_planet::SwitchPlanet;
 use crate::overlay::{ColorMaterials, OverlayLayerKind};
 use crate::planet::*;
@@ -53,11 +53,30 @@ pub fn map_window(
         Local<MapLayer>,
         Local<MapLayer>,
     ),
+    textures: Res<UiTextures>,
     mut legend: Local<Option<Legend>>,
 ) {
     *image_update_counter += 1;
 
     if !wos.map {
+        let rect = egui::Window::new("reports-map")
+            .anchor(egui::Align2::RIGHT_BOTTOM, [0.0, 0.0])
+            .frame(super::misc::small_window_frame(egui_ctxs.ctx_mut()))
+            .resizable(false)
+            .title_bar(false)
+            .show(egui_ctxs.ctx_mut(), |ui| {
+                if ui
+                    .add(egui::ImageButton::new(textures.get("ui/icon-map")))
+                    .on_hover_text(t!("map"))
+                    .clicked()
+                {
+                    wos.map = true;
+                }
+            })
+            .unwrap()
+            .response
+            .rect;
+        screen.1.push_egui_window_rect(rect);
         return;
     }
 
@@ -89,10 +108,19 @@ pub fn map_window(
     }
 
     let rect = egui::Window::new(t!("map"))
-        .open(&mut wos.map)
+        .anchor(egui::Align2::RIGHT_BOTTOM, [0.0, 0.0])
+        .title_bar(false)
         .vscroll(false)
         .resizable(false)
         .show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("▼").clicked() {
+                    wos.map = false;
+                }
+                ui.heading(t!("map"));
+            });
+            ui.separator();
+
             ui.vertical(|ui| {
                 egui::ComboBox::from_id_salt("map-layer-items")
                     .selected_text(t!(*map_layer))
