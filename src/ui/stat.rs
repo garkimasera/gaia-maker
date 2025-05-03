@@ -62,7 +62,12 @@ pub fn stat_window(
                 if ui.button("▼").clicked() {
                     wos.stat = false;
                 }
-                ui.heading(t!("statistics"));
+                let title = if *current_panel == Panel::History {
+                    format!("{} - {}", t!("statistics"), t!(current_graph_item.as_ref()))
+                } else {
+                    t!("statistics")
+                };
+                ui.heading(title);
             });
             ui.separator();
 
@@ -82,7 +87,9 @@ pub fn stat_window(
                 ),
                 Panel::Atmosphere => atmo_stat(ui, &textures, &planet, &params),
                 Panel::Civilization => civ_stat(ui, &textures, &planet, &mut current_civ_id),
-                Panel::History => history_stat(ui, &mut current_graph_item, &planet, &params),
+                Panel::History => {
+                    history_stat(ui, &textures, &mut current_graph_item, &planet, &params)
+                }
             }
         })
         .unwrap()
@@ -290,14 +297,23 @@ fn civ_stat(
     });
 }
 
-fn history_stat(ui: &mut egui::Ui, item: &mut GraphItem, planet: &Planet, params: &Params) {
-    egui::ComboBox::from_id_salt("graph-items")
-        .selected_text(t!(item))
-        .show_ui(ui, |ui| {
-            for graph_item in GraphItem::iter() {
-                ui.selectable_value(item, graph_item, t!(graph_item));
+fn history_stat(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    item: &mut GraphItem,
+    planet: &Planet,
+    params: &Params,
+) {
+    let layout = egui::Layout::left_to_right(egui::Align::Min);
+    ui.with_layout(layout, |ui| {
+        for g in GraphItem::iter() {
+            let button = egui::Button::image(textures.get(g.icon())).selected(g == *item);
+            if ui.add(button).on_hover_text(t!(g)).clicked() {
+                *item = g;
             }
-        });
+        }
+    });
+    ui.separator();
 
     let mut min = f64::MAX;
     let mut max = f64::MIN;
@@ -401,6 +417,20 @@ impl GraphItem {
             Self::CarbonDioxide => format!("{:.2e} atm", value),
             Self::BuriedCarbon => format!("{:.1} Gt", value),
             Self::Population => format!("{:.0}", value),
+        }
+    }
+
+    fn icon(&self) -> &str {
+        match self {
+            Self::AverageAirTemperature => "ui/icon-air-temperature",
+            Self::AverageSeaTemperature => "ui/icon-sea-temperature",
+            Self::AverageRainfall => "ui/icon-rainfall",
+            Self::Biomass => "ui/icon-biomass",
+            Self::Oxygen => "ui/icon-oxygen",
+            Self::Nitrogen => "ui/icon-nitrogen",
+            Self::CarbonDioxide => "ui/icon-carbon-dioxide",
+            Self::BuriedCarbon => "ui/icon-carbon",
+            Self::Population => "ui/icon-population",
         }
     }
 }
