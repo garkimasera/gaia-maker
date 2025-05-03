@@ -31,9 +31,24 @@ pub fn animals_window(
     }
     let state = state.as_mut().unwrap();
 
-    let rect = egui::Window::new(t!("animal"))
-        .open(&mut wos.animals)
+    let rect = egui::Window::new("animal-window")
+        .anchor(
+            egui::Align2::LEFT_TOP,
+            [
+                occupied_screen_space.tools_expander_width,
+                occupied_screen_space.toolbar_height,
+            ],
+        )
+        .title_bar(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("◀").clicked() {
+                    wos.animals = false;
+                }
+                ui.heading(t!("animals"));
+            });
+            ui.separator();
+
             ui.horizontal(|ui| {
                 select_panel(ui, state, &params);
                 ui.separator();

@@ -14,7 +14,7 @@ use crate::{
 
 use super::{UiTextures, WindowsOpenState, help::HelpItem};
 
-pub fn panels(
+pub fn toolbar(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut cursor_mode: ResMut<CursorMode>,
@@ -29,11 +29,11 @@ pub fn panels(
 ) {
     occupied_screen_space.reset();
 
-    occupied_screen_space.occupied_top = egui::TopBottomPanel::top("top_panel")
+    let height = egui::TopBottomPanel::top("top_panel")
         .resizable(false)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
-                toolbar(
+                toolbar_ui(
                     ui,
                     &mut cursor_mode,
                     &mut wos,
@@ -54,11 +54,13 @@ pub fn panels(
         })
         .response
         .rect
-        .height()
-        * conf.ui.scale_factor;
+        .height();
+
+    occupied_screen_space.toolbar_height = height;
+    occupied_screen_space.occupied_top = height * conf.ui.scale_factor;
 }
 
-fn toolbar(
+fn toolbar_ui(
     ui: &mut egui::Ui,
     cursor_mode: &mut CursorMode,
     wos: &mut WindowsOpenState,
@@ -101,18 +103,6 @@ fn toolbar(
     egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
         layers_menu(ui, display_opts, update_draw);
     });
-
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    // Window buttons
-
-    if button(ui, "ui/icon-space-buildings", "space-buildings") {
-        wos.space_building = !wos.space_building;
-    }
-
-    if button(ui, "ui/icon-animal", "animal") {
-        wos.animals = !wos.animals;
-    }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 

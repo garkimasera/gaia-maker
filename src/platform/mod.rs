@@ -13,7 +13,7 @@ pub enum PreferredWindowResolution {
 
 impl Default for PreferredWindowResolution {
     fn default() -> Self {
-        Self::Size(1280, 720)
+        Self::Size(1600, 900)
     }
 }
 

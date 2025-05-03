@@ -351,6 +351,8 @@ pub struct OccupiedScreenSpace {
     pub window_rects: Vec<Rect>,
     pub opening_modal: bool,
     pub stat_width: f32,
+    pub toolbar_height: f32,
+    pub tools_expander_width: f32,
     scale_factor: f32,
 }
 

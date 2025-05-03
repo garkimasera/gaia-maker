@@ -9,12 +9,13 @@ mod main_menu;
 mod map;
 mod misc;
 mod new_planet;
-mod panels;
 mod preferences;
 mod reports;
 mod saveload;
 mod space_buildings;
 mod stat;
+mod toolbar;
+mod tools_expander;
 mod tutorial;
 
 use bevy::prelude::*;
@@ -119,7 +120,7 @@ impl Plugin for UiPlugin {
             .add_systems(OnExit(GameState::MainMenu), reset_ime)
             .add_systems(
                 Update,
-                panels::panels
+                toolbar::toolbar
                     .run_if(in_state(GameState::Running))
                     .in_set(MainPanelsSystemSet)
                     .before(UiWindowsSystemSet),
@@ -128,6 +129,7 @@ impl Plugin for UiPlugin {
                 Update,
                 (
                     indicators::indicators,
+                    tools_expander::tools_expander,
                     space_buildings::space_buildings_window,
                     animals::animals_window,
                     map::map_window,

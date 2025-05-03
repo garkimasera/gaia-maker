@@ -31,10 +31,25 @@ pub fn space_buildings_window(
     }
     let window_width = window.get_single().unwrap().width();
 
-    let rect = egui::Window::new(t!("space-buildings"))
-        .open(&mut wos.space_building)
+    let rect = egui::Window::new("space-buildings-window")
+        .anchor(
+            egui::Align2::LEFT_TOP,
+            [
+                occupied_screen_space.tools_expander_width,
+                occupied_screen_space.toolbar_height,
+            ],
+        )
+        .title_bar(false)
         .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("◀").clicked() {
+                    wos.space_building = false;
+                }
+                ui.heading(t!("space-buildings"));
+            });
+            ui.separator();
+
             for (i, kind) in SpaceBuildingKind::iter().enumerate() {
                 if i != 0 {
                     ui.separator();
