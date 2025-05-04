@@ -40,6 +40,9 @@ pub struct State {
     pub solar_power_multiplier: f32,
     /// Solar power at the planet [W/m^2]
     pub solar_power: f32,
+    /// Biomass increase speed
+    #[serde(default = "control_value_default")]
+    pub forestation_speed: i16,
 }
 
 impl Default for State {
@@ -47,8 +50,13 @@ impl Default for State {
         Self {
             solar_power_multiplier: 1.0,
             solar_power: 0.0,
+            forestation_speed: control_value_default(),
         }
     }
+}
+
+fn control_value_default() -> i16 {
+    100
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Default, Debug)]
@@ -669,6 +677,8 @@ pub struct SimParams {
     pub base_biomass_increase_speed: f32,
     /// Base biomass decrease speed
     pub base_biomass_decrease_speed: f32,
+    /// The controllable ratio of biomass increase speed by forestation speed
+    pub biomass_increase_speed_control_ratio: f32,
     /// Biomass growth speed factor by atm
     pub biomass_growth_speed_atm_table: Vec<(f32, f32)>,
     /// Biomass growth speed factor by CO2

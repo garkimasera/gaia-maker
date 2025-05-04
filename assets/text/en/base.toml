@@ -49,6 +49,7 @@ exit = "Exit"
 facilities = "Facilities"
 fertility = "Fertility"
 focus = "Focus"
+forestation-speed = "Forestation Speed"
 gene-points = "Gene Points"
 habitability = "Habitability"
 habitat = "Habitat"
@@ -198,7 +199,8 @@ save-limit-strong = "Do you want to delete the following save data and start a n
 save-limit-file = "Delete: {$name}"
 save-limit-supplement = "If you want to play without this limitation, please use the download version."
 web-limit-warning = "You are running Gaia Maker in a web browser. When running in a web browser, the number of save data and performance are limited. If you want to play without these limitations, please use the download version."
-control-need-orbital-mirror = "An orbital mirror needs to be built."
+control-need-orbital-mirror = "An Orbital Mirror needs to be built."
+control-need-fertilization-plant = "One or more Soil Fertilization Plants need to be built."
 
 # Stat items
 [stat_item]

@@ -49,6 +49,7 @@ exit = "終了"
 facilities = "施設"
 fertility = "肥沃度"
 focus = "注目"
+forestation-speed = "植林速度"
 gene-points = "遺伝子ポイント"
 habitability = "居住性"
 habitat = "生息環境"
@@ -198,6 +199,7 @@ save-limit-file = "消去: {$name}"
 save-limit-supplement = "この制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
 web-limit-warning = "Gaia MakerはWebブラウザ上で実行されています。Webブラウザ上で実行する場合、セーブデータの数やパフォーマンスが制限されます。制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
 control-need-orbital-mirror = "軌道ミラーが建設されていない"
+control-need-fertilization-plant = "肥沃化工場が建設されていない"
 
 # Stat items
 [stat_item]

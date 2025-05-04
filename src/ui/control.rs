@@ -3,7 +3,9 @@ use bevy_egui::{EguiContexts, egui};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use crate::{
-    planet::{AnimalId, BuildingControlValue, Planet, SpaceBuildingKind},
+    planet::{
+        AnimalId, BuildingControlValue, Planet, Requirement, SpaceBuildingKind, StructureKind,
+    },
     screen::OccupiedScreenSpace,
 };
 
@@ -70,18 +72,35 @@ pub fn control_window(
 }
 
 fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet) {
+    ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+    ui.spacing_mut().slider_width = SLIDER_WIDTH;
+
     // Orbital mirror
     ui.heading(t!("orbital-mirror"));
     let building = planet.space_building_mut(SpaceBuildingKind::OrbitalMirror);
     if building.n > 0 {
         if let BuildingControlValue::IncreaseRate(rate) = &mut building.control {
-            ui.spacing_mut().slider_width = SLIDER_WIDTH;
             ui.add(egui::Slider::new(rate, -100..=100).suffix("%"));
         }
     } else {
         ui.horizontal(|ui| {
             ui.image(textures.get("ui/icon-cross"));
             ui.label(t!("msg/control-need-orbital-mirror"));
+        });
+    }
+
+    // Forestation speed
+    ui.heading(t!("forestation-speed"));
+    let requirement = Requirement::StructureBuilt {
+        kind: StructureKind::FertilizationPlant,
+        n: 1,
+    };
+    if requirement.check(planet) {
+        ui.add(egui::Slider::new(&mut planet.state.forestation_speed, 0..=200).suffix("%"));
+    } else {
+        ui.horizontal(|ui| {
+            ui.image(textures.get("ui/icon-cross"));
+            ui.label(t!("msg/control-need-fertilization-plant"));
         });
     }
 }

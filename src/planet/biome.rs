@@ -146,7 +146,11 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let biomass = planet.map[p].biomass;
         let diff_to_max = max - biomass;
         let diff = if diff_to_max > 0.0 && speed_factor_by_atmo > 0.0 {
-            params.sim.base_biomass_increase_speed * speed_factor_by_atmo
+            super::misc::apply_control_value(
+                params.sim.base_biomass_increase_speed * speed_factor_by_atmo,
+                params.sim.biomass_increase_speed_control_ratio,
+                planet.state.forestation_speed,
+            )
         } else {
             diff_to_max * params.sim.base_biomass_decrease_speed
         };

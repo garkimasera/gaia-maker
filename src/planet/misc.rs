@@ -102,6 +102,12 @@ pub fn calc_congestion_rate<F: FnMut(Coords) -> f32>(p: Coords, size: (u32, u32)
     crowded / sum as f32
 }
 
+pub fn apply_control_value(value: f32, ratio: f32, control_multiplier: i16) -> f32 {
+    let control_multiplier = control_multiplier as f32 / 100.0;
+    let base = value * (1.0 - ratio);
+    base + value * ratio * control_multiplier
+}
+
 /// Random sampling [mean - d, mean + d] with constant distribution.
 #[derive(Clone, Copy, Debug)]
 pub struct ConstantDist {

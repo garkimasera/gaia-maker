@@ -155,6 +155,7 @@
         max_biomass_pop_adj_factor: 0.7,
         base_biomass_increase_speed: 0.01,
         base_biomass_decrease_speed: 0.06,
+        biomass_increase_speed_control_ratio: 0.90,
         biomass_growth_speed_atm_table: [
             (0, -1.0),
             (0.2, 0.0),
