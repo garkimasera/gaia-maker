@@ -31,6 +31,7 @@ pub fn tools_expander(
             {
                 wos.space_building = !wos.space_building;
                 wos.animals = false;
+                wos.control = false;
             }
             if ui
                 .add(egui::ImageButton::new(textures.get("ui/icon-animal")).selected(wos.animals))
@@ -39,6 +40,16 @@ pub fn tools_expander(
             {
                 wos.animals = !wos.animals;
                 wos.space_building = false;
+                wos.control = false;
+            }
+            if ui
+                .add(egui::ImageButton::new(textures.get("ui/icon-control")).selected(wos.control))
+                .on_hover_text(t!("control"))
+                .clicked()
+            {
+                wos.control = !wos.control;
+                wos.space_building = false;
+                wos.animals = false;
             }
         })
         .unwrap()

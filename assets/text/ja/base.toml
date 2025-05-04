@@ -30,6 +30,7 @@ civilize-cost = "文明化コスト"
 civilized = "文明化完了"
 civilizing-in-progress = "文明化中"
 close = "閉じる"
+control = "コントロール"
 coordinates = "座標"
 cost = "コスト"
 credits = "クレジット"
@@ -196,6 +197,7 @@ save-limit-strong = "以下のセーブデータを削除し、新規のゲー�
 save-limit-file = "消去: {$name}"
 save-limit-supplement = "この制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
 web-limit-warning = "Gaia MakerはWebブラウザ上で実行されています。Webブラウザ上で実行する場合、セーブデータの数やパフォーマンスが制限されます。制限無しにプレイしたい場合はダウンロード版をご使用下さい。"
+control-need-orbital-mirror = "軌道ミラーが建設されていない"
 
 # Stat items
 [stat_item]

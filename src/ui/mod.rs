@@ -1,5 +1,6 @@
 mod achivements;
 mod animals;
+mod control;
 mod debug_tools;
 mod error_popup;
 mod help;
@@ -45,6 +46,7 @@ pub struct UiPlugin;
 pub struct WindowsOpenState {
     pub space_building: bool,
     pub animals: bool,
+    pub control: bool,
     pub map: bool,
     pub stat: bool,
     pub reports: bool,
@@ -63,7 +65,8 @@ impl Default for WindowsOpenState {
         Self {
             space_building: false,
             animals: false,
-            map: false,
+            control: false,
+            map: true,
             stat: false,
             reports: true,
             help: false,
@@ -132,6 +135,7 @@ impl Plugin for UiPlugin {
                     tools_expander::tools_expander,
                     space_buildings::space_buildings_window,
                     animals::animals_window,
+                    control::control_window,
                     map::map_window,
                     stat::stat_window,
                     reports::reports_window,

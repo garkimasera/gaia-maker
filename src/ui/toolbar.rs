@@ -121,6 +121,7 @@ fn toolbar_ui(
     if menu_clicked {
         wos.space_building = false;
         wos.animals = false;
+        wos.control = false;
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
