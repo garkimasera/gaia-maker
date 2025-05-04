@@ -76,7 +76,11 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
     ui.spacing_mut().slider_width = SLIDER_WIDTH;
 
     // Orbital mirror
-    ui.heading(t!("orbital-mirror"));
+    ui.horizontal(|ui| {
+        ui.heading(t!("orbital-mirror"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/orbital-mirror"));
+    });
     let building = planet.space_building_mut(SpaceBuildingKind::OrbitalMirror);
     if building.n > 0 {
         if let BuildingControlValue::IncreaseRate(rate) = &mut building.control {
@@ -88,9 +92,14 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
             ui.label(t!("msg/control-need-orbital-mirror"));
         });
     }
+    ui.separator();
 
     // Forestation speed
-    ui.heading(t!("forestation-speed"));
+    ui.horizontal(|ui| {
+        ui.heading(t!("forestation-speed"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/forestation-speed"));
+    });
     let requirement = Requirement::StructureBuilt {
         kind: StructureKind::FertilizationPlant,
         n: 1,
