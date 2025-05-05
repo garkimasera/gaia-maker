@@ -3,6 +3,7 @@ use bevy_egui::{EguiContexts, egui};
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use crate::{
+    audio::SoundEffectPlayer,
     planet::{
         AnimalId, BuildingControlValue, Planet, Requirement, SpaceBuildingKind, StructureKind,
     },
@@ -29,6 +30,7 @@ pub fn control_window(
     textures: Res<UiTextures>,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
+    se_player: SoundEffectPlayer,
 ) {
     if !wos.control {
         return;
@@ -54,7 +56,12 @@ pub fn control_window(
 
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
-                    ui.selectable_value(&mut *current_panel, panel, t!(panel));
+                    if ui
+                        .selectable_value(&mut *current_panel, panel, t!(panel))
+                        .clicked()
+                    {
+                        se_player.play("select-item");
+                    }
                 }
             });
             ui.separator();
@@ -62,9 +69,9 @@ pub fn control_window(
             egui::ScrollArea::vertical()
                 .auto_shrink(egui::Vec2b::new(false, false))
                 .show(ui, |ui| match *current_panel {
-                    Panel::Planet => planet_control(ui, &textures, &mut planet),
+                    Panel::Planet => planet_control(ui, &textures, &mut planet, &se_player),
                     Panel::Civilization => {
-                        civ_control(ui, &textures, &mut planet, &mut current_civ_id)
+                        civ_control(ui, &textures, &mut planet, &mut current_civ_id, &se_player)
                     }
                 });
         })
@@ -74,7 +81,12 @@ pub fn control_window(
     occupied_screen_space.push_egui_window_rect(rect);
 }
 
-fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet) {
+fn planet_control(
+    ui: &mut egui::Ui,
+    textures: &UiTextures,
+    planet: &mut Planet,
+    se_player: &SoundEffectPlayer,
+) {
     ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
     ui.spacing_mut().slider_width = SLIDER_WIDTH;
 
@@ -87,7 +99,12 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
     let building = planet.space_building_mut(SpaceBuildingKind::OrbitalMirror);
     if building.n > 0 {
         if let BuildingControlValue::IncreaseRate(rate) = &mut building.control {
-            ui.add(egui::Slider::new(rate, -100..=100).suffix("%"));
+            if ui
+                .add(egui::Slider::new(rate, -100..=100).suffix("%"))
+                .changed()
+            {
+                se_player.play_if_stopped("slider");
+            }
         }
     } else {
         ui.horizontal(|ui| {
@@ -108,7 +125,12 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
         n: 1,
     };
     if requirement.check(planet) {
-        ui.add(egui::Slider::new(&mut planet.state.forestation_speed, 0..=100).suffix("%"));
+        if ui
+            .add(egui::Slider::new(&mut planet.state.forestation_speed, 0..=100).suffix("%"))
+            .changed()
+        {
+            se_player.play_if_stopped("slider");
+        }
     } else {
         ui.horizontal(|ui| {
             ui.image(textures.get("ui/icon-cross"));
@@ -122,6 +144,7 @@ fn civ_control(
     textures: &UiTextures,
     planet: &mut Planet,
     current_civ_id: &mut Option<AnimalId>,
+    se_player: &SoundEffectPlayer,
 ) {
     if planet.civs.is_empty() {
         ui.label(t!("no-civilization"));
@@ -136,13 +159,22 @@ fn civ_control(
     }
     let mut selected_civ_id = current_civ_id.unwrap();
 
-    egui::ComboBox::from_id_salt("select-civilization")
+    let response = egui::ComboBox::from_id_salt("select-civilization")
         .selected_text(planet.civ_name(selected_civ_id))
         .show_ui(ui, |ui| {
             for &id in &civ_ids {
-                ui.selectable_value(&mut selected_civ_id, id, planet.civ_name(id));
+                if ui
+                    .selectable_value(&mut selected_civ_id, id, planet.civ_name(id))
+                    .clicked()
+                {
+                    se_player.play("select-item");
+                }
             }
-        });
+        })
+        .response;
+    if response.clicked() {
+        se_player.play("select-item");
+    }
 
     *current_civ_id = Some(selected_civ_id);
     let Some(c) = planet.civs.get_mut(&selected_civ_id) else {
@@ -159,7 +191,12 @@ fn civ_control(
         ui.image(textures.get("ui/icon-help"))
             .on_hover_text(t!("help/control/population-growth"));
     });
-    ui.add(egui::Slider::new(&mut civ_control.pop_growth, 0..=200).suffix("%"));
+    if ui
+        .add(egui::Slider::new(&mut civ_control.pop_growth, 0..=200).suffix("%"))
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
     ui.separator();
 
     // Technology development
@@ -168,7 +205,12 @@ fn civ_control(
         ui.image(textures.get("ui/icon-help"))
             .on_hover_text(t!("help/control/technology-development"));
     });
-    ui.add(egui::Slider::new(&mut civ_control.tech_development, 0..=200).suffix("%"));
+    if ui
+        .add(egui::Slider::new(&mut civ_control.tech_development, 0..=200).suffix("%"))
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
     ui.separator();
 
     // Energy source weight
@@ -181,7 +223,9 @@ fn civ_control(
         ui.horizontal(|ui| {
             ui.image(textures.get(format!("ui/icon-energy-source-{}", energy_source.as_ref())))
                 .on_hover_text(t!("energy_source", energy_source));
-            ui.add(egui::Slider::new(weight, 0..=100).suffix("%"));
+            if ui.add(egui::Slider::new(weight, 0..=100).suffix("%")).changed() {
+                se_player.play_if_stopped("slider");
+            }
         });
     }
 }

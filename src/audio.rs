@@ -36,6 +36,9 @@ pub struct SoundEffectPlayer<'w> {
     channel_se: Res<'w, AudioChannelSE>,
 }
 
+static LATEST_AUDIO_INSTANCE: crossbeam::atomic::AtomicCell<Option<Handle<AudioInstance>>> =
+    crossbeam::atomic::AtomicCell::new(None);
+
 impl SoundEffectPlayer<'_> {
     pub fn play(&self, s: &str) {
         let path = compact_str::format_compact!("se/{}.ogg", s);
@@ -44,7 +47,27 @@ impl SoundEffectPlayer<'_> {
             return;
         };
         self.channel_se.stop();
-        self.channel_se.play(audio_source.clone());
+        let instance = self.channel_se.play(audio_source.clone()).handle();
+        LATEST_AUDIO_INSTANCE.store(Some(instance));
+    }
+
+    pub fn play_if_stopped(&self, s: &str) {
+        if self.channel_se.is_playing_sound() {
+            return;
+        }
+        self.play(s)
+    }
+
+    pub fn is_playing(&self) -> bool {
+        if self.channel_se.is_playing_sound() {
+            return true;
+        }
+
+        if let Some(handle) = LATEST_AUDIO_INSTANCE.take() {
+            matches!(self.channel_se.state(&handle), PlaybackState::Queued)
+        } else {
+            false
+        }
     }
 }
 

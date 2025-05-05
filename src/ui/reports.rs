@@ -50,7 +50,6 @@ pub fn reports_window(
             [occupied_screen_space.stat_width, 0.0],
         )
         .title_bar(false)
-        .vscroll(true)
         .default_width(DEFAULT_WINDOW_WIDTH)
         .default_height(DEFAULT_WINDOW_HEIGHT)
         .show(egui_ctxs.ctx_mut(), |ui| {
@@ -62,7 +61,11 @@ pub fn reports_window(
             });
             ui.separator();
 
-            report_list(ui, &planet, &mut ew_centering);
+            egui::ScrollArea::vertical()
+                .auto_shrink(egui::Vec2b::new(false, false))
+                .show(ui, |ui| {
+                    report_list(ui, &planet, &mut ew_centering);
+                });
         })
         .unwrap()
         .response

@@ -9,7 +9,7 @@ use strum::IntoEnumIterator;
 use super::{
     HELP_TOOLTIP_WIDTH, OccupiedScreenSpace, UiTextures, WindowsOpenState, help::HelpItem,
 };
-use crate::planet::*;
+use crate::{audio::SoundEffectPlayer, planet::*};
 
 const BUILDING_BACKGROUND_SIZE: (u32, u32) = (336, 48);
 
@@ -25,6 +25,7 @@ pub fn space_buildings_window(
     >,
     textures: Res<UiTextures>,
     params: Res<Params>,
+    se_player: SoundEffectPlayer,
 ) {
     if !wos.space_building {
         return;
@@ -65,6 +66,7 @@ pub fn space_buildings_window(
                             &params,
                             params.building_attrs(kind),
                             window_width,
+                            &se_player,
                         );
                     });
                 }
@@ -85,6 +87,7 @@ pub fn buildng_row(
     params: &Params,
     attrs: &BuildingAttrs,
     window_width: f32,
+    se_player: &SoundEffectPlayer,
 ) {
     let build_max = attrs.build_max.unwrap();
     let cannot_build_reason = if build_max <= planet.space_building(kind).n {
@@ -130,6 +133,7 @@ pub fn buildng_row(
                 .on_disabled_hover_ui(|ui| cannot_build_reason.ui(ui, textures));
         } else if ui.button("+1").clicked() {
             planet.build_space_building(kind, sim, params);
+            se_player.play("build-space");
         }
 
         if build_max >= 5 {
@@ -145,6 +149,7 @@ pub fn buildng_row(
                         break;
                     }
                 }
+                se_player.play("build-space");
             }
         }
 
@@ -152,9 +157,11 @@ pub fn buildng_row(
             if n > 0 {
                 if ui.button("-1").clicked() {
                     planet.demolish_space_building(kind, 1, sim, params);
+                    se_player.play("demolish");
                 }
                 if build_max >= 5 && ui.button("-5").clicked() {
                     planet.demolish_space_building(kind, 5, sim, params);
+                    se_player.play("demolish");
                 }
             } else {
                 ui.add_visible(false, egui::Button::new("-1"));

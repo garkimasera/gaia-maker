@@ -5,6 +5,7 @@ use strum::IntoEnumIterator;
 use crate::{
     GameSpeed, GameState,
     achivement_save::AchivementNotification,
+    audio::SoundEffectPlayer,
     conf::Conf,
     draw::{DisplayOpts, UpdateDraw},
     manage_planet::ManagePlanet,
@@ -22,11 +23,11 @@ pub fn toolbar(
     mut speed: ResMut<GameSpeed>,
     (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
     mut next_game_state: ResMut<NextState<GameState>>,
-    planet: Res<Planet>,
-    (textures, params, conf): (Res<UiTextures>, Res<Params>, Res<Conf>),
     mut achivement_notification: ResMut<AchivementNotification>,
     mut display_opts: ResMut<DisplayOpts>,
     mut update_draw: ResMut<UpdateDraw>,
+    (textures, planet, params, conf): (Res<UiTextures>, Res<Planet>, Res<Params>, Res<Conf>),
+    se_player: SoundEffectPlayer,
 ) {
     occupied_screen_space.reset();
 
@@ -50,6 +51,7 @@ pub fn toolbar(
                     &mut achivement_notification,
                     &mut display_opts,
                     &mut update_draw,
+                    &se_player,
                 );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
@@ -78,6 +80,7 @@ fn toolbar_ui(
     achivement_notification: &mut AchivementNotification,
     display_opts: &mut DisplayOpts,
     update_draw: &mut UpdateDraw,
+    se_player: &SoundEffectPlayer,
 ) {
     // Menu buttons
 
@@ -90,7 +93,14 @@ fn toolbar_ui(
         |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
 
     let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
-        game_menu(ui, wos, app_exit_events, ew_manage_planet, next_game_state);
+        game_menu(
+            ui,
+            wos,
+            app_exit_events,
+            ew_manage_planet,
+            next_game_state,
+            se_player,
+        );
     })
     .response
     .clicked();
@@ -98,21 +108,21 @@ fn toolbar_ui(
     ui.add(egui::Separator::default().spacing(2.0).vertical());
 
     let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
-        build_menu(ui, cursor_mode, textures, params);
+        build_menu(ui, cursor_mode, textures, params, se_player);
     })
     .response
     .clicked()
         | menu_clicked;
 
     let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
-        action_menu(ui, cursor_mode, textures, params);
+        action_menu(ui, cursor_mode, textures, params, se_player);
     })
     .response
     .clicked()
         | menu_clicked;
 
     let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
-        layers_menu(ui, display_opts, update_draw);
+        layers_menu(ui, display_opts, update_draw, se_player);
     })
     .response
     .clicked()
@@ -122,6 +132,7 @@ fn toolbar_ui(
         wos.space_building = false;
         wos.animals = false;
         wos.control = false;
+        se_player.play("select-item");
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
@@ -135,6 +146,7 @@ fn toolbar_ui(
     };
     if button(ui, texture, "speed-paused") {
         *speed = GameSpeed::Paused;
+        se_player.play("select-item");
     }
 
     let texture = if *speed == GameSpeed::Slow {
@@ -144,6 +156,7 @@ fn toolbar_ui(
     };
     if button(ui, texture, "speed-slow") {
         *speed = GameSpeed::Slow;
+        se_player.play("select-item");
     }
 
     let texture = if *speed == GameSpeed::Medium {
@@ -153,6 +166,7 @@ fn toolbar_ui(
     };
     if button(ui, texture, "speed-medium") {
         *speed = GameSpeed::Medium;
+        se_player.play("select-item");
     }
 
     let texture = if *speed == GameSpeed::Fast {
@@ -162,6 +176,7 @@ fn toolbar_ui(
     };
     if button(ui, texture, "speed-fast") {
         *speed = GameSpeed::Fast;
+        se_player.play("select-item");
     }
 
     ui.add(egui::Separator::default().spacing(2.0).vertical());
@@ -214,10 +229,12 @@ fn build_menu(
     cursor_mode: &mut CursorMode,
     textures: &UiTextures,
     params: &Params,
+    se_player: &SoundEffectPlayer,
 ) {
     if ui.button(t!("demolition")).clicked() {
         *cursor_mode = CursorMode::Demolition;
         ui.close_menu();
+        se_player.play("select-item");
     }
     ui.separator();
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
@@ -226,6 +243,7 @@ fn build_menu(
         if response.clicked() {
             *cursor_mode = CursorMode::Build(kind);
             ui.close_menu();
+            se_player.play("select-item");
         }
         if response.hovered() {
             egui::containers::show_tooltip_at(
@@ -248,6 +266,7 @@ fn action_menu(
     cursor_mode: &mut CursorMode,
     textures: &UiTextures,
     params: &Params,
+    se_player: &SoundEffectPlayer,
 ) {
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
     for &kind in params.event.tile_event_costs.keys() {
@@ -255,6 +274,7 @@ fn action_menu(
         if response.clicked() {
             *cursor_mode = CursorMode::TileEvent(kind);
             ui.close_menu();
+            se_player.play("select-item");
         }
         if response.hovered() {
             egui::containers::show_tooltip_at(
@@ -278,6 +298,7 @@ fn game_menu(
     app_exit_events: &mut EventWriter<AppExit>,
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     next_game_state: &mut NextState<GameState>,
+    se_player: &SoundEffectPlayer,
 ) {
     if ui.button(t!("save")).clicked() {
         ew_manage_planet.send(ManagePlanet::Save {
@@ -285,6 +306,7 @@ fn game_menu(
             _new_name: None,
         });
         ui.close_menu();
+        se_player.play("select-item");
     }
     // if ui.button(format!("{}...", t!("save-as"))).clicked() {
     //     wos.save = true;
@@ -312,12 +334,32 @@ fn game_menu(
     }
 }
 
-fn layers_menu(ui: &mut egui::Ui, display_opts: &mut DisplayOpts, update_draw: &mut UpdateDraw) {
+fn layers_menu(
+    ui: &mut egui::Ui,
+    display_opts: &mut DisplayOpts,
+    update_draw: &mut UpdateDraw,
+    se_player: &SoundEffectPlayer,
+) {
     let old = *display_opts;
-    ui.checkbox(&mut display_opts.animals, t!("animal"));
-    ui.checkbox(&mut display_opts.cities, t!("cities"));
-    ui.checkbox(&mut display_opts.city_icons, t!("city-icons"));
-    ui.checkbox(&mut display_opts.structures, t!("structures"));
+    if ui.checkbox(&mut display_opts.animals, t!("animal")).clicked() {
+        se_player.play("select-item");
+    }
+    if ui.checkbox(&mut display_opts.cities, t!("cities")).clicked() {
+        se_player.play("select-item");
+    }
+    if ui
+        .checkbox(&mut display_opts.city_icons, t!("city-icons"))
+        .clicked()
+    {
+        se_player.play("select-item");
+    }
+    if ui
+        .checkbox(&mut display_opts.structures, t!("structures"))
+        .clicked()
+    {
+        se_player.play("select-item");
+    }
+
     if *display_opts != old {
         update_draw.update();
     }

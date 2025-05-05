@@ -156,6 +156,10 @@ impl Plugin for UiPlugin {
                 hover_tile_tooltip::hover_tile_tooltip
                     .run_if(in_state(GameState::Running))
                     .after(UiWindowsSystemSet),
+            )
+            .add_systems(
+                Update,
+                check_windows_open_state.run_if(in_state(GameState::Running)),
             );
     }
 }
@@ -328,5 +332,52 @@ pub fn reset_window_open_state(
 ) {
     if er_switch_planet.read().last().is_some() {
         wos.dialogs.clear();
+    }
+}
+
+fn check_windows_open_state(
+    wos: Res<WindowsOpenState>,
+    se_player: crate::audio::SoundEffectPlayer,
+    mut prev_wos: Local<WindowsOpenState>,
+) {
+    let mut opened = false;
+    let mut closed = false;
+
+    for (current, prev) in wos.open_bools().into_iter().zip(prev_wos.open_bools()) {
+        if !current && prev {
+            closed = true;
+        }
+        if current && !prev {
+            opened = true;
+        }
+    }
+
+    if !se_player.is_playing() {
+        if opened {
+            se_player.play("window-open");
+        } else if closed {
+            se_player.play("window-close");
+        }
+    }
+
+    *prev_wos = wos.clone();
+}
+
+impl WindowsOpenState {
+    fn open_bools(&self) -> [bool; 12] {
+        [
+            self.space_building,
+            self.animals,
+            self.control,
+            self.map,
+            self.stat,
+            self.reports,
+            self.help,
+            self.save,
+            self.load,
+            self.achivements,
+            self.preferences,
+            self.debug_tools,
+        ]
     }
 }

@@ -1,5 +1,5 @@
 use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState, misc::label_with_icon};
-use crate::{planet::*, screen::CursorMode, text::WithUnitDisplay};
+use crate::{audio::SoundEffectPlayer, planet::*, screen::CursorMode, text::WithUnitDisplay};
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 use compact_str::format_compact;
@@ -22,6 +22,7 @@ pub fn animals_window(
     textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
+    se_player: SoundEffectPlayer,
 ) {
     if !wos.animals {
         return;
@@ -50,7 +51,7 @@ pub fn animals_window(
             ui.separator();
 
             ui.horizontal(|ui| {
-                select_panel(ui, state, &params);
+                select_panel(ui, state, &params, &se_player);
                 ui.separator();
                 ui.vertical(|ui| {
                     contents(
@@ -60,6 +61,7 @@ pub fn animals_window(
                         &params,
                         &textures,
                         &mut cursor_mode,
+                        &se_player,
                         &mut window.single_mut(),
                     );
                 });
@@ -78,6 +80,7 @@ fn contents(
     params: &Params,
     textures: &UiTextures,
     cursor_mode: &mut CursorMode,
+    se_player: &SoundEffectPlayer,
     _window: &mut bevy::window::Window,
 ) {
     ui.horizontal(|ui| {
@@ -142,6 +145,7 @@ fn contents(
     ui.horizontal(|ui| {
         if ui.button(t!("spawn")).clicked() {
             *cursor_mode = CursorMode::SpawnAnimal(state.current);
+            se_player.play("select-item");
         }
 
         if attr.civ.is_some() {
@@ -161,6 +165,7 @@ fn contents(
                     };
                     if ui.button(t!("civilize")).on_disabled_hover_text(s).clicked() {
                         planet.civilize_animal(state.current, params);
+                        se_player.play("select-item");
                     }
                 }
             });
@@ -177,7 +182,12 @@ fn contents(
     // }
 }
 
-fn select_panel(ui: &mut egui::Ui, state: &mut State, params: &Params) {
+fn select_panel(
+    ui: &mut egui::Ui,
+    state: &mut State,
+    params: &Params,
+    se_player: &SoundEffectPlayer,
+) {
     let before = state.current;
     egui::ScrollArea::vertical()
         .min_scrolled_height(200.0)
@@ -186,7 +196,12 @@ fn select_panel(ui: &mut egui::Ui, state: &mut State, params: &Params) {
             ui.set_min_height(180.0);
             ui.vertical(|ui| {
                 for id in &state.ordered_ids {
-                    ui.selectable_value(&mut state.current, *id, t!("animal", id));
+                    if ui
+                        .selectable_value(&mut state.current, *id, t!("animal", id))
+                        .clicked()
+                    {
+                        se_player.play("select-item");
+                    }
                 }
             });
         });

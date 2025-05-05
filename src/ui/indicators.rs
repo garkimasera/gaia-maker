@@ -3,6 +3,7 @@ use bevy_egui::{EguiContexts, egui};
 use geom::Coords;
 
 use crate::{
+    audio::SoundEffectPlayer,
     conf::Conf,
     draw::UpdateDraw,
     overlay::OverlayLayerKind,
@@ -18,13 +19,14 @@ pub const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
 pub fn indicators(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
+    mut current_layer: ResMut<OverlayLayerKind>,
+    mut update_draw: ResMut<UpdateDraw>,
     hover_tile: Query<&HoverTile>,
     cursor_mode: Res<CursorMode>,
     (planet, textures, params, conf): (Res<Planet>, Res<UiTextures>, Res<Params>, Res<Conf>),
     diagnostics_store: Res<DiagnosticsStore>,
+    se_player: SoundEffectPlayer,
     mut last_hover_tile: Local<Option<Coords>>,
-    mut current_layer: ResMut<OverlayLayerKind>,
-    mut update_draw: ResMut<UpdateDraw>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
     let visuals = &ctx.style().visuals;
@@ -57,6 +59,7 @@ pub fn indicators(
                 &textures,
                 &mut current_layer,
                 &mut update_draw,
+                &se_player,
             );
         })
         .unwrap()
@@ -214,12 +217,18 @@ pub fn tile_info_indicators(
     textures: &UiTextures,
     current_layer: &mut OverlayLayerKind,
     update_draw: &mut UpdateDraw,
+    se_player: &SoundEffectPlayer,
 ) {
     let layer = *current_layer;
     let tile = &planet.map[p];
     ui.horizontal(|ui| {
-        ui.radio_value(current_layer, OverlayLayerKind::None, "")
-            .on_hover_text(t!("coordinates"));
+        if ui
+            .radio_value(current_layer, OverlayLayerKind::None, "")
+            .on_hover_text(t!("coordinates"))
+            .clicked()
+        {
+            se_player.play("select-item");
+        }
         ui.image(textures.get("ui/icon-coordinates"))
             .on_hover_text(t!("coordinates"));
         ui.label(format!("[{}, {}]", p.0, p.1))
@@ -282,7 +291,13 @@ pub fn tile_info_indicators(
     for (layer, icon, label, s) in items {
         let s = t!(s);
         ui.horizontal(|ui| {
-            ui.radio_value(current_layer, *layer, "").on_hover_text(&s);
+            if ui
+                .radio_value(current_layer, *layer, "")
+                .on_hover_text(&s)
+                .clicked()
+            {
+                se_player.play("select-item");
+            }
             ui.image(textures.get(icon)).on_hover_text(&s);
             ui.label(label).on_hover_text(s);
         });

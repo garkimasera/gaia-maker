@@ -6,7 +6,7 @@ use egui_plot as plot;
 use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 
 use super::{OccupiedScreenSpace, UiTextures, WindowsOpenState, help::HelpItem};
-use crate::{manage_planet::SaveState, planet::*};
+use crate::{audio::SoundEffectPlayer, manage_planet::SaveState, planet::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug, AsRefStr, EnumIter)]
 #[strum(serialize_all = "kebab-case")]
@@ -26,6 +26,7 @@ pub fn stat_window(
     params: Res<Params>,
     save_state: Res<SaveState>,
     textures: Res<UiTextures>,
+    se_player: SoundEffectPlayer,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
     mut current_graph_item: Local<GraphItem>,
@@ -73,7 +74,12 @@ pub fn stat_window(
 
             ui.horizontal(|ui| {
                 for panel in Panel::iter() {
-                    ui.selectable_value(&mut *current_panel, panel, t!(panel));
+                    if ui
+                        .selectable_value(&mut *current_panel, panel, t!(panel))
+                        .clicked()
+                    {
+                        se_player.play("select-item");
+                    }
                 }
             });
             ui.separator();
@@ -86,10 +92,17 @@ pub fn stat_window(
                     save_state.save_file_metadata.debug_mode_enabled,
                 ),
                 Panel::Atmosphere => atmo_stat(ui, &textures, &planet, &params),
-                Panel::Civilization => civ_stat(ui, &textures, &planet, &mut current_civ_id),
-                Panel::History => {
-                    history_stat(ui, &textures, &mut current_graph_item, &planet, &params)
+                Panel::Civilization => {
+                    civ_stat(ui, &textures, &planet, &mut current_civ_id, &se_player)
                 }
+                Panel::History => history_stat(
+                    ui,
+                    &textures,
+                    &mut current_graph_item,
+                    &planet,
+                    &params,
+                    &se_player,
+                ),
             }
         })
         .unwrap()
@@ -223,6 +236,7 @@ fn civ_stat(
     textures: &UiTextures,
     planet: &Planet,
     current_civ_id: &mut Option<AnimalId>,
+    se_player: &SoundEffectPlayer,
 ) {
     if planet.civs.is_empty() {
         ui.label(t!("no-civilization"));
@@ -236,13 +250,22 @@ fn civ_stat(
     }
     let mut selected_civ_id = current_civ_id.unwrap();
 
-    egui::ComboBox::from_id_salt("select-civilization")
+    let response = egui::ComboBox::from_id_salt("select-civilization")
         .selected_text(planet.civ_name(selected_civ_id))
         .show_ui(ui, |ui| {
             for &id in &civ_ids {
-                ui.selectable_value(&mut selected_civ_id, id, planet.civ_name(id));
+                if ui
+                    .selectable_value(&mut selected_civ_id, id, planet.civ_name(id))
+                    .clicked()
+                {
+                    se_player.play("select-item");
+                }
             }
-        });
+        })
+        .response;
+    if response.clicked() {
+        se_player.play("select-item");
+    }
 
     *current_civ_id = Some(selected_civ_id);
     let Some(c) = planet.civs.get(&selected_civ_id) else {
@@ -303,6 +326,7 @@ fn history_stat(
     item: &mut GraphItem,
     planet: &Planet,
     params: &Params,
+    se_player: &SoundEffectPlayer,
 ) {
     let layout = egui::Layout::left_to_right(egui::Align::Min);
     ui.with_layout(layout, |ui| {
@@ -310,6 +334,7 @@ fn history_stat(
             let button = egui::Button::image(textures.get(g.icon())).selected(g == *item);
             if ui.add(button).on_hover_text(t!(g)).clicked() {
                 *item = g;
+                se_player.play("select-item");
             }
         }
     });

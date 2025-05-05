@@ -71,6 +71,7 @@ pub fn map_window(
         Local<MapLayer>,
     ),
     textures: Res<UiTextures>,
+    se_player: crate::audio::SoundEffectPlayer,
     mut legend: Local<Option<Legend>>,
 ) {
     *image_update_counter += 1;
@@ -147,6 +148,7 @@ pub fn map_window(
                             egui::Button::image(textures.get(l.icon())).selected(l == *map_layer);
                         if ui.add(button).on_hover_text(t!(l)).clicked() {
                             *map_layer = l;
+                            se_player.play("select-item");
                         }
                     }
                 });
