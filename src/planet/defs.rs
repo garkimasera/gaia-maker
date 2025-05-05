@@ -6,7 +6,7 @@ use num_derive::FromPrimitive;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{DisplayFromStr, Same, serde_as};
-use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString};
+use strum::{AsRefStr, Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
 
 use super::serde_with_types::*;
 
@@ -292,6 +292,21 @@ pub struct Civilization {
     pub total_pop: f32,
     pub total_settlement: [u32; CivilizationAge::LEN],
     pub total_energy_consumption: [f32; EnergySource::LEN],
+    #[serde(default)]
+    pub civ_control: CivControl,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct CivControl {
+    pub energy_weight: BTreeMap<EnergySource, u8>,
+}
+
+impl Default for CivControl {
+    fn default() -> Self {
+        Self {
+            energy_weight: EnergySource::iter().map(|s| (s, 100)).collect(),
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Default, Debug, Serialize, Deserialize)]
@@ -350,7 +365,8 @@ pub enum SettlementKind {
     Shelter,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Serialize, Deserialize, AsRefStr, EnumIter)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 #[repr(u8)]

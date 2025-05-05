@@ -62,7 +62,7 @@ pub fn control_window(
 
             match *current_panel {
                 Panel::Planet => planet_control(ui, &textures, &mut planet),
-                Panel::Civilization => civ_control(ui, &textures, &planet, &mut current_civ_id),
+                Panel::Civilization => civ_control(ui, &textures, &mut planet, &mut current_civ_id),
             }
         })
         .unwrap()
@@ -116,8 +116,8 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
 
 fn civ_control(
     ui: &mut egui::Ui,
-    _textures: &UiTextures,
-    planet: &Planet,
+    textures: &UiTextures,
+    planet: &mut Planet,
     current_civ_id: &mut Option<AnimalId>,
 ) {
     if planet.civs.is_empty() {
@@ -125,6 +125,7 @@ fn civ_control(
         *current_civ_id = None;
         return;
     }
+    ui.spacing_mut().slider_width = SLIDER_WIDTH;
 
     let civ_ids: Vec<AnimalId> = planet.civs.keys().copied().collect();
     if current_civ_id.is_none() {
@@ -141,4 +142,25 @@ fn civ_control(
         });
 
     *current_civ_id = Some(selected_civ_id);
+    let Some(c) = planet.civs.get_mut(&selected_civ_id) else {
+        *current_civ_id = None;
+        return;
+    };
+    let civ_control = &mut c.civ_control;
+
+    ui.separator();
+
+    // Energy source weight
+    ui.horizontal(|ui| {
+        ui.heading(t!("energy-source-weight"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/energy-source-weight"));
+    });
+    for (energy_source, weight) in &mut civ_control.energy_weight {
+        ui.horizontal(|ui| {
+            ui.image(textures.get(format!("ui/icon-energy-source-{}", energy_source.as_ref())))
+                .on_hover_text(t!("energy_source", energy_source));
+            ui.add(egui::Slider::new(weight, 0..=100).suffix("%"));
+        });
+    }
 }
