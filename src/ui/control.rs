@@ -105,7 +105,7 @@ fn planet_control(ui: &mut egui::Ui, textures: &UiTextures, planet: &mut Planet)
         n: 1,
     };
     if requirement.check(planet) {
-        ui.add(egui::Slider::new(&mut planet.state.forestation_speed, 0..=200).suffix("%"));
+        ui.add(egui::Slider::new(&mut planet.state.forestation_speed, 0..=100).suffix("%"));
     } else {
         ui.horizontal(|ui| {
             ui.image(textures.get("ui/icon-cross"));
