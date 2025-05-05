@@ -62,10 +62,22 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let cap = cap.max(1e-10);
         let dn = params.sim.base_pop_growth_speed * settlement.pop * (1.0 - settlement.pop / cap);
 
-        let can_growth = !settlement_blocked_by_tile_event(&planet.map[p].tile_events);
-        if dn < 0.0 || can_growth {
-            settlement.pop += dn;
-        }
+        let dn = if dn > 0.0 {
+            let can_growth = !settlement_blocked_by_tile_event(&planet.map[p].tile_events);
+            if can_growth {
+                let control = planet
+                    .civs
+                    .get(&animal_id)
+                    .map(|civ| civ.civ_control.pop_growth)
+                    .unwrap_or_default();
+                super::misc::apply_control_value(dn, 1.0, control)
+            } else {
+                0.0
+            }
+        } else {
+            dn
+        };
+        settlement.pop += dn;
 
         // Settlement extinction
         if settlement.pop
@@ -180,9 +192,15 @@ fn spread_settlement(
     params: &Params,
     animal_attr: &AnimalAttr,
 ) {
+    let pop_growth_control = planet
+        .civs
+        .get(&settlement.id)
+        .map(|civ| civ.civ_control.pop_growth)
+        .unwrap_or_default();
     let normalized_pop =
         (settlement.pop / params.sim.settlement_spread_pop[settlement.age as usize]).min(2.0);
     let prob = (params.sim.base_settlement_spreading_prob * normalized_pop).clamp(0.0, 1.0);
+    let prob = super::misc::apply_control_value(prob, 1.0, pop_growth_control);
     if !sim.rng.random_bool(prob.into()) {
         return;
     }
@@ -242,7 +260,8 @@ fn tech_exp(settlement: &mut Settlement, planet: &mut Planet, p: Coords, params:
         let total_pop_factor = (civ.total_pop
             / params.sim.tech_exp_total_pop_factor[settlement.age as usize])
             .min(2.0);
-        params.sim.base_tech_exp * normalized_pop.sqrt() * total_pop_factor
+        let diff = params.sim.base_tech_exp * normalized_pop.sqrt() * total_pop_factor;
+        super::misc::apply_control_value(diff, 1.0, civ.civ_control.tech_development)
     } else {
         -params.sim.tech_exp_declining_speed
     };

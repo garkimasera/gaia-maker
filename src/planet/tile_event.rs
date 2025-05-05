@@ -223,6 +223,18 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             civ_sum_values.n_moving += 1;
         } else {
             // Build settlement if habitable
+
+            // Check by pop growth control
+            let pop_growth_control = planet
+                .civs
+                .get(&id)
+                .map(|civ| civ.civ_control.pop_growth)
+                .unwrap_or_default() as f64
+                / 100.0;
+            if sim.rng.random_bool((1.0 - pop_growth_control).clamp(0.0, 1.0)) {
+                continue;
+            }
+
             let cap_animal = super::animal::calc_cap_by_atmo_temp(
                 planet,
                 p,
