@@ -122,6 +122,14 @@ pub fn process_settlement_energy(
     let age = settlement.age as usize;
     let animal_id = settlement.id;
 
+    let mut limit_by_control = [0.0; EnergySource::LEN];
+    for src in EnergySource::iter() {
+        if let Some(civ_control) = planet.civs.get(&animal_id).map(|civ| &civ.civ_control) {
+            limit_by_control[src as usize] =
+                civ_control.energy_weight.get(&src).copied().unwrap_or_default() as f32 / 100.0;
+        }
+    }
+
     let demand = settlement.pop * params.sim.energy_demand_per_pop[age];
     let mut supply = [0.0; EnergySource::LEN];
     let mut consume = [0.0; EnergySource::LEN];
@@ -175,8 +183,10 @@ pub fn process_settlement_energy(
         let eff = params.sim.energy_efficiency[age][src];
         let high_eff = params.sim.energy_high_efficiency[age][src];
         if high_eff > 0.0 {
-            let high_eff_supply = (supply[src] * params.sim.high_efficiency_limit_by_supply[src])
-                .min(demand * params.sim.high_efficiency_limit_by_demand[src]);
+            let demand_limit =
+                demand * params.sim.high_efficiency_limit_by_demand[src] * limit_by_control[src];
+            let high_eff_supply =
+                (supply[src] * params.sim.high_efficiency_limit_by_supply[src]).min(demand_limit);
             let normal_supply = supply[src] - high_eff_supply;
             v.push((src, high_eff, high_eff_supply));
             v.push((src, eff, normal_supply));
@@ -192,9 +202,9 @@ pub fn process_settlement_energy(
     let mut remaining = demand;
     let mut sum_eff = 0.0;
     for (src, eff, supply) in v {
-        let a = (demand * params.sim.energy_source_limit_by_age[age][src] - consume[src])
-            .min(supply)
-            .min(remaining);
+        let demand_limit =
+            demand * params.sim.energy_source_limit_by_age[age][src] * limit_by_control[src];
+        let a = (demand_limit - consume[src]).min(supply).min(remaining);
         debug_assert!(a >= 0.0);
         consume[src] += a;
         remaining -= a;
