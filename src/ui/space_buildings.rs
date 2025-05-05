@@ -40,7 +40,7 @@ pub fn space_buildings_window(
             ],
         )
         .title_bar(false)
-        .vscroll(true)
+        .resizable(egui::Vec2b::new(false, true))
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 if ui.button("◀").clicked() {
@@ -50,23 +50,25 @@ pub fn space_buildings_window(
             });
             ui.separator();
 
-            for (i, kind) in SpaceBuildingKind::iter().enumerate() {
-                if i != 0 {
-                    ui.separator();
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for (i, kind) in SpaceBuildingKind::iter().enumerate() {
+                    if i != 0 {
+                        ui.separator();
+                    }
+                    ui.vertical(|ui| {
+                        buildng_row(
+                            ui,
+                            kind,
+                            &mut planet,
+                            &mut sim,
+                            &textures,
+                            &params,
+                            params.building_attrs(kind),
+                            window_width,
+                        );
+                    });
                 }
-                ui.vertical(|ui| {
-                    buildng_row(
-                        ui,
-                        kind,
-                        &mut planet,
-                        &mut sim,
-                        &textures,
-                        &params,
-                        params.building_attrs(kind),
-                        window_width,
-                    );
-                });
-            }
+            });
         })
         .unwrap()
         .response
