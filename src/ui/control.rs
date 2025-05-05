@@ -43,7 +43,6 @@ pub fn control_window(
             ],
         )
         .title_bar(false)
-        .vscroll(true)
         .show(egui_ctxs.ctx_mut(), |ui| {
             ui.horizontal(|ui| {
                 if ui.button("◀").clicked() {
@@ -60,10 +59,14 @@ pub fn control_window(
             });
             ui.separator();
 
-            match *current_panel {
-                Panel::Planet => planet_control(ui, &textures, &mut planet),
-                Panel::Civilization => civ_control(ui, &textures, &mut planet, &mut current_civ_id),
-            }
+            egui::ScrollArea::vertical()
+                .auto_shrink(egui::Vec2b::new(false, false))
+                .show(ui, |ui| match *current_panel {
+                    Panel::Planet => planet_control(ui, &textures, &mut planet),
+                    Panel::Civilization => {
+                        civ_control(ui, &textures, &mut planet, &mut current_civ_id)
+                    }
+                });
         })
         .unwrap()
         .response
@@ -148,6 +151,24 @@ fn civ_control(
     };
     let civ_control = &mut c.civ_control;
 
+    ui.separator();
+
+    // Population growth
+    ui.horizontal(|ui| {
+        ui.heading(t!("population-growth"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/population-growth"));
+    });
+    ui.add(egui::Slider::new(&mut civ_control.pop_growth, 0..=200).suffix("%"));
+    ui.separator();
+
+    // Technology development
+    ui.horizontal(|ui| {
+        ui.heading(t!("technology-development"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/technology-development"));
+    });
+    ui.add(egui::Slider::new(&mut civ_control.tech_development, 0..=200).suffix("%"));
     ui.separator();
 
     // Energy source weight

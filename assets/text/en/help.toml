@@ -75,5 +75,7 @@ gift = "Gift energy is energy that the overseer makes available to primitive civ
 
 [help.control]
 orbital-mirror = "Orbital Mirror reflects the stellar light and increases or decreases the amount of light energy that reaches the surface of the planet."
-forestation-speed = "Changing the forestation speed will also change the rate at which biomass increases on tiles."
-energy-source-weight = "Guides the percentage of energy sources consumed by a civilization to a specified value. The actual distribution depends on the level of technology in a civilization and its energy efficiency. If other energy sources are not available, biomass will be consumed."
+forestation-speed = "Adjust forestation speed and change the rate at which biomass increases on tiles."
+population-growth = "Adjust the population growth rate of the civilization."
+technology-development = "Adjust the speed of technological development in the civilization."
+energy-source-weight = "Guide the percentage of energy sources consumed by the civilization to a specified value. The actual distribution depends on the level of technology in the civilization and its energy efficiency. If other energy sources are not available, biomass will be consumed."

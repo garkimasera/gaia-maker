@@ -298,12 +298,16 @@ pub struct Civilization {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CivControl {
+    pub pop_growth: i16,
+    pub tech_development: i16,
     pub energy_weight: BTreeMap<EnergySource, u8>,
 }
 
 impl Default for CivControl {
     fn default() -> Self {
         Self {
+            pop_growth: control_value_default(),
+            tech_development: control_value_default(),
             energy_weight: EnergySource::iter().map(|s| (s, 100)).collect(),
         }
     }
