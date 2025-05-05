@@ -168,6 +168,10 @@ pub fn process_settlement_energy(
     supply[EnergySource::Nuclear as usize] = demand * a;
 
     // Calculate energy distribution
+    let high_eff_biomass_supply = demand
+        * params.sim.high_efficiency_limit_by_demand[EnergySource::Biomass as usize]
+        * limit_by_control[EnergySource::Biomass as usize];
+
     let src_without_biomass = [
         EnergySource::Gift,
         EnergySource::HydroGeothermal,
@@ -201,6 +205,12 @@ pub fn process_settlement_energy(
 
     let mut remaining = demand;
     let mut sum_eff = 0.0;
+
+    remaining -= high_eff_biomass_supply;
+    sum_eff += high_eff_biomass_supply
+        / params.sim.energy_high_efficiency[age][EnergySource::Biomass as usize];
+    consume[EnergySource::Biomass as usize] = high_eff_biomass_supply;
+
     for (src, eff, supply) in v {
         let demand_limit =
             demand * params.sim.energy_source_limit_by_age[age][src] * limit_by_control[src];
@@ -212,7 +222,7 @@ pub fn process_settlement_energy(
             sum_eff += a / eff;
         }
     }
-    consume[EnergySource::Biomass as usize] = remaining;
+    consume[EnergySource::Biomass as usize] += remaining;
     let biomass_eff_factor = linear_interpolation(
         &params.sim.biomass_energy_efficiency_density_factor_table,
         planet.map[p].biomass,
@@ -246,7 +256,9 @@ pub fn process_settlement_energy(
         .iter()
         .enumerate()
         .map(|(src, a)| {
-            if src == EnergySource::SolarWind as usize {
+            if src == EnergySource::Biomass as usize {
+                a * (consume[src] - high_eff_biomass_supply).max(0.0)
+            } else if src == EnergySource::SolarWind as usize {
                 params.sim.high_efficiency_wind_solar_biomass_impact
                     * high_eff_wind_solar.max(consume[src])
                     + a * (consume[src] - high_eff_wind_solar).max(0.0)
