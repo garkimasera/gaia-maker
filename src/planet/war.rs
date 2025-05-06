@@ -10,8 +10,19 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let Some(Structure::Settlement(settlement)) = planet.map[p].structure else {
             continue;
         };
+        let aggressiveness = planet
+            .civs
+            .get(&settlement.id)
+            .map(|civ| civ.civ_control.aggressiveness)
+            .unwrap_or_default() as f32
+            / 100.0;
+        let a = if aggressiveness > 1.0 {
+            aggressiveness * aggressiveness
+        } else {
+            aggressiveness
+        };
 
-        let prob = params.event.base_civil_war_prob;
+        let prob = params.event.base_civil_war_prob * a;
         if sim.rng.random_bool(prob as f64) {
             start_civil_war(planet, sim, params, p, settlement);
         }
@@ -22,9 +33,13 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         let civ1 = &planet.civs[&id_b];
         let age = civ0.current_age().max(civ1.current_age());
 
+        let a0 = civ0.civ_control.aggressiveness as f64 / 100.0;
+        let a1 = civ1.civ_control.aggressiveness as f64 / 100.0;
+        let a = (a0 * a0 + a1 * a1).sqrt();
+
         if !sim
             .rng
-            .random_bool(params.event.inter_species_war_prob[age as usize])
+            .random_bool(params.event.inter_species_war_prob[age as usize] * a)
         {
             continue;
         }
@@ -73,7 +88,13 @@ pub fn cause_war_random(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
     }) {
         for civ in planet.civs.values() {
-            let prob = params.event.nuclear_war_prob[civ.most_advanced_age as usize];
+            let aggressiveness = civ.civ_control.aggressiveness as f64 / 100.0;
+            let a = if aggressiveness > 1.0 {
+                aggressiveness * aggressiveness
+            } else {
+                aggressiveness
+            };
+            let prob = params.event.nuclear_war_prob[civ.most_advanced_age as usize] * a;
 
             if sim.rng.random_bool(prob) {
                 // Start nuclear war

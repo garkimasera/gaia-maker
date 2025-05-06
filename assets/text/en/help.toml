@@ -78,4 +78,5 @@ orbital-mirror = "Orbital Mirror reflects the stellar light and increases or dec
 forestation-speed = "Adjust forestation speed and change the rate at which biomass increases on tiles."
 population-growth = "Adjust the population growth rate of the civilization."
 technology-development = "Adjust the speed of technological development in the civilization."
+aggressiveness = "Adjust how much the civilization prefers war as a means of solving problems. The frequency of civil wars, interspecies wars, and nuclear wars will change."
 energy-source-weight = "Guide the percentage of energy sources consumed by the civilization to a specified value. The actual distribution depends on the level of technology in the civilization and its energy efficiency. If other energy sources are not available, biomass will be consumed."

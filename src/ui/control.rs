@@ -213,6 +213,20 @@ fn civ_control(
     }
     ui.separator();
 
+    // Aggressiveness
+    ui.horizontal(|ui| {
+        ui.heading(t!("aggressiveness"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/aggressiveness"));
+    });
+    if ui
+        .add(egui::Slider::new(&mut civ_control.aggressiveness, 0..=200).suffix("%"))
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
+    ui.separator();
+
     // Energy source weight
     ui.horizontal(|ui| {
         ui.heading(t!("energy-source-weight"));
