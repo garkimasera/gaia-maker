@@ -58,8 +58,19 @@ fn cursor_action(
                 }
             }
             CursorMode::TileEvent(kind) => {
-                planet.cause_tile_event(p, kind, &mut sim, &params);
-                update_draw.update();
+                if planet.cause_tile_event(p, kind, &mut sim, &params) {
+                    update_draw.update();
+                    let se = match kind {
+                        TileEventKind::Fire => "fire",
+                        TileEventKind::BlackDust => "black-dust",
+                        TileEventKind::AerosolInjection => "aerosol-injection",
+                        TileEventKind::Plague => "plague",
+                        _ => "",
+                    };
+                    if !se.is_empty() {
+                        se_player.play(se);
+                    }
+                }
             }
             CursorMode::SpawnAnimal(animal_id) => {
                 if planet.animal_spawnable(p, animal_id, &params) {

@@ -90,12 +90,15 @@ impl Planet {
         kind: TileEventKind,
         sim: &mut Sim,
         params: &Params,
-    ) {
+    ) -> bool {
         let cost = params.event.tile_event_costs[&kind];
         if self.res.enough_to_consume(cost) {
             self.res.consume(cost);
             super::tile_event::cause_tile_event(self, p, kind, sim, params);
             self.update(sim, params);
+            true
+        } else {
+            false
         }
     }
 

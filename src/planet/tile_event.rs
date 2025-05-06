@@ -147,7 +147,7 @@ pub fn cause_tile_event(
     kind: TileEventKind,
     sim: &mut Sim,
     params: &Params,
-) {
+) -> bool {
     let event = match kind {
         TileEventKind::Fire => TileEvent::Fire,
         TileEventKind::BlackDust => TileEvent::BlackDust {
@@ -160,12 +160,13 @@ pub fn cause_tile_event(
             if let Some(Structure::Settlement(_)) = &mut planet.map[p].structure {
                 super::plague::cause_plague(planet, sim, params, p);
             }
-            return;
+            return false;
         }
         _ => unreachable!(),
     };
 
     planet.map[p].tile_events.insert(event);
+    true
 }
 
 fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
