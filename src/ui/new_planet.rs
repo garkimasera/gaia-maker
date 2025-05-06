@@ -3,6 +3,7 @@ use bevy_egui::{EguiContexts, egui};
 use rand::seq::IndexedRandom;
 
 use crate::{
+    audio::SoundEffectPlayer,
     manage_planet::{ManagePlanet, SaveState},
     planet::{Basics, GasKind, Params, StartParams},
 };
@@ -52,6 +53,7 @@ pub fn new_planet(
     window: &mut bevy::window::Window,
     random_name_list_map: &crate::text_assets::RandomNameListMap,
     save_state: &SaveState,
+    se_player: &SoundEffectPlayer,
 ) {
     if let Some(cancelled) =
         super::saveload::check_save_limit(egui_ctxs.ctx_mut(), &mut ew_manage_planet, save_state)
@@ -78,17 +80,27 @@ pub fn new_planet(
                             if planet.id == crate::tutorial::TUTORIAL_PLANET {
                                 continue;
                             }
-                            ui.selectable_value(
-                                &mut state.new_planet.planet,
-                                NewPlanetKind::Id(planet.id.clone()),
-                                t!("planet", planet.id),
-                            );
+                            if ui
+                                .selectable_value(
+                                    &mut state.new_planet.planet,
+                                    NewPlanetKind::Id(planet.id.clone()),
+                                    t!("planet", planet.id),
+                                )
+                                .clicked()
+                            {
+                                se_player.play("select-item");
+                            }
                         }
-                        ui.selectable_value(
-                            &mut state.new_planet.planet,
-                            NewPlanetKind::Custom,
-                            t!("planet/custom"),
-                        );
+                        if ui
+                            .selectable_value(
+                                &mut state.new_planet.planet,
+                                NewPlanetKind::Custom,
+                                t!("planet/custom"),
+                            )
+                            .clicked()
+                        {
+                            se_player.play("select-item");
+                        }
                     });
 
                     ui.separator();
@@ -98,7 +110,7 @@ pub fn new_planet(
                             planet_desc(ui, id, params, textures);
                         }
                         NewPlanetKind::Custom => {
-                            custom(ui, params, state);
+                            custom(ui, params, state, se_player);
                         }
                     });
                 });
@@ -129,6 +141,7 @@ pub fn new_planet(
                                     .choose(&mut rand::rng())
                                     .map(|name| name.to_owned())
                                     .unwrap();
+                                se_player.play("select-item");
                             }
                         }
                     });
@@ -138,6 +151,7 @@ pub fn new_planet(
 
                 if ui.button(t!("cancel")).clicked() {
                     state.mode = MainMenuMode::Menu;
+                    se_player.play("window-close");
                 }
 
                 if ui.button(t!("start")).clicked() {
@@ -211,38 +225,69 @@ fn planet_desc(ui: &mut egui::Ui, id: &str, params: &Params, textures: &UiTextur
     ui.label(t!("planet/desc", id));
 }
 
-fn custom(ui: &mut egui::Ui, params: &Params, state: &mut MainMenuState) {
+fn custom(
+    ui: &mut egui::Ui,
+    params: &Params,
+    state: &mut MainMenuState,
+    se_player: &SoundEffectPlayer,
+) {
     let npp = &params.custom_planet;
-    ui.add(
-        egui::Slider::new(
-            &mut state.new_planet.solar_constant,
-            npp.solar_constant.min..=npp.solar_constant.max,
+    if ui
+        .add(
+            egui::Slider::new(
+                &mut state.new_planet.solar_constant,
+                npp.solar_constant.min..=npp.solar_constant.max,
+            )
+            .text(format!("{} [W/m²]", t!("solar-constant"))),
         )
-        .text(format!("{} [W/m²]", t!("solar-constant"))),
-    );
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
 
-    ui.add(
-        egui::Slider::new(
-            &mut state.new_planet.difference_in_elevation,
-            npp.difference_in_elevation.min..=npp.difference_in_elevation.max,
+    if ui
+        .add(
+            egui::Slider::new(
+                &mut state.new_planet.difference_in_elevation,
+                npp.difference_in_elevation.min..=npp.difference_in_elevation.max,
+            )
+            .text(format!("{} [m]", t!("difference-in-elevation"))),
         )
-        .text(format!("{} [m]", t!("difference-in-elevation"))),
-    );
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
 
-    ui.add(
-        egui::Slider::new(&mut state.new_planet.water, 0.0..=100.0)
-            .show_value(false)
-            .text(t!("water")),
-    );
+    if ui
+        .add(
+            egui::Slider::new(&mut state.new_planet.water, 0.0..=100.0)
+                .show_value(false)
+                .text(t!("water")),
+        )
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
 
-    ui.add(
-        egui::Slider::new(&mut state.new_planet.nitrogen, 0.0..=100.0)
-            .show_value(false)
-            .text(t!("nitrogen")),
-    );
-    ui.add(
-        egui::Slider::new(&mut state.new_planet.carbon_dioxide, 0.0..=100.0)
-            .show_value(false)
-            .text(t!("carbon-dioxide")),
-    );
+    if ui
+        .add(
+            egui::Slider::new(&mut state.new_planet.nitrogen, 0.0..=100.0)
+                .show_value(false)
+                .text(t!("nitrogen")),
+        )
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
+
+    if ui
+        .add(
+            egui::Slider::new(&mut state.new_planet.carbon_dioxide, 0.0..=100.0)
+                .show_value(false)
+                .text(t!("carbon-dioxide")),
+        )
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
 }

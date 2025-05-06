@@ -4,6 +4,7 @@ use bevy_egui::{EguiContexts, egui};
 use strum::IntoEnumIterator;
 
 use crate::assets::CreditsAsset;
+use crate::audio::SoundEffectPlayer;
 use crate::conf::{Conf, ConfChange};
 use crate::manage_planet::{GlobalData, ManagePlanet, ManagePlanetError, SaveState};
 use crate::planet::Params;
@@ -47,17 +48,20 @@ pub fn set_main_menu_state(mut command: Commands, params: Res<Params>) {
 
 pub fn main_menu(
     mut egui_ctxs: EguiContexts,
-    mut ew_manage_planet: EventWriter<ManagePlanet>,
+    (mut ew_manage_planet, mut er_manage_planet_error): (
+        EventWriter<ManagePlanet>,
+        EventReader<ManagePlanetError>,
+    ),
     params: Res<Params>,
     save_state: Res<SaveState>,
     (mut conf, mut ew_conf_change): (ResMut<Conf>, EventWriter<ConfChange>),
-    mut er_manage_planet_error: EventReader<ManagePlanetError>,
     mut app_exit_events: EventWriter<AppExit>,
     mut state: ResMut<MainMenuState>,
     mut logo_visibility: Query<&mut Visibility, With<crate::title_screen::TitleScreenLogo>>,
     mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
     (textures, global_data, credits): (Res<UiTextures>, Res<GlobalData>, Res<Assets<CreditsAsset>>),
     random_name_list_map: Res<crate::text_assets::RandomNameListMap>,
+    se_player: SoundEffectPlayer,
 ) {
     if let Some(e) = er_manage_planet_error.read().next() {
         state.mode = MainMenuMode::Error;
@@ -79,12 +83,14 @@ pub fn main_menu(
                         resume_ui(ui, &global_data, &mut ew_manage_planet, &save_state);
                         if ui.button(t!("new")).clicked() {
                             state.mode = MainMenuMode::NewPlanet;
+                            se_player.play("window-open");
                         }
                         if ui.button(t!(TUTORIAL_PLANET)).clicked() {
                             state.mode = MainMenuMode::Tutorial;
                         }
                         if ui.button(t!("load")).clicked() {
                             state.mode = MainMenuMode::Load;
+                            se_player.play("window-open");
                         }
                         if ui.button(t!("exit")).clicked() {
                             app_exit_events.send(bevy::app::AppExit::Success);
@@ -93,7 +99,9 @@ pub fn main_menu(
 
                         ui.separator();
 
-                        if let Some(lang) = language_selector(ui, crate::text_assets::get_lang()) {
+                        if let Some(lang) =
+                            language_selector(ui, crate::text_assets::get_lang(), &se_player)
+                        {
                             conf.lang = lang;
                             crate::text_assets::set_lang(lang);
                             ew_conf_change.send_default();
@@ -103,7 +111,7 @@ pub fn main_menu(
                 })
                 .unwrap();
             display_version(&mut egui_ctxs);
-            display_credits_button(&mut egui_ctxs, &mut state.mode);
+            display_credits_button(&mut egui_ctxs, &mut state.mode, &se_player);
             display_web_limit_warning(&mut egui_ctxs);
         }
         MainMenuMode::Tutorial => {
@@ -132,6 +140,7 @@ pub fn main_menu(
                 &mut window.single_mut(),
                 &random_name_list_map,
                 &save_state,
+                &se_player,
             );
         }
         MainMenuMode::Load => {
@@ -141,6 +150,7 @@ pub fn main_menu(
                 &mut ew_manage_planet,
                 &mut open_state,
                 &save_state.current_save_sub_dir,
+                &se_player,
             );
             if !open_state {
                 state.mode = MainMenuMode::Menu;
@@ -149,6 +159,7 @@ pub fn main_menu(
         MainMenuMode::Credit => {
             if !credit_window(egui_ctxs.ctx_mut(), &credits) {
                 state.mode = MainMenuMode::Menu;
+                se_player.play("window-close");
             }
         }
         MainMenuMode::Error => {
@@ -192,15 +203,25 @@ fn resume_ui(
     }
 }
 
-fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
+fn language_selector(
+    ui: &mut egui::Ui,
+    before: Lang,
+    se_player: &SoundEffectPlayer,
+) -> Option<Lang> {
     let mut selected = before;
-    egui::ComboBox::from_label("")
+    let response = egui::ComboBox::from_label("")
         .selected_text(selected.name())
         .show_ui(ui, |ui| {
             for lang in Lang::iter() {
-                ui.selectable_value(&mut selected, lang, lang.name());
+                if ui.selectable_value(&mut selected, lang, lang.name()).clicked() {
+                    se_player.play("select-item");
+                }
             }
-        });
+        })
+        .response;
+    if response.clicked() {
+        se_player.play("select-item");
+    }
 
     if selected != before {
         Some(selected)
@@ -209,7 +230,11 @@ fn language_selector(ui: &mut egui::Ui, before: Lang) -> Option<Lang> {
     }
 }
 
-fn display_credits_button(egui_ctxs: &mut EguiContexts, mode: &mut MainMenuMode) {
+fn display_credits_button(
+    egui_ctxs: &mut EguiContexts,
+    mode: &mut MainMenuMode,
+    se_player: &SoundEffectPlayer,
+) {
     egui::Window::new(t!("credits"))
         .title_bar(false)
         .anchor(egui::Align2::RIGHT_BOTTOM, egui::Vec2::new(-10.0, -10.0))
@@ -217,6 +242,7 @@ fn display_credits_button(egui_ctxs: &mut EguiContexts, mode: &mut MainMenuMode)
         .show(egui_ctxs.ctx_mut(), |ui| {
             if ui.button(t!("credits")).clicked() {
                 *mode = MainMenuMode::Credit;
+                se_player.play("window-open");
             }
         })
         .unwrap();

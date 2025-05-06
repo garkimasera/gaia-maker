@@ -5,6 +5,7 @@ use bevy_egui::{EguiContexts, egui};
 
 use super::{OccupiedScreenSpace, WindowsOpenState};
 use crate::{
+    audio::SoundEffectPlayer,
     manage_planet::{ManagePlanet, SaveState},
     saveload::{SaveSubDirItem, SavedTime},
 };
@@ -46,6 +47,7 @@ pub fn load_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     save_state: Res<SaveState>,
+    se_player: SoundEffectPlayer,
 ) {
     debug_assert!(!(wos.save && wos.load));
 
@@ -59,6 +61,7 @@ pub fn load_window(
         &mut ew_manage_planet,
         &mut open_state,
         &save_state.current_save_sub_dir,
+        &se_player,
     );
 
     if open_state {
@@ -73,12 +76,13 @@ pub fn show_load_window(
     ew_manage_planet: &mut EventWriter<ManagePlanet>,
     open_state: &mut bool,
     playing_name: &str,
+    se_player: &SoundEffectPlayer,
 ) {
     let mut ws_guard = WINDOW_STATE.lock().unwrap();
     let ws: &mut WindowState = &mut ws_guard;
 
     if let Some(delete_modal) = &ws.delete_modal {
-        if delete_modal.show(ctx, ew_manage_planet) {
+        if delete_modal.show(ctx, ew_manage_planet, se_player) {
             ws.delete_modal = None;
             return;
         }
@@ -127,6 +131,7 @@ pub fn show_load_window(
                                     crate::saveload::read_save_sub_dir(sub_dir);
                                 ws.planet_name = planet_name;
                                 ws.file_list = list;
+                                se_player.play("select-item");
                             }
                         }
                     });
@@ -212,10 +217,16 @@ pub fn show_load_window(
             let response = ui.button(t!("cancel"));
             if response.clicked() {
                 canceled = true;
+                se_player.play("window-close");
             }
             let rect =
                 egui::Rect::from_min_size(response.rect.right_top(), egui::Vec2::new(100.0, 10.0));
-            ui.put(rect, egui::Checkbox::new(&mut ws.delete, t!("delete")));
+            if ui
+                .put(rect, egui::Checkbox::new(&mut ws.delete, t!("delete")))
+                .clicked()
+            {
+                se_player.play("select-item");
+            }
         });
     });
 
@@ -239,6 +250,7 @@ pub fn show_load_window(
             });
             *open_state = false;
         }
+        se_player.play("select-item");
     }
     if latest_selected {
         if ws.delete {
@@ -255,6 +267,7 @@ pub fn show_load_window(
             });
             *open_state = false;
         }
+        se_player.play("select-item");
     }
     if !*open_state {
         ws.delete = false;
@@ -268,6 +281,7 @@ impl DeleteModal {
         &self,
         ctx: &mut egui::Context,
         ew_manage_planet: &mut EventWriter<ManagePlanet>,
+        se_player: &SoundEffectPlayer,
     ) -> bool {
         let mut close = false;
 
@@ -296,9 +310,11 @@ impl DeleteModal {
                     } else {
                         NeedInit::Files
                     });
+                    se_player.play("select-item");
                 }
                 if ui.button(t!("cancel")).clicked() {
                     close = true;
+                    se_player.play("window-close");
                 }
             });
         });
