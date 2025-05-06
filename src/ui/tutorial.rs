@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 
 use super::UiTextures;
+use crate::audio::SoundEffectPlayer;
 use crate::tutorial::*;
 use crate::{manage_planet::SaveState, screen::OccupiedScreenSpace};
 
@@ -13,6 +14,7 @@ pub fn tutorial_popup(
     mut save_state: ResMut<SaveState>,
     window: Query<&Window, With<bevy::window::PrimaryWindow>>,
     textures: Res<UiTextures>,
+    se_player: SoundEffectPlayer,
 ) {
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
         return;
@@ -63,10 +65,12 @@ pub fn tutorial_popup(
                 if can_complete {
                     if ui.button(t!("close")).clicked() {
                         tutorial_state.complete();
+                        se_player.play("window-close");
                     }
                 } else {
                     if can_back && ui.button(t!("back")).clicked() {
                         tutorial_state.move_back();
+                        se_player.play("select-item");
                     }
                     if has_next_tutorial {
                         if ui
@@ -74,9 +78,11 @@ pub fn tutorial_popup(
                             .clicked()
                         {
                             tutorial_state.move_next();
+                            se_player.play("select-item");
                         }
                     } else if ui.button(t!("next")).clicked() {
                         tutorial_state.move_next();
+                        se_player.play("select-item");
                     }
                 }
             });
