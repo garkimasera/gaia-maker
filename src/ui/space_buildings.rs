@@ -177,7 +177,12 @@ pub fn buildng_row(
         BuildingControlValue::AlwaysEnabled => {}
         BuildingControlValue::IncreaseRate(rate) => {
             ui.spacing_mut().slider_width = 220.0;
-            ui.add(egui::Slider::new(rate, -100..=100).suffix("%"));
+            if ui
+                .add(egui::Slider::new(rate, -100..=100).suffix("%"))
+                .changed()
+            {
+                se_player.play_if_stopped("slider");
+            }
         }
     }
 }
