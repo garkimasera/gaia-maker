@@ -365,7 +365,7 @@ fn history_stat(
     let x_axis_formatter = move |_, _range: &RangeInclusive<f64>| "".to_string();
     let min_bound_margin = match item {
         GraphItem::AverageAirTemperature | GraphItem::AverageSeaTemperature => 1.0e-1,
-        GraphItem::AverageRainfall => 1.0e+0,
+        GraphItem::AverageRainfall => 1.0e+1,
         GraphItem::Biomass | GraphItem::BuriedCarbon => 1.0e+0,
         GraphItem::Oxygen | GraphItem::Nitrogen | GraphItem::CarbonDioxide => 1.0e-5,
         GraphItem::Population => 1.0e+1,
