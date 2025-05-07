@@ -380,7 +380,7 @@ fn manage_planet(
     };
 
     if let Some(new_planet) = new_planet {
-        ew_centering.send(Centering(Vec2::new(
+        ew_centering.send(Centering::new(Vec2::new(
             new_planet.map.size().0 as f32 * TILE_SIZE / 2.0,
             new_planet.map.size().1 as f32 * TILE_SIZE / 2.0,
         )));

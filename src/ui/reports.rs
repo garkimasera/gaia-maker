@@ -81,7 +81,7 @@ pub fn report_list(ui: &mut egui::Ui, planet: &Planet, ew_centering: &mut EventW
             ui.label(style.icon());
             if let Some(pos) = report.content.pos() {
                 if ui.link(text).clicked() {
-                    ew_centering.send(Centering(Vec2::new(
+                    ew_centering.send(Centering::new(Vec2::new(
                         pos.0 as f32 * TILE_SIZE,
                         pos.1 as f32 * TILE_SIZE,
                     )));

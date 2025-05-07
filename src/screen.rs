@@ -16,7 +16,18 @@ use strum::{AsRefStr, EnumIter};
 pub struct ScreenPlugin;
 
 #[derive(Clone, Copy, Debug, Event)]
-pub struct Centering(pub Vec2);
+pub struct Centering(Vec2, Option<i8>);
+
+impl Centering {
+    pub fn new(v: Vec2) -> Self {
+        Self(v, None)
+    }
+
+    pub fn scale(mut self, scale: i8) -> Self {
+        self.1 = Some(scale);
+        self
+    }
+}
 
 #[derive(Clone, Debug, Resource)]
 pub enum CursorMode {
@@ -137,6 +148,7 @@ fn mouse_event(
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     occupied_screen_space: Res<OccupiedScreenSpace>,
     hover_tile: Query<(&HoverTile, &Transform), Without<OrthographicProjection>>,
+    mut evr_scroll: EventReader<bevy::input::mouse::MouseWheel>,
     mut cursor_mode: ResMut<CursorMode>,
     mut prev_tile_coords: Local<Option<Coords>>,
 ) {
@@ -173,7 +185,19 @@ fn mouse_event(
 
         translation += d;
 
-        ew_centering.send(Centering(translation));
+        ew_centering.send(Centering::new(translation));
+        return;
+    }
+
+    // Zoom in or Zoom out
+    if let Some(ev) = evr_scroll.read().last() {
+        log::info!("{:?}", ev);
+        let translation = camera_query.single().1.translation.xy();
+        if ev.y > 0.0 {
+            ew_centering.send(Centering::new(translation).scale(1));
+        } else {
+            ew_centering.send(Centering::new(translation).scale(-1));
+        }
         return;
     }
 
@@ -210,7 +234,8 @@ fn centering(
     window: Query<(&Window, &bevy_egui::EguiContextSettings), With<PrimaryWindow>>,
     mut in_screen_tile_range: ResMut<InScreenTileRange>,
     planet: Res<Planet>,
-    mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform)>,
+    mut camera_scale_num: Local<i8>,
 ) {
     let Ok((window, egui_settings)) = window.get_single() else {
         return;
@@ -218,36 +243,56 @@ fn centering(
 
     for e in er_centering.read() {
         update_draw.update();
-        let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
 
+        if let Some(diff_scale) = e.1 {
+            *camera_scale_num = (*camera_scale_num + diff_scale).clamp(-1, 2);
+        }
+        let camera_scale = match *camera_scale_num {
+            -1 => 1.5,
+            0 => 1.0,
+            1 => 0.75,
+            2 => 0.5,
+            _ => unreachable!(),
+        };
+
+        let camera = &mut camera_query.single_mut();
+        camera.0.scale = camera_scale;
+        let cpos = &mut camera.1.translation;
         let center = &e.0;
 
         // Change camera position
-        let width = TILE_SIZE * planet.map.size().0 as f32;
-        let x = center.x;
-        cpos.x = if x < 0.0 {
-            x + ((-x / width).trunc() + 1.0) * width
-        } else {
-            x - (x / width).trunc() * width
-        };
-        cpos.y = center
-            .y
-            .clamp(-TILE_SIZE, (planet.map.size().1 + 1) as f32 * TILE_SIZE);
+        if e.1.is_none() {
+            let width = TILE_SIZE * planet.map.size().0 as f32;
+            let x = center.x;
+            cpos.x = if x < 0.0 {
+                x + ((-x / width).trunc() + 1.0) * width
+            } else {
+                x - (x / width).trunc() * width
+            };
+            cpos.y = center
+                .y
+                .clamp(-TILE_SIZE, (planet.map.size().1 + 1) as f32 * TILE_SIZE);
 
-        let space_adjust = Vec3::new(
-            (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor,
-            (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
-            0.0,
-        ) / 2.0;
-        *cpos -= space_adjust;
+            let space_adjust = Vec3::new(
+                (screen.occupied_left - screen.occupied_right) * egui_settings.scale_factor,
+                (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
+                0.0,
+            ) / 2.0;
+            *cpos -= space_adjust;
+        }
 
-        adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
+        if *camera_scale_num == 0 {
+            adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
+        }
 
         // Update in screen tile range
-        let x0 = ((cpos.x - window.width() / 2.0) / TILE_SIZE) as i32 - 1;
-        let y0 = ((cpos.y - window.height() / 2.0) / TILE_SIZE) as i32 - 1;
-        let x1 = ((cpos.x + window.width() / 2.0) / TILE_SIZE) as i32 + 1;
-        let y1 = ((cpos.y + window.height() / 2.0) / TILE_SIZE) as i32 + 1;
+        let tile_size = TILE_SIZE / camera_scale;
+        let x = cpos.x / camera_scale;
+        let y = cpos.y / camera_scale;
+        let x0 = ((x - window.width() / 2.0) / tile_size) as i32 - 1;
+        let y0 = ((y - window.height() / 2.0) / tile_size) as i32 - 1;
+        let x1 = ((x + window.width() / 2.0) / tile_size) as i32 + 1;
+        let y1 = ((y + window.height() / 2.0) / tile_size) as i32 + 1;
         in_screen_tile_range.y_to_from_not_clamped = (y0, y1);
         let y0 = y0.clamp(0, planet.map.size().1 as i32 - 1);
         let y1 = y1.clamp(0, planet.map.size().1 as i32 - 1);
@@ -261,13 +306,14 @@ fn update_hover_tile(
     window: Query<&Window, With<PrimaryWindow>>,
     planet: Res<Planet>,
     mut hover_tile: Query<
-        (&mut HoverTile, &mut Transform, &mut Visibility),
+        (&mut HoverTile, &mut Transform, &mut Visibility, &mut Sprite),
         Without<OrthographicProjection>,
     >,
     occupied_screen_space: Res<OccupiedScreenSpace>,
     camera_query: Query<(&OrthographicProjection, &Transform)>,
     cursor_mode: Res<CursorMode>,
     ui_assets: Res<UiAssets>,
+    asset_server: Res<AssetServer>,
     mut color_entities: Local<Vec<Entity>>,
 ) {
     let Ok(window) = window.get_single() else {
@@ -279,7 +325,7 @@ fn update_hover_tile(
         return;
     };
 
-    let mut hover_tile = hover_tile.get_single_mut().unwrap();
+    let mut hover_tile = hover_tile.single_mut();
 
     // Check covered by ui or not
     if !occupied_screen_space.check(window.width(), window.height(), cursor_pos) {
@@ -288,9 +334,19 @@ fn update_hover_tile(
         return;
     }
 
-    let camera_pos = camera_query.get_single().unwrap().1.translation.xy();
+    let camera = camera_query.single();
+    let camera_scale = camera.0.scale;
+    let camera_pos = camera.1.translation.xy();
 
-    let p = cursor_pos + camera_pos - Vec2::new(window.width() / 2.0, window.height() / 2.0);
+    let sprite_image = if camera_scale <= 1.0 {
+        "ui/tile-cursor.png"
+    } else {
+        "ui/tile-cursor-bold.png"
+    };
+    *hover_tile.3 = Sprite::from_image(asset_server.get_handle(sprite_image).unwrap());
+
+    let p = camera_pos
+        + (cursor_pos - Vec2::new(window.width() / 2.0, window.height() / 2.0)) * camera_scale;
 
     let tile_i = if p.x >= 0.0 {
         (p.x / TILE_SIZE) as i32
@@ -420,7 +476,7 @@ fn on_resize(
             (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
         ) / 2.0;
         translation += d;
-        ew_centering.send(Centering(translation));
+        ew_centering.send(Centering::new(translation));
     }
 }
 
@@ -505,7 +561,7 @@ fn keyboard_input(
             (screen.occupied_buttom - screen.occupied_top) * egui_settings.scale_factor,
         ) / 2.0;
         let new_center = camera_pos + space_adjust + Vec2::new(dx, dy) * conf.camera_move_speed;
-        ew_centering.send(Centering(new_center));
+        ew_centering.send(Centering::new(new_center));
     }
 }
 

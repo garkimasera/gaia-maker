@@ -161,7 +161,7 @@ pub fn map_window(
                             pos.x / m as f32 * TILE_SIZE,
                             (planet.map.size().1 as f32 - pos.y / m as f32 - 1.0) * TILE_SIZE,
                         );
-                        ew_centering.send(Centering(pos));
+                        ew_centering.send(Centering::new(pos));
                     }
                 }
                 legend.ui(ui, *map_layer, &planet, &params);
