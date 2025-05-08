@@ -1,5 +1,7 @@
 use bevy_egui::egui::{self, epaint, load::SizedTexture};
 
+use crate::screen::OccupiedScreenSpace;
+
 use super::UiTextures;
 
 pub fn label_with_icon(
@@ -79,4 +81,15 @@ pub fn small_window_frame(ctx: &egui::Context) -> egui::Frame {
         .fill(visuals.window_fill.gamma_multiply(0.95))
         .stroke(visuals.window_stroke)
         .inner_margin(egui::Margin::same(4))
+}
+
+pub fn constrain_to_rect(
+    ctx: &egui::Context,
+    occupied_screen_space: &OccupiedScreenSpace,
+) -> egui::Rect {
+    let rect = ctx.screen_rect();
+    egui::Rect::from_two_pos(
+        rect.left_top() + egui::vec2(0.0, occupied_screen_space.occupied_top),
+        rect.right_bottom(),
+    )
 }

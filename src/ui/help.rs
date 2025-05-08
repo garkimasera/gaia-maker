@@ -150,10 +150,12 @@ pub fn help_window(
     if !wos.help {
         return;
     }
+    let ctx = egui_ctxs.ctx_mut();
     let rect = egui::Window::new(t!("help"))
+        .constrain_to(super::misc::constrain_to_rect(ctx, &occupied_screen_space))
         .open(&mut wos.help)
         .vscroll(false)
-        .show(egui_ctxs.ctx_mut(), |ui| {
+        .show(ctx, |ui| {
             ui.horizontal(|ui| {
                 egui::ScrollArea::vertical()
                     .min_scrolled_height(300.0)

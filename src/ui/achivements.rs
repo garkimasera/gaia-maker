@@ -18,10 +18,12 @@ pub fn achivements_window(
         return;
     }
 
+    let ctx = egui_ctxs.ctx_mut();
     let rect = egui::Window::new(t!("achivements"))
+        .constrain_to(super::misc::constrain_to_rect(ctx, &occupied_screen_space))
         .resizable(egui::Vec2b::new(false, false))
         .open(&mut wos.achivements)
-        .show(egui_ctxs.ctx_mut(), |ui| {
+        .show(ctx, |ui| {
             show_achivement_list(ui, &unlocked_achivements, &textures);
         })
         .unwrap()

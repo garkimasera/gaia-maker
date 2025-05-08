@@ -26,7 +26,9 @@ pub fn tutorial_popup(
     let tutorial_ui = tutorial_state.current_step().ui();
     let checked = tutorial_state.checked();
 
+    let ctx = egui_ctxs.ctx_mut();
     let rect = egui::Window::new(t!("tutorial"))
+        .constrain_to(super::misc::constrain_to_rect(ctx, &occupied_screen_space))
         .default_pos([
             window.single().width()
                 - WINDOW_WIDTH
@@ -35,7 +37,7 @@ pub fn tutorial_popup(
             35.0,
         ])
         .default_width(WINDOW_WIDTH)
-        .show(egui_ctxs.ctx_mut(), |ui| {
+        .show(ctx, |ui| {
             tutorial_ui(ui, &textures);
 
             if has_next_tutorial && !tutorial_state.checklist().is_empty() {
