@@ -126,7 +126,11 @@ fn planet_stat(
         ui.image(textures.get("ui/icon-planet"))
             .on_hover_text(&hover_text);
         ui.label(t!("planet-name")).on_hover_text(&hover_text);
-        ui.label(&planet.basics.name).on_hover_text(&hover_text);
+        ui.horizontal(|ui| {
+            ui.set_max_width(180.0);
+            ui.add(egui::Label::new(&planet.basics.name).truncate())
+                .on_hover_text(&hover_text);
+        });
         ui.end_row();
 
         let hover_text = t!("stat_item", "cycles");

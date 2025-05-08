@@ -122,7 +122,7 @@ pub fn new_planet(
                     ui.horizontal(|ui| {
                         window.ime_enabled = false;
                         let result = ui.add(
-                            egui::TextEdit::singleline(&mut state.new_planet.name).char_limit(92),
+                            egui::TextEdit::singleline(&mut state.new_planet.name).char_limit(30),
                         );
                         if result.has_focus() {
                             window.ime_enabled = true;
@@ -154,7 +154,13 @@ pub fn new_planet(
                     se_player.play("window-close");
                 }
 
-                if ui.button(t!("start")).clicked() {
+                if ui
+                    .add_enabled(
+                        !state.new_planet.name.is_empty(),
+                        egui::Button::new(t!("start")),
+                    )
+                    .clicked()
+                {
                     start(&mut ew_manage_planet, params, state);
                 }
             });
