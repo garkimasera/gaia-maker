@@ -21,13 +21,16 @@ pub fn toolbar(
     mut cursor_mode: ResMut<CursorMode>,
     mut wos: ResMut<WindowsOpenState>,
     mut speed: ResMut<GameSpeed>,
-    (mut app_exit_events, mut ew_manage_planet): (EventWriter<AppExit>, EventWriter<ManagePlanet>),
-    mut next_game_state: ResMut<NextState<GameState>>,
+    (mut app_exit_events, mut ew_manage_planet, mut next_game_state): (
+        EventWriter<AppExit>,
+        EventWriter<ManagePlanet>,
+        ResMut<NextState<GameState>>,
+    ),
     mut achivement_notification: ResMut<AchivementNotification>,
-    mut display_opts: ResMut<DisplayOpts>,
-    mut update_draw: ResMut<UpdateDraw>,
+    (mut display_opts, mut update_draw): (ResMut<DisplayOpts>, ResMut<UpdateDraw>),
     (textures, planet, params, conf): (Res<UiTextures>, Res<Planet>, Res<Params>, Res<Conf>),
     se_player: SoundEffectPlayer,
+    mut right_ui_width: Local<f32>,
 ) {
     occupied_screen_space.reset();
 
@@ -49,9 +52,9 @@ pub fn toolbar(
                     &planet,
                     &params,
                     &mut achivement_notification,
-                    &mut display_opts,
-                    &mut update_draw,
+                    (&mut display_opts, &mut update_draw),
                     &se_player,
+                    &mut right_ui_width,
                 );
             });
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
@@ -78,150 +81,174 @@ fn toolbar_ui(
     planet: &Planet,
     params: &Params,
     achivement_notification: &mut AchivementNotification,
-    display_opts: &mut DisplayOpts,
-    update_draw: &mut UpdateDraw,
+    (display_opts, update_draw): (&mut DisplayOpts, &mut UpdateDraw),
     se_player: &SoundEffectPlayer,
+    right_ui_width: &mut f32,
 ) {
-    // Menu buttons
+    let panel_width = ui.max_rect().width();
 
-    let button = |ui: &mut egui::Ui, path: &str, s: &str| {
-        ui.add(egui::ImageButton::new(textures.get(path)))
-            .on_hover_text(t!(s))
+    let res = ui.horizontal(|ui| {
+        // Menu buttons
+        let button = |ui: &mut egui::Ui, path: &str, s: &str| {
+            ui.add(egui::ImageButton::new(textures.get(path)))
+                .on_hover_text(t!(s))
+                .clicked()
+        };
+        let menu_button = |path: &str| {
+            egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0))
+        };
+
+        let menu_clicked =
+            egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
+                game_menu(
+                    ui,
+                    wos,
+                    app_exit_events,
+                    ew_manage_planet,
+                    next_game_state,
+                    se_player,
+                );
+            })
+            .response
+            .clicked();
+
+        ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+        let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
+            build_menu(ui, cursor_mode, textures, params, se_player);
+        })
+        .response
+        .clicked()
+            | menu_clicked;
+
+        let menu_clicked =
+            egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
+                action_menu(ui, cursor_mode, textures, params, se_player);
+            })
+            .response
             .clicked()
-    };
-    let menu_button =
-        |path: &str| egui::Button::image(textures.get(path)).min_size(egui::Vec2::new(30.0, 24.0));
+                | menu_clicked;
 
-    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-game-menu"), |ui| {
-        game_menu(
-            ui,
-            wos,
-            app_exit_events,
-            ew_manage_planet,
-            next_game_state,
-            se_player,
-        );
-    })
-    .response
-    .clicked();
+        let menu_clicked =
+            egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
+                layers_menu(ui, display_opts, update_draw, se_player);
+            })
+            .response
+            .clicked()
+                | menu_clicked;
 
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
+        if menu_clicked {
+            wos.space_building = false;
+            wos.animals = false;
+            wos.control = false;
+            se_player.play("select-item");
+        }
 
-    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-build"), |ui| {
-        build_menu(ui, cursor_mode, textures, params, se_player);
-    })
-    .response
-    .clicked()
-        | menu_clicked;
+        ui.add(egui::Separator::default().spacing(2.0).vertical());
 
-    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-action"), |ui| {
-        action_menu(ui, cursor_mode, textures, params, se_player);
-    })
-    .response
-    .clicked()
-        | menu_clicked;
-
-    let menu_clicked = egui::menu::menu_custom_button(ui, menu_button("ui/icon-layers"), |ui| {
-        layers_menu(ui, display_opts, update_draw, se_player);
-    })
-    .response
-    .clicked()
-        | menu_clicked;
-
-    if menu_clicked {
-        wos.space_building = false;
-        wos.animals = false;
-        wos.control = false;
-        se_player.play("select-item");
-    }
-
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    // Game speed selector
-
-    let texture = if *speed == GameSpeed::Paused {
-        "ui/icon-speed-paused-selected"
-    } else {
-        "ui/icon-speed-paused"
-    };
-    if button(ui, texture, "speed-paused") {
-        *speed = GameSpeed::Paused;
-        se_player.play("select-item");
-    }
-
-    let texture = if *speed == GameSpeed::Slow {
-        "ui/icon-speed-slow-selected"
-    } else {
-        "ui/icon-speed-slow"
-    };
-    if button(ui, texture, "speed-slow") {
-        *speed = GameSpeed::Slow;
-        se_player.play("select-item");
-    }
-
-    let texture = if *speed == GameSpeed::Medium {
-        "ui/icon-speed-medium-selected"
-    } else {
-        "ui/icon-speed-medium"
-    };
-    if button(ui, texture, "speed-medium") {
-        *speed = GameSpeed::Medium;
-        se_player.play("select-item");
-    }
-
-    let texture = if *speed == GameSpeed::Fast {
-        "ui/icon-speed-fast-selected"
-    } else {
-        "ui/icon-speed-fast"
-    };
-    if button(ui, texture, "speed-fast") {
-        *speed = GameSpeed::Fast;
-        se_player.play("select-item");
-    }
-
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
-
-    let resp = ui.add(egui::ImageButton::new(textures.get("ui/icon-achivements")));
-    let resp = if let Some(achivement) = achivement_notification.achivement {
-        resp.show_tooltip_ui(|ui| {
-            ui.set_width(200.0);
-            ui.strong(t!("new-achivement"));
-            ui.horizontal(|ui| {
-                ui.image(textures.get(format!("ui/achivement-{}", achivement.as_ref())));
-                ui.label(t!("achivement", achivement.as_ref()));
+        // Other windows
+        let resp = ui.add(egui::ImageButton::new(textures.get("ui/icon-achivements")));
+        let resp = if let Some(achivement) = achivement_notification.achivement {
+            resp.show_tooltip_ui(|ui| {
+                ui.set_width(200.0);
+                ui.strong(t!("new-achivement"));
+                ui.horizontal(|ui| {
+                    ui.image(textures.get(format!("ui/achivement-{}", achivement.as_ref())));
+                    ui.label(t!("achivement", achivement.as_ref()));
+                });
             });
-        });
-        resp
-    } else {
-        resp.on_hover_text(t!("achivements"))
-    };
-    if resp.clicked() {
-        *achivement_notification = AchivementNotification::default();
-        wos.achivements = !wos.achivements;
-    }
+            resp
+        } else {
+            resp.on_hover_text(t!("achivements"))
+        };
+        if resp.clicked() {
+            *achivement_notification = AchivementNotification::default();
+            wos.achivements = !wos.achivements;
+        }
 
-    if button(ui, "ui/icon-help", "help") {
-        wos.help = !wos.help;
-    }
+        if button(ui, "ui/icon-help", "help") {
+            wos.help = !wos.help;
+        }
 
-    ui.add(egui::Separator::default().spacing(2.0).vertical());
+        ui.add(egui::Separator::default().spacing(2.0).vertical());
+
+        // Game speed selector
+        let texture = if *speed == GameSpeed::Paused {
+            "ui/icon-speed-paused-selected"
+        } else {
+            "ui/icon-speed-paused"
+        };
+        if button(ui, texture, "speed-paused") {
+            *speed = GameSpeed::Paused;
+            se_player.play("select-item");
+        }
+
+        let texture = if *speed == GameSpeed::Slow {
+            "ui/icon-speed-slow-selected"
+        } else {
+            "ui/icon-speed-slow"
+        };
+        if button(ui, texture, "speed-slow") {
+            *speed = GameSpeed::Slow;
+            se_player.play("select-item");
+        }
+
+        let texture = if *speed == GameSpeed::Medium {
+            "ui/icon-speed-medium-selected"
+        } else {
+            "ui/icon-speed-medium"
+        };
+        if button(ui, texture, "speed-medium") {
+            *speed = GameSpeed::Medium;
+            se_player.play("select-item");
+        }
+
+        let texture = if *speed == GameSpeed::Fast {
+            "ui/icon-speed-fast-selected"
+        } else {
+            "ui/icon-speed-fast"
+        };
+        if button(ui, texture, "speed-fast") {
+            *speed = GameSpeed::Fast;
+            se_player.play("select-item");
+        }
+
+        let hover_text = t!("stat_item", "cycles");
+        ui.image(textures.get("ui/icon-cycles"))
+            .on_hover_text(&hover_text);
+        ui.label(format!("{}", planet.cycles))
+            .on_hover_text(&hover_text);
+    });
+    let left_ui_width = res.response.rect.width();
+
+    // Center space
+    ui.add_space((panel_width - *right_ui_width - left_ui_width - 10.0).max(0.0));
 
     // Resource indicators
-    super::indicators::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
-    ui.separator();
-    super::indicators::material_indicator(
-        ui,
-        textures,
-        planet.res.material,
-        planet.res.diff_material,
-    );
-    ui.separator();
-    super::indicators::gene_point_indicator(
-        ui,
-        textures,
-        planet.res.gene_point,
-        planet.res.diff_gene_point,
-    );
+    let res = ui.horizontal(|ui| {
+        super::indicators::power_indicator(ui, textures, planet.res.power, planet.res.used_power);
+        ui.separator();
+        super::indicators::material_indicator(
+            ui,
+            textures,
+            planet.res.material,
+            planet.res.diff_material,
+        );
+        ui.separator();
+        super::indicators::gene_point_indicator(
+            ui,
+            textures,
+            planet.res.gene_point,
+            planet.res.diff_gene_point,
+        );
+        ui.separator();
+        ui.horizontal(|ui| {
+            ui.set_max_width(240.0);
+            ui.add(egui::Label::new(&planet.basics.name).truncate())
+                .on_hover_text(t!("stat_item", "planet-name"));
+        });
+    });
+    *right_ui_width = res.response.rect.width();
 }
 
 fn build_menu(
