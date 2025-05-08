@@ -215,18 +215,25 @@ fn setup_style(mut egui_ctxs: EguiContexts) {
     style.visuals.widgets.hovered.corner_radius = cr;
     style.visuals.widgets.active.corner_radius = cr;
     style.visuals.widgets.open.corner_radius = cr;
-    let bg_color = egui::Color32::from_rgb(7, 12, 19);
+    let bg_color = egui::Color32::from_rgb(7, 12, 24);
     style.visuals.window_fill = bg_color;
     style.visuals.panel_fill = bg_color;
-    let button_color = egui::Color32::from_rgb(53, 57, 72);
+    let button_color = egui::Color32::from_rgb(53, 57, 78);
     style.visuals.widgets.inactive.weak_bg_fill = button_color;
     style.visuals.widgets.hovered.weak_bg_fill = button_color;
-    style.visuals.widgets.open.weak_bg_fill = egui::Color32::from_rgb(33, 36, 47);
+    style.visuals.widgets.open.weak_bg_fill = egui::Color32::from_rgb(33, 36, 52);
     let text_color = egui::Color32::from_rgb(208, 208, 208);
     style.visuals.widgets.noninteractive.fg_stroke.color = text_color;
     style.visuals.widgets.inactive.fg_stroke.color = text_color;
     style.spacing.scroll = egui::style::ScrollStyle::solid();
     style.interaction.tooltip_delay = 0.04;
+
+    style.visuals.window_stroke.color = egui::Color32::from_rgb(34, 48, 78);
+    style.visuals.widgets.noninteractive.bg_stroke.color = egui::Color32::from_rgb(36, 52, 84);
+    style.visuals.widgets.hovered.bg_stroke.color = egui::Color32::from_rgb(158, 210, 245);
+    style.visuals.widgets.hovered.bg_fill = egui::Color32::from_rgb(98, 112, 152);
+    style.visuals.selection.bg_fill = egui::Color32::from_rgb(10, 80, 118);
+
     // style.debug.debug_on_hover = true;
 
     ctx.set_style(style);
