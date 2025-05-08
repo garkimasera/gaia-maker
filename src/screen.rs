@@ -180,10 +180,11 @@ fn mouse_event(
     if mouse_button_input.just_pressed(MouseButton::Middle) {
         let transform = camera_query.get_single().unwrap().1;
         let mut translation = transform.translation.xy();
+        let camera_scale = camera_query.single().0.scale;
 
         let d = Vec2::new(pos.x - window.width() / 2.0, pos.y - window.height() / 2.0);
 
-        translation += d;
+        translation += d * camera_scale;
 
         ew_centering.send(Centering::new(translation));
         return;
@@ -191,7 +192,6 @@ fn mouse_event(
 
     // Zoom in or Zoom out
     if let Some(ev) = evr_scroll.read().last() {
-        log::info!("{:?}", ev);
         let translation = camera_query.single().1.translation.xy();
         if ev.y > 0.0 {
             ew_centering.send(Centering::new(translation).scale(1));
