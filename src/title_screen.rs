@@ -88,7 +88,7 @@ fn setup_title_screen(
 }
 
 fn enter_title_screen(
-    mut camera_query: Query<(&OrthographicProjection, &mut Transform)>,
+    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform)>,
     mut meshes: Query<&mut Visibility, With<TitleScreen>>,
     mut bg_transform: Query<
         &mut Transform,
@@ -99,7 +99,9 @@ fn enter_title_screen(
     let Ok(window) = window.get_single() else {
         return;
     };
-    let cpos = &mut camera_query.get_single_mut().unwrap().1.translation;
+    let mut camera = camera_query.single_mut();
+    camera.0.scale = 1.0;
+    let cpos = &mut camera.1.translation;
     cpos.x = 0.0;
     cpos.y = 0.0;
     crate::screen::adjust_camera_pos(&mut cpos.x, &mut cpos.y, window.width(), window.height());
