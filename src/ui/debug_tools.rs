@@ -218,6 +218,10 @@ impl MapPanel {
             planet.delete_civilization();
         }
 
+        if ui.button("delete all animals").clicked() {
+            planet.delete_animals();
+        }
+
         ui.separator();
         if ui.button("copy height map").clicked() {
             let s = planet.height_map_as_string();

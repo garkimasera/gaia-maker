@@ -111,6 +111,7 @@ pub trait PlanetDebug {
     fn cause_civil_war(&mut self, p: Coords, sim: &mut Sim, params: &Params);
     fn cause_nuclear_explosion(&mut self, p: Coords, sim: &mut Sim, params: &Params);
     fn delete_civilization(&mut self);
+    fn delete_animals(&mut self);
     fn height_map_as_string(&self) -> String;
 }
 
@@ -152,6 +153,13 @@ impl PlanetDebug for Planet {
                 self.map[p].structure = None;
             }
             self.map[p].tile_events.remove(TileEventKind::Vehicle);
+            self.map[p].tile_events.remove(TileEventKind::Troop);
+        }
+    }
+
+    fn delete_animals(&mut self) {
+        for p in self.map.iter_idx() {
+            self.map[p].animal = [None; 3];
         }
     }
 
