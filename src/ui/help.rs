@@ -3,6 +3,7 @@ use bevy_egui::{EguiContexts, egui};
 use strum::{AsRefStr, EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 use super::{UiTextures, WindowsOpenState, misc::label_with_icon};
+use crate::audio::SoundEffectPlayer;
 use crate::planet::{
     Biome, BuildingAttrs, BuildingEffect, CivilizationAge, Cost, EnergySource, GasKind, Params,
     SpaceBuildingKind, StructureKind, TileEventKind,
@@ -145,6 +146,7 @@ pub fn help_window(
     mut wos: ResMut<WindowsOpenState>,
     textures: Res<UiTextures>,
     params: Res<Params>,
+    se_player: SoundEffectPlayer,
     mut current_item: Local<HelpItem>,
 ) {
     if !wos.help {
@@ -164,11 +166,26 @@ pub fn help_window(
                         ui.set_min_height(300.0);
                         ui.vertical(|ui| {
                             for item_group in ItemGroup::iter() {
-                                ui.collapsing(t!(item_group), |ui| {
-                                    for item in &ITEM_LIST[&item_group] {
-                                        ui.selectable_value(&mut *current_item, *item, t!(item));
-                                    }
-                                });
+                                if ui
+                                    .collapsing(t!(item_group), |ui| {
+                                        for item in &ITEM_LIST[&item_group] {
+                                            if ui
+                                                .selectable_value(
+                                                    &mut *current_item,
+                                                    *item,
+                                                    t!(item),
+                                                )
+                                                .changed()
+                                            {
+                                                se_player.play("select-item");
+                                            }
+                                        }
+                                    })
+                                    .header_response
+                                    .changed()
+                                {
+                                    se_player.play("select-item");
+                                }
                             }
                         });
                     });
