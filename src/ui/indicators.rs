@@ -14,7 +14,7 @@ use crate::{
 
 use super::{UiTextures, misc::LabelWithIcon};
 
-pub const TILE_INFO_INDICATOR_WIDTH: f32 = 208.0;
+pub const TILE_INFO_INDICATOR_WIDTH: f32 = 196.0;
 
 pub fn indicators(
     mut egui_ctxs: EguiContexts,
@@ -237,8 +237,6 @@ pub fn tile_info_indicators(
         }
         ui.image(textures.get("ui/icon-coordinates"))
             .on_hover_text(t!("coordinates"));
-        ui.label(format!("[{}, {}]", p.0, p.1))
-            .on_hover_text(t!("coordinates"));
 
         let (longitude, latitude) = planet.calc_longitude_latitude(p);
         ui.label(format!(
@@ -247,6 +245,9 @@ pub fn tile_info_indicators(
             latitude * 180.0 * std::f32::consts::FRAC_1_PI,
         ))
         .on_hover_text(format!("{}, {}", t!("longitude"), t!("latitude")));
+
+        ui.label(egui::RichText::new(format!("[{}, {}]", p.0, p.1)).small())
+            .on_hover_text(t!("coordinates"));
     });
 
     let buried_carbon = if tile.buried_carbon > 5000.0 {
