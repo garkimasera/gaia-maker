@@ -173,11 +173,13 @@ fn cursor_mode_indicator(
 pub fn power_indicator(ui: &mut egui::Ui, textures: &UiTextures, power: f32, used_power: f32) {
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-power");
-        ui.image(texture).on_hover_text(t!("power"));
+        ui.image(texture);
         let used_power = crate::text::format_float_1000(used_power, 1);
         let power = crate::text::format_float_1000(power, 1);
         ui.label(format!("{} / {} TW", used_power, power));
-    });
+    })
+    .response
+    .on_hover_text(t!("power"));
 }
 
 pub fn material_indicator(
@@ -188,12 +190,14 @@ pub fn material_indicator(
 ) {
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-material");
-        ui.image(texture).on_hover_text(t!("material"));
+        ui.image(texture);
         ui.label(WithUnitDisplay::Material(material).to_string());
         ui.label(
             egui::RichText::new(format!("(+{})", WithUnitDisplay::Material(diff_material))).small(),
         );
-    });
+    })
+    .response
+    .on_hover_text(t!("material"));
 }
 
 pub fn gene_point_indicator(
@@ -204,10 +208,12 @@ pub fn gene_point_indicator(
 ) {
     ui.horizontal(|ui| {
         let texture = textures.get("ui/icon-gene");
-        ui.image(texture).on_hover_text(t!("gene-points"));
+        ui.image(texture);
         ui.label(WithUnitDisplay::GenePoint(gene_point).to_string());
         ui.label(egui::RichText::new(format!("({:+.2})", diff_gene_point)).small());
-    });
+    })
+    .response
+    .on_hover_text(t!("gene-points"));
 }
 
 pub fn tile_info_indicators(
