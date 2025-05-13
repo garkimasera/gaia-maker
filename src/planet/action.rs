@@ -119,12 +119,16 @@ impl Planet {
         });
     }
 
-    pub fn civilize_animal(&mut self, animal_id: AnimalId, params: &Params) {
-        let Some(civ) = &params.animals[&animal_id].civ else {
-            unreachable!()
-        };
-        self.res.consume(Cost::GenePoint(civ.civilize_cost));
-        let event = PlanetEvent::Civilize { target: animal_id };
-        self.events.start_event(event, params.event.civilize_cycles);
+    pub fn civilize_animal(&mut self, p: Coords, animal_id: AnimalId, params: &Params) {
+        self.res.consume(Cost::GenePoint(params.event.civilize_cost));
+        super::civ::civilize_animal(self, params, p, animal_id);
+    }
+
+    pub fn get_civilizable_animal(&mut self, p: Coords, params: &Params) -> Option<AnimalId> {
+        self.map[p]
+            .animal
+            .iter()
+            .filter_map(|animal| animal.map(|animal| animal.id))
+            .find(|&animal| params.animals[&animal].civ.is_some())
     }
 }

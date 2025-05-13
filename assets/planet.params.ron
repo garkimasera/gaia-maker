@@ -302,8 +302,7 @@
         garrison_troop_str_remaing_rate: 1,
     ),
     event: (
-        n_animal_to_civilize: 8.0,
-        civilize_cycles: 108,
+        civilize_cost: 300,
         tile_event_costs: {
             fire: Material(100.0),
             black_dust: Material(50.0),

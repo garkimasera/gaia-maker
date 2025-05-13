@@ -5,7 +5,6 @@
     temp: (8, 28),
     settlement_effect: 0.5,
     civ: (
-        civilize_cost: 100.0,
         color: (0xff, 0xd4, 0x58),
     ),
 )

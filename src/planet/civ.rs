@@ -369,61 +369,25 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 }
 
-pub fn civilize_animal(planet: &mut Planet, sim: &mut Sim, params: &Params, animal_id: AnimalId) {
-    let mut p_max_animal = None;
-    let mut n = 0.0;
-    let size = params.animals[&animal_id].size;
-
-    for p in planet.map.iter_idx() {
-        if let Some(tile_animal) = &planet.map[p].animal[size as usize] {
-            if tile_animal.id == animal_id && tile_animal.n > n {
-                n = tile_animal.n;
-                p_max_animal = Some(p);
-            }
-        }
-    }
-
-    if let Some(p) = p_max_animal {
-        planet.map[p].animal[size as usize] = None;
-
-        let settlement = Settlement {
-            id: animal_id,
-            age: CivilizationAge::Stone,
-            pop: params.sim.settlement_init_pop[CivilizationAge::Stone as usize],
-            ..Default::default()
-        };
-        let mut p_settlement = None;
-        for p in tile_geom::SpiralIter::new(p).take(0xFF) {
-            if planet.map.in_range(p) && planet.map[p].structure.is_none() {
-                planet.map[p].structure = Some(Structure::Settlement(settlement));
-                p_settlement = Some(p);
-                break;
-            }
-        }
-        if let Some(p_center) = p_settlement {
-            for _ in 0..2 {
-                let p = p_center
-                    + *tile_geom::CHEBYSHEV_DISTANCE_2_COORDS
-                        .choose(&mut sim.rng)
-                        .unwrap();
-                if planet.map.in_range(p)
-                    && planet.map[p].structure.is_none()
-                    && params.animals[&animal_id]
-                        .habitat
-                        .match_biome(planet.map[p].biome)
-                {
-                    planet.map[p].structure = Some(Structure::Settlement(settlement));
-                }
-            }
-
-            planet.reports.append(
-                planet.cycles,
-                ReportContent::EventCivilized {
-                    animal: animal_id,
-                    pos: p_center,
-                },
-            );
-            planet.civs.insert(animal_id, Civilization::default());
+pub fn civilize_animal(planet: &mut Planet, params: &Params, pos: Coords, animal_id: AnimalId) {
+    planet.reports.append(
+        planet.cycles,
+        ReportContent::EventCivilized {
+            animal: animal_id,
+            pos,
+        },
+    );
+    planet.civs.insert(animal_id, Civilization::default());
+    let settlement = Settlement {
+        id: animal_id,
+        age: CivilizationAge::Stone,
+        pop: params.sim.settlement_init_pop[CivilizationAge::Stone as usize],
+        ..Default::default()
+    };
+    for p in tile_geom::SpiralIter::new(pos).take(0xFF) {
+        if planet.map.in_range(p) && planet.map[p].structure.is_none() {
+            planet.map[p].structure = Some(Structure::Settlement(settlement));
+            break;
         }
     }
 }
@@ -437,33 +401,6 @@ fn settlement_blocked_by_tile_event(tile_events: &TileEvents) -> bool {
         TileEvent::Plague { cured, .. } => !cured,
         _ => false,
     })
-}
-
-impl Planet {
-    pub fn can_civilize(&self, id: AnimalId, params: &Params) -> Result<(), &'static str> {
-        let Some(civ) = &params.animals[&id].civ else {
-            unreachable!()
-        };
-
-        let sum: f32 = self
-            .map
-            .iter()
-            .map(|tile| {
-                tile.get_animal(id, params)
-                    .map(|animal| animal.n)
-                    .unwrap_or_default()
-            })
-            .sum();
-        if sum < params.event.n_animal_to_civilize {
-            return Err("animal-insufficient-population");
-        }
-
-        if self.res.gene_point < civ.civilize_cost {
-            return Err("lack-of-gene-points");
-        }
-
-        Ok(())
-    }
 }
 
 impl Settlement {

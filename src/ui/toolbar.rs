@@ -11,9 +11,10 @@ use crate::{
     manage_planet::ManagePlanet,
     planet::{Params, Planet, StructureKind},
     screen::{CursorMode, OccupiedScreenSpace},
+    text::WithUnitDisplay,
 };
 
-use super::{UiTextures, WindowsOpenState, help::HelpItem};
+use super::{UiTextures, WindowsOpenState, help::HelpItem, misc::label_with_icon};
 
 pub fn toolbar(
     mut egui_ctxs: EguiContexts,
@@ -296,6 +297,7 @@ fn action_menu(
     se_player: &SoundEffectPlayer,
 ) {
     let pos_tooltip = ui.response().rect.right_top() + egui::Vec2::new(16.0, 0.0);
+
     for &kind in params.event.tile_event_costs.keys() {
         let response = ui.button(t!(kind));
         if response.clicked() {
@@ -316,6 +318,35 @@ fn action_menu(
             );
         }
         ui.end_row();
+    }
+
+    ui.separator();
+
+    let response = ui.button(t!("civilize"));
+    if response.clicked() {
+        *cursor_mode = CursorMode::Civilize;
+        ui.close_menu();
+        se_player.play("select-item");
+    }
+    if response.hovered() {
+        egui::containers::show_tooltip_at(
+            &response.ctx,
+            response.layer_id,
+            response.id,
+            pos_tooltip,
+            |ui| {
+                ui.set_max_width(super::HELP_TOOLTIP_WIDTH);
+                ui.label(egui::RichText::new(t!("cost")).strong());
+                label_with_icon(
+                    ui,
+                    textures,
+                    "ui/icon-gene",
+                    WithUnitDisplay::GenePoint(params.event.civilize_cost).to_string(),
+                );
+                ui.separator();
+                ui.label(t!("help/civilize"));
+            },
+        );
     }
 }
 

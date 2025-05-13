@@ -6,6 +6,7 @@ use crate::draw::UpdateDraw;
 use crate::planet::debug::PlanetDebug;
 use crate::planet::*;
 use crate::screen::{CauseEventKind, CursorMode};
+use crate::ui::{Dialog, WindowsOpenState};
 use crate::{GameState, GameSystemSet};
 
 #[derive(Clone, Copy, Debug)]
@@ -35,6 +36,7 @@ fn cursor_action(
     mut sim: ResMut<Sim>,
     params: Res<Params>,
     mut planet: ResMut<Planet>,
+    mut wos: ResMut<WindowsOpenState>,
     se_player: SoundEffectPlayer,
 ) {
     for e in er.read() {
@@ -43,9 +45,33 @@ fn cursor_action(
         match *cursor_mode {
             CursorMode::Normal => (),
             CursorMode::Demolition => {
-                update_draw.update();
                 if planet.demolition(p, &mut sim, &params) {
                     se_player.play("demolish");
+                    update_draw.update();
+                }
+            }
+            CursorMode::Civilize => {
+                if planet.res.gene_point >= params.event.civilize_cost {
+                    if let Some(id) = planet.get_civilizable_animal(p, &params) {
+                        if planet.civs.contains_key(&id) {
+                            update_draw.update();
+                            let age = CivilizationAge::Stone;
+                            planet.place_settlement(
+                                p,
+                                Settlement {
+                                    id,
+                                    age,
+                                    pop: params.sim.settlement_init_pop[age as usize],
+                                    ..Default::default()
+                                },
+                            );
+                            planet.res.consume(Cost::GenePoint(params.event.civilize_cost));
+                            se_player.play("civilize");
+                        } else {
+                            wos.dialogs.push(Dialog::Civilize { p, id });
+                            se_player.play("select-item");
+                        }
+                    }
                 }
             }
             CursorMode::Build(kind) => {
@@ -161,6 +187,10 @@ pub fn cursor_mode_lack_and_cost(
             if let Some(cost) = params.event.tile_event_costs.get(kind) {
                 cost_list.push((!planet.res.enough_to_consume(*cost), *cost));
             }
+        }
+        CursorMode::Civilize => {
+            let cost = params.event.civilize_cost;
+            cost_list.push((cost > planet.res.gene_point, Cost::GenePoint(cost)));
         }
         _ => (),
     }

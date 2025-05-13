@@ -127,8 +127,10 @@ impl PlanetDebug for Planet {
     }
 
     fn place_settlement(&mut self, p: Coords, settlement: Settlement) {
-        self.civs.entry(settlement.id).or_default();
-        self.map[p].structure = Some(Structure::Settlement(settlement));
+        if self.map[p].structure.is_none() {
+            self.civs.entry(settlement.id).or_default();
+            self.map[p].structure = Some(Structure::Settlement(settlement));
+        }
     }
 
     fn cause_decadence(&mut self, p: Coords, sim: &mut Sim, params: &Params) {

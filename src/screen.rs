@@ -33,6 +33,7 @@ impl Centering {
 pub enum CursorMode {
     Normal,
     Demolition,
+    Civilize,
     Build(StructureKind),
     TileEvent(TileEventKind),
     SpawnAnimal(AnimalId),

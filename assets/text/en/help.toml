@@ -57,6 +57,8 @@ cloud-albedo = "Cloud albedo represents the proportion of stellar light reflecte
 fertility = "Fertility refers to the fertility of the soil on land, or the nutrient content of the seawater in the ocean. If the land is fertile, forests will grow and it will be easier for a civilization to flourish. In order for the land to become fertile, it is necessary to have the right temperature and rainfall."
 solar-constant = "Solar Constant refers to the amount of energy a planet receives from its star. The higher this value is, the higher the temperature of the planet will be. It can increase or decrease due to buildings and natural phenomena."
 
+civilize = "Modify the genes of the specified animal on the selected tile to grant it intelligence and civilization. This requires a civilizable animal to be present on that tile."
+
 [help.age]
 stone = "Stone Age civilizations use stone tools as primitive tools and begin primitive agriculture. Since their populations are small and energy consumption is low, their impact on the ecosystem is minimal, they consume a small amount of biomass as an energy source."
 bronze = "Bronze Age civilizations use more sophisticated tools and have basic metalworking technology. They settle in cities and form societies. In addition, writing is invented, and it becomes possible to pass on technology and culture to future generations. The main source of energy is biomass."

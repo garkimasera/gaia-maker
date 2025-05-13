@@ -2,7 +2,7 @@ mod achivements;
 mod animals;
 mod control;
 mod debug_tools;
-mod error_popup;
+mod dialogs;
 mod help;
 mod hover_tile_tooltip;
 mod indicators;
@@ -24,6 +24,7 @@ use bevy_egui::{
     EguiContextSettings, EguiContexts, EguiPlugin,
     egui::{self, FontData, FontDefinitions, FontFamily, load::SizedTexture},
 };
+use geom::Coords;
 use std::collections::HashMap;
 
 use crate::{
@@ -83,7 +84,7 @@ impl Default for WindowsOpenState {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Dialog {
-    _Dummy,
+    Civilize { p: Coords, id: AnimalId },
 }
 
 #[derive(Clone, Default, Resource)]
@@ -143,7 +144,8 @@ impl Plugin for UiPlugin {
                     saveload::load_window,
                     tutorial::tutorial_popup,
                     achivements::achivements_window,
-                    error_popup::error_popup,
+                    dialogs::error_popup,
+                    dialogs::dialogs,
                     preferences::preferences_window,
                     debug_tools::debug_tools_window,
                     reset_window_open_state,

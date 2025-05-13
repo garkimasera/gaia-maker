@@ -20,6 +20,7 @@ buried-carbon = "Buried Carbon"
 cancel = "Cancel"
 carbon = "Carbon"
 carbon-dioxide = "Carbon Dioxide"
+civilizable = "Civilizable"
 cities = "Cities"
 city = "City"
 city-icons = "City Icons"
@@ -205,6 +206,7 @@ save-limit-supplement = "If you want to play without this limitation, please use
 web-limit-warning = "You are running Gaia Maker in a web browser. When running in a web browser, the number of save data and performance are limited. If you want to play without these limitations, please use the download version."
 control-need-orbital-mirror = "An Orbital Mirror needs to be built."
 control-need-fertilization-plant = "One or more Soil Fertilization Plants need to be built."
+civilize-animal = "Civilize the following animal?"
 
 # Stat items
 [stat_item]

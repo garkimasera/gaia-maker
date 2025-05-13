@@ -17,11 +17,10 @@ pub fn animals_window(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
     mut cursor_mode: ResMut<CursorMode>,
-    mut planet: ResMut<Planet>,
+    planet: Res<Planet>,
     params: Res<Params>,
     textures: Res<UiTextures>,
     mut state: Local<Option<State>>,
-    mut window: Query<&mut Window, With<bevy::window::PrimaryWindow>>,
     se_player: SoundEffectPlayer,
 ) {
     if !wos.animals {
@@ -57,12 +56,11 @@ pub fn animals_window(
                     contents(
                         ui,
                         state,
-                        &mut planet,
+                        &planet,
                         &params,
                         &textures,
                         &mut cursor_mode,
                         &se_player,
-                        &mut window.single_mut(),
                     );
                 });
             });
@@ -76,12 +74,11 @@ pub fn animals_window(
 fn contents(
     ui: &mut egui::Ui,
     state: &mut State,
-    planet: &mut Planet,
+    _planet: &Planet,
     params: &Params,
     textures: &UiTextures,
     cursor_mode: &mut CursorMode,
     se_player: &SoundEffectPlayer,
-    _window: &mut bevy::window::Window,
 ) {
     ui.horizontal(|ui| {
         ui.add(egui::Image::new(
@@ -129,14 +126,8 @@ fn contents(
         ));
         ui.end_row();
 
-        if let Some(civ) = &attr.civ {
-            ui.label(t!("civilize-cost"));
-            label_with_icon(
-                ui,
-                textures,
-                "ui/icon-gene",
-                WithUnitDisplay::GenePoint(civ.civilize_cost).to_string(),
-            );
+        if attr.civ.is_some() {
+            ui.label(t!("civilizable"));
             ui.end_row();
         }
     });
@@ -147,39 +138,7 @@ fn contents(
             *cursor_mode = CursorMode::SpawnAnimal(state.current);
             se_player.play("select-item");
         }
-
-        if attr.civ.is_some() {
-            ui.scope(|ui| {
-                if planet.events.in_progress_civilize_event(state.current) {
-                    ui.disable();
-                    let _ = ui.button(t!("civilizing-in-progress"));
-                } else if planet.civs.contains_key(&state.current) {
-                    ui.disable();
-                    let _ = ui.button(t!("civilized"));
-                } else {
-                    let s = if let Err(s) = planet.can_civilize(state.current, params) {
-                        ui.disable();
-                        t!("msg", s)
-                    } else {
-                        String::new()
-                    };
-                    if ui.button(t!("civilize")).on_disabled_hover_text(s).clicked() {
-                        planet.civilize_animal(state.current, params);
-                        se_player.play("select-item");
-                    }
-                }
-            });
-        }
     });
-
-    // if attr.civ.is_some() {
-    //     window.ime_enabled = false;
-    //     let result = ui.add(egui::TextEdit::singleline(&mut state.civ_name).char_limit(92));
-    //     if result.has_focus() {
-    //         window.ime_enabled = true;
-    //         window.ime_position = bevy::math::Vec2::new(result.rect.left(), result.rect.top());
-    //     }
-    // }
 }
 
 fn select_panel(

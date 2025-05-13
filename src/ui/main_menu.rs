@@ -167,10 +167,7 @@ pub fn main_menu(
                 .collapsible(false)
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                 .show(egui_ctxs.ctx_mut(), |ui| {
-                    super::error_popup::ui_management_planet_error(
-                        ui,
-                        state.error.as_ref().unwrap(),
-                    );
+                    super::dialogs::ui_management_planet_error(ui, state.error.as_ref().unwrap());
                     ui.vertical_centered(|ui| {
                         if ui.button(t!("close")).clicked() {
                             state.mode = MainMenuMode::Menu;

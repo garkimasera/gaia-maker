@@ -1,4 +1,3 @@
-use civ::civilize_animal;
 use serde::{Deserialize, Serialize};
 
 use super::*;
@@ -31,16 +30,6 @@ impl Events {
                 Some(e.progress)
             } else {
                 None
-            }
-        })
-    }
-
-    pub fn in_progress_civilize_event(&self, animal_id: AnimalId) -> bool {
-        self.in_progress_iter().any(|event| {
-            if let PlanetEvent::Civilize { target } = &event.event {
-                *target == animal_id
-            } else {
-                false
             }
         })
     }
@@ -91,7 +80,6 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             PlanetEventKind::War => {
                 super::war::sim_war(planet, sim, params);
             }
-            _ => (),
         }
     }
 
@@ -121,14 +109,4 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         true
     });
-
-    for event in completed_events {
-        #[allow(clippy::single_match)]
-        match event {
-            PlanetEvent::Civilize { target } => {
-                civilize_animal(planet, sim, params, target);
-            }
-            _ => (),
-        }
-    }
 }

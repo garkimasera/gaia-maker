@@ -14,13 +14,6 @@ impl Tile {
             _ => None,
         }
     }
-
-    pub fn get_animal(&self, id: AnimalId, params: &Params) -> Option<&Animal> {
-        let size = params.animals[&id].size;
-        self.animal[size as usize]
-            .as_ref()
-            .filter(|animal| animal.id == id)
-    }
 }
 
 pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {

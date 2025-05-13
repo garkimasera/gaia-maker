@@ -248,7 +248,6 @@ fn animal_ratio_attr_default() -> f32 {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimalCivParams {
-    pub civilize_cost: f32,
     pub color: [u8; 3],
 }
 
@@ -515,7 +514,6 @@ pub enum BuildingEffect {
 #[strum_discriminants(serde(rename_all = "snake_case"))]
 #[strum_discriminants(strum(serialize_all = "kebab-case"))]
 pub enum PlanetEvent {
-    Civilize { target: AnimalId },
     Plague(PlagueEvent),
     Decadence(DecadenceEvent),
     War(WarEvent),
@@ -853,10 +851,8 @@ pub struct SimParams {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EventParams {
-    /// Minimum required animal population to civilize
-    pub n_animal_to_civilize: f32,
-    /// Required cycles to civilize an animal
-    pub civilize_cycles: u64,
+    /// Animal civilize cost
+    pub civilize_cost: f32,
     /// Resource cost for tile event
     pub tile_event_costs: BTreeMap<TileEventKind, Cost>,
     /// The ratio of biomass burn at one cycle

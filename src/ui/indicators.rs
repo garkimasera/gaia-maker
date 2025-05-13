@@ -121,6 +121,9 @@ fn cursor_mode_indicator(
         CursorMode::Demolition => {
             t!("demolition")
         }
+        CursorMode::Civilize => {
+            t!("civilize")
+        }
         CursorMode::Build(kind) => {
             t!(kind)
         }
