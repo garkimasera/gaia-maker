@@ -175,7 +175,7 @@ fn update(
         Local<u8>,
     ),
 ) {
-    if wos.save || wos.load {
+    if wos.save || wos.load || !wos.dialogs.is_empty() {
         return;
     }
 

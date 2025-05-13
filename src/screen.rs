@@ -492,6 +492,10 @@ fn keyboard_input(
     conf: Res<Conf>,
     mut old_gamespeed: Local<GameSpeed>,
 ) {
+    if !wos.dialogs.is_empty() {
+        return;
+    }
+
     let egui_settings = egui_settings.single();
 
     // Shortcut keys
