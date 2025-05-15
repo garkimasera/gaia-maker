@@ -5,12 +5,13 @@ use strum::{AsRefStr, EnumIter, IntoEnumIterator};
 use crate::{
     audio::SoundEffectPlayer,
     planet::{
-        AnimalId, BuildingControlValue, Planet, Requirement, SpaceBuildingKind, StructureKind,
+        AnimalId, BuildingControlValue, Params, Planet, Requirement, SpaceBuildingKind,
+        StructureKind,
     },
     screen::OccupiedScreenSpace,
 };
 
-use super::{UiTextures, WindowsOpenState};
+use super::{HELP_TOOLTIP_WIDTH, UiTextures, WindowsOpenState, help::HelpItem};
 
 const SLIDER_WIDTH: f32 = 250.0;
 
@@ -26,7 +27,7 @@ pub fn control_window(
     mut egui_ctxs: EguiContexts,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
-    mut planet: ResMut<Planet>,
+    (mut planet, params): (ResMut<Planet>, Res<Params>),
     textures: Res<UiTextures>,
     mut current_panel: Local<Panel>,
     mut current_civ_id: Local<Option<AnimalId>>,
@@ -70,9 +71,14 @@ pub fn control_window(
                 .auto_shrink(egui::Vec2b::new(false, false))
                 .show(ui, |ui| match *current_panel {
                     Panel::Planet => planet_control(ui, &textures, &mut planet, &se_player),
-                    Panel::Civilization => {
-                        civ_control(ui, &textures, &mut planet, &mut current_civ_id, &se_player)
-                    }
+                    Panel::Civilization => civ_control(
+                        ui,
+                        &textures,
+                        &mut planet,
+                        &params,
+                        &mut current_civ_id,
+                        &se_player,
+                    ),
                 });
         })
         .unwrap()
@@ -143,9 +149,12 @@ fn civ_control(
     ui: &mut egui::Ui,
     textures: &UiTextures,
     planet: &mut Planet,
+    params: &Params,
     current_civ_id: &mut Option<AnimalId>,
     se_player: &SoundEffectPlayer,
 ) {
+    let x_tooltip = ui.response().rect.right_top().x + 3.0;
+
     if planet.civs.is_empty() {
         ui.label(t!("no-civilization"));
         *current_civ_id = None;
@@ -237,8 +246,26 @@ fn civ_control(
         ui.horizontal(|ui| {
             ui.image(textures.get(format!("ui/icon-energy-source-{}", energy_source.as_ref())))
                 .on_hover_text(t!("energy_source", energy_source));
-            if ui.add(egui::Slider::new(weight, 0..=100).suffix("%")).changed() {
+            let response = ui.add(egui::Slider::new(weight, 0..=100).suffix("%"));
+            if response.changed() {
                 se_player.play_if_stopped("slider");
+            }
+            if response.hovered() {
+                let help_item = HelpItem::EnergySources(*energy_source);
+                let pos = egui::pos2(x_tooltip, response.rect.right_top().y);
+
+                egui::containers::show_tooltip_at(
+                    &response.ctx,
+                    response.layer_id,
+                    response.id,
+                    pos,
+                    |ui| {
+                        ui.set_max_width(HELP_TOOLTIP_WIDTH);
+                        ui.strong(t!("energy_source", energy_source));
+                        ui.separator();
+                        help_item.ui(ui, textures, params);
+                    },
+                );
             }
         });
     }
