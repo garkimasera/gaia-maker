@@ -37,7 +37,7 @@ pub fn dialogs(
                 planet.civilize_animal(*p, *id, &params);
                 close = true;
                 update_draw.update();
-                se_player.play("civilize");
+                se_player.play_with_priority("civilize", true);
             }
             if ui.button(t!("cancel")).clicked() {
                 close = true;

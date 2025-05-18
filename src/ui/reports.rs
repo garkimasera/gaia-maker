@@ -2,14 +2,16 @@ use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 
 use crate::{
+    audio::SoundEffectPlayer,
+    manage_planet::SwitchPlanet,
     planet::{Planet, TILE_SIZE},
     screen::{Centering, OccupiedScreenSpace},
 };
 
 use super::{UiTextures, WindowsOpenState};
 
-const DEFAULT_WINDOW_WIDTH: f32 = 180.0;
-const DEFAULT_WINDOW_HEIGHT: f32 = 150.0;
+const DEFAULT_WINDOW_WIDTH: f32 = 220.0;
+const DEFAULT_WINDOW_HEIGHT: f32 = 105.0;
 
 pub fn reports_window(
     mut egui_ctxs: EguiContexts,
@@ -18,7 +20,24 @@ pub fn reports_window(
     mut ew_centering: EventWriter<Centering>,
     textures: Res<UiTextures>,
     planet: Res<Planet>,
+    se_player: SoundEffectPlayer,
+    mut er_switch_planet: EventReader<SwitchPlanet>,
+    mut n_items_prev: Local<Option<usize>>,
 ) {
+    if er_switch_planet.read().last().is_some() {
+        *n_items_prev = None;
+    }
+
+    let n_items = planet.reports.n_reports();
+    if let Some(n_items_prev) = &mut *n_items_prev {
+        if *n_items_prev < n_items {
+            se_player.play("report");
+            *n_items_prev = n_items;
+        }
+    } else {
+        *n_items_prev = Some(n_items);
+    }
+
     if !wos.reports {
         let rect = egui::Window::new("reports-expander")
             .anchor(

@@ -33,6 +33,10 @@ impl Reports {
         }
     }
 
+    pub fn n_reports(&self) -> usize {
+        self.reports.len() + self.persistent_warns.len()
+    }
+
     pub fn append_persitent_warn(&mut self, cycles: u64, content: ReportContent) {
         let new_report = Report { cycles, content };
         if let Some(report) = self
@@ -40,7 +44,9 @@ impl Reports {
             .iter_mut()
             .find(|report| report.content == new_report.content)
         {
-            *report = new_report
+            if new_report.cycles - report.cycles > 1000 {
+                *report = new_report;
+            }
         } else {
             self.persistent_warns.push(new_report);
         }

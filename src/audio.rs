@@ -2,6 +2,7 @@ use std::{collections::HashSet, time::Duration};
 
 use bevy::{asset::LoadState, ecs::system::SystemParam, prelude::*};
 use bevy_kira_audio::prelude::*;
+use crossbeam::atomic::AtomicCell;
 use serde::Deserialize;
 
 use crate::{
@@ -36,11 +37,26 @@ pub struct SoundEffectPlayer<'w> {
     channel_se: Res<'w, AudioChannelSE>,
 }
 
-static LATEST_AUDIO_INSTANCE: crossbeam::atomic::AtomicCell<Option<Handle<AudioInstance>>> =
-    crossbeam::atomic::AtomicCell::new(None);
+static LATEST_AUDIO_INSTANCE: AtomicCell<Option<Handle<AudioInstance>>> = AtomicCell::new(None);
+static HIGH_PRIORITY_SE_INSTANCE: AtomicCell<Option<Handle<AudioInstance>>> = AtomicCell::new(None);
 
 impl SoundEffectPlayer<'_> {
     pub fn play(&self, s: &str) {
+        self.play_with_priority(s, false);
+    }
+
+    pub fn play_with_priority(&self, s: &str, high_priority: bool) {
+        if !high_priority {
+            if let Some(handle) = HIGH_PRIORITY_SE_INSTANCE.take() {
+                if matches!(
+                    self.channel_se.state(&handle),
+                    PlaybackState::Queued | PlaybackState::Playing { .. }
+                ) {
+                    return;
+                }
+            }
+        }
+
         let path = compact_str::format_compact!("se/{}.ogg", s);
         let Some(audio_source) = self.sources.sound_effects.get(path.as_str()) else {
             log::warn!("unknown sound effect {}", path);
@@ -48,6 +64,9 @@ impl SoundEffectPlayer<'_> {
         };
         self.channel_se.stop();
         let instance = self.channel_se.play(audio_source.clone()).handle();
+        if high_priority {
+            HIGH_PRIORITY_SE_INSTANCE.store(Some(instance.clone()));
+        }
         LATEST_AUDIO_INSTANCE.store(Some(instance));
     }
 
