@@ -28,6 +28,9 @@ pub enum Requirement {
         n: u32,
         animal_id: Option<AnimalId>,
     },
+    CivPopGrowthAdjust {
+        range: std::ops::RangeInclusive<i16>,
+    },
     OrbitalMirrorAdjust {
         range: std::ops::RangeInclusive<i32>,
     },
@@ -90,6 +93,14 @@ impl Requirement {
                     })
                     .count()
                     >= *n as usize
+            }
+            Self::CivPopGrowthAdjust { range } => {
+                for civ in planet.civs.values() {
+                    if range.contains(&civ.civ_control.pop_growth) {
+                        return true;
+                    }
+                }
+                false
             }
             Self::OrbitalMirrorAdjust { range } => {
                 if let BuildingControlValue::IncreaseRate(rate) =

@@ -22,6 +22,7 @@ pub enum TutorialStep {
     Carbon(usize),
     Animal(usize),
     Civilize(usize),
+    ControlCiv(usize),
     OrbitalMirror(usize),
     Complete(bool),
 }
@@ -41,6 +42,7 @@ pub enum ChecklistItem {
     CarbonChecklist1,
     AnimalChecklist1,
     CivilizeChecklist1,
+    ControlCivChecklist1,
     OrbitalMirrorChecklist1,
     OrbitalMirrorChecklist2,
 }
@@ -121,6 +123,7 @@ impl TutorialStep {
         Self::Animal(0),
         Self::Animal(1),
         Self::Civilize(0),
+        Self::ControlCiv(0),
         Self::OrbitalMirror(0),
         Self::Complete(false),
         Self::Complete(true),
@@ -226,6 +229,7 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
             kind: SpaceBuildingKind::OrbitalMirror,
             n: 1,
         },
+        ChecklistItem::ControlCivChecklist1 => Requirement::CivPopGrowthAdjust { range: 150..=200 },
         ChecklistItem::OrbitalMirrorChecklist2 => {
             Requirement::OrbitalMirrorAdjust { range: -10..=-5 }
         }
@@ -254,6 +258,7 @@ fn checklist(d: TutorialStepDiscriminants) -> &'static [ChecklistItem] {
         TutorialStepDiscriminants::Carbon => &[ChecklistItem::CarbonChecklist1],
         TutorialStepDiscriminants::Animal => &[ChecklistItem::AnimalChecklist1],
         TutorialStepDiscriminants::Civilize => &[ChecklistItem::CivilizeChecklist1],
+        TutorialStepDiscriminants::ControlCiv => &[ChecklistItem::ControlCivChecklist1],
         TutorialStepDiscriminants::OrbitalMirror => &[
             ChecklistItem::OrbitalMirrorChecklist1,
             ChecklistItem::OrbitalMirrorChecklist2,

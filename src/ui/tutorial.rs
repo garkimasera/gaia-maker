@@ -98,7 +98,10 @@ pub fn tutorial_popup(
 impl TutorialStep {
     fn ui(&self) -> fn(&mut egui::Ui, &UiTextures) {
         match *self {
-            Self::Start(0) => |ui, _| {
+            Self::Start(0) => |ui, textures| {
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/tutorial-icon"));
+                });
                 ui.label(t!("tutorial", "start-0"));
             },
             Self::Start(1) => |ui, textures| {
@@ -108,6 +111,11 @@ impl TutorialStep {
                 });
                 ui.add_space(8.0);
                 ui.label(t!("tutorial", "start-1-2"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/tutorial-mouse"));
+                });
+                ui.add_space(8.0);
+                ui.label(t!("tutorial", "start-1-3"));
                 ui.vertical_centered(|ui| {
                     ui.image(textures.get("ui/icon-map"));
                 });
@@ -210,8 +218,19 @@ impl TutorialStep {
                     ui.image(textures.get("ui/tutorial-animal-habitat"));
                 });
             },
-            Self::Civilize(0) => |ui, _textures| {
+            Self::Civilize(0) => |ui, textures| {
                 ui.label(t!("tutorial", "civilize-0-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-action"));
+                });
+                ui.label(t!("tutorial", "civilize-0-2"));
+            },
+            Self::ControlCiv(0) => |ui, textures| {
+                ui.label(t!("tutorial", "control-civ-0-1"));
+                ui.vertical_centered(|ui| {
+                    ui.image(textures.get("ui/icon-control"));
+                });
+                ui.label(t!("tutorial", "control-civ-0-2"));
             },
             Self::OrbitalMirror(0) => |ui, textures| {
                 ui.label(t!("tutorial", "orbital-mirror-0-1"));
