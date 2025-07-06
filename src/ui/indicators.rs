@@ -98,7 +98,7 @@ pub fn indicators(
             .anchor(egui::Align2::RIGHT_TOP, [0.0, y])
             .show(ctx, |ui| {
                 if let Some(fps) = diagnostics_store.get(&FPS).and_then(|d| d.average()) {
-                    ui.label(format!("FPS: {:.2}", fps));
+                    ui.label(format!("FPS: {fps:.2}"));
                 }
             })
             .unwrap()
@@ -137,10 +137,10 @@ fn cursor_mode_indicator(
             format!("biome editing: {}", biome.as_ref())
         }
         CursorMode::ChangeHeight(value) => {
-            format!("change height: {}", value)
+            format!("change height: {value}")
         }
         CursorMode::PlaceSettlement(id, age) => {
-            format!("settlement: {} {:?}", id, age)
+            format!("settlement: {id} {age:?}")
         }
         CursorMode::CauseEvent(kind) => AsRef::<str>::as_ref(&kind).to_owned(),
     };
@@ -179,7 +179,7 @@ pub fn power_indicator(ui: &mut egui::Ui, textures: &UiTextures, power: f32, use
         ui.image(texture);
         let used_power = crate::text::format_float_1000(used_power, 1);
         let power = crate::text::format_float_1000(power, 1);
-        ui.label(format!("{} / {} TW", used_power, power));
+        ui.label(format!("{used_power} / {power} TW"));
     })
     .response
     .on_hover_text(t!("power"));
@@ -213,7 +213,7 @@ pub fn gene_point_indicator(
         let texture = textures.get("ui/icon-gene");
         ui.image(texture);
         ui.label(WithUnitDisplay::GenePoint(gene_point).to_string());
-        ui.label(egui::RichText::new(format!("({:+.2})", diff_gene_point)).small());
+        ui.label(egui::RichText::new(format!("({diff_gene_point:+.2})")).small());
     })
     .response
     .on_hover_text(t!("gene-points"));

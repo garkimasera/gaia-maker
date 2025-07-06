@@ -361,7 +361,7 @@ impl Legend {
                     pixels,
                 };
                 let texture_handle = ctx.load_texture(
-                    format!("legend_gradation_image_{}", i),
+                    format!("legend_gradation_image_{i}"),
                     image,
                     egui::TextureOptions::NEAREST,
                 );

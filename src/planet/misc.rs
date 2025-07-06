@@ -23,7 +23,7 @@ pub fn linear_interpolation(table: &[(f32, f32)], x: f32) -> f32 {
         }
     }
 
-    panic!("invalid input for interpolation: {}", x)
+    panic!("invalid input for interpolation: {x}")
 }
 
 pub fn bisection<F: FnMut(f32) -> f32>(

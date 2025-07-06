@@ -437,15 +437,15 @@ impl GraphItem {
 
     fn format_value(&self, value: f64) -> String {
         match self {
-            Self::AverageAirTemperature => format!("{:.1} °C", value),
-            Self::AverageSeaTemperature => format!("{:.1} °C", value),
-            Self::AverageRainfall => format!("{:.0} mm", value),
-            Self::Biomass => format!("{:.1} Gt", value),
-            Self::Oxygen => format!("{:.2e} atm", value),
-            Self::Nitrogen => format!("{:.2e} atm", value),
-            Self::CarbonDioxide => format!("{:.2e} atm", value),
-            Self::BuriedCarbon => format!("{:.1} Gt", value),
-            Self::Population => format!("{:.0}", value),
+            Self::AverageAirTemperature => format!("{value:.1} °C"),
+            Self::AverageSeaTemperature => format!("{value:.1} °C"),
+            Self::AverageRainfall => format!("{value:.0} mm"),
+            Self::Biomass => format!("{value:.1} Gt"),
+            Self::Oxygen => format!("{value:.2e} atm"),
+            Self::Nitrogen => format!("{value:.2e} atm"),
+            Self::CarbonDioxide => format!("{value:.2e} atm"),
+            Self::BuriedCarbon => format!("{value:.1} Gt"),
+            Self::Population => format!("{value:.0}"),
         }
     }
 

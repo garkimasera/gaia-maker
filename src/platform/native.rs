@@ -29,7 +29,7 @@ fn find_data_dir() -> Option<std::path::PathBuf> {
 pub fn read_data_file(file_name: &str) -> Result<String> {
     let data_dir =
         crate::platform::data_dir().ok_or_else(|| anyhow!("cannot get data directory path"))?;
-    std::fs::read_to_string(data_dir.join(file_name)).with_context(|| format!("read {}", file_name))
+    std::fs::read_to_string(data_dir.join(file_name)).with_context(|| format!("read {file_name}"))
 }
 
 /// Write string data to a file under the data directory
@@ -257,7 +257,7 @@ pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::lo
     impl tracing::field::Visit for CaptureLayerVisitor<'_> {
         fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
             if field.name() == "message" {
-                *self.0 = Some(format!("{:?}", value));
+                *self.0 = Some(format!("{value:?}"));
             }
         }
     }
@@ -279,7 +279,7 @@ pub fn log_plugin_custom_layer(_app: &mut bevy::prelude::App) -> Option<bevy::lo
             let _ = write!(file, "{}", now.format("%Y-%m-%dT%H:%M:%S"));
             let _ = write!(file, " {}", event.metadata().level());
             if let Some(message) = message {
-                let _ = write!(file, " {}", message);
+                let _ = write!(file, " {message}");
             }
             let _ = writeln!(file);
         }

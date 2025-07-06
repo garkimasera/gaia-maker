@@ -13,19 +13,19 @@ impl std::fmt::Display for WithUnitDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match *self {
             WithUnitDisplay::Power(value) => {
-                write!(f, "{}TW", value)
+                write!(f, "{value}TW")
             }
             WithUnitDisplay::Material(value) => {
                 if value < 1.0 {
-                    write!(f, "{}Mt", value)
+                    write!(f, "{value}Mt")
                 } else if value < 100000.0 {
-                    write!(f, "{:.0}Mt", value)
+                    write!(f, "{value:.0}Mt")
                 } else {
                     write!(f, "{:.0}Gt", value / 1000.0)
                 }
             }
             WithUnitDisplay::GenePoint(value) => {
-                write!(f, "{:.0}", value)
+                write!(f, "{value:.0}")
             }
         }
     }

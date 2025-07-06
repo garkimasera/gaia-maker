@@ -210,7 +210,7 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
         }
     };
 
-    let ext = format!(".{}", SAVE_FILE_EXTENSION);
+    let ext = format!(".{SAVE_FILE_EXTENSION}");
     for file_name in save_sub_dir_files {
         if !file_name.ends_with(&ext) {
             continue;
@@ -261,7 +261,7 @@ pub fn read_save_sub_dir(sub_dir_name: &str) -> (Vec<SaveSubDirItem>, String) {
 pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
     let mut max = 0;
     let mut dup = false;
-    let prefix = format!("{} (", name);
+    let prefix = format!("{name} (");
 
     for (_, s) in &save_state.dirs {
         dup |= *s == name;
@@ -310,9 +310,9 @@ pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
 
 pub fn save_file_name(auto: bool, n: u32) -> String {
     if auto {
-        format!("autosave{:06}.{}", n, SAVE_FILE_EXTENSION)
+        format!("autosave{n:06}.{SAVE_FILE_EXTENSION}")
     } else {
-        format!("{:06}.{}", n, SAVE_FILE_EXTENSION)
+        format!("{n:06}.{SAVE_FILE_EXTENSION}")
     }
 }
 

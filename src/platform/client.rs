@@ -14,12 +14,12 @@ pub enum Response {
 }
 
 pub fn run_client(port: u16) {
-    let stream = std::net::TcpStream::connect(format!("127.0.0.1:{}", port))
+    let stream = std::net::TcpStream::connect(format!("127.0.0.1:{port}"))
         .expect("cannot open stream with launcher");
 
     std::thread::spawn(move || {
         if let Err(e) = client_task(stream) {
-            eprintln!("launcher connection error: {:?}", e);
+            eprintln!("launcher connection error: {e:?}");
         }
     });
 }

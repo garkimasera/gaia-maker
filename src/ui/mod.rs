@@ -301,7 +301,7 @@ fn bevy_image_to_egui_texture(
     let image = image
         .clone()
         .try_into_dynamic()
-        .unwrap_or_else(|_| panic!("not supported image format: {}", name))
+        .unwrap_or_else(|_| panic!("not supported image format: {name}"))
         .into_rgba8();
     let w = image.width();
     let h = image.height();
