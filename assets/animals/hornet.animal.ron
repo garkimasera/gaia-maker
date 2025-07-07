@@ -1,0 +1,8 @@
+(
+    size: small,
+    cost: 2,
+    habitat: land,
+    growth_speed: 140,
+    temp: (8, 35),
+    settlement_effect: 0.6,
+)

@@ -1,9 +1,20 @@
 [animal]
 ant = "アリ"
+crocodile = "ワニ"
 elephant = "ゾウ"
 fox = "キツネ"
+hornet = "ハチ"
+jellyfish = "クラゲ"
+octopus = "タコ"
 raccoon-dog = "タヌキ"
+raven = "カラス"
+shark = "サメ"
+stenonychosaurus = "ステノニコサウルス"
+tribrachidium = "トリブラキディウム"
 
 [civ]
+crocodile = "ワニ文明"
 fox = "キツネ文明"
 raccoon-dog = "タヌキ文明"
+raven = "カラス文明"
+stenonychosaurus = "恐竜人文明"

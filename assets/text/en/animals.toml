@@ -1,9 +1,20 @@
 [animal]
 ant = "Ant"
+crocodile = "Crocodile"
 elephant = "Elephant"
 fox = "Fox"
+hornet = "Hornet"
+jellyfish = "Jellyfish"
+octopus = "Octopus"
 raccoon-dog = "Raccoon Dog"
+raven = "Raven"
+shark = "Shark"
+stenonychosaurus = "Stenonychosaurus"
+tribrachidium = "Tribrachidium"
 
 [civ]
+crocodile = "Crocodile Civilization"
 fox = "Fox Civilization"
 raccoon-dog = "Raccoon Dog Civilization"
+raven = "Raven Civilization"
+stenonychosaurus = "Dinosauroid Civilization"

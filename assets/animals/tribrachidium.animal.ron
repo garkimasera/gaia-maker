@@ -1,0 +1,7 @@
+(
+    size: medium,
+    cost: 40,
+    habitat: sea,
+    temp: (15, 32),
+    settlement_effect: 0.8,
+)
