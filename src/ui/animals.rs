@@ -50,7 +50,7 @@ pub fn animals_window(
             ui.separator();
 
             ui.horizontal(|ui| {
-                select_panel(ui, state, &params, &se_player);
+                select_panel(ui, state, &se_player);
                 ui.separator();
                 ui.vertical(|ui| {
                     contents(
@@ -126,10 +126,9 @@ fn contents(
         ));
         ui.end_row();
 
-        if attr.civ.is_some() {
-            ui.label(t!("civilizable"));
-            ui.end_row();
-        }
+        ui.label(t!("civ-suitability"));
+        ui.label(format!("{:.0}%", attr.civ_prob * 100.0));
+        ui.end_row();
     });
 
     ui.separator();
@@ -141,12 +140,7 @@ fn contents(
     });
 }
 
-fn select_panel(
-    ui: &mut egui::Ui,
-    state: &mut State,
-    params: &Params,
-    se_player: &SoundEffectPlayer,
-) {
+fn select_panel(ui: &mut egui::Ui, state: &mut State, se_player: &SoundEffectPlayer) {
     let before = state.current;
     egui::ScrollArea::vertical()
         .min_scrolled_height(200.0)
@@ -166,13 +160,7 @@ fn select_panel(
         });
 
     // Selected animal changed
-    if before != state.current
-        && params
-            .animals
-            .get(&state.current)
-            .map(|attr| attr.civ.is_some())
-            .unwrap_or_default()
-    {
+    if before != state.current {
         state.civ_default_name = t!("civ", state.current);
         state.civ_name = state.civ_default_name.clone();
     }

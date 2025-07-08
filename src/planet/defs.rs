@@ -238,17 +238,12 @@ pub struct AnimalAttr {
     pub temp: (f32, f32),
     /// Settlement effect to livability
     pub settlement_effect: f32,
-    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
-    pub civ: Option<AnimalCivParams>,
+    pub civ_prob: f32,
+    pub color: [u8; 3],
 }
 
 fn animal_ratio_attr_default() -> f32 {
     1.0
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AnimalCivParams {
-    pub color: [u8; 3],
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize, AsRefStr)]

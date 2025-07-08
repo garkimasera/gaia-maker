@@ -34,7 +34,7 @@ use crate::{
     gz::GunzipBin,
     manage_planet::{ManagePlanetError, SwitchPlanet},
     overlay::OverlayLayerKind,
-    planet::{AnimalId, Params},
+    planet::AnimalId,
     screen::{CursorMode, OccupiedScreenSpace},
 };
 
@@ -246,7 +246,6 @@ fn load_textures(
     mut egui_ctxs: EguiContexts,
     images: Res<Assets<Image>>,
     ui_assets: Res<UiAssets>,
-    params: Res<Params>,
     mut texture_handles: Local<Vec<egui::TextureHandle>>,
 ) {
     let ctx = egui_ctxs.ctx_mut();
@@ -277,7 +276,7 @@ fn load_textures(
         let Some((path, _)) = path.split_once(".") else {
             continue;
         };
-        let (texture_handle, size) = bevy_image_to_egui_texture(ctx, image, path, &params);
+        let (texture_handle, size) = bevy_image_to_egui_texture(ctx, image, path);
 
         egui_textures.insert(
             path.to_owned(),
@@ -296,7 +295,6 @@ fn bevy_image_to_egui_texture(
     ctx: &egui::Context,
     image: &bevy::prelude::Image,
     name: &str,
-    params: &Params,
 ) -> (egui::TextureHandle, egui::Vec2) {
     let image = image
         .clone()
@@ -306,10 +304,8 @@ fn bevy_image_to_egui_texture(
     let w = image.width();
     let h = image.height();
 
-    let (w, h) = if let Some(animal) = name.strip_prefix("animals/") {
-        let attr = &params.animals[&AnimalId::from(animal).unwrap()];
-        let nw = if attr.civ.is_some() { 3 } else { 2 };
-        (w / nw, h / 2)
+    let (w, h) = if name.starts_with("animals/") {
+        (w / 3, h / 2)
     } else {
         (w, h)
     };

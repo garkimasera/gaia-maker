@@ -335,15 +335,13 @@ fn create_assets_list(
         let Ok(handle) = handle.clone().try_typed::<Image>() else {
             continue;
         };
-        let attr = params.animals.get(&animal_id).expect("no animal parameters");
 
-        let nw = if attr.civ.is_some() { 3 } else { 2 };
         let image = images.get(&handle).unwrap();
-        let width = image.width() / nw;
+        let width = image.width() / 3;
         let height = image.height() / 2;
         let layout = texture_atlas_assets.add(TextureAtlasLayout::from_grid(
             UVec2::new(width, height),
-            nw,
+            3,
             2,
             None,
             None,

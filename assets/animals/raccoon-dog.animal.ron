@@ -4,7 +4,6 @@
     habitat: land,
     temp: (8, 28),
     settlement_effect: 0.2,
-    civ: (
-        color: (0xa5, 0x50, 0x00),
-    ),
+    civ_prob: 0.80,
+    color: (0xa5, 0x50, 0x00),
 )

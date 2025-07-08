@@ -5,4 +5,6 @@
     growth_speed: 140,
     temp: (8, 35),
     settlement_effect: 0.6,
+    civ_prob: 0.00,
+    color: (0xf7, 0xe9, 0x00),
 )

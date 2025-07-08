@@ -287,11 +287,7 @@ fn map_img(
                 }
                 MapLayer::Civilizations => {
                     if let Some((id, _)) = &sim.domain[(x, y)] {
-                        params.animals[id]
-                            .civ
-                            .as_ref()
-                            .map(|civ| civ.color)
-                            .unwrap_or_default()
+                        params.animals[id].color
                     } else if planet.map[(x, y)].biome.is_land() {
                         params.biomes[&Biome::Rock].color
                     } else {
@@ -481,11 +477,7 @@ static STRUCTURE_COLORS: LazyLock<BTreeMap<StructureKind, [u8; 3]>> = LazyLock::
 fn civilization_color_legends(planet: &Planet, params: &Params) -> Vec<([u8; 3], String)> {
     let mut civs = BTreeMap::new();
     for civ in &planet.civs {
-        let color = params.animals[civ.0]
-            .civ
-            .as_ref()
-            .map(|c| c.color)
-            .unwrap_or_default();
+        let color = params.animals[civ.0].color;
         civs.insert(*civ.0, (color, planet.civ_name(*civ.0)));
     }
     civs.into_values().collect()

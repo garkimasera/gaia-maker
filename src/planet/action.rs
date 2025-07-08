@@ -124,11 +124,11 @@ impl Planet {
         super::civ::civilize_animal(self, params, p, animal_id);
     }
 
-    pub fn get_civilizable_animal(&mut self, p: Coords, params: &Params) -> Option<AnimalId> {
+    pub fn get_civilizable_animal(&mut self, p: Coords, _params: &Params) -> Option<AnimalId> {
         self.map[p]
             .animal
             .iter()
             .filter_map(|animal| animal.map(|animal| animal.id))
-            .find(|&animal| params.animals[&animal].civ.is_some())
+            .next()
     }
 }

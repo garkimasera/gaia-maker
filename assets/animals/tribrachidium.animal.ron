@@ -4,4 +4,6 @@
     habitat: sea,
     temp: (15, 32),
     settlement_effect: 0.8,
+    civ_prob: 0.50,
+    color: (0xc8, 0xc8, 0x75),
 )

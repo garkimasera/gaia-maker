@@ -315,7 +315,6 @@ fn spawn_animal_textures(
     texture_handles: Res<TextureHandles>,
     in_screen_tile_range: Res<InScreenTileRange>,
     planet: Res<Planet>,
-    params: Res<Params>,
     (current_layer, display_opts): (Res<OverlayLayerKind>, Res<DisplayOpts>),
     counter: Res<AnimationCounter>,
     mut tex_entities: Local<Vec<Entity>>,
@@ -361,16 +360,11 @@ fn spawn_animal_textures(
         };
 
         let t = &texture_handles.animals[&animal.id];
-        let monochrome_shift: u8 = if params.animals[&animal.id].civ.is_some() {
-            3
-        } else {
-            2
-        };
         let animated_texture = AnimatedTexture {
             speed: AnimatedTextureSpeed::Slow,
             n_frame: 2,
             start: 0,
-            monochrome_shift,
+            monochrome_shift: 3,
         };
         let index = animated_texture.index(counter.slow, monochrome);
 

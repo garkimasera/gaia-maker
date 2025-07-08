@@ -131,12 +131,7 @@ impl MapPanel {
         cursor_mode: &mut CursorMode,
         params: &Params,
     ) {
-        let default_civ_animal = *params
-            .animals
-            .iter()
-            .find(|(_, attr)| attr.civ.is_some())
-            .unwrap()
-            .0;
+        let default_civ_animal = *params.animals.iter().next().unwrap().0;
         if self.animal_id.is_none() {
             self.animal_id = Some(default_civ_animal);
         }
@@ -169,11 +164,7 @@ impl MapPanel {
             egui::ComboBox::from_id_salt("debug_tool_civ_animals")
                 .selected_text(&*self.animal_id.unwrap())
                 .show_ui(ui, |ui| {
-                    for animal_id in params
-                        .animals
-                        .iter()
-                        .filter_map(|(id, attr)| attr.civ.as_ref().map(|_| id))
-                    {
+                    for animal_id in params.animals.keys() {
                         ui.selectable_value(
                             self.animal_id.as_mut().unwrap(),
                             *animal_id,
