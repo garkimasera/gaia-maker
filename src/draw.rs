@@ -242,7 +242,8 @@ fn spawn_structure_textures(
 
     for p_screen in RectIter::new(in_screen_tile_range.from, in_screen_tile_range.to) {
         let p = coord_rotation_x(planet.map.size(), p_screen);
-        let Some(structure) = &planet.map[p].structure else {
+        let tile = &planet.map[p];
+        let Some(structure) = &tile.structure else {
             continue;
         };
 
@@ -258,7 +259,8 @@ fn spawn_structure_textures(
             } else {
                 None
             };
-            (settlement.age as usize, civ_icon)
+            let aquatic_shift = if tile.biome.is_sea() { 6 } else { 0 };
+            (settlement.age as usize + aquatic_shift, civ_icon)
         } else {
             if !display_opts.structures {
                 continue;

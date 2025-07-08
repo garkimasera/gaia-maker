@@ -334,7 +334,7 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                     }
                 }
             };
-            if planet.map[p_adj].biome == Biome::Ocean {
+            if planet.map[p_adj].biome == Biome::Ocean && planet.map[p].biome.is_land() {
                 let kind = if settlement.age >= CivilizationAge::Atomic {
                     if sim.rng.random_bool(0.4) {
                         VehicleKind::AirPlane
