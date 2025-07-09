@@ -128,6 +128,7 @@ impl Planet {
         self.map[p]
             .animal
             .iter()
+            .rev()
             .filter_map(|animal| animal.map(|animal| animal.id))
             .next()
     }
