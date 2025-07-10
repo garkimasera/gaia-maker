@@ -826,6 +826,8 @@ pub struct SimParams {
     pub energy_high_efficiency: [[f32; EnergySource::LEN]; CivilizationAge::LEN],
     /// Biomass energy efficiency factor by density [kg/m^2] table
     pub biomass_energy_efficiency_density_factor_table: Vec<(f32, f32)>,
+    /// Biomass energy efficiency factor by fertility [kg/m^2] table
+    pub biomass_energy_efficiency_sea_fertility_factor_table: Vec<(f32, f32)>,
     /// High efficiency energy limit by ratio to supply
     pub high_efficiency_limit_by_supply: [f32; EnergySource::LEN],
     /// High efficiency energy limit by ratio to demand

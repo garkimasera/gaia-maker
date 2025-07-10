@@ -223,10 +223,17 @@ pub fn process_settlement_energy(
         }
     }
     consume[EnergySource::Biomass as usize] += remaining;
-    let biomass_eff_factor = linear_interpolation(
-        &params.sim.biomass_energy_efficiency_density_factor_table,
-        planet.map[p].biomass,
-    );
+    let biomass_eff_factor = if planet.map[p].biome.is_land() {
+        linear_interpolation(
+            &params.sim.biomass_energy_efficiency_density_factor_table,
+            planet.map[p].biomass,
+        )
+    } else {
+        linear_interpolation(
+            &params.sim.biomass_energy_efficiency_sea_fertility_factor_table,
+            planet.map[p].fertility,
+        )
+    };
     sum_eff += remaining
         / (params.sim.energy_efficiency[age][EnergySource::Biomass as usize] * biomass_eff_factor);
     sim.energy_eff[p] = demand / sum_eff;
