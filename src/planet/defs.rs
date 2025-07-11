@@ -277,6 +277,8 @@ pub enum AnimalHabitat {
 pub struct Animal {
     pub id: AnimalId,
     pub n: f32,
+    #[serde(default)]
+    pub evo_exp: f32,
 }
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]

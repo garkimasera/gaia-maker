@@ -116,6 +116,7 @@ impl Planet {
         self.map[p].animal[attr.size as usize] = Some(Animal {
             id: animal_id,
             n: 0.1,
+            evo_exp: 0.0,
         });
     }
 

@@ -100,7 +100,10 @@ fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
         return "-".into();
     };
 
-    format!("{}(n={:.3})", animal.id, animal.n)
+    format!(
+        "{}(n={:.3})(evo={:.3})",
+        animal.id, animal.n, animal.evo_exp,
+    )
 }
 
 pub trait PlanetDebug {
