@@ -39,6 +39,10 @@ impl Report {
             ReportContent::WarnLowTemp => (Warn, t!("report/warn-low-temp")),
             ReportContent::WarnLowOxygen => (Warn, t!("report/warn-low-oxygen")),
             ReportContent::WarnLowCarbonDioxide => (Warn, t!("report/warn-low-carbon-dioxide")),
+            ReportContent::EventAnimalBorn { animal, .. } => {
+                let animal = t!("animal", animal);
+                (Notice, t!("report/animal-born"; animal = animal))
+            }
             ReportContent::EventCivilized { animal, .. } => {
                 let animal = t!("animal", animal);
                 (Notice, t!("report/civilized"; animal = animal))

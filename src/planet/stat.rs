@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use super::*;
 
@@ -12,6 +12,8 @@ pub struct Stat {
     pub sum_biomass: f32,
     pub sum_buried_carbon: f32,
     history: VecDeque<Record>,
+    #[serde(default)]
+    pub animals: HashMap<AnimalId, f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -35,6 +37,7 @@ impl Stat {
             average_rainfall: 0.0,
             sum_biomass: 0.0,
             sum_buried_carbon: 0.0,
+            animals: HashMap::default(),
             history: VecDeque::with_capacity(params.history.max_record + 1),
         }
     }

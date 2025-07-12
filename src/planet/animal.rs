@@ -26,6 +26,19 @@ pub fn sim_animal(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             process_each_animal(planet, sim, p, size, params);
         }
     }
+
+    // Count
+    for n in planet.stat.animals.values_mut() {
+        *n = 0.0;
+    }
+
+    for p in planet.map.iter_idx() {
+        for size in AnimalSize::iter() {
+            if let Some(animal) = &planet.map[p].animal[size as usize] {
+                *planet.stat.animals.entry(animal.id).or_default() += animal.n;
+            }
+        }
+    }
 }
 
 fn process_each_animal(
@@ -115,6 +128,17 @@ fn process_each_animal(
                 n: 1.0,
                 evo_exp: 0.0,
             });
+
+            if !planet.stat.animals.contains_key(&evolve_to) {
+                planet.reports.append(
+                    planet.cycles,
+                    ReportContent::EventAnimalBorn {
+                        animal: evolve_to,
+                        pos: p,
+                    },
+                );
+            }
+
             return;
         }
     }
