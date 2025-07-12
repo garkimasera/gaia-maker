@@ -240,6 +240,8 @@ pub struct AnimalAttr {
     pub settlement_effect: f32,
     pub civ_prob: f32,
     pub color: [u8; 3],
+    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
+    pub evolve_from: Option<(AnimalId, f32)>,
 }
 
 fn animal_ratio_attr_default() -> f32 {
@@ -746,6 +748,10 @@ pub struct SimParams {
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
     /// Coefficent to calculate gene point income.
     pub coef_gene_point_income: f32,
+    /// Needed evolution experience to evolve
+    pub needed_evo_exp_to_evolve: f32,
+    /// Base evolution probability
+    pub base_evolution_prob: f32,
     /// Initial population of settlements
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements

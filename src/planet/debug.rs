@@ -101,7 +101,7 @@ fn animals_debug_text_in_tile(animal: &Option<Animal>) -> String {
     };
 
     format!(
-        "{}(n={:.3})(evo={:.3})",
+        "{}(n={:.3})(evo={:.1})",
         animal.id, animal.n, animal.evo_exp,
     )
 }

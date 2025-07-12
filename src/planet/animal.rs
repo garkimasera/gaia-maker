@@ -101,6 +101,24 @@ fn process_each_animal(
         }
     }
 
+    // Evolution
+    let animal = planet.map[p].animal[size as usize].as_mut().unwrap();
+    animal.evo_exp += animal.n;
+    if animal.evo_exp >= params.sim.needed_evo_exp_to_evolve {
+        animal.evo_exp = 0.0;
+        let prob = params.sim.base_evolution_prob;
+        if sim.rng.random_bool(prob.into())
+            && let Some(evolve_to) = sim.animal_evolution_table.evolve_to(&animal.id, &mut sim.rng)
+        {
+            planet.map[p].animal[size as usize] = Some(Animal {
+                id: evolve_to,
+                n: 1.0,
+                evo_exp: 0.0,
+            });
+            return;
+        }
+    }
+
     // Random kill by congestion
     let prob = (params.sim.coef_animal_kill_by_congestion_a
         * (cr - params.sim.coef_animal_kill_by_congestion_b))

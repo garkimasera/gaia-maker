@@ -1,4 +1,5 @@
 use fnv::FnvHashSet;
+use rand::distr::Distribution;
 use rand::rngs::SmallRng;
 
 use super::achivement::Achivement;
@@ -70,6 +71,8 @@ pub struct Sim {
     pub war_target_settlements: HashMap<AnimalId, (f32, Coords)>,
     /// New achievements
     pub new_achievements: FnvHashSet<Achivement>,
+    /// Animal evolution table
+    pub animal_evolution_table: AnimalEvolutionTable,
 }
 
 impl Sim {
@@ -122,6 +125,7 @@ impl Sim {
             war_counter: FnvHashMap::default(),
             war_target_settlements: HashMap::default(),
             new_achievements: FnvHashSet::default(),
+            animal_evolution_table: AnimalEvolutionTable::new(params),
         }
     }
 
@@ -188,4 +192,49 @@ pub struct CivSumValues {
     pub fossil_fuel_supply: f32,
     pub gift_supply: f32,
     pub n_moving: u32,
+}
+
+#[derive(Default)]
+pub struct AnimalEvolutionTable(
+    HashMap<AnimalId, (Vec<AnimalId>, rand::distr::weighted::WeightedIndex<f32>)>,
+);
+
+impl AnimalEvolutionTable {
+    fn new(params: &Params) -> Self {
+        let mut map: HashMap<AnimalId, Vec<(AnimalId, f32)>> = HashMap::default();
+
+        for (id, animal_attr) in &params.animals {
+            if let Some((evolve_from, w)) = &animal_attr.evolve_from {
+                map.entry(*evolve_from).or_default().push((*id, *w));
+            }
+        }
+
+        let map = map
+            .into_iter()
+            .map(|(id, v)| {
+                let weights: Vec<f32> = v.iter().map(|a| a.1).collect();
+                let evolve_to_list: Vec<AnimalId> = v.into_iter().map(|a| a.0).collect();
+
+                (
+                    id,
+                    (
+                        evolve_to_list,
+                        rand::distr::weighted::WeightedIndex::new(weights)
+                            .expect("invalid evolve list"),
+                    ),
+                )
+            })
+            .collect();
+
+        Self(map)
+    }
+
+    pub fn evolve_to<R: Rng>(&self, id: &AnimalId, rng: &mut R) -> Option<AnimalId> {
+        if let Some((list, weights)) = self.0.get(id) {
+            let i = weights.sample(rng);
+            Some(list[i])
+        } else {
+            None
+        }
+    }
 }
