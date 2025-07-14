@@ -199,7 +199,7 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
         return 0.0;
     }
 
-    let cap_biomass_or_fertility = if attr.habitat != AnimalHabitat::Sea {
+    let cap_biomass_or_fertility = if tile.biome.is_land() {
         (tile.biomass / params.sim.animal_cap_max_biomass).clamp(0.0, 1.0)
     } else {
         tile.fertility.min(params.sim.animal_cap_max_fertility)
