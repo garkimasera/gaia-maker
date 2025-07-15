@@ -126,7 +126,7 @@ fn contents(
         ));
         ui.end_row();
 
-        ui.label(t!("civ-suitability"));
+        ui.label(t!("civ-probability"));
         ui.label(format!("{:.0}%", attr.civ_prob * 100.0));
         ui.end_row();
     });
