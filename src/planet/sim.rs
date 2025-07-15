@@ -204,7 +204,7 @@ impl AnimalEvolutionTable {
         let mut map: HashMap<AnimalId, Vec<(AnimalId, f32)>> = HashMap::default();
 
         for (id, animal_attr) in &params.animals {
-            if let Some((evolve_from, w)) = &animal_attr.evolve_from {
+            for (evolve_from, w) in &animal_attr.evolve_from {
                 map.entry(*evolve_from).or_default().push((*id, *w));
             }
         }

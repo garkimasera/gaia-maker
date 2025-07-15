@@ -240,8 +240,8 @@ pub struct AnimalAttr {
     pub settlement_effect: f32,
     pub civ_prob: f32,
     pub color: [u8; 3],
-    #[serde(default, with = "serde_with::rust::unwrap_or_skip")]
-    pub evolve_from: Option<(AnimalId, f32)>,
+    #[serde(default)]
+    pub evolve_from: Vec<(AnimalId, f32)>,
 }
 
 fn animal_ratio_attr_default() -> f32 {
