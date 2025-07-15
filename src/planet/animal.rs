@@ -123,20 +123,33 @@ fn process_each_animal(
         if sim.rng.random_bool(prob.into())
             && let Some(evolve_to) = sim.animal_evolution_table.evolve_to(&animal.id, &mut sim.rng)
         {
-            planet.map[p].animal[size as usize] = Some(Animal {
-                id: evolve_to,
-                n: 1.0,
-                evo_exp: 0.0,
-            });
-
-            if !planet.stat.animals.contains_key(&evolve_to) {
-                planet.reports.append(
-                    planet.cycles,
-                    ReportContent::EventAnimalBorn {
-                        animal: evolve_to,
-                        pos: p,
-                    },
-                );
+            for &d in [Coords(0, 0)]
+                .iter()
+                .chain(geom::CHEBYSHEV_DISTANCE_1_COORDS)
+                .chain(geom::CHEBYSHEV_DISTANCE_2_COORDS)
+            {
+                let Some(p_adj) = sim.convert_p_cyclic(p + d) else {
+                    continue;
+                };
+                let target_attr = &params.animals[&evolve_to];
+                let cap = calc_cap(planet, p_adj, target_attr, params);
+                if cap > 0.0 {
+                    planet.map[p_adj].animal[target_attr.size as usize] = Some(Animal {
+                        id: evolve_to,
+                        n: 1.0,
+                        evo_exp: 0.0,
+                    });
+                    if !planet.stat.animals.contains_key(&evolve_to) {
+                        planet.reports.append(
+                            planet.cycles,
+                            ReportContent::EventAnimalBorn {
+                                animal: evolve_to,
+                                pos: p,
+                            },
+                        );
+                    }
+                    break;
+                }
             }
 
             return;
