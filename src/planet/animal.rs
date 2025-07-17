@@ -119,8 +119,10 @@ fn process_each_animal(
     animal.evo_exp += animal.n;
     if animal.evo_exp >= params.sim.needed_evo_exp_to_evolve {
         animal.evo_exp = 0.0;
-        let prob = params.sim.base_evolution_prob;
-        if sim.rng.random_bool(prob.into())
+        let evolve_prob = params.sim.base_evolution_prob;
+        let civ_prob =
+            params.sim.base_civ_prob * attr.civ_prob / ((planet.civs.len() as f32 + 1.0).powf(2.5));
+        if sim.rng.random_bool(evolve_prob.into())
             && let Some(evolve_to) = sim.animal_evolution_table.evolve_to(&animal.id, &mut sim.rng)
         {
             for &d in [Coords(0, 0)]
@@ -153,6 +155,11 @@ fn process_each_animal(
             }
 
             return;
+        } else if sim.rng.random_bool(civ_prob.into()) {
+            // Civilize
+            if sim.domain[p].is_none() {
+                super::civ::civilize_animal(planet, params, p, animal_id, false);
+            }
         }
     }
 

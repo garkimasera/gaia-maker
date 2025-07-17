@@ -4,6 +4,7 @@ warn-low-carbon-dioxide = "大気中に十分な二酸化炭素がありませ�
 warn-low-oxygen = "大気中に十分な酸素がありません。酸素発生機や炭素還元機を設置しましょう。"
 warn-low-temp = "気温が低すぎます。気温を上げるには、軌道上建造物である軌道ミラーを稼働させ、地表に届く太陽光を増やすことが効果的です。"
 animal-born = "{$animal}が誕生しました"
+achive-civilization = "{$animal}が文明を獲得しました"
 civilized = "{$animal}の文明化が完了しました"
 civ-advance = "{$civ} が {$age}時代 に進歩しました"
 civ-extinct = "{$civ} が滅亡しました"

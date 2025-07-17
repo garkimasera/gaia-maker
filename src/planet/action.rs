@@ -122,7 +122,7 @@ impl Planet {
 
     pub fn civilize_animal(&mut self, p: Coords, animal_id: AnimalId, params: &Params) {
         self.res.consume(Cost::GenePoint(params.event.civilize_cost));
-        super::civ::civilize_animal(self, params, p, animal_id);
+        super::civ::civilize_animal(self, params, p, animal_id, true);
     }
 
     pub fn get_civilizable_animal(&mut self, p: Coords, _params: &Params) -> Option<AnimalId> {

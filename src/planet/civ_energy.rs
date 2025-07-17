@@ -153,7 +153,7 @@ pub fn process_settlement_energy(
 
     // Calculate fossil fuel & gift energy supply
     let sum_values = sim.civ_sum.get_mut(animal_id);
-    let a = settlement.pop / sum_values.total_pop_prev as f32;
+    let a = settlement.pop / sum_values.total_pop_prev.max(1.0) as f32;
     supply[EnergySource::FossilFuel as usize] = sum_values.fossil_fuel_supply * a;
     supply[EnergySource::Gift as usize] = sum_values.gift_supply * a;
 
@@ -183,7 +183,7 @@ pub fn process_settlement_energy(
     let mut high_eff_wind_solar = 0.0;
     for src in src_without_biomass {
         let src = src as usize;
-        debug_assert!(supply[src] >= 0.0);
+        debug_assert!(supply[src] >= 0.0, "{}", src);
         let eff = params.sim.energy_efficiency[age][src];
         let high_eff = params.sim.energy_high_efficiency[age][src];
         if high_eff > 0.0 {

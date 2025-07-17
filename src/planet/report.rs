@@ -102,6 +102,10 @@ pub enum ReportContent {
         pos: Coords,
         animal: AnimalId,
     },
+    EventAchiveCivilization {
+        pos: Coords,
+        animal: AnimalId,
+    },
     EventCivilized {
         pos: Coords,
         animal: AnimalId,
@@ -150,6 +154,7 @@ impl ReportContent {
     pub fn pos(&self) -> Option<Coords> {
         match self {
             Self::EventAnimalBorn { pos, .. }
+            | Self::EventAchiveCivilization { pos, .. }
             | Self::EventCivilized { pos, .. }
             | Self::EventCivAdvance { pos, .. }
             | Self::EventCivDecadence { pos, .. } => Some(*pos),

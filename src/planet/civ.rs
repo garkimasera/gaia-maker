@@ -369,14 +369,30 @@ fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 }
 
-pub fn civilize_animal(planet: &mut Planet, params: &Params, pos: Coords, animal_id: AnimalId) {
-    planet.reports.append(
-        planet.cycles,
-        ReportContent::EventCivilized {
-            animal: animal_id,
-            pos,
-        },
-    );
+pub fn civilize_animal(
+    planet: &mut Planet,
+    params: &Params,
+    pos: Coords,
+    animal_id: AnimalId,
+    manual: bool,
+) {
+    if manual {
+        planet.reports.append(
+            planet.cycles,
+            ReportContent::EventCivilized {
+                animal: animal_id,
+                pos,
+            },
+        )
+    } else {
+        planet.reports.append(
+            planet.cycles,
+            ReportContent::EventAchiveCivilization {
+                animal: animal_id,
+                pos,
+            },
+        )
+    }
     planet.civs.insert(animal_id, Civilization::default());
     let settlement = Settlement {
         id: animal_id,

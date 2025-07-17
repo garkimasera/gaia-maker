@@ -212,6 +212,7 @@
         base_pop_growth_speed: 0.001,
         needed_evo_exp_to_evolve: 100.0,
         base_evolution_prob: 0.01,
+        base_civ_prob: 0.001,
         settlement_init_pop: (1.0, 5.0, 10.0, 30.0, 40.0, 40.0),
         settlement_max_pop: (16.0, 120.0, 400.0, 3200.0, 4000.0, 5200.0),
         pop_factor_by_settlement_state: (1.0, 1.0, 0.94, 0.20),

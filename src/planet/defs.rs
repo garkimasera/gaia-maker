@@ -752,6 +752,8 @@ pub struct SimParams {
     pub needed_evo_exp_to_evolve: f32,
     /// Base evolution probability
     pub base_evolution_prob: f32,
+    /// Base civilization probability
+    pub base_civ_prob: f32,
     /// Initial population of settlements
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements

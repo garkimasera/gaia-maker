@@ -43,6 +43,10 @@ impl Report {
                 let animal = t!("animal", animal);
                 (Notice, t!("report/animal-born"; animal = animal))
             }
+            ReportContent::EventAchiveCivilization { animal, .. } => {
+                let animal = t!("animal", animal);
+                (Notice, t!("report/achive-civilization"; animal = animal))
+            }
             ReportContent::EventCivilized { animal, .. } => {
                 let animal = t!("animal", animal);
                 (Notice, t!("report/civilized"; animal = animal))
