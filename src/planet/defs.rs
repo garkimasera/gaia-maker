@@ -754,6 +754,12 @@ pub struct SimParams {
     pub base_evolution_prob: f32,
     /// Base civilization probability
     pub base_civ_prob: f32,
+    /// Civilization probability factor by animal size
+    pub civ_prob_factor_by_size: [f32; AnimalSize::LEN],
+    /// Civilization probability factor by existing civilizations
+    pub civ_prob_factor_by_existing_civs: [f32; CivilizationAge::LEN],
+    /// Civilization probability factor by aquatic animal
+    pub civ_prob_aquatic: f32,
     /// Initial population of settlements
     pub settlement_init_pop: [f32; CivilizationAge::LEN],
     /// Max population of settlements

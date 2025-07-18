@@ -120,8 +120,6 @@ fn process_each_animal(
     if animal.evo_exp >= params.sim.needed_evo_exp_to_evolve {
         animal.evo_exp = 0.0;
         let evolve_prob = params.sim.base_evolution_prob;
-        let civ_prob =
-            params.sim.base_civ_prob * attr.civ_prob / ((planet.civs.len() as f32 + 1.0).powf(2.5));
         if sim.rng.random_bool(evolve_prob.into())
             && let Some(evolve_to) = sim.animal_evolution_table.evolve_to(&animal.id, &mut sim.rng)
         {
@@ -155,7 +153,7 @@ fn process_each_animal(
             }
 
             return;
-        } else if sim.rng.random_bool(civ_prob.into()) {
+        } else if sim.rng.random_bool(calc_civ_prob(planet, attr, params).into()) {
             // Civilize
             if sim.domain[p].is_none() {
                 super::civ::civilize_animal(planet, params, p, animal_id, false);
@@ -235,6 +233,26 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
     cap_biomass_or_fertility
         * calc_cap_by_atmo_temp(planet, p, attr, params, 0.0)
         * settlement_effect
+}
+
+fn calc_civ_prob(planet: &Planet, attr: &AnimalAttr, params: &Params) -> f32 {
+    let mut existing_civ_factor = 1.0;
+    for civ in planet.civs.values() {
+        existing_civ_factor *=
+            params.sim.civ_prob_factor_by_existing_civs[civ.current_age() as usize]
+    }
+
+    let biome_factor = if attr.habitat.match_biome(Biome::Ocean) {
+        params.sim.civ_prob_aquatic
+    } else {
+        1.0
+    };
+
+    params.sim.base_civ_prob
+        * attr.civ_prob
+        * biome_factor
+        * params.sim.civ_prob_factor_by_size[attr.size as usize]
+        * existing_civ_factor
 }
 
 impl AnimalHabitat {
