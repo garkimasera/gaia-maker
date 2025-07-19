@@ -5,6 +5,8 @@
 
 Planet and terraforming simulation game written in Rust
 
+[Available on Steam](https://store.steampowered.com/app/3662040/Gaia_Maker/)
+
 ## Features
 
 * Simulation of the entire planet based on real physics and geology.
