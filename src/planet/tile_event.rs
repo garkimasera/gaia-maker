@@ -205,14 +205,15 @@ fn advance_vehicle(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if planet.map[p].structure.is_some() {
             continue;
         }
-        if kind == VehicleKind::Ship && planet.map[p].biome != Biome::Ocean {
-            continue;
-        }
 
         let animal_attr = &params.animals[&id];
         let civ_sum_values = sim.civ_sum.get_mut(id);
 
         if !animal_attr.habitat.match_biome(planet.map[p].biome) {
+            if kind == VehicleKind::Ship && planet.map[p].biome != Biome::Ocean {
+                continue;
+            }
+
             moved_vehicles.push((
                 p,
                 TileEvent::Vehicle {
