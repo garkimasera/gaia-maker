@@ -43,6 +43,10 @@ pub struct State {
     /// Biomass increase speed
     #[serde(default = "control_value_default")]
     pub forestation_speed: i16,
+    #[serde(default = "control_value_default")]
+    pub animal_evolution: i16,
+    #[serde(default = "control_value_default")]
+    pub civ_prob: i16,
 }
 
 impl Default for State {
@@ -51,6 +55,8 @@ impl Default for State {
             solar_power_multiplier: 1.0,
             solar_power: 0.0,
             forestation_speed: control_value_default(),
+            animal_evolution: control_value_default(),
+            civ_prob: control_value_default(),
         }
     }
 }

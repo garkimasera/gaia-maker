@@ -143,6 +143,32 @@ fn planet_control(
             ui.label(t!("msg/control-need-fertilization-plant"));
         });
     }
+
+    // Animal Evolution
+    ui.horizontal(|ui| {
+        ui.heading(t!("animal-evolution"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/animal-evolution"));
+    });
+    if ui
+        .add(egui::Slider::new(&mut planet.state.animal_evolution, 0..=200).suffix("%"))
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
+
+    // Civilization Probability
+    ui.horizontal(|ui| {
+        ui.heading(t!("civ-probability"));
+        ui.image(textures.get("ui/icon-help"))
+            .on_hover_text(t!("help/control/civ-probability"));
+    });
+    if ui
+        .add(egui::Slider::new(&mut planet.state.civ_prob, 0..=200).suffix("%"))
+        .changed()
+    {
+        se_player.play_if_stopped("slider");
+    }
 }
 
 fn civ_control(

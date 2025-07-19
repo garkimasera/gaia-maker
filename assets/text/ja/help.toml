@@ -78,6 +78,8 @@ gift = "管理者がもつエネルギーを、地上の原始文明が利用で
 [help.control]
 orbital-mirror = "軌道ミラーは、恒星の光を反射し惑星表面に到達する光エネルギーを増減させます。"
 forestation-speed = "植林速度を変更すると、タイルのバイオマスの増加速度も変化します。"
+animal-evolution = "動物の進化の頻度を調節します"
+civ-probability = "動物たちが文明を獲得する確率を調整します"
 population-growth = "文明の人口増加速度を調節します"
 technology-development = "文明の技術開発速度を調節します。"
 aggressiveness = "この文明が問題解決の手段としてどれだけ戦争を好むのかを調整します。内戦、種族間戦争、核戦争の頻度が変わります。"

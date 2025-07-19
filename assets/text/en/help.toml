@@ -78,6 +78,8 @@ gift = "Gift energy is energy that the overseer makes available to primitive civ
 [help.control]
 orbital-mirror = "Orbital Mirror reflects the stellar light and increases or decreases the amount of light energy that reaches the surface of the planet."
 forestation-speed = "Adjust forestation speed and change the rate at which biomass increases on tiles."
+animal-evolution = "Adjust the frequency of animal evolution."
+civ-probability = "Adjust the probability of animals acquiring civilization."
 population-growth = "Adjust the population growth rate of the civilization."
 technology-development = "Adjust the speed of technological development in the civilization."
 aggressiveness = "Adjust how much the civilization prefers war as a means of solving problems. The frequency of civil wars, interspecies wars, and nuclear wars will change."

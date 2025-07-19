@@ -119,7 +119,8 @@ fn process_each_animal(
     animal.evo_exp += animal.n;
     if animal.evo_exp >= params.sim.needed_evo_exp_to_evolve {
         animal.evo_exp = 0.0;
-        let evolve_prob = params.sim.base_evolution_prob;
+        let evolve_prob =
+            params.sim.base_evolution_prob * (planet.state.animal_evolution as f32 / 100.0);
         if sim.rng.random_bool(evolve_prob.into())
             && let Some(evolve_to) = sim.animal_evolution_table.evolve_to(&animal.id, &mut sim.rng)
         {
@@ -249,6 +250,7 @@ fn calc_civ_prob(planet: &Planet, attr: &AnimalAttr, params: &Params) -> f32 {
     };
 
     params.sim.base_civ_prob
+        * (planet.state.civ_prob as f32 / 100.0)
         * attr.civ_prob
         * biome_factor
         * params.sim.civ_prob_factor_by_size[attr.size as usize]
