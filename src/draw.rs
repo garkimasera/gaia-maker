@@ -370,6 +370,8 @@ fn spawn_animal_textures(
         };
         let index = animated_texture.index(counter.slow, monochrome);
 
+        let alpha = if tile.biome == Biome::Ocean { 0.7 } else { 1.0 };
+
         let x = (p_screen.0 as f32 + 0.5) * TILE_SIZE;
         let y = (p_screen.1 as f32 + 0.5) * TILE_SIZE;
         let id = commands
@@ -380,6 +382,7 @@ fn spawn_animal_textures(
                         index,
                         layout: t.layout.clone(),
                     }),
+                    color: Color::srgba(1.0, 1.0, 1.0, alpha),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 400.0),
