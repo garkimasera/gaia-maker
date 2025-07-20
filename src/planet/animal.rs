@@ -84,7 +84,7 @@ fn process_each_animal(
                     .habitat
                     .compete_at_biome(&other_attr.habitat, planet.map[p].biome)
                 {
-                    0.8
+                    params.sim.animal_congestion_weight_by_other_animals
                 } else {
                     0.0
                 }
@@ -98,13 +98,11 @@ fn process_each_animal(
     if sim.rng.random_bool(prob.into()) {
         let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
         for d in Direction::EIGHT_DIRS {
-            if let Some(p_next) = sim.convert_p_cyclic(p + d.as_coords()) {
-                if planet.map[p_next].animal[size as usize].is_none()
-                    && calc_cap(planet, p_next, attr, params)
-                        > params.sim.animal_extinction_threshold
-                {
-                    target_tiles.push(p_next);
-                }
+            if let Some(p_next) = sim.convert_p_cyclic(p + d.as_coords())
+                && can_fisson_to(planet, p_next, attr, params, sim)
+                && calc_cap(planet, p_next, attr, params) > params.sim.animal_extinction_threshold
+            {
+                target_tiles.push(p_next);
             }
         }
         if let Some(p_target) = target_tiles.choose(&mut sim.rng) {
@@ -255,6 +253,24 @@ fn calc_civ_prob(planet: &Planet, attr: &AnimalAttr, params: &Params) -> f32 {
         * biome_factor
         * params.sim.civ_prob_factor_by_size[attr.size as usize]
         * existing_civ_factor
+}
+
+fn can_fisson_to(
+    planet: &Planet,
+    p: Coords,
+    attr: &AnimalAttr,
+    params: &Params,
+    sim: &mut Sim,
+) -> bool {
+    let Some(other_animal) = &planet.map[p].animal[attr.size as usize] else {
+        return true;
+    };
+
+    if attr.evolve_from.iter().any(|(id, _)| *id == other_animal.id) {
+        sim.rng.random_bool(params.sim.animal_fission_overwrite_prob)
+    } else {
+        false
+    }
 }
 
 impl AnimalHabitat {

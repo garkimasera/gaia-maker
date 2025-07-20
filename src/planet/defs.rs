@@ -742,6 +742,8 @@ pub struct SimParams {
     pub animal_cap_max_fertility: f32,
     /// Probability of animal moving
     pub animal_move_weight: f64,
+    /// Weight to calculate animal congestion rate by other animals
+    pub animal_congestion_weight_by_other_animals: f32,
     /// Coefficent to calculate animal fission probability
     pub coef_animal_fisson_a: f32,
     /// Coefficent to calculate animal fission probability
@@ -750,6 +752,8 @@ pub struct SimParams {
     pub coef_animal_kill_by_congestion_a: f32,
     /// Coefficent to calculate animal random kill probability by congestion rate
     pub coef_animal_kill_by_congestion_b: f32,
+    /// Probability to overwrite other animals if the animal evolved from them
+    pub animal_fission_overwrite_prob: f64,
     /// Animal livable oxygen range by size
     pub livable_oxygen_range: [(f32, f32); AnimalSize::LEN],
     /// Coefficent to calculate gene point income.
