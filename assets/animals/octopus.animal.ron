@@ -7,4 +7,5 @@
     settlement_effect: 0.6,
     civ_prob: 0.20,
     color: (0x93, 0x1f, 0x13),
+    evolve_from: [("crab", 1.0)],
 )

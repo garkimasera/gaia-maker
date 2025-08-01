@@ -6,4 +6,5 @@
     settlement_effect: 0.5,
     civ_prob: 0.90,
     color: (0xff, 0xd4, 0x58),
+    evolve_from: [("rat", 1.0)],
 )

@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 20,
+    habitat: biomes(["ocean", "tropical-rainforest"]),
+    temp: (20, 34),
+    settlement_effect: 0.4,
+    civ_prob: 0.10,
+    color: (0x2a, 0x5f, 0x2a),
+    evolve_from: [("dunkleosteus", 1.0)],
+)

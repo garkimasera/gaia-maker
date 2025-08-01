@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 40,
+    habitat: sea,
+    temp: (18, 32),
+    settlement_effect: 0.8,
+    civ_prob: 0.05,
+    color: (0x6b, 0x50, 0x2a),
+    evolve_from: [("starfish", 1.5)],
+)

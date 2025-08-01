@@ -2,10 +2,10 @@
     size: small,
     cost: 2,
     habitat: sea,
-    growth_speed: 120,
+    growth_speed: 150,
     temp: (5, 35),
     settlement_effect: 0.8,
     civ_prob: 0.05,
-    color: (0x69, 0xb8, 0xc2),
-    evolve_from: [("starfish", 1.0)],
+    color: (0xbe, 0x48, 0x30),
+    evolve_from: [("jellyfish", 0.2), ("octopus", 0.2)],
 )

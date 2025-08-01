@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 20,
+    habitat: land,
+    temp: (4, 38),
+    settlement_effect: 1.0,
+    civ_prob: 0.40,
+    color: (0x55, 0x55, 0x59),
+    evolve_from: [("lizard", 1.5)],
+)

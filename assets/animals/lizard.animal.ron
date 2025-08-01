@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 20,
+    habitat: land,
+    temp: (20, 35),
+    settlement_effect: 0.5,
+    civ_prob: 0.20,
+    color: (0x6c, 0x88, 0x00),
+    evolve_from: [("ichthyostega", 1.0)],
+)

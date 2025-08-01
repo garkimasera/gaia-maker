@@ -6,4 +6,5 @@
     settlement_effect: 0.1,
     civ_prob: 0.80,
     color: (0x99, 0x8c, 0x49),
+    evolve_from: [("lizard", 1.0)],
 )

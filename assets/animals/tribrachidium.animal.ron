@@ -4,6 +4,7 @@
     habitat: sea,
     temp: (15, 32),
     settlement_effect: 0.8,
-    civ_prob: 0.50,
+    civ_prob: 0.25,
     color: (0xc8, 0xc8, 0x75),
+    evolve_from: [("starfish", 1.0)],
 )

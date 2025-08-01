@@ -4,6 +4,7 @@
     habitat: land,
     temp: (8, 28),
     settlement_effect: 1.2,
-    civ_prob: 0.8,
+    civ_prob: 0.80,
     color: (0x3f, 0x3f, 0x3f),
+    evolve_from: [("stenonychosaurus", 1.0)],
 )
