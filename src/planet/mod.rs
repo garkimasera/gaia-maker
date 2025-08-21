@@ -9,6 +9,7 @@ mod civ_energy;
 mod decadence;
 mod defs;
 mod event;
+mod exodus;
 mod heat_transfer;
 mod initial_conditions;
 mod map_generator;

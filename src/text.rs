@@ -70,6 +70,10 @@ impl Report {
                 t!("report/inter-species-war-ceased"; civ_a = name_a, civ_b = name_b),
             ),
             ReportContent::EventNuclearWar { .. } => (Notice, t!("report/nuclear-war")),
+            ReportContent::EventExodus { name, .. } => (Notice, t!("report/exodus"; civ = name)),
+            ReportContent::EventExodusCompleted { name, .. } => {
+                (Notice, t!("report/exodus-completed"; civ = name))
+            }
         }
     }
 }

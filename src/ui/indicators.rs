@@ -375,6 +375,9 @@ pub fn tile_info_indicators(
             TileEvent::Troop { id, .. } => {
                 ui.label(format!("{} ({})", t!("troop"), planet.civ_name(*id)));
             }
+            TileEvent::Exodus { .. } => {
+                ui.label(t!("exodus"));
+            }
         }
     }
 }

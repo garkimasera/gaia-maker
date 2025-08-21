@@ -138,6 +138,14 @@ pub enum ReportContent {
         name_a: String,
         name_b: String,
     },
+    EventExodus {
+        id: AnimalId,
+        name: String,
+    },
+    EventExodusCompleted {
+        id: AnimalId,
+        name: String,
+    },
 }
 
 impl ReportContent {

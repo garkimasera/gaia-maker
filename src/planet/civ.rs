@@ -5,7 +5,7 @@ use geom::Coords;
 use num_traits::FromPrimitive;
 use rand::{Rng, distr::Distribution, seq::IndexedRandom};
 
-use super::{Planet, ReportContent, Sim, TileEvents, defs::*};
+use super::*;
 
 pub type Civs = fnv::FnvHashMap<AnimalId, Civilization>;
 
@@ -13,6 +13,8 @@ const SETTLEMENT_STATE_UPDATE_INTERVAL_CYCLES: u16 = 8;
 const SETTLEMENT_RANDOM_EVENT_INTERVAL_CYCLES: u64 = 10;
 
 pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let exodus_civ_id = planet.events.in_exodus_civ();
+
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(mut settlement)) = planet.map[p].structure else {
             continue;
@@ -29,6 +31,14 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
         // Energy
         super::civ_energy::process_settlement_energy(planet, sim, p, &mut settlement, params, cr);
+
+        // Skip by exodus
+        if exodus_civ_id.is_some_and(|exodus_civ_id| animal_id == exodus_civ_id) {
+            let civ_sum_values = sim.civ_sum.get_mut(animal_id);
+            civ_sum_values.total_settlement[settlement.age as usize] += 1;
+            civ_sum_values.total_pop += settlement.pop as f64;
+            continue;
+        }
 
         // Settlement state update
         settlement.since_state_changed = settlement.since_state_changed.saturating_add(1);
@@ -104,6 +114,12 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     super::civ_energy::consume_buried_carbon(planet, sim, params);
 
     for (id, sum_values) in sim.civ_sum.iter() {
+        if let Some(exodus_civ_id) = exodus_civ_id
+            && exodus_civ_id == id
+        {
+            continue;
+        }
+
         if sum_values.total_settlement.iter().copied().sum::<u32>() == 0 && sum_values.n_moving == 0
         {
             let name = planet.civ_name(id);
@@ -123,8 +139,10 @@ pub fn sim_civs(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     }
 
     // Cause settlement random events
-    super::war::sim_settlement_str(planet, sim, params);
-    cause_random_events(planet, sim, params);
+    if exodus_civ_id.is_none() {
+        super::war::sim_settlement_str(planet, sim, params);
+        cause_random_events(planet, sim, params);
+    }
 }
 
 fn update_state(
@@ -307,10 +325,28 @@ fn cause_random_events(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 }
 
 fn spawn_vehicles(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    let exodus_civ_id = planet.events.in_progress_iter().find_map(|e| {
+        if let EventInProgress {
+            event: PlanetEvent::Exodus(ExodusEvent { id }),
+            ..
+        } = e
+        {
+            Some(*id)
+        } else {
+            None
+        }
+    });
+
     for p in planet.map.iter_idx() {
         let Some(Structure::Settlement(settlement)) = planet.map[p].structure else {
             continue;
         };
+
+        if let Some(exodus_civ_id) = exodus_civ_id
+            && settlement.id == exodus_civ_id
+        {
+            continue;
+        }
 
         for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
             let Some(p_adj) = sim.convert_p_cyclic(p + *d) else {

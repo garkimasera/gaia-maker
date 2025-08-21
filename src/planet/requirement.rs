@@ -20,8 +20,6 @@ pub enum Requirement {
         value: f32,
     },
     AnimalTiles {
-        id: AnimalId,
-        size: AnimalSize,
         n: u32,
     },
     Settlements {
@@ -61,17 +59,11 @@ impl Requirement {
             Self::PartialPressureHigherThan { kind, value } => {
                 planet.atmo.partial_pressure(*kind) >= *value
             }
-            Self::AnimalTiles { id, size, n } => {
+            Self::AnimalTiles { n } => {
                 planet
                     .map
                     .iter()
-                    .filter(|tile| {
-                        if let Some(animal) = tile.animal[*size as usize] {
-                            &animal.id == id
-                        } else {
-                            false
-                        }
-                    })
+                    .filter(|tile| tile.animal.iter().any(|animal| animal.is_some()))
                     .count()
                     >= *n as usize
             }

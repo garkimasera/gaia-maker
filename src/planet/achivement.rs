@@ -21,6 +21,7 @@ pub enum Achivement {
     Pandemic,
     StepTowardEcumenopolis,
     MagicalEnergy,
+    Exodus,
     AbundantPower = 301,
     LowCarbonDioxide,
     DestroyPlanet,

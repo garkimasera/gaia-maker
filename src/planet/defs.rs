@@ -215,6 +215,9 @@ pub enum TileEvent {
         dest: Coords,
         str: f32,
     },
+    Exodus {
+        remaining_cycles: u32,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
@@ -522,6 +525,7 @@ pub enum PlanetEvent {
     Plague(PlagueEvent),
     Decadence(DecadenceEvent),
     War(WarEvent),
+    Exodus(ExodusEvent),
 }
 
 impl PlanetEvent {
@@ -558,6 +562,11 @@ pub enum WarKind {
     InterCity,
     InterSpecies(AnimalId, AnimalId),
     NuclearWar,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ExodusEvent {
+    pub id: AnimalId,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -946,6 +955,16 @@ pub struct EventParams {
     pub nuclear_war_interval_cycles: u64,
     /// Nuclear war city bombing probability
     pub nuclear_war_bomb_prob: f64,
+    /// Base probability to start exodus
+    pub base_exodus_prob: f32,
+    /// Tech level threshold to start exodus
+    pub exodus_tech_level_threshold: f32,
+    /// Population threshold to start exodus
+    pub exodus_pop_threshold: f32,
+    /// Settlement exodus probability
+    pub settlement_exodus_prob: f32,
+    /// Settlement exodus cycles
+    pub settlement_exodus_cycles: u32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

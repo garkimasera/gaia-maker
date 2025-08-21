@@ -359,6 +359,11 @@
         nuclear_war_duration_cycles: 16,
         nuclear_war_interval_cycles: 10000,
         nuclear_war_bomb_prob: 0.01,
+        base_exodus_prob: 4e-1,
+        exodus_tech_level_threshold: 3500,
+        exodus_pop_threshold: 3000000,
+        settlement_exodus_prob: 0.02,
+        settlement_exodus_cycles: 300,
     ),
     custom_planet: (
         solar_constant: (min: 500, max: 2000, default: 1400),

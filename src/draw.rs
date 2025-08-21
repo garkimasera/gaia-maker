@@ -254,6 +254,9 @@ fn spawn_structure_textures(
             if !display_opts.cities {
                 continue;
             }
+            if tile.tile_events.contains(TileEventKind::Exodus) {
+                continue;
+            }
             let civ_icon = if display_opts.city_icons {
                 Some(settlement.id)
             } else {
@@ -579,6 +582,7 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
         TileEvent::War { .. } => 32,
         TileEvent::NuclearExplosion { .. } => 90,
         TileEvent::Troop { .. } => 41,
+        TileEvent::Exodus { .. } => 90,
     }
 }
 

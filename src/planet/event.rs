@@ -48,6 +48,20 @@ impl Events {
         }
         None
     }
+
+    pub fn in_exodus_civ(&self) -> Option<AnimalId> {
+        self.in_progress_iter().find_map(|e| {
+            if let EventInProgress {
+                event: PlanetEvent::Exodus(ExodusEvent { id }),
+                ..
+            } = e
+            {
+                Some(*id)
+            } else {
+                None
+            }
+        })
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -60,6 +74,7 @@ pub struct EventInProgress {
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
     let mut completed_events = Vec::new();
     let mut plague_ended = false;
+    let mut exodus_ended = false;
 
     let mut event_kind_list: Vec<_> = planet
         .events
@@ -80,11 +95,23 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             PlanetEventKind::War => {
                 super::war::sim_war(planet, sim, params);
             }
+            PlanetEventKind::Exodus => {
+                exodus_ended = super::exodus::sim_exodus(planet, sim, params);
+            }
         }
     }
 
     for ein in &mut planet.events.in_progress {
         ein.progress += 1;
+    }
+
+    if exodus_ended && let Some(id) = planet.events.in_exodus_civ() {
+        let name = planet.civ_name(id);
+        planet.reports.append(
+            planet.cycles,
+            ReportContent::EventExodusCompleted { id, name },
+        );
+        planet.civs.remove(&id);
     }
 
     planet.events.in_progress.retain(|ein| {
@@ -107,6 +134,13 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             }
         }
 
+        // Check exodus event is ended
+        if exodus_ended && ein.event.kind() == PlanetEventKind::Exodus {
+            return false;
+        }
+
         true
     });
+
+    super::exodus::cause_exodus(planet, sim, params);
 }

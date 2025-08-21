@@ -32,6 +32,8 @@ fire = "It will cause a fire in the specified tile. It will burn the biomass on 
 plague = "The plague will spread to the city you have selected. The plague will also infect other cities over time, reducing the population of civilization."
 vehicle = "Advanced civilizations use ships and airplanes for travel."
 decadence = "Civilizations that have achieved a certain level of prosperity may become decadent. In a decadent civilization, people neglect maintaining the foundations of prosperity - science, technology, culture, and infrastructure - or actively damage these foundations. The population and level of technology in the civilization decline."
+exodus = "Civilizations with the technology to venture into outer space may leave the planet where they were born and raised."
+nuclear-explosion = "Nuclear explosion caused by civilizations."
 war = "Cities can become involved in wars. The population of cities during wars decreases."
 troop = "Troops advance on their target cities. The cities that are attacked enter a state of war."
 
