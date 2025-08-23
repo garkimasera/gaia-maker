@@ -1,3 +1,5 @@
+use std::sync::atomic::AtomicBool;
+
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumDiscriminants};
@@ -5,6 +7,8 @@ use strum::{AsRefStr, Display, EnumDiscriminants};
 use crate::{manage_planet::SaveState, planet::*};
 
 pub const TUTORIAL_PLANET: &str = "tutorial";
+
+pub static CIVILIZEABLE: AtomicBool = AtomicBool::new(true);
 
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize, Resource)]
 pub struct TutorialState {
@@ -57,6 +61,7 @@ impl Default for TutorialState {
 }
 
 pub fn update_tutorial(mut save_state: ResMut<SaveState>, planet: Res<Planet>) {
+    CIVILIZEABLE.store(true, std::sync::atomic::Ordering::Relaxed);
     let Some(tutorial_state) = &mut save_state.save_file_metadata.tutorial_state else {
         return;
     };
@@ -64,6 +69,19 @@ pub fn update_tutorial(mut save_state: ResMut<SaveState>, planet: Res<Planet>) {
     if tutorial_state.current == TutorialStep::Complete(true) {
         save_state.save_file_metadata.tutorial_state = None;
         return;
+    }
+
+    if matches!(
+        tutorial_state.current,
+        TutorialStep::Start(_)
+            | TutorialStep::Power(_)
+            | TutorialStep::Fertilize(_)
+            | TutorialStep::BuildOxygen(_)
+            | TutorialStep::WaitOxygen(_)
+            | TutorialStep::Carbon(_)
+            | TutorialStep::Animal(_)
+    ) {
+        CIVILIZEABLE.store(false, std::sync::atomic::Ordering::Relaxed);
     }
 
     for (item, checked) in &mut tutorial_state.checklist {
@@ -216,11 +234,7 @@ fn check(planet: &Planet, item: ChecklistItem) -> bool {
             kind: StructureKind::CarbonCapturer,
             n: 2,
         },
-        ChecklistItem::AnimalChecklist1 => Requirement::AnimalTiles {
-            id: AnimalId::from("fox").unwrap(),
-            size: AnimalSize::Medium,
-            n: 30,
-        },
+        ChecklistItem::AnimalChecklist1 => Requirement::AnimalTiles { n: 30 },
         ChecklistItem::CivilizeChecklist1 => Requirement::Settlements {
             n: 1,
             animal_id: None,

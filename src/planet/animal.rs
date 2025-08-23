@@ -235,6 +235,10 @@ fn calc_cap(planet: &Planet, p: Coords, attr: &AnimalAttr, params: &Params) -> f
 }
 
 fn calc_civ_prob(planet: &Planet, attr: &AnimalAttr, params: &Params) -> f32 {
+    if !crate::tutorial::CIVILIZEABLE.load(std::sync::atomic::Ordering::Relaxed) {
+        return 0.0;
+    }
+
     let mut existing_civ_factor = 1.0;
     for civ in planet.civs.values() {
         existing_civ_factor *=
