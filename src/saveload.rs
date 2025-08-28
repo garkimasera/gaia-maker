@@ -265,14 +265,12 @@ pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
 
     for (_, s) in &save_state.dirs {
         dup |= *s == name;
-        if let Some(s) = s.strip_prefix(&prefix) {
-            if let Some(s) = s.strip_suffix(")") {
-                if let Ok(i) = s.parse::<u32>() {
-                    if i > max {
-                        max = i;
-                    }
-                }
-            }
+        if let Some(s) = s.strip_prefix(&prefix)
+            && let Some(s) = s.strip_suffix(")")
+            && let Ok(i) = s.parse::<u32>()
+            && i > max
+        {
+            max = i;
         }
     }
 
@@ -284,26 +282,26 @@ pub fn check_save_dir_name_dup(save_state: &SaveState, name: String) -> String {
 }
 
 pub fn check_save_files_limit(save_state: &mut SaveState, conf: &Conf) {
-    if save_state.auto_save_files.len() > conf.autosave_max_files {
-        if let Some(min) = save_state.auto_save_files.pop_first() {
-            let file_name = save_file_name(true, min);
-            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
-            if let Err(e) =
-                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
-            {
-                log::warn!("cannot delete save file: {:?}", e);
-            }
+    if save_state.auto_save_files.len() > conf.autosave_max_files
+        && let Some(min) = save_state.auto_save_files.pop_first()
+    {
+        let file_name = save_file_name(true, min);
+        log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+        if let Err(e) =
+            crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+        {
+            log::warn!("cannot delete save file: {:?}", e);
         }
     }
-    if save_state.manual_save_files.len() > conf.manual_max_files {
-        if let Some(min) = save_state.manual_save_files.pop_first() {
-            let file_name = save_file_name(false, min);
-            log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
-            if let Err(e) =
-                crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
-            {
-                log::warn!("cannot delete save file: {:?}", e);
-            }
+    if save_state.manual_save_files.len() > conf.manual_max_files
+        && let Some(min) = save_state.manual_save_files.pop_first()
+    {
+        let file_name = save_file_name(false, min);
+        log::info!("delete {}/{}", save_state.current_save_sub_dir, file_name);
+        if let Err(e) =
+            crate::platform::delete_savefile(&save_state.current_save_sub_dir, &file_name)
+        {
+            log::warn!("cannot delete save file: {:?}", e);
         }
     }
 }

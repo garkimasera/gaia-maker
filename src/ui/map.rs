@@ -154,15 +154,15 @@ pub fn map_window(
                 });
                 ui.separator();
                 let response = map_ui(ui, map_tex_handle, &screen, m as f32);
-                if response.clicked() | response.dragged() {
-                    if let Some(pos) = response.interact_pointer_pos {
-                        let pos = pos - response.rect.min;
-                        let pos = Vec2::new(
-                            pos.x / m as f32 * TILE_SIZE,
-                            (planet.map.size().1 as f32 - pos.y / m as f32 - 1.0) * TILE_SIZE,
-                        );
-                        ew_centering.send(Centering::new(pos));
-                    }
+                if response.clicked() | response.dragged()
+                    && let Some(pos) = response.interact_pointer_pos
+                {
+                    let pos = pos - response.rect.min;
+                    let pos = Vec2::new(
+                        pos.x / m as f32 * TILE_SIZE,
+                        (planet.map.size().1 as f32 - pos.y / m as f32 - 1.0) * TILE_SIZE,
+                    );
+                    ew_centering.send(Centering::new(pos));
                 }
                 legend.ui(ui, *map_layer, &planet, &params);
             });

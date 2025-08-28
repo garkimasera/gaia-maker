@@ -214,23 +214,23 @@ impl HelpItem {
         } {
             ui_building_attr(ui, textures, building_attrs);
             ui.separator();
-        } else if let HelpItem::TileEvents(kind) = self {
-            if let Some(cost) = &params.event.tile_event_costs.get(kind) {
-                let (icon, s) = match **cost {
-                    Cost::Material(value) => (
-                        "ui/icon-material",
-                        WithUnitDisplay::Material(value).to_string(),
-                    ),
-                    Cost::GenePoint(value) => (
-                        "ui/icon-gene",
-                        WithUnitDisplay::GenePoint(value).to_string(),
-                    ),
-                    _ => todo!(),
-                };
-                ui.label(egui::RichText::new(t!("cost")).strong());
-                label_with_icon(ui, textures, icon, s);
-                ui.separator();
-            }
+        } else if let HelpItem::TileEvents(kind) = self
+            && let Some(cost) = &params.event.tile_event_costs.get(kind)
+        {
+            let (icon, s) = match **cost {
+                Cost::Material(value) => (
+                    "ui/icon-material",
+                    WithUnitDisplay::Material(value).to_string(),
+                ),
+                Cost::GenePoint(value) => (
+                    "ui/icon-gene",
+                    WithUnitDisplay::GenePoint(value).to_string(),
+                ),
+                _ => todo!(),
+            };
+            ui.label(egui::RichText::new(t!("cost")).strong());
+            label_with_icon(ui, textures, icon, s);
+            ui.separator();
         }
         ui.label(t!("help", self));
     }

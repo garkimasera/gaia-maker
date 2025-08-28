@@ -104,13 +104,12 @@ fn planet_control(
     });
     let building = planet.space_building_mut(SpaceBuildingKind::OrbitalMirror);
     if building.n > 0 {
-        if let BuildingControlValue::IncreaseRate(rate) = &mut building.control {
-            if ui
+        if let BuildingControlValue::IncreaseRate(rate) = &mut building.control
+            && ui
                 .add(egui::Slider::new(rate, -100..=100).suffix("%"))
                 .changed()
-            {
-                se_player.play_if_stopped("slider");
-            }
+        {
+            se_player.play_if_stopped("slider");
         }
     } else {
         ui.horizontal(|ui| {

@@ -51,26 +51,26 @@ fn cursor_action(
                 }
             }
             CursorMode::Civilize => {
-                if planet.res.gene_point >= params.event.civilize_cost {
-                    if let Some(id) = planet.get_civilizable_animal(p, &params) {
-                        if planet.civs.contains_key(&id) {
-                            update_draw.update();
-                            let age = CivilizationAge::Stone;
-                            planet.place_settlement(
-                                p,
-                                Settlement {
-                                    id,
-                                    age,
-                                    pop: params.sim.settlement_init_pop[age as usize],
-                                    ..Default::default()
-                                },
-                            );
-                            planet.res.consume(Cost::GenePoint(params.event.civilize_cost));
-                            se_player.play("civilize");
-                        } else {
-                            wos.dialogs.push(Dialog::Civilize { p, id });
-                            se_player.play("select-item");
-                        }
+                if planet.res.gene_point >= params.event.civilize_cost
+                    && let Some(id) = planet.get_civilizable_animal(p, &params)
+                {
+                    if planet.civs.contains_key(&id) {
+                        update_draw.update();
+                        let age = CivilizationAge::Stone;
+                        planet.place_settlement(
+                            p,
+                            Settlement {
+                                id,
+                                age,
+                                pop: params.sim.settlement_init_pop[age as usize],
+                                ..Default::default()
+                            },
+                        );
+                        planet.res.consume(Cost::GenePoint(params.event.civilize_cost));
+                        se_player.play("civilize");
+                    } else {
+                        wos.dialogs.push(Dialog::Civilize { p, id });
+                        se_player.play("select-item");
                     }
                 }
             }

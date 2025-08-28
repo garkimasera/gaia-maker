@@ -29,14 +29,14 @@ impl Plugin for ConfPlugin {
 }
 
 fn on_change(mut er_conf_change: EventReader<ConfChange>, conf: Option<Res<Conf>>) {
-    if let Some(conf) = conf {
-        if er_conf_change.read().last().is_some() {
-            let conf = toml::to_string(&*conf).unwrap();
-            if let Err(e) = crate::platform::write_data_file(CONF_FILE_NAME, &conf) {
-                log::error!("cannot save conf: {}", e);
-            }
-            log::info!("conf saved");
+    if let Some(conf) = conf
+        && er_conf_change.read().last().is_some()
+    {
+        let conf = toml::to_string(&*conf).unwrap();
+        if let Err(e) = crate::platform::write_data_file(CONF_FILE_NAME, &conf) {
+            log::error!("cannot save conf: {}", e);
         }
+        log::info!("conf saved");
     }
 }
 

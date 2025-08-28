@@ -132,17 +132,15 @@ pub fn new_planet(
 
                         if let Some(random_name_list) =
                             random_name_list_map.0.get(&crate::text_assets::get_lang())
+                            && !random_name_list.0.is_empty()
+                            && ui.button(t!("random-name")).clicked()
                         {
-                            if !random_name_list.0.is_empty()
-                                && ui.button(t!("random-name")).clicked()
-                            {
-                                state.new_planet.name = random_name_list
-                                    .0
-                                    .choose(&mut rand::rng())
-                                    .map(|name| name.to_owned())
-                                    .unwrap();
-                                se_player.play("select-item");
-                            }
+                            state.new_planet.name = random_name_list
+                                .0
+                                .choose(&mut rand::rng())
+                                .map(|name| name.to_owned())
+                                .unwrap();
+                            se_player.play("select-item");
                         }
                     });
                 });

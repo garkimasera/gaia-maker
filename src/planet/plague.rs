@@ -107,12 +107,11 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
             {
                 let mut target_tiles: ArrayVec<(Coords, f32), 8> = ArrayVec::new();
                 for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-                    if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
-                        if let Some(Structure::Settlement(target_settlement)) =
+                    if let Some(p_adj) = sim.convert_p_cyclic(p + *d)
+                        && let Some(Structure::Settlement(target_settlement)) =
                             &planet.map[p_adj].structure
-                        {
-                            target_tiles.push((p_adj, target_settlement.pop));
-                        }
+                    {
+                        target_tiles.push((p_adj, target_settlement.pop));
                     }
                 }
                 if let Some((p_target, pop)) = target_tiles.choose(&mut sim.rng) {
@@ -137,20 +136,19 @@ pub fn sim_plague(planet: &mut Planet, sim: &mut Sim, params: &Params) -> bool {
         true
     } else {
         // Spread to distant settlement
-        if infection_enabled_by_cycles {
-            if let Some(p) = p_pop_max_uninfected_settlement {
-                if sim.rng.random_bool(
-                    (params.event.plague_spread_base_prob * plague_params.distant_infectivity)
-                        .min(1.0)
-                        .into(),
-                ) {
-                    planet.map[p].tile_events.insert(TileEvent::Plague {
-                        i: plague_event.i,
-                        cured: false,
-                        target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
-                    });
-                }
-            }
+        if infection_enabled_by_cycles
+            && let Some(p) = p_pop_max_uninfected_settlement
+            && sim.rng.random_bool(
+                (params.event.plague_spread_base_prob * plague_params.distant_infectivity)
+                    .min(1.0)
+                    .into(),
+            )
+        {
+            planet.map[p].tile_events.insert(TileEvent::Plague {
+                i: plague_event.i,
+                cured: false,
+                target_pop: pop_max_uninfected_settlement * (1.0 - plague_params.lethality),
+            });
         }
         false
     }

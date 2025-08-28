@@ -46,15 +46,14 @@ impl SoundEffectPlayer<'_> {
     }
 
     pub fn play_with_priority(&self, s: &str, high_priority: bool) {
-        if !high_priority {
-            if let Some(handle) = HIGH_PRIORITY_SE_INSTANCE.take() {
-                if matches!(
-                    self.channel_se.state(&handle),
-                    PlaybackState::Queued | PlaybackState::Playing { .. }
-                ) {
-                    return;
-                }
-            }
+        if !high_priority
+            && let Some(handle) = HIGH_PRIORITY_SE_INSTANCE.take()
+            && matches!(
+                self.channel_se.state(&handle),
+                PlaybackState::Queued | PlaybackState::Playing { .. }
+            )
+        {
+            return;
         }
 
         let path = compact_str::format_compact!("se/{}.ogg", s);
@@ -134,18 +133,16 @@ fn check_main_menu_bgm(
         .instance
         .as_ref()
         .is_none_or(|instance| matches!(channel.state(instance), PlaybackState::Stopped))
+        && let Some(item) = &list.main_menu
+        && matches!(
+            server.get_load_state(item.handle.id()),
+            Some(LoadState::Loaded)
+        )
     {
-        if let Some(item) = &list.main_menu {
-            if matches!(
-                server.get_load_state(item.handle.id()),
-                Some(LoadState::Loaded)
-            ) {
-                let handle = channel.play(item.handle.clone()).looped().handle();
-                bgm_state.instance = Some(handle);
-                bgm_state.path = item.path.clone();
-                bgm_state.kind = Some(item.kind);
-            }
-        }
+        let handle = channel.play(item.handle.clone()).looped().handle();
+        bgm_state.instance = Some(handle);
+        bgm_state.path = item.path.clone();
+        bgm_state.kind = Some(item.kind);
     }
 
     if bgm_state.kind.is_some_and(|kind| kind != MusicKind::MainMenu) {

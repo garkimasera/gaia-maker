@@ -26,10 +26,11 @@ pub fn sim_biome(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }) = planet.working_building_effect(p, params)
         {
             for (_, p) in CDistRangeIter::new(p, range as _) {
-                if let Some(p) = coords_converter.conv(p) {
-                    if planet.map.in_range(p) && planet.map[p].fertility < max {
-                        *effect += increment;
-                    }
+                if let Some(p) = coords_converter.conv(p)
+                    && planet.map.in_range(p)
+                    && planet.map[p].fertility < max
+                {
+                    *effect += increment;
                 }
             }
         } else if let Some(Structure::Settlement(Settlement { age, .. })) = &planet.map[p].structure
@@ -306,15 +307,14 @@ fn calc_tile_max_biomass_density(
             f32::MAX
         };
     for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-        if let Some(p_adj) = coords_converter.conv(p + *p_adj) {
-            if let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p_adj].structure
-            {
-                let diff =
-                    max_by_pop_zero - linear_interpolation(&params.sim.max_biomass_pop_table, pop);
-                let m = max_by_pop_zero - params.sim.max_biomass_pop_adj_factor * diff;
-                if m < max_by_pop {
-                    max_by_pop = m;
-                }
+        if let Some(p_adj) = coords_converter.conv(p + *p_adj)
+            && let Some(Structure::Settlement(Settlement { pop, .. })) = planet.map[p_adj].structure
+        {
+            let diff =
+                max_by_pop_zero - linear_interpolation(&params.sim.max_biomass_pop_table, pop);
+            let m = max_by_pop_zero - params.sim.max_biomass_pop_adj_factor * diff;
+            if m < max_by_pop {
+                max_by_pop = m;
             }
         }
     }
@@ -348,14 +348,14 @@ fn calc_biomass_consumption_dist_by_settlements(planet: &Planet, sim: &mut Sim) 
         let mut total_biomass = planet.map[p].biomass;
         let mut max_biomass = total_biomass;
         for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-            if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
-                if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
-                    let biomass = planet.map[p_adj].biomass;
-                    if biomass > max_biomass {
-                        max_biomass = biomass;
-                        total_biomass += biomass;
-                        p_max_biomass = p_adj;
-                    }
+            if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj)
+                && !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_)))
+            {
+                let biomass = planet.map[p_adj].biomass;
+                if biomass > max_biomass {
+                    max_biomass = biomass;
+                    total_biomass += biomass;
+                    p_max_biomass = p_adj;
                 }
             }
         }

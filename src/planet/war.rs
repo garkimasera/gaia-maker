@@ -246,10 +246,11 @@ fn choose_target(planet: &Planet, sim: &mut Sim, p: Coords, src_id: AnimalId) ->
         .chain(geom::CHEBYSHEV_DISTANCE_2_COORDS)
         .filter_map(|d| sim.convert_p_cyclic(p + *d));
     for p_adj in adj_iter {
-        if let Some(Structure::Settlement(Settlement { id, .. })) = &planet.map[p_adj].structure {
-            if src_id != *id && planet.events.in_war(src_id, *id).is_some() {
-                return Some(p_adj);
-            }
+        if let Some(Structure::Settlement(Settlement { id, .. })) = &planet.map[p_adj].structure
+            && src_id != *id
+            && planet.events.in_war(src_id, *id).is_some()
+        {
+            return Some(p_adj);
         }
     }
 
@@ -513,17 +514,17 @@ pub fn exec_combat_until_finish(defence_str: &mut f32, offence_str: &mut f32) {
 fn get_enemies(events: &Events, id: AnimalId) -> smallvec::SmallVec<[AnimalId; 2]> {
     let mut enemies = smallvec::SmallVec::new();
     for e in events.in_progress_iter() {
-        if let PlanetEvent::War(event) = &e.event {
-            if !event.ceased {
-                match event.kind {
-                    WarKind::InterSpecies(aid, enemy_id) if aid == id => {
-                        enemies.push(enemy_id);
-                    }
-                    WarKind::InterSpecies(enemy_id, aid) if aid == id => {
-                        enemies.push(enemy_id);
-                    }
-                    _ => (),
+        if let PlanetEvent::War(event) = &e.event
+            && !event.ceased
+        {
+            match event.kind {
+                WarKind::InterSpecies(aid, enemy_id) if aid == id => {
+                    enemies.push(enemy_id);
                 }
+                WarKind::InterSpecies(enemy_id, aid) if aid == id => {
+                    enemies.push(enemy_id);
+                }
+                _ => (),
             }
         }
     }
@@ -533,10 +534,10 @@ fn get_enemies(events: &Events, id: AnimalId) -> smallvec::SmallVec<[AnimalId; 2
 fn empty_war_id(planet: &Planet) -> u32 {
     'i_loop: for a in 0.. {
         for e in planet.events.in_progress_iter() {
-            if let PlanetEvent::War(WarEvent { i, .. }) = &e.event {
-                if *i == a {
-                    continue 'i_loop;
-                }
+            if let PlanetEvent::War(WarEvent { i, .. }) = &e.event
+                && *i == a
+            {
+                continue 'i_loop;
             }
         }
         return a;

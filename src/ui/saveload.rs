@@ -81,11 +81,11 @@ pub fn show_load_window(
     let mut ws_guard = WINDOW_STATE.lock().unwrap();
     let ws: &mut WindowState = &mut ws_guard;
 
-    if let Some(delete_modal) = &ws.delete_modal {
-        if delete_modal.show(ctx, ew_manage_planet, se_player) {
-            ws.delete_modal = None;
-            return;
-        }
+    if let Some(delete_modal) = &ws.delete_modal
+        && delete_modal.show(ctx, ew_manage_planet, se_player)
+    {
+        ws.delete_modal = None;
+        return;
     }
 
     if NEED_INIT.load() != NeedInit::None {

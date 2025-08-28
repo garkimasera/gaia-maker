@@ -139,11 +139,11 @@ pub fn process_settlement_energy(
     let mut surrounding_hydro_geothermal = 0.0;
 
     for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj) {
-            if !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_))) {
-                surrounding_wind_solar += sim.energy_wind_solar;
-                surrounding_hydro_geothermal += sim.energy_hydro_geothermal[p_adj];
-            }
+        if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj)
+            && !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_)))
+        {
+            surrounding_wind_solar += sim.energy_wind_solar;
+            surrounding_hydro_geothermal += sim.energy_hydro_geothermal[p_adj];
         }
     }
     supply[EnergySource::SolarWind as usize] =

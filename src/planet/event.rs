@@ -36,14 +36,12 @@ impl Events {
 
     pub fn in_war(&self, a: AnimalId, b: AnimalId) -> Option<u32> {
         for e in self.in_progress_iter() {
-            if let PlanetEvent::War(war_event) = &e.event {
-                if !war_event.ceased {
-                    if let WarKind::InterSpecies(id0, id1) = &war_event.kind {
-                        if (*id0 == a && *id1 == b) || (*id0 == b && *id1 == a) {
-                            return Some(war_event.i);
-                        }
-                    }
-                }
+            if let PlanetEvent::War(war_event) = &e.event
+                && !war_event.ceased
+                && let WarKind::InterSpecies(id0, id1) = &war_event.kind
+                && ((*id0 == a && *id1 == b) || (*id0 == b && *id1 == a))
+            {
+                return Some(war_event.i);
             }
         }
         None
@@ -116,11 +114,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
 
     planet.events.in_progress.retain(|ein| {
         // Check the event is completed by the duration
-        if let Some(duration) = ein.duration {
-            if ein.progress >= duration {
-                completed_events.push(ein.event.clone());
-                return false;
-            }
+        if let Some(duration) = ein.duration
+            && ein.progress >= duration
+        {
+            completed_events.push(ein.event.clone());
+            return false;
         }
         // Check plague event is ended
         if plague_ended && ein.event.kind() == PlanetEventKind::Plague {
@@ -128,10 +126,11 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         }
 
         // Check civil war is ended
-        if let PlanetEvent::War(WarEvent { i, kind, .. }) = &ein.event {
-            if *kind == WarKind::CivilWar && matches!(sim.war_counter.get(i), Some(0) | None) {
-                return false;
-            }
+        if let PlanetEvent::War(WarEvent { i, kind, .. }) = &ein.event
+            && *kind == WarKind::CivilWar
+            && matches!(sim.war_counter.get(i), Some(0) | None)
+        {
+            return false;
         }
 
         // Check exodus event is ended

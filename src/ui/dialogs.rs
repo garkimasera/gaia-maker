@@ -57,10 +57,10 @@ pub fn error_popup(
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     mut wos: ResMut<WindowsOpenState>,
 ) {
-    if wos.error_popup.is_none() {
-        if let Some(e) = er_manage_planet_error.read().next() {
-            wos.error_popup = Some(e.clone());
-        }
+    if wos.error_popup.is_none()
+        && let Some(e) = er_manage_planet_error.read().next()
+    {
+        wos.error_popup = Some(e.clone());
     }
     let Some(e) = &wos.error_popup else {
         return;

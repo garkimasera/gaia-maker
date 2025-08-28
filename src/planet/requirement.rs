@@ -73,10 +73,10 @@ impl Requirement {
                     .iter()
                     .filter(|tile| {
                         if let Some(Structure::Settlement(settlement)) = tile.structure {
-                            if let Some(animal_id) = animal_id {
-                                if animal_id != &settlement.id {
-                                    return false;
-                                }
+                            if let Some(animal_id) = animal_id
+                                && animal_id != &settlement.id
+                            {
+                                return false;
                             }
                             true
                         } else {

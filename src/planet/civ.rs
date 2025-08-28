@@ -247,14 +247,13 @@ fn spread_settlement(
             {
                 target_tiles.push(q);
             }
-        } else if let Some(Structure::Settlement(s)) = &mut planet.map[q].structure {
-            if s.age < settlement.age
-                && s.id == settlement.id
-                && sim.rng.random_bool(params.sim.technology_propagation_prob)
-            {
-                s.age = settlement.age;
-                s.tech_exp = 0.0;
-            }
+        } else if let Some(Structure::Settlement(s)) = &mut planet.map[q].structure
+            && s.age < settlement.age
+            && s.id == settlement.id
+            && sim.rng.random_bool(params.sim.technology_propagation_prob)
+        {
+            s.age = settlement.age;
+            s.tech_exp = 0.0;
         }
     }
     if let Some(p_target) = target_tiles.choose(&mut sim.rng) {

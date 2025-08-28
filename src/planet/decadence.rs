@@ -137,19 +137,17 @@ pub fn sim_decadence(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if sim.rng.random_bool(params.event.decadence_infectivity) {
             let mut target_tiles: ArrayVec<Coords, 8> = ArrayVec::new();
             for d in geom::CHEBYSHEV_DISTANCE_1_COORDS {
-                if let Some(p_adj) = sim.convert_p_cyclic(p + *d) {
-                    if let Some(Structure::Settlement(settlement)) = &planet.map[p_adj].structure {
-                        if settlement.id == id
-                            && settlement.age == age
-                            && planet.map[p_adj]
-                                .tile_events
-                                .list()
-                                .iter()
-                                .all(|te| !te.is_settlement_event())
-                        {
-                            target_tiles.push(p_adj);
-                        }
-                    }
+                if let Some(p_adj) = sim.convert_p_cyclic(p + *d)
+                    && let Some(Structure::Settlement(settlement)) = &planet.map[p_adj].structure
+                    && settlement.id == id
+                    && settlement.age == age
+                    && planet.map[p_adj]
+                        .tile_events
+                        .list()
+                        .iter()
+                        .all(|te| !te.is_settlement_event())
+                {
+                    target_tiles.push(p_adj);
                 }
             }
             if let Some(p_target) = target_tiles.choose(&mut sim.rng) {
