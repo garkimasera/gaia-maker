@@ -100,6 +100,7 @@ pub fn cause_exodus(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             continue;
         }
 
+        let tech_control_weight = (civ.civ_control.tech_development as f32 / 100.0).powi(2);
         let nuclear_control = civ.civ_control.energy_weight[&EnergySource::Nuclear] as f32 / 100.0;
         let atomic_weight = if nuclear_control < 0.5 {
             0.0
@@ -107,6 +108,7 @@ pub fn cause_exodus(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             nuclear_control.powi(2)
         };
         let exodus_prob = params.event.base_exodus_prob
+            * tech_control_weight
             * atomic_weight
             * (tech_level_average / params.event.exodus_tech_level_threshold)
             * (civ.total_pop / params.event.exodus_pop_threshold);
