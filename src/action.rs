@@ -91,6 +91,7 @@ fn cursor_action(
                         TileEventKind::BlackDust => "black-dust",
                         TileEventKind::AerosolInjection => "aerosol-injection",
                         TileEventKind::Plague => "plague",
+                        TileEventKind::VolcanicEruption => "volcanic-eruption",
                         _ => "",
                     };
                     if !se.is_empty() {

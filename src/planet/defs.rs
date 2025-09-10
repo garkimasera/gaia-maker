@@ -218,6 +218,10 @@ pub enum TileEvent {
     Exodus {
         remaining_cycles: u32,
     },
+    VolcanicEruption {
+        remaining_cycles: u32,
+        power: f32,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
@@ -965,6 +969,20 @@ pub struct EventParams {
     pub settlement_exodus_prob: f32,
     /// Settlement exodus cycles
     pub settlement_exodus_cycles: u32,
+    /// Volcanic eruption cycles
+    pub volcanic_eruption_cycles: (u32, u32),
+    /// Volcanic eruption power
+    pub volcanic_eruption_power: (f32, f32),
+    /// Artificial volcanic eruption power
+    pub artificial_volcanic_eruption_power: (f32, f32),
+    /// The ratio of biomass burn at one cycle by volcanic eruption
+    pub volcanic_eruption_burn_ratio: f32,
+    /// Aerosol supply by volcanic eruption
+    pub volcanic_eruption_aerosol: f32,
+    /// CO2 supply by volcanic eruption [Mt]
+    pub volcanic_eruption_carbon_dioxide: f32,
+    /// Terrain uplift by volcanic eruption [m]
+    pub volcanic_eruption_uplift: (f32, f32),
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

@@ -10,6 +10,7 @@ mod decadence;
 mod defs;
 mod event;
 mod exodus;
+mod geological_event;
 mod heat_transfer;
 mod initial_conditions;
 mod map_generator;

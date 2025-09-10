@@ -39,6 +39,8 @@ impl TileEvents {
 }
 
 pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
+    super::geological_event::advance_geological_event(planet, sim, params);
+
     sim.war_counter.clear();
 
     for tile in planet.map.iter_mut() {
@@ -161,6 +163,20 @@ pub fn cause_tile_event(
                 super::plague::cause_plague(planet, sim, params, p);
             }
             return false;
+        }
+        TileEventKind::VolcanicEruption => {
+            let planet_relative_geo_power = planet.basics.geothermal_power
+                / params.default_start_params.basics.geothermal_power;
+            let power_range = params.event.artificial_volcanic_eruption_power;
+            let power =
+                sim.rng.random_range(power_range.0..power_range.1) * planet_relative_geo_power;
+            let cycles_range = params.event.volcanic_eruption_cycles;
+            let remaining_cycles = sim.rng.random_range(cycles_range.0..cycles_range.1);
+
+            TileEvent::VolcanicEruption {
+                remaining_cycles,
+                power,
+            }
         }
         _ => unreachable!(),
     };

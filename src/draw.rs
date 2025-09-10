@@ -583,6 +583,7 @@ fn tile_event_order_key(tile_event: &TileEvent) -> u32 {
         TileEvent::NuclearExplosion { .. } => 90,
         TileEvent::Troop { .. } => 41,
         TileEvent::Exodus { .. } => 90,
+        TileEvent::VolcanicEruption { .. } => 90,
     }
 }
 

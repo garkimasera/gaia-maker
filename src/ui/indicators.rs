@@ -378,6 +378,9 @@ pub fn tile_info_indicators(
             TileEvent::Exodus { .. } => {
                 ui.label(t!("exodus"));
             }
+            TileEvent::VolcanicEruption { .. } => {
+                ui.label(t!("volcanic-eruption"));
+            }
         }
     }
 }

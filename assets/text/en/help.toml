@@ -30,6 +30,7 @@ aerosol-injection = "Aerosols are injected into the atmosphere of the planet. Th
 black-dust = "Black dust is spread over the surface of the planet. The surface of the planet absorbs more of the stellar light, causing the temperature of the surrounding area to rise. This dust disappears over time."
 fire = "It will cause a fire in the specified tile. It will burn the biomass on the ground, destroying civilization and animals. It will increase carbon dioxide and aerosols."
 plague = "The plague will spread to the city you have selected. The plague will also infect other cities over time, reducing the population of civilization."
+volcanic-eruption = "Volcanic eruptions release ash and carbon dioxide into the atmosphere and uplift the surrounding terrain. These are natural phenomena that occur periodically on the planet, but they can also be artificially induced."
 vehicle = "Advanced civilizations use ships and airplanes for travel."
 decadence = "Civilizations that have achieved a certain level of prosperity may become decadent. In a decadent civilization, people neglect maintaining the foundations of prosperity - science, technology, culture, and infrastructure - or actively damage these foundations. The population and level of technology in the civilization decline."
 exodus = "Civilizations with the technology to venture into outer space may leave the planet where they were born and raised."
