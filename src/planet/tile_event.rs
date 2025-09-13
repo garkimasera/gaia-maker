@@ -165,18 +165,7 @@ pub fn cause_tile_event(
             return false;
         }
         TileEventKind::VolcanicEruption => {
-            let planet_relative_geo_power = planet.basics.geothermal_power
-                / params.default_start_params.basics.geothermal_power;
-            let power_range = params.event.artificial_volcanic_eruption_power;
-            let power =
-                sim.rng.random_range(power_range.0..power_range.1) * planet_relative_geo_power;
-            let cycles_range = params.event.volcanic_eruption_cycles;
-            let remaining_cycles = sim.rng.random_range(cycles_range.0..cycles_range.1);
-
-            TileEvent::VolcanicEruption {
-                remaining_cycles,
-                power,
-            }
+            super::geological_event::volcanic_eruption_tile_event(planet, sim, params, true)
         }
         _ => unreachable!(),
     };

@@ -969,6 +969,8 @@ pub struct EventParams {
     pub settlement_exodus_prob: f32,
     /// Settlement exodus cycles
     pub settlement_exodus_cycles: u32,
+    /// Volcanic eruption probability
+    pub volcanic_eruption_prob: f64,
     /// Volcanic eruption cycles
     pub volcanic_eruption_cycles: (u32, u32),
     /// Volcanic eruption power
@@ -977,6 +979,8 @@ pub struct EventParams {
     pub artificial_volcanic_eruption_power: (f32, f32),
     /// The ratio of biomass burn at one cycle by volcanic eruption
     pub volcanic_eruption_burn_ratio: f32,
+    /// The ratio of released biomass at one cycle by volcanic eruption
+    pub volcanic_eruption_carbon_release_ratio: f32,
     /// Aerosol supply by volcanic eruption
     pub volcanic_eruption_aerosol: f32,
     /// CO2 supply by volcanic eruption [Mt]
