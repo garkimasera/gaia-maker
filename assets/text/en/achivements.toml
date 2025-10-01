@@ -16,6 +16,7 @@ exodus = "Exodus"
 giant-mirror = "Giant Mirror"
 low-carbon-dioxide = "Cannot Photosynthesize"
 destroy-planet = "I don't need this"
+dark-clouds = "Dark Clouds"
 
 [achivement.desc]
 grasslands = "Spread grasslands to cover more than 10 tiles."
@@ -35,3 +36,4 @@ exodus = "Witness civilization's journey into space"
 giant-mirror = "Build an orbital mirror."
 low-carbon-dioxide = "Lower the atmospheric CO2 concentration below 0.00003 atm."
 destroy-planet = "Make a thriving planet (500+ Gt biomass, 1000+ pop) barren within 3000 cycles."
+dark-clouds = "Cover more than 80% of the planet with clouds"

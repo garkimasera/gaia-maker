@@ -25,6 +25,7 @@ pub enum Achivement {
     AbundantPower = 301,
     LowCarbonDioxide,
     DestroyPlanet,
+    DarkClouds,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
@@ -130,6 +131,7 @@ impl Achivement {
                     false
                 }
             }
+            Achivement::DarkClouds => planet.cloud_albedo(params) >= 0.79,
             _ => false,
         }
     }
