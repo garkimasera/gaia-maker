@@ -9,8 +9,10 @@ custom = "Custom"
 continental = "Continental Planet"
 ice = "Ice Planet"
 desert = "Desert Planet"
+barren = "Barren Planet"
 
 [planet.desc]
 continental = "This is a planet that has both an ocean and a continent. Although it does not have oxygen, it is easy to sustain life due to the presence of an ocean. It is the most suitable celestial body for terraforming."
 ice = "This is a planet covered in ice. Due to its low temperature, no life exists there, but if the temperature could be raised somehow, water, which is essential for life, could be obtained."
 desert = "This is a planet with almost no water, and its surface is covered in dry desert. Without supplying water, life would not be possible."
+barren = "This is a planet with almost no water or atmosphere, its surface covered only in rock. It contains almost none of the substances necessary for life."

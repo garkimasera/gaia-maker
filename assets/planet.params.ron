@@ -437,19 +437,19 @@
         ice_importer: (
             power: -400,
             cost: 500,
-            build_max: 20,
+            build_max: 40,
             effect: AddWater( value: 2e+10 ),
         ),
         nitrogen_importer: (
-            power: -50,
-            cost: 100,
-            build_max: 10,
-            effect: SprayToAtmo( kind: nitrogen, mass: 200, limit_atm: 1.0 ),
+            power: -300,
+            cost: 200,
+            build_max: 50,
+            effect: SprayToAtmo( kind: nitrogen, mass: 5000, limit_atm: 1.0 ),
         ),
         carbon_importer: (
             power: -10,
             cost: 100,
-            build_max: 10,
+            build_max: 20,
             effect: SprayToAtmo( kind: carbon_dioxide, mass: 183.3, limit_atm: 0.1 ),
         ),
         ion_irradiator: (

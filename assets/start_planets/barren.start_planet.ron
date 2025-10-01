@@ -1,0 +1,21 @@
+(
+    id: "barren",
+    habitability: hostile,
+    radius: (5200, 300),
+    solar_constant: (650, 40),
+    geothermal_power: (0.0, 0.0),
+    elevation: (8000.0, 1000.0),
+    water_volume: (0.0, 0.0),
+    nitrogen: (0.01, 0.005),
+    oxygen: (8.0e-6, 2.0e-6),
+    carbon_dioxide: (0.02, 0.005),
+    argon: (1.0e-5, 0.2e-5),
+    initial_conditions: [],
+    height_table: [(0.0, 0.0), (0.3, 0.05), (0.8, 0.4), (1.0, 1.0)],
+    initial_buried_carbon: (
+        n_spot: (1, 2),
+        mass: (1.0e+1, 1.0e+4),
+        radius: (2, 3),
+        scattering: 0.4,
+    ),
+)
