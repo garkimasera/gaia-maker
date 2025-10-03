@@ -222,6 +222,9 @@ pub enum TileEvent {
         remaining_cycles: u32,
         power: f32,
     },
+    SolarRay {
+        remaining_cycles: u32,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize_repr, Deserialize_repr)]
@@ -987,6 +990,20 @@ pub struct EventParams {
     pub volcanic_eruption_carbon_dioxide: f32,
     /// Terrain uplift by volcanic eruption [m]
     pub volcanic_eruption_uplift: (f32, f32),
+    /// Solar ray cycles
+    pub solar_ray_cycles: u32,
+    /// Solar ray aerosol
+    pub solar_ray_aerosol: f32,
+    /// Terrain digging by solar ray [m]
+    pub solar_ray_digging: (f32, f32),
+    /// Generated gases by solar ray
+    pub solar_ray_gases: HashMap<GasKind, f32>,
+    /// Random range of generated gases by solar ray
+    pub solar_ray_gases_random_range: (f32, f32),
+    /// Buried carbon burn ratio by solar ray
+    pub solar_ray_buried_carbon_burn_ratio: f32,
+    /// Ocean vaporization by solar ray
+    pub solar_ray_ocean_vaporization: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]

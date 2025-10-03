@@ -449,7 +449,8 @@ fn settlement_blocked_by_tile_event(tile_events: &TileEvents) -> bool {
         | TileEvent::BlackDust { .. }
         | TileEvent::War { .. }
         | TileEvent::NuclearExplosion { .. }
-        | TileEvent::VolcanicEruption { .. } => true,
+        | TileEvent::VolcanicEruption { .. }
+        | TileEvent::SolarRay { .. } => true,
         TileEvent::Plague { cured, .. } => !cured,
         _ => false,
     })

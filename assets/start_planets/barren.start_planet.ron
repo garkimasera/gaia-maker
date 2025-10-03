@@ -3,7 +3,7 @@
     habitability: hostile,
     radius: (5200, 300),
     solar_constant: (650, 40),
-    geothermal_power: (0.0, 0.0),
+    geothermal_power: (1.0e+11, 1.0e+10),
     elevation: (8000.0, 1000.0),
     water_volume: (0.0, 0.0),
     nitrogen: (0.01, 0.005),

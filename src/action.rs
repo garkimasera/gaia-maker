@@ -92,6 +92,7 @@ fn cursor_action(
                         TileEventKind::AerosolInjection => "aerosol-injection",
                         TileEventKind::Plague => "plague",
                         TileEventKind::VolcanicEruption => "volcanic-eruption",
+                        TileEventKind::SolarRay => "solar-ray",
                         _ => "",
                     };
                     if !se.is_empty() {

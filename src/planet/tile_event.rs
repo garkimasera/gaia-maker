@@ -58,7 +58,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
             let burned_biomass = biomass * params.event.fire_burn_ratio;
             let biomass = biomass - burned_biomass;
             tile.biomass = biomass;
-            let burned_biomass = sim.biomass_density_to_mass();
+            let burned_biomass = sim.biomass_density_to_mass() * burned_biomass;
             planet.atmo.release_carbon(burned_biomass);
             let extinction_biomass = sim.rng.sample(ConstantDist::from(
                 params.event.biomass_at_fire_extinction_range,
@@ -95,6 +95,44 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
                 tile_events.remove(TileEventKind::AerosolInjection);
             }
             planet.atmo.aerosol += params.event.aerosol_injection_amount;
+        }
+
+        if let Some(TileEvent::SolarRay { remaining_cycles }) =
+            tile_events.get_mut(TileEventKind::SolarRay)
+        {
+            *remaining_cycles -= 1;
+            if *remaining_cycles == 0 {
+                tile_events.remove(TileEventKind::SolarRay);
+            }
+            if matches!(tile.structure, Some(Structure::Settlement(_))) {
+                tile.structure = None;
+            }
+            tile.animal = [None; AnimalSize::LEN];
+
+            let burned_biomass = sim.biomass_density_to_mass() * tile.biomass;
+            tile.biomass = 0.0;
+            planet.atmo.release_carbon(burned_biomass);
+            planet.atmo.aerosol += params.event.solar_ray_aerosol;
+
+            if tile.biome.is_land() {
+                let d = sim
+                    .rng
+                    .sample(ConstantDist::from(params.event.solar_ray_digging));
+                tile.height = (tile.height - d).max(0.0);
+                for (kind, mass) in &params.event.solar_ray_gases {
+                    let random_range = params.event.solar_ray_gases_random_range;
+                    let r = sim.rng.random_range(random_range.0..random_range.1);
+                    planet.atmo.add(*kind, *mass * r);
+                }
+                let burned_buried_carbon =
+                    params.event.solar_ray_buried_carbon_burn_ratio * tile.buried_carbon;
+                tile.buried_carbon -= burned_buried_carbon;
+                planet.atmo.release_carbon(burned_buried_carbon);
+                tile.biome = Biome::Rock;
+            } else {
+                planet.water.water_volume -= params.event.solar_ray_ocean_vaporization;
+                tile.biome = Biome::Ocean;
+            }
         }
 
         if let Some(TileEvent::War {
@@ -167,6 +205,9 @@ pub fn cause_tile_event(
         TileEventKind::VolcanicEruption => {
             super::geological_event::volcanic_eruption_tile_event(planet, sim, params, true)
         }
+        TileEventKind::SolarRay => TileEvent::SolarRay {
+            remaining_cycles: params.event.solar_ray_cycles,
+        },
         _ => unreachable!(),
     };
 

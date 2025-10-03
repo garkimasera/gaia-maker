@@ -381,6 +381,9 @@ pub fn tile_info_indicators(
             TileEvent::VolcanicEruption { .. } => {
                 ui.label(t!("volcanic-eruption"));
             }
+            TileEvent::SolarRay { .. } => {
+                ui.label(t!("solar-ray"));
+            }
         }
     }
 }
