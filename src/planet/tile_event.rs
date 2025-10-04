@@ -100,6 +100,7 @@ pub fn advance(planet: &mut Planet, sim: &mut Sim, params: &Params) {
         if let Some(TileEvent::SolarRay { remaining_cycles }) =
             tile_events.get_mut(TileEventKind::SolarRay)
         {
+            sim.new_achievements.insert(Achivement::PlanetSculpting);
             *remaining_cycles -= 1;
             if *remaining_cycles == 0 {
                 tile_events.remove(TileEventKind::SolarRay);

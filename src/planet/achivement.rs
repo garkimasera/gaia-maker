@@ -26,6 +26,7 @@ pub enum Achivement {
     LowCarbonDioxide,
     DestroyPlanet,
     DarkClouds,
+    PlanetSculpting,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
