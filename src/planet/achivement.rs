@@ -16,6 +16,7 @@ pub enum Achivement {
     GreenPlanet,
     MeltedIce = 101,
     DesertGreening,
+    ArtificialBlueSky,
     IndustrialRevolution = 201,
     InterSpeciesWar,
     Pandemic,
@@ -83,6 +84,9 @@ impl Achivement {
             }
             Achivement::DesertGreening => {
                 planet.basics.origin == "desert" && planet.stat.sum_biomass > 600_000.0
+            }
+            Achivement::ArtificialBlueSky => {
+                planet.basics.origin == "barren" && planet.atmo.atm() >= 1.0
             }
             Achivement::IndustrialRevolution => planet.map.iter().any(|tile| {
                 if let Some(Structure::Settlement(settlement)) = &tile.structure {
