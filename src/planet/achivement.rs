@@ -33,6 +33,13 @@ pub enum Achivement {
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
     std::sync::LazyLock::new(|| Achivement::iter().collect());
 
+impl Achivement {
+    pub fn upper_snake_case(&self) -> String {
+        let s: &str = self.as_ref();
+        s.replace('-', "_").to_uppercase()
+    }
+}
+
 pub fn check_achivements(
     planet: &Planet,
     unlocked_achivements: &FnvHashSet<Achivement>,

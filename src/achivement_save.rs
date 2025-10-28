@@ -111,6 +111,11 @@ fn check_periodic(
             ACHIVEMENT_NOTIFICATION_DURATION,
             TimerMode::Once,
         ));
+
+        let name = new_achivement.upper_snake_case();
+        crate::platform::client::send_request(crate::platform::client::Request::UnlockAchivement {
+            name,
+        });
     }
 
     if unlocked {

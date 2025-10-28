@@ -1,30 +1,45 @@
 use std::io::{BufRead, Write};
+use std::sync::{OnceLock, mpsc};
 
 use anyhow::{Result, bail};
 use serde::{Deserialize, Serialize};
 
+static TX_REQUEST: OnceLock<mpsc::Sender<Request>> = OnceLock::new();
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Request {
     Start {},
+    UnlockAchivement { name: String },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Response {
     Start {},
+    UnlockAchivement {},
+}
+
+pub fn send_request(req: Request) {
+    if let Some(tx) = TX_REQUEST.get()
+        && let Err(e) = tx.send(req)
+    {
+        log::warn!("cannot send to client stream task: {e}");
+    }
 }
 
 pub fn run_client(port: u16) {
+    let (tx, rx) = mpsc::channel();
+    TX_REQUEST.set(tx).unwrap();
     let stream = std::net::TcpStream::connect(format!("127.0.0.1:{port}"))
         .expect("cannot open stream with launcher");
 
     std::thread::spawn(move || {
-        if let Err(e) = client_task(stream) {
+        if let Err(e) = client_task(stream, rx) {
             eprintln!("launcher connection error: {e:?}");
         }
     });
 }
 
-fn client_task(stream: std::net::TcpStream) -> Result<()> {
+fn client_task(stream: std::net::TcpStream, rx: mpsc::Receiver<Request>) -> Result<()> {
     let mut client = Client::new(stream);
 
     client.send(Request::Start {})?;
@@ -33,6 +48,12 @@ fn client_task(stream: std::net::TcpStream) -> Result<()> {
         bail!("invalid response");
     }
     eprintln!("connected to game launcher");
+
+    while let Ok(req) = rx.recv() {
+        client.send(req)?;
+        let resp = client.recv()?;
+        log::info!("response {resp:?}");
+    }
 
     Ok(())
 }
