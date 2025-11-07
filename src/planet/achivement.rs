@@ -17,6 +17,7 @@ pub enum Achivement {
     MeltedIce = 101,
     DesertGreening,
     ArtificialBlueSky,
+    OceanParadise,
     IndustrialRevolution = 201,
     InterSpeciesWar,
     Pandemic,
@@ -94,6 +95,31 @@ impl Achivement {
             }
             Achivement::ArtificialBlueSky => {
                 planet.basics.origin == "barren" && planet.atmo.atm() >= 1.0
+            }
+            Achivement::OceanParadise => {
+                planet.basics.origin == "archipelago"
+                    && planet
+                        .map
+                        .iter()
+                        .filter(|tile| {
+                            if tile.biome.is_land() {
+                                return false;
+                            }
+                            for animal in tile.animal {
+                                let Some(animal) = animal else {
+                                    continue;
+                                };
+                                let Some(animal_attr) = params.animals.get(&animal.id) else {
+                                    continue;
+                                };
+                                if animal_attr.habitat.match_biome(Biome::Ocean) {
+                                    return true;
+                                }
+                            }
+                            false
+                        })
+                        .count()
+                        > (planet.map.size().0 * planet.map.size().1 / 2) as usize
             }
             Achivement::IndustrialRevolution => planet.map.iter().any(|tile| {
                 if let Some(Structure::Settlement(settlement)) = &tile.structure {
