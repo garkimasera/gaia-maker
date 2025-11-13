@@ -89,12 +89,17 @@ fn check_periodic(
         return;
     }
 
+    let mut new_achivements = FnvHashSet::default();
+
     check_achivements(
         &planet,
         &unlocked_achivements.0,
-        &mut sim.new_achievements,
+        &mut new_achivements,
         &params,
+        &sim,
     );
+
+    sim.new_achievements.extend(new_achivements);
 
     let mut unlocked = false;
 

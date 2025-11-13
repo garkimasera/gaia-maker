@@ -20,6 +20,7 @@ low-carbon-dioxide = "光合成できない"
 destroy-planet = "もうこんな星いらない"
 dark-clouds = "暗黒の曇り"
 planet-sculpting = "惑星造形"
+deforestation = "森林伐採"
 
 [achivement.desc]
 grasslands = "草原が10タイル以上に広がる"
@@ -43,3 +44,4 @@ low-carbon-dioxide = "大気中の二酸化炭素濃度が0.00003 atm以下に�
 destroy-planet = "バイオマス500Gt、人口1000以上の惑星を3000サイクル以内に不毛な星にする"
 dark-clouds = "惑星の80%以上が雲に覆われる"
 planet-sculpting = "光線で惑星表面を彫刻する"
+deforestation = "文明が深刻な森林破壊を行う"

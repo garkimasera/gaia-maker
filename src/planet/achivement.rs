@@ -29,6 +29,7 @@ pub enum Achivement {
     DestroyPlanet,
     DarkClouds,
     PlanetSculpting,
+    Deforestation,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
@@ -46,16 +47,17 @@ pub fn check_achivements(
     unlocked_achivements: &FnvHashSet<Achivement>,
     new_achivements: &mut FnvHashSet<Achivement>,
     params: &Params,
+    sim: &Sim,
 ) {
     for achivement in Achivement::iter() {
-        if !unlocked_achivements.contains(&achivement) && achivement.check(planet, params) {
+        if !unlocked_achivements.contains(&achivement) && achivement.check(planet, params, sim) {
             new_achivements.insert(achivement);
         }
     }
 }
 
 impl Achivement {
-    fn check(self, planet: &Planet, params: &Params) -> bool {
+    fn check(self, planet: &Planet, params: &Params, sim: &Sim) -> bool {
         match self {
             Achivement::Grasslands => Requirement::BiomeTiles {
                 biomes: vec![Biome::Grassland],
@@ -170,6 +172,20 @@ impl Achivement {
                 }
             }
             Achivement::DarkClouds => planet.cloud_albedo(params) >= 0.79,
+            Achivement::Deforestation => {
+                let biomass_consumption_on_land = planet
+                    .map
+                    .iter_idx()
+                    .map(|p| {
+                        if planet.map[p].biome.is_land() {
+                            sim.biomass_consumption[p] as f64
+                        } else {
+                            0.0
+                        }
+                    })
+                    .sum::<f64>();
+                biomass_consumption_on_land > 10000.0
+            }
             _ => false,
         }
     }
