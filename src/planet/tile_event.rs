@@ -190,7 +190,15 @@ pub fn cause_tile_event(
     params: &Params,
 ) -> bool {
     let event = match kind {
-        TileEventKind::Fire => TileEvent::Fire,
+        TileEventKind::Fire => {
+            if let Some(Structure::Settlement(settlement)) = &mut planet.map[p].structure
+                && settlement.pop > 1000.0
+            {
+                sim.new_achievements.insert(Achivement::HeavenlyFire);
+            }
+
+            TileEvent::Fire
+        }
         TileEventKind::BlackDust => TileEvent::BlackDust {
             remaining_cycles: params.event.black_dust_cycles,
         },

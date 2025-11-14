@@ -21,6 +21,7 @@ destroy-planet = "I don't need this"
 dark-clouds = "Dark Clouds"
 planet-sculpting = "Planet Sculpting"
 deforestation = "Deforestation"
+heavenly-fire = "Heavenly Fire"
 
 [achivement.desc]
 grasslands = "Spread grasslands to cover more than 10 tiles."
@@ -44,4 +45,5 @@ low-carbon-dioxide = "Lower the atmospheric CO2 concentration below 0.00003 atm.
 destroy-planet = "Make a thriving planet (500+ Gt biomass, 1000+ pop) barren within 3000 cycles."
 dark-clouds = "Cover more than 80% of the planet with clouds."
 planet-sculpting = "Sculpt the planet surface."
-deforestation = "Witness civilization's severe destruction of forests"
+deforestation = "Witness civilization's severe destruction of forests."
+heavenly-fire = "Burn a city with populations of 1,000 or more."

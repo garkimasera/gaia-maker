@@ -30,6 +30,7 @@ pub enum Achivement {
     DarkClouds,
     PlanetSculpting,
     Deforestation,
+    HeavenlyFire,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
