@@ -22,6 +22,7 @@ dark-clouds = "Dark Clouds"
 planet-sculpting = "Planet Sculpting"
 deforestation = "Deforestation"
 heavenly-fire = "Heavenly Fire"
+three-way-deadlock = "Three-Way Deadlock"
 
 [achivement.desc]
 grasslands = "Spread grasslands to cover more than 10 tiles."
@@ -47,3 +48,4 @@ dark-clouds = "Cover more than 80% of the planet with clouds."
 planet-sculpting = "Sculpt the planet surface."
 deforestation = "Witness civilization's severe destruction of forests."
 heavenly-fire = "Burn a city with populations of 1,000 or more."
+three-way-deadlock = "Have three civilizations each with a population over 300,000."

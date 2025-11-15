@@ -22,6 +22,7 @@ dark-clouds = "暗黒の曇り"
 planet-sculpting = "惑星造形"
 deforestation = "森林伐採"
 heavenly-fire = "天の火"
+three-way-deadlock = "三すくみ"
 
 [achivement.desc]
 grasslands = "草原が10タイル以上に広がる"
@@ -47,3 +48,4 @@ dark-clouds = "惑星の80%以上が雲に覆われる"
 planet-sculpting = "光線で惑星表面を彫刻する"
 deforestation = "文明が深刻な森林破壊を行う"
 heavenly-fire = "人口1000以上の都市を焼却する"
+three-way-deadlock = "人口3000000以上の文明が3つある"

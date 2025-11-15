@@ -31,6 +31,7 @@ pub enum Achivement {
     PlanetSculpting,
     Deforestation,
     HeavenlyFire,
+    ThreeWayDeadlock,
 }
 
 pub static ACHIVEMENTS: std::sync::LazyLock<Vec<Achivement>> =
@@ -186,6 +187,10 @@ impl Achivement {
                     })
                     .sum::<f64>();
                 biomass_consumption_on_land > 10000.0
+            }
+            Achivement::ThreeWayDeadlock => {
+                planet.civs.len() == 3
+                    && planet.civs.iter().all(|(_, civ)| civ.total_pop > 3000000.0)
             }
             _ => false,
         }
