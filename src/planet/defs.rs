@@ -165,13 +165,6 @@ impl StructureKind {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
-pub enum StructureBuildingState {
-    Working,
-    Stopped,
-    Disabled,
-}
-
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, EnumDiscriminants)]
 #[strum_discriminants(name(TileEventKind))]
 #[strum_discriminants(derive(PartialOrd, Ord, Hash, Serialize, Deserialize))]

@@ -1,4 +1,4 @@
-#![allow(clippy::type_complexity, clippy::comparison_chain)]
+#![allow(clippy::type_complexity, clippy::comparison_chain, clippy::manual_is_multiple_of)]
 
 extern crate tile_geom as geom;
 

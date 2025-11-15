@@ -29,8 +29,9 @@ impl Centering {
     }
 }
 
-#[derive(Clone, Debug, Resource)]
+#[derive(Clone, Default, Debug, Resource)]
 pub enum CursorMode {
+    #[default]
     Normal,
     Demolition,
     Civilize,
@@ -49,12 +50,6 @@ pub enum CauseEventKind {
     Decadence,
     CivilWar,
     NuclearExplsion,
-}
-
-impl Default for CursorMode {
-    fn default() -> Self {
-        Self::Normal
-    }
 }
 
 impl Plugin for ScreenPlugin {
