@@ -92,6 +92,12 @@ pub fn main_menu(
                             state.mode = MainMenuMode::Load;
                             se_player.play("window-open");
                         }
+
+                        if ui.button(t!("credits")).clicked() {
+                            state.mode = MainMenuMode::Credit;
+                            se_player.play("window-open");
+                        }
+
                         if ui.button(t!("exit")).clicked() {
                             app_exit_events.send(bevy::app::AppExit::Success);
                             crate::platform::window_close();
@@ -111,7 +117,6 @@ pub fn main_menu(
                 })
                 .unwrap();
             display_version(&mut egui_ctxs);
-            display_credits_button(&mut egui_ctxs, &mut state.mode, &se_player);
             display_web_limit_warning(&mut egui_ctxs);
         }
         MainMenuMode::Tutorial => {
@@ -225,24 +230,6 @@ fn language_selector(
     } else {
         None
     }
-}
-
-fn display_credits_button(
-    egui_ctxs: &mut EguiContexts,
-    mode: &mut MainMenuMode,
-    se_player: &SoundEffectPlayer,
-) {
-    egui::Window::new(t!("credits"))
-        .title_bar(false)
-        .anchor(egui::Align2::RIGHT_BOTTOM, egui::Vec2::new(-10.0, -10.0))
-        .resizable(false)
-        .show(egui_ctxs.ctx_mut(), |ui| {
-            if ui.button(t!("credits")).clicked() {
-                *mode = MainMenuMode::Credit;
-                se_player.play("window-open");
-            }
-        })
-        .unwrap();
 }
 
 fn display_version(egui_ctxs: &mut EguiContexts) {
