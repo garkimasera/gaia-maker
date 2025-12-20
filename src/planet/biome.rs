@@ -345,8 +345,7 @@ fn calc_biomass_consumption_dist_by_settlements(planet: &Planet, sim: &mut Sim) 
 
         // Consume biomass from a tile that has maximum biomass
         let mut p_max_biomass = p;
-        let mut total_biomass = planet.map[p].biomass;
-        let mut max_biomass = total_biomass;
+        let mut max_biomass = planet.map[p].biomass;
         for p_adj in geom::CHEBYSHEV_DISTANCE_1_COORDS {
             if let Some(p_adj) = sim.convert_p_cyclic(p + *p_adj)
                 && !matches!(planet.map[p_adj].structure, Some(Structure::Settlement(_)))
@@ -354,7 +353,6 @@ fn calc_biomass_consumption_dist_by_settlements(planet: &Planet, sim: &mut Sim) 
                 let biomass = planet.map[p_adj].biomass;
                 if biomass > max_biomass {
                     max_biomass = biomass;
-                    total_biomass += biomass;
                     p_max_biomass = p_adj;
                 }
             }
