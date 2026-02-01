@@ -243,6 +243,11 @@ pub fn process_settlement_energy(
         let src = src as usize;
         let req = demand * params.sim.energy_source_waste_by_age[age][src];
         let supply = supply[src] - consume[src];
+        let supply = if src == EnergySource::Gift as usize {
+            supply * limit_by_control[src]
+        } else {
+            supply
+        };
         if src == 0 || supply > req {
             consume[src] += req;
         } else {
