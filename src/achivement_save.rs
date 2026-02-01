@@ -124,7 +124,9 @@ fn check_periodic(
     }
 
     if unlocked {
-        se_player.play("achivement");
+        if !crate::platform::client::running_as_client() {
+            se_player.play("achivement");
+        }
 
         let list: Vec<u16> = unlocked_achivements
             .0

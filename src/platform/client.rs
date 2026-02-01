@@ -26,6 +26,10 @@ pub fn send_request(req: Request) {
     }
 }
 
+pub fn running_as_client() -> bool {
+    TX_REQUEST.get().is_some()
+}
+
 pub fn run_client(port: u16) {
     let (tx, rx) = mpsc::channel();
     TX_REQUEST.set(tx).unwrap();
