@@ -39,7 +39,7 @@ animal-0-1 = "If there are currently enough forests, then the conditions are rig
 animal-0-2 = "Gene points gradually increase over time. The amount of increase becomes larger as the amount of life on the planet rises."
 animal-1-1 = "To spawn animals, click on the following icon in the top left of the screen to display the animal window."
 animal-1-2 = "Select your favorite animal from the animal list, press the “Spawn” button, and then click on a tile to place the animal. When placing animals, the tile you place them on should be an environment suitable for that animal. For example, a starfish needs to be placed in an ocean tiles. If placed in a suitable environment, the animal will reproduce on surrounding tiles over time. Additionally, animals may mutate into different species."
-animal-checklist1 = "Have foxes inhabit more than 30 tiles."
+animal-checklist1 = "Have animals inhabit more than 30 tiles."
 
 civilize-0-1 = "Animals eventually evolve and develop civilization, but it is also possible to intentionally give them civilization through the process of being civilized. Click the following icon on the toolbar at the top of the screen to open the menu, and select \"Civilize\""
 civilize-0-2 = "Then, by clicking on a tile inhabited by an animal, a city of civilized animals will appear."
