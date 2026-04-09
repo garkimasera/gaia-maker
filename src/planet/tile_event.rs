@@ -340,7 +340,7 @@ impl TileEvent {
     pub fn is_settlement_event(&self) -> bool {
         matches!(
             self,
-            Self::War { .. } | Self::Decadence { .. } | Self::Plague { .. }
+            Self::War { .. } | Self::Decadence { .. } | Self::Plague { .. } | Self::Exodus { .. }
         )
     }
 }
