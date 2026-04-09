@@ -189,8 +189,12 @@ impl Achivement {
                 biomass_consumption_on_land > 10000.0
             }
             Achivement::ThreeWayDeadlock => {
-                planet.civs.len() == 3
-                    && planet.civs.iter().all(|(_, civ)| civ.total_pop > 3000000.0)
+                planet
+                    .civs
+                    .iter()
+                    .filter(|(_, civ)| civ.total_pop > 3000000.0)
+                    .count()
+                    == 3
             }
             _ => false,
         }
