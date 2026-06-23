@@ -1,0 +1,10 @@
+(
+    size: medium,
+    cost: 30,
+    habitat: biomes(["ocean", "tropical-rainforest"]),
+    temp: (0, 38),
+    settlement_effect: 0.2,
+    civ_prob: 0.20,
+    color: (0xff, 0x00, 0xff),
+    evolve_from: [("rat", 0.2)],
+)
